@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>טבלת מעקב - לימוד ותרגול</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+
+        .rtl {
+            direction: rtl;
+            text-align: right;
+        }
+
+        .ltr {
+            direction: ltr;
+            text-align: left;
+        }
+
+        .explanation {
+            background-color: #e8f5e9;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            direction: rtl;
+        }
+
+        .example-table, .practice-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            direction: ltr;
+        }
+
+        .example-table th,
+        .example-table td,
+        .practice-table th,
+        .practice-table td {
+            border: 1px solid #4caf50;
+            padding: 12px;
+            text-align: left;
+        }
+
+        .example-table th {
+            background-color: #e8f5e9;
+        }
+
+        .program-code {
+            background-color: #f5f5f5;
+            padding: 15px;
+            margin: 10px 0;
+            font-family: monospace;
+            direction: ltr;
+            text-align: left;
+        }
+
+        .current-line {
+            background-color: #fff9c4;
+        }
+
+        input {
+            width: 60px;
+            padding: 8px;
+            direction: ltr;
+            text-align: left;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: #4caf50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 10px 0;
+        }
+
+        button:disabled {
+            background-color: #cccccc;
+        }
+
+        .error {
+            color: #d32f2f;
+            background-color: #ffebee;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            direction: rtl;
+        }
+
+        .success {
+            color: #1b5e20;
+            background-color: #e8f5e9;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            direction: rtl;
+        }
+
+        .section {
+            margin: 30px 0;
+            padding: 20px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+        }
+
+        .practice-header {
+            background-color: #2196f3;
+            color: white;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+            direction: rtl;
+        }
+    </style>
+</head>
+<body>
+    <!-- חלק תיאורטי -->
+    <div class="rtl section">
+        <h1>טבלת מעקב - הסבר</h1>
+        <div class="explanation">
+            <h2>מהי טבלת מעקב?</h2>
+            <p>טבלת מעקב היא כלי שעוזר לנו לעקוב אחר ערכי המשתנים במהלך ביצוע התוכנית. בכל שורה בטבלה אנחנו רושמים:</p>
+            <ol>
+                <li>את ההוראה שמתבצעת</li>
+                <li>את הערך של כל משתנה אחרי ביצוע ההוראה</li>
+                <li>את הפלט (אם יש) שמתקבל מביצוע ההוראה</li>
+            </ol>
+        </div>
+
+        <h3>דוגמה לטבלת מעקב מלאה:</h3>
+        <table class="example-table">
+            <thead>
+                <tr>
+                    <th>Statement</th>
+                    <th>num1</th>
+                    <th>num2</th>
+                    <th>sum</th>
+                    <th>output</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>num1 = 5;</td>
+                    <td>5</td>
+                    <td>?</td>
+                    <td>?</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>num2 = 3;</td>
+                    <td>5</td>
+                    <td>3</td>
+                    <td>?</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>sum = num1 + num2;</td>
+                    <td>5</td>
+                    <td>3</td>
+                    <td>8</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>sum = sum * 2;</td>
+                    <td>5</td>
+                    <td>3</td>
+                    <td>16</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>System.out.println(sum);</td>
+                    <td>5</td>
+                    <td>3</td>
+                    <td>16</td>
+                    <td>16</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="explanation">
+            <h3>הערות חשובות למעקב:</h3>
+            <ul>
+                <li>משתנה שעוד לא קיבל ערך מסומן ב-?</li>
+                <li>משתנה שלא משתנה בשורה מסוימת שומר את ערכו מהשורה הקודמת</li>
+                <li>פלט מופיע רק בשורות שבהן יש הוראת הדפסה (System.out.println)</li>
+                <li>חשוב לעקוב אחר הביצוע שורה-שורה, בדיוק כמו שהמחשב מבצע את התוכנית</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- חלק מעשי - תרגול -->
+    <div class="section">
+        <div class="practice-header">
+            <h2>תרגול - מילוי טבלת מעקב</h2>
+            <p>עכשיו תורך! נסה למלא את טבלת המעקב עבור התוכנית הבאה:</p>
+        </div>
+
+        <div id="program" class="program-code">
+            <div>x = 8;</div>
+            <div>y = 3;</div>
+            <div>z = x + y;</div>
+            <div>x = z - y;</div>
+            <div>System.out.println(x);</div>
+        </div>
+
+        <div id="error" class="error" style="display: none;"></div>
+
+        <table class="practice-table">
+            <thead>
+                <tr>
+                    <th>Statement</th>
+                    <th>x</th>
+                    <th>y</th>
+                    <th>z</th>
+                    <th>output</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+        </table>
+
+        <button id="nextButton" onclick="nextStep()">בדוק שורה ועבור לשורה הבאה</button>
+
+        <div id="completion" class="success" style="display: none;">
+            <h3>כל הכבוד!</h3>
+            <p>השלמת בהצלחה את המעקב אחר ביצוע התוכנית.</p>
+        </div>
+    </div>
+
+    <script>
+        const program = [
+            "x = 8;",
+            "y = 3;",
+            "z = x + y;",
+            "x = z - y;",
+            "System.out.println(x);"
+        ];
+
+        const correctValues = {
+            0: { x: '8', y: '?', z: '?', output: '' },
+            1: { x: '8', y: '3', z: '?', output: '' },
+            2: { x: '8', y: '3', z: '11', output: '' },
+            3: { x: '8', y: '3', z: '11', output: '' },
+            4: { x: '8', y: '3', z: '11', output: '8' }
+        };
+
+        const relevantVariables = {
+            0: ['x'],
+            1: ['x', 'y'],
+            2: ['x', 'y', 'z'],
+            3: ['x', 'y', 'z'],
+            4: ['x', 'y', 'z', 'output']
+        };
+
+        let currentStep = 0;
+        let completed = false;
+
+        function initializeTable() {
+            const tbody = document.getElementById('tableBody');
+            program.forEach((line, i) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${line}</td>
+                    <td><input type="text" onchange="handleInput(${i}, 'x')" ${i > 0 ? 'disabled' : ''}></td>
+                    <td><input type="text" onchange="handleInput(${i}, 'y')" ${i > 0 ? 'disabled' : ''}></td>
+                    <td><input type="text" onchange="handleInput(${i}, 'z')" ${i > 0 ? 'disabled' : ''}></td>
+                    <td><input type="text" onchange="handleInput(${i}, 'output')" ${i > 0 ? 'disabled' : ''}></td>
+                `;
+                tbody.appendChild(row);
+            });
+            updateProgramHighlight();
+        }
+
+        function handleInput(step, variable) {
+            if (step > currentStep) {
+                showError('יש למלא את הטבלה לפי סדר הביצוע');
+                event.target.value = '';
+                return;
+            }
+            hideError();
+        }
+
+        function checkStep() {
+            const expected = correctValues[currentStep];
+            const varsToCheck = relevantVariables[currentStep];
+            
+            for (let variable of varsToCheck) {
+                const input = document.querySelector(`#tableBody tr:nth-child(${currentStep + 1}) td:nth-child(${getColumnIndex(variable)}) input`);
+                const userValue = input.value || '';
+                const expectedValue = expected[variable];
+                
+                if (!varsToCheck.includes(variable) && userValue === '') continue;
+                
+                if (expectedValue !== userValue) {
+                    if (variable === 'output') {
+                        if (program[currentStep].includes('System.out.println')) {
+                            showError('חסר ערך בעמודת הפלט - מה יודפס בשורה זו?');
+                        } else if (userValue !== '') {
+                            showError('בשורה זו אין הדפסה - אין צורך למלא את עמודת הפלט');
+                        }
+                    } else {
+                        showError(`הערך ${userValue || '?'} במשתנה ${variable} אינו נכון. נסה שוב`);
+                    }
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        function nextStep() {
+            if (checkStep()) {
+                if (currentStep < program.length - 1) {
+                    currentStep++;
+                    enableNextRow();
+                    updateProgramHighlight();
+                    hideError();
+                } else {
+                    completed = true;
+                    document.getElementById('completion').style.display = 'block';
+                    document.getElementById('nextButton').disabled = true;
+                }
+            }
+        }
+
+        function enableNextRow() {
+            const nextRow = document.querySelector(`#tableBody tr:nth-child(${currentStep + 1})`);
+            const inputs = nextRow.querySelectorAll('input');
+            inputs.forEach(input => input.disabled = false);
+        }
+
+        function updateProgramHighlight() {
+            const lines = document.querySelectorAll('#program div');
+            lines.forEach((line, i) => {
+                line.className = i === currentStep ? 'current-line' : '';
+            });
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('error');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+        }
+
+        function hideError() {
+            document.getElementById('error').style.display = 'none';
+        }
+
+        function getColumnIndex(variable) {
+            const columns = ['Statement', 'x', 'y', 'z', 'output'];
+            return columns.indexOf(variable) + 1;
+        }
+
+        window.onload = initializeTable;
+    </script>
+</body>
+</html>
