@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>תרגול Java - מחשבון נקודות</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 900px;
+            margin: 20px auto;
+            padding: 20px;
+            direction: rtl;
+        }
+
+        .step {
+            background-color: #e3f2fd;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 15px 0;
+            display: none;
+        }
+
+        .step.active {
+            display: block;
+        }
+
+        .input-area {
+            direction: ltr;
+            background-color: #f5f5f5;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 80px;
+            font-family: 'Courier New', monospace;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        .button-group {
+            margin: 15px 0;
+            display: flex;
+            gap: 10px;
+        }
+
+        button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .check-btn { background: #4CAF50; color: white; }
+        .hint-btn { background: #FFC107; }
+        .solution-btn { background: #2196F3; color: white; }
+        
+        .feedback {
+            margin: 15px 0;
+            padding: 15px;
+            border-radius: 4px;
+            display: none;
+        }
+
+        .correct { background: #E8F5E9; }
+        .incorrect { background: #FFEBEE; }
+        .hint { background: #FFF3E0; }
+        
+        .progress-indicator {
+            background: #eee;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="progress-indicator" id="progress">
+        שלב 1 מתוך 5
+    </div>
+
+    <div class="step active" id="step1">
+        <h3>שלב 1: ייבוא הספרייה הדרושה</h3>
+        <p>כדי לקלוט קלט מהמשתמש בג'אווה, אנחנו צריכים להשתמש במחלקה מיוחדת. כתוב את שורת ה-import המתאימה:</p>
+        <div class="input-area">
+            <textarea id="input1"></textarea>
+        </div>
+        <div class="button-group">
+            <button class="check-btn" onclick="checkStep(1)">בדוק</button>
+            <button class="hint-btn" onclick="showHint(1)">אני צריך רמז</button>
+            <button class="solution-btn" onclick="showSolution(1)">אני לא מצליח</button>
+        </div>
+        <div id="feedback1" class="feedback"></div>
+    </div>
+
+    <div class="step" id="step2">
+        <h3>שלב 2: יצירת המחלקה הראשית</h3>
+        <p>עכשיו נגדיר את המחלקה הראשית שלנו. איך נכתוב אותה?</p>
+        <div class="input-area">
+            <textarea id="input2"></textarea>
+        </div>
+        <div class="button-group">
+            <button class="check-btn" onclick="checkStep(2)">בדוק</button>
+            <button class="hint-btn" onclick="showHint(2)">אני צריך רמז</button>
+            <button class="solution-btn" onclick="showSolution(2)">אני לא מצליח</button>
+        </div>
+        <div id="feedback2" class="feedback"></div>
+    </div>
+
+    <div class="step" id="step3">
+        <h3>שלב 3: יצירת אובייקט לקליטת קלט</h3>
+        <p>כדי לקלוט קלט, אנחנו צריכים ליצור אובייקט מיוחד. איך נעשה זאת?</p>
+        <div class="input-area">
+            <textarea id="input3"></textarea>
+        </div>
+        <div class="button-group">
+            <button class="check-btn" onclick="checkStep(3)">בדוק</button>
+            <button class="hint-btn" onclick="showHint(3)">אני צריך רמז</button>
+            <button class="solution-btn" onclick="showSolution(3)">אני לא מצליח</button>
+        </div>
+        <div id="feedback3" class="feedback"></div>
+    </div>
+
+    <div class="step" id="step4">
+        <h3>שלב 4: קליטת הנקודות</h3>
+        <p>עכשיו נקלוט את מספר הנקודות עבור שלושת הפקדים. כתוב את הקוד המתאים:</p>
+        <div class="input-area">
+            <textarea id="input4"></textarea>
+        </div>
+        <div class="button-group">
+            <button class="check-btn" onclick="checkStep(4)">בדוק</button>
+            <button class="hint-btn" onclick="showHint(4)">אני צריך רמז</button>
+            <button class="solution-btn" onclick="showSolution(4)">אני לא מצליח</button>
+        </div>
+        <div id="feedback4" class="feedback"></div>
+    </div>
+
+    <div class="step" id="step5">
+        <h3>שלב 5: חישוב והצגת התוצאה</h3>
+        <p>לבסוף, נחשב את סך כל הנקודות ונציג את התוצאה:</p>
+        <div class="input-area">
+            <textarea id="input5"></textarea>
+        </div>
+        <div class="button-group">
+            <button class="check-btn" onclick="checkStep(5)">בדוק</button>
+            <button class="hint-btn" onclick="showHint(5)">אני צריך רמז</button>
+            <button class="solution-btn" onclick="showSolution(5)">אני לא מצליח</button>
+        </div>
+        <div id="feedback5" class="feedback"></div>
+    </div>
+
+    <script>
+        const steps = {
+            1: {
+                solution: "import java.util.Scanner;",
+                hints: [
+                    "אנחנו צריכים את המחלקה Scanner",
+                    "המחלקה Scanner נמצאת בחבילה java.util",
+                    "הפורמט הוא: import package.subpackage.Class;"
+                ],
+                validation: (input) => {
+                    input = input.trim();
+                    if (!input.includes('import')) return "חסרה המילה import";
+                    if (!input.includes('Scanner')) return "חסרה המילה Scanner";
+                    if (!input.includes('java.util')) return "חסר המיקום של המחלקה (java.util)";
+                    if (!input.endsWith(';')) return "חסר ; בסוף השורה";
+                    return true;
+                }
+            },
+            2: {
+                solution: `public class PointsCalculator {
+    public static void main(String[] args) {
+
+    }
+}`,
+                hints: [
+                    "המחלקה שלנו צריכה להיות public",
+                    "צריך להגדיר את המתודה הראשית main",
+                    "המתודה main צריכה לקבל מערך של מחרוזות כפרמטר"
+                ],
+                validation: (input) => {
+                    input = input.trim();
+                    if (!input.includes('public class')) return "חסרה הגדרת המחלקה עם public class";
+                    if (!input.includes('main')) return "חסרה המתודה הראשית main";
+                    if (!input.includes('String[] args')) return "חסר הפרמטר של main";
+                    if (!input.includes('{') || !input.includes('}')) return "חסרים סוגריים מסולסלים";
+                    return true;
+                }
+            },
+            3: {
+                solution: "Scanner input = new Scanner(System.in);",
+                hints: [
+                    "אנחנו צריכים ליצור משתנה מסוג Scanner",
+                    "הקלט מגיע מ-System.in",
+                    "יוצרים אובייקט חדש עם המילה new"
+                ],
+                validation: (input) => {
+                    input = input.trim();
+                    if (!input.includes('Scanner')) return "חסר השימוש במחלקה Scanner";
+                    if (!input.includes('System.in')) return "חסר מקור הקלט (System.in)";
+                    if (!input.includes('new')) return "חסרה יצירת אובייקט חדש עם new";
+                    if (!input.endsWith(';')) return "חסר ; בסוף השורה";
+                    return true;
+                }
+            },
+            4: {
+                solution: `System.out.println("Enter points for first clerk:");
+int points1 = input.nextInt();
+System.out.println("Enter points for second clerk:");
+int points2 = input.nextInt();
+System.out.println("Enter points for third clerk:");
+int points3 = input.nextInt();`,
+                hints: [
+                    "צריך להדפיס הודעה למשתמש לפני כל קליטה",
+                    "משתמשים ב-nextInt() כדי לקלוט מספר שלם",
+                    "צריך לשמור כל מספר במשתנה נפרד"
+                ],
+                validation: (input) => {
+                    input = input.trim();
+                    if (!input.includes('nextInt()')) return "חסר השימוש ב-nextInt() לקליטת מספרים";
+                    if (!input.includes('points1') || !input.includes('points2') || !input.includes('points3')) 
+                        return "חסרים משתנים לשמירת הנקודות";
+                    if (!input.includes('System.out.println')) return "חסרות הודעות למשתמש";
+                    return true;
+                }
+            },
+            5: {
+                solution: `int total = points1 + points2 + points3;
+System.out.println("Total points: " + total);`,
+                hints: [
+                    "צריך לחבר את כל המשתנים יחד",
+                    "צריך לשמור את הסכום במשתנה חדש",
+                    "צריך להדפיס את התוצאה עם הודעה מתאימה"
+                ],
+                validation: (input) => {
+                    input = input.trim();
+                    if (!input.includes('total')) return "חסר משתנה לשמירת הסכום הכולל";
+                    if (!input.includes('points1') || !input.includes('points2') || !input.includes('points3'))
+                        return "חסר החיבור של כל המשתנים";
+                    if (!input.includes('System.out.println')) return "חסרה הדפסת התוצאה";
+                    return true;
+                }
+            }
+        };
+
+        let currentStep = 1;
+        let currentHintIndex = {};
+
+        function checkStep(step) {
+            const input = document.getElementById(`input${step}`).value;
+            const feedback = document.getElementById(`feedback${step}`);
+            const result = steps[step].validation(input);
+
+            feedback.style.display = 'block';
+            if (result === true) {
+                feedback.className = 'feedback correct';
+                feedback.textContent = 'מצוין! התשובה נכונה!';
+                
+                if (step < 5) {
+                    // Show next step
+                    currentStep = step + 1;
+                    document.getElementById(`step${currentStep}`).className = 'step active';
+                    document.getElementById('progress').textContent = `שלב ${currentStep} מתוך 5`;
+                }
+            } else {
+                feedback.className = 'feedback incorrect';
+                feedback.textContent = result;
+            }
+        }
+
+        function showHint(step) {
+            if (!currentHintIndex[step]) currentHintIndex[step] = 0;
+            
+            const hints = steps[step].hints;
+            const feedback = document.getElementById(`feedback${step}`);
+            
+            feedback.style.display = 'block';
+            feedback.className = 'feedback hint';
+            feedback.textContent = hints[currentHintIndex[step]];
+            
+            currentHintIndex[step] = (currentHintIndex[step] + 1) % hints.length;
+        }
+
+        function showSolution(step) {
+            const input = document.getElementById(`input${step}`);
+            const feedback = document.getElementById(`feedback${step}`);
+            
+            input.value = steps[step].solution;
+            feedback.style.display = 'block';
+            feedback.className = 'feedback hint';
+            feedback.textContent = 'זה הפתרון. בוא נבין אותו לפני שנמשיך לשלב הבא.';
+        }
+    </script>
+</body>
+</html>
