@@ -1074,6 +1074,89 @@ namespace MyWebApp.Admin
                     <li>טיפול בשגיאות באופן בטוח</li>
                 </ul>
             </div>
+
+            <h3>צעדים הבאים</h3>
+            <p>כעת משהשלמתם את יצירת הפונקציונליות הבסיסית בצד השרת, תוכלו להמשיך לשפר את הפרויקט ב:</p>
+            <ul>
+                <li>עיצוב מתקדם וחווית משתמש משופרת</li>
+                <li>תמיכה בשפות נוספות</li>
+                <li>דוחות וסטטיסטיקות מתקדמות</li>
+                <li>שילוב תשלומים מקוונים</li>
+                <li>אינטגרציה עם רשתות חברתיות</li>
+            </ul>
+        </section>
+    </main>
+
+    <button class="top-btn" id="topBtn" title="חזרה לראש הדף">&#8679;</button>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 מדריך פיתוח אתרים ASP.NET. כל הזכויות שמורות.</p>
+            <p>נבנה במיוחד עבור תלמידי פיתוח אתרים</p>
+        </div>
+    </footer>
+
+    <script>
+        // כפתור חזרה לראש העמוד
+        const topButton = document.getElementById("topBtn");
+        
+        // הצגת הכפתור כאשר המשתמש גולל למטה
+        window.onscroll = function() {
+            if (document.body.scrollTop > 300 || document.documentElement.scrollTop > 300) {
+                topButton.style.display = "flex";
+            } else {
+                topButton.style.display = "none";
+            }
+        };
+        
+        // חזרה לראש העמוד בלחיצה על הכפתור
+        topButton.addEventListener("click", function() {
+            document.body.scrollTop = 0; // Safari
+            document.documentElement.scrollTop = 0; // Chrome, Firefox, IE, Opera
+        });
+        
+        // הוספת סימון פעיל לקישור בתפריט בעת גלילה
+        document.addEventListener("DOMContentLoaded", function() {
+            const sections = document.querySelectorAll("section");
+            const navLinks = document.querySelectorAll(".project-nav a");
+            
+            window.addEventListener("scroll", function() {
+                let current = "";
+                
+                sections.forEach(section => {
+                    const sectionTop = section.offsetTop;
+                    const sectionHeight = section.clientHeight;
+                    
+                    if (pageYOffset >= (sectionTop - 150)) {
+                        current = section.getAttribute("id");
+                    }
+                });
+                
+                navLinks.forEach(link => {
+                    link.classList.remove("active");
+                    if (link.getAttribute("href").substring(1) === current) {
+                        link.classList.add("active");
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html> שמאפשרת למשתמשים חדשים להירשם לאתר, עם בדיקות תקינות.</li>
+                <li><strong>מערכת התנתקות</strong> - שמאפשרת למשתמשים להתנתק מהאתר.</li>
+                <li><strong>אבטחה</strong> - מנגנוני אבטחה בסיסיים למניעת גישה לדפים מאובטחים ללא התחברות.</li>
+            </ol>
+            
+            <div class="note">
+                <strong>הערה חשובה:</strong> הקוד במדריך זה נועד למטרות לימוד בלבד. בסביבת ייצור יש להתייחס לנושאי אבטחה נוספים:
+                <ul>
+                    <li>הצפנת סיסמאות בבסיס הנתונים (למשל, באמצעות bcrypt או משהו דומה)</li>
+                    <li>מניעת SQL Injection על ידי שימוש תמיד בפרמטרים (כפי שהודגם במדריך)</li>
+                    <li>הגנה מפני Cross-Site Scripting (XSS) על ידי סינון תוכן המשתמש</li>
+                    <li>שימוש ב-HTTPS להצפנת התקשורת</li>
+                    <li>טיפול בשגיאות באופן בטוח</li>
+                </ul>
+            </div>
         </section>
     </main>
     <footer style="background-color: #375a8e; color: white; text-align: center; padding: 1rem; margin-top: 2rem;">
@@ -1087,6 +1170,7 @@ namespace MyWebApp.Admin
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>מדריך פרקטי למימוש פרויקט ASP.NET - חלק השרת</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -1100,7 +1184,37 @@ namespace MyWebApp.Admin
             background-color: #4a6da7;
             color: white;
             text-align: center;
-            padding: 1rem;
+            padding: 2rem 1rem;
+            margin-bottom: 0;
+        }
+        .project-nav {
+            background-color: #375a8e;
+            padding: 1rem 0;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+        .project-nav ul {
+            display: flex;
+            justify-content: center;
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+            flex-wrap: wrap;
+        }
+        .project-nav li {
+            margin: 0.3rem 0.6rem;
+        }
+        .project-nav a {
+            color: white;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            font-weight: 500;
+            transition: background-color 0.3s;
+        }
+        .project-nav a:hover {
+            background-color: #2a4572;
+            text-decoration: none;
         }
         main {
             max-width: 1200px;
@@ -1110,12 +1224,29 @@ namespace MyWebApp.Admin
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
         }
         section {
-            margin-bottom: 2rem;
-            padding-bottom: 1rem;
+            margin-bottom: 2.5rem;
+            padding-bottom: 1.5rem;
             border-bottom: 1px solid #eee;
         }
         h1, h2, h3, h4 {
             color: #2a4572;
+            margin-top: 1.5rem;
+        }
+        h1 {
+            font-size: 2.5rem;
+        }
+        h2 {
+            font-size: 2rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #eaeaea;
+            margin-bottom: 1rem;
+        }
+        h3 {
+            font-size: 1.5rem;
+            margin-top: 1.8rem;
+        }
+        h4 {
+            font-size: 1.2rem;
         }
         code {
             background-color: #f5f5f5;
@@ -1129,29 +1260,34 @@ namespace MyWebApp.Admin
             border-radius: 5px;
             overflow-x: auto;
             font-family: Consolas, Monaco, 'Andale Mono', monospace;
+            border: 1px solid #e0e0e0;
         }
         .note {
             background-color: #e8f4f8;
             border-right: 4px solid #4a6da7;
             padding: 1rem;
             margin: 1rem 0;
+            border-radius: 4px;
         }
         .warning {
             background-color: #fff3cd;
             border-right: 4px solid #ffc107;
             padding: 1rem;
             margin: 1rem 0;
+            border-radius: 4px;
         }
         .highlight {
             background-color: #fffde7;
             padding: 1rem;
             border-radius: 5px;
             margin: 1rem 0;
+            border: 1px solid #fff9c4;
         }
         table {
             width: 100%;
             border-collapse: collapse;
             margin: 1rem 0;
+            border: 1px solid #ddd;
         }
         th, td {
             padding: 0.75rem;
@@ -1159,39 +1295,103 @@ namespace MyWebApp.Admin
         }
         th {
             background-color: #f2f2f2;
+            font-weight: bold;
         }
         img {
             max-width: 100%;
             height: auto;
             display: block;
-            margin: 0 auto;
+            margin: 1rem auto;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         .step {
             background-color: #f0f7ff;
             border-radius: 5px;
-            padding: 1rem;
-            margin-bottom: 1rem;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border: 1px solid #d1e7ff;
         }
         .step h4 {
             margin-top: 0;
             color: #0056b3;
+            border-bottom: 1px solid #d1e7ff;
+            padding-bottom: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        .top-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #4a6da7;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            z-index: 1000;
+        }
+        .top-btn:hover {
+            background-color: #375a8e;
+        }
+        footer {
+            background-color: #375a8e;
+            color: white;
+            text-align: center;
+            padding: 1.5rem 1rem;
+            margin-top: 2rem;
         }
     </style>
 </head>
 <body>
     <header>
-        <h1>מדריך פרקטי למימוש פרויקט ASP.NET</h1>
-        <p>יישום פונקציונליות שרת מתקדמת</p>
+        <div class="container">
+            <h1>מדריך פרקטי למימוש פרויקט ASP.NET</h1>
+            <p class="lead">יישום פונקציונליות שרת מתקדמת בסביבת ASP.NET Web Forms</p>
+        </div>
     </header>
-    <main>
+    
+    <nav class="project-nav">
+        <div class="container">
+            <ul>
+                <li><a href="#intro">הקדמה</a></li>
+                <li><a href="#db-updates">עדכוני בסיס נתונים</a></li>
+                <li><a href="#visitor-counter">מונה מבקרים</a></li>
+                <li><a href="#survey">סקר</a></li>
+                <li><a href="#admin-page">דף מנהל</a></li>
+                <li><a href="#login-registration">התחברות והרשמה</a></li>
+                <li><a href="#security">אבטחה</a></li>
+                <li><a href="#summary">סיכום</a></li>
+            </ul>
+        </div>
+    </nav>
+    <main class="container">
         <section id="intro">
             <h2>מבוא</h2>
             <p>
-                במדריך זה נראה כיצד ליישם את הדרישות המתקדמות בפרויקט ASP.NET שלכם, כולל מונה מבקרים, סקר, דף מנהל, מערכת התחברות והרשמה.
-                נעבור על כל דרישה בנפרד ונראה את הקוד הדרוש למימושה.
+                ברוכים הבאים למדריך המעשי ליישום פונקציונליות מתקדמת בצד השרת בפרויקט ASP.NET Web Forms. 
+                מדריך זה נועד לסייע למפתחים בתהליך הפיתוח של רכיבי שרת חיוניים בפרויקט האינטרנט שלהם, כגון:
+                מונה מבקרים, מערכת סקרים, ממשק מנהל, התחברות והרשמת משתמשים.
             </p>
+            <p>
+                לאחר השלמת מדריך זה, תוכלו ליישם אתר מלא עם פונקציונליות שרת עשירה הכוללת:
+            </p>
+            <ul>
+                <li>מערכת <strong>מונה מבקרים</strong> שסופרת את מספר המבקרים באתר</li>
+                <li>מערכת <strong>סקרים</strong> שמאפשרת לאסוף דעות מהמשתמשים</li>
+                <li><strong>ממשק ניהול</strong> מאובטח למנהלי האתר</li>
+                <li>מערכת <strong>הרשמה והתחברות</strong> מלאה עם בדיקות תקינות</li>
+                <li>אמצעי <strong>אבטחה</strong> נאותים להגנה על הדפים הרגישים</li>
+            </ul>
             <div class="note">
-                <strong>הערה:</strong> מדריך זה מניח שכבר יצרתם את ה-Master Page ואת מבנה האתר הבסיסי כפי שנלמד בשיעורים הקודמים.
+                <strong>דרישות מקדימות:</strong> מדריך זה מניח שיש לכם ידע בסיסי ב-ASP.NET Web Forms,
+                C#, SQL Server, ושכבר יצרתם את הפרויקט הבסיסי עם ה-Master Page ותבנית האתר.
             </div>
         </section>
 
@@ -1258,6 +1458,22 @@ GO
 UPDATE Users SET IsAdmin = 1 WHERE UserID = 1;
 GO
 </pre>
+            <div class="note">
+                <p><strong>שימו לב:</strong> הקוד לעיל מניח שיש לכם כבר טבלת Users בסיסית. 
+                אם אין לכם, תצטרכו ליצור אותה לפני הוספת השדות הנוספים:</p>
+<pre>
+-- יצירת טבלת משתמשים בסיסית
+CREATE TABLE Users (
+    UserID INT PRIMARY KEY IDENTITY(1,1),
+    Username NVARCHAR(50) NOT NULL UNIQUE,
+    Email NVARCHAR(100) NOT NULL UNIQUE,
+    Password NVARCHAR(255) NOT NULL,
+    FullName NVARCHAR(100),
+    RegistrationDate DATETIME DEFAULT GETDATE()
+);
+GO
+</pre>
+            </div>
         </section>
 
         <section id="visitor-counter">
