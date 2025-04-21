@@ -1,0 +1,1367 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>בסיסי נתונים וצד שרת - מדריך לפיתוח אתרים</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-color: #f8f9fa;
+            color: #333;
+        }
+        header {
+            background-color: #4a6da7;
+            color: white;
+            text-align: center;
+            padding: 1rem;
+        }
+        nav {
+            background-color: #375a8e;
+            padding: 0.5rem;
+        }
+        nav ul {
+            display: flex;
+            justify-content: center;
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+        }
+        nav li {
+            margin: 0 1rem;
+        }
+        nav a {
+            color: white;
+            text-decoration: none;
+            padding: 0.5rem;
+        }
+        nav a:hover {
+            background-color: #2a4572;
+            border-radius: 4px;
+        }
+        main {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            background-color: white;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        section {
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #eee;
+        }
+        h1, h2, h3 {
+            color: #2a4572;
+        }
+        code {
+            background-color: #f5f5f5;
+            padding: 0.2rem 0.4rem;
+            border-radius: 3px;
+            font-family: Consolas, Monaco, 'Andale Mono', monospace;
+        }
+        pre {
+            background-color: #f5f5f5;
+            padding: 1rem;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-family: Consolas, Monaco, 'Andale Mono', monospace;
+        }
+        .note {
+            background-color: #e8f4f8;
+            border-left: 4px solid #4a6da7;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+        th, td {
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            text-align: right;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .highlight {
+            background-color: #fffde7;
+            padding: 1rem;
+            border-radius: 5px;
+            margin: 1rem 0;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>מדריך לפיתוח אתרים</h1>
+        <p>המדריך המקיף ללימוד פיתוח אתרים מאפס</p>
+    </header>
+    <nav>
+        <ul>
+            <li><a href="#intro">מבוא</a></li>
+            <li><a href="#databases">בסיסי נתונים</a></li>
+            <li><a href="#sql">SQL</a></li>
+            <li><a href="#server">צד שרת</a></li>
+            <li><a href="#concepts">מושגי יסוד</a></li>
+        </ul>
+    </nav>
+    <main>
+        <section id="intro">
+            <h2>מבוא לבסיסי נתונים וצד שרת</h2>
+            <p>
+                בשיעורים הקודמים למדנו על HTML, CSS ו-JavaScript - שהם הכלים המשמשים לבניית החלק הקדמי (Frontend) של האתר. 
+                עכשיו נלמד על החלקים שנמצאים מאחורי הקלעים - בסיסי הנתונים ופיתוח צד שרת (Backend).
+            </p>
+            <div class="note">
+                <strong>הערה:</strong> צד שרת וניהול בסיסי נתונים הם הבסיס לבניית אפליקציות אינטרנט דינמיות שיכולות לשמור מידע, לנהל משתמשים ולבצע פעולות מורכבות.
+            </div>
+        </section>
+
+        <section id="databases">
+            <h2>בסיסי נתונים</h2>
+            <h3>מה זה בסיס נתונים?</h3>
+            <p>
+                בסיס נתונים הוא מערכת המאפשרת לשמור, לארגן ולנהל מידע באופן מאורגן. בסיסי נתונים מאפשרים:
+            </p>
+            <ul>
+                <li>שמירה של כמויות גדולות של מידע</li>
+                <li>גישה מהירה למידע</li>
+                <li>ארגון המידע בצורה יעילה</li>
+                <li>הבטחת עקביות ואמינות המידע</li>
+            </ul>
+
+            <h3>סוגי בסיסי נתונים</h3>
+            <p>ישנם שני סוגים עיקריים של בסיסי נתונים:</p>
+            <table>
+                <tr>
+                    <th>בסיס נתונים טבלאי (SQL)</th>
+                    <th>בסיס נתונים לא-טבלאי (NoSQL)</th>
+                </tr>
+                <tr>
+                    <td>
+                        <ul>
+                            <li>מאורגן בטבלאות, שורות ועמודות</li>
+                            <li>מבנה קבוע וסכמה מוגדרת</li>
+                            <li>קשרים ברורים בין טבלאות</li>
+                            <li>דוגמאות: MySQL, PostgreSQL, SQL Server</li>
+                        </ul>
+                    </td>
+                    <td>
+                        <ul>
+                            <li>מבנה גמיש ללא סכמה קבועה</li>
+                            <li>מתאים לנתונים לא מובנים</li>
+                            <li>סוגים שונים: מסמכים, גרפים, Key-Value</li>
+                            <li>דוגמאות: MongoDB, Redis, Cassandra</li>
+                        </ul>
+                    </td>
+                </tr>
+            </table>
+
+            <h3>תכנון בסיס נתונים</h3>
+            <p>
+                תכנון נכון של בסיס נתונים הוא קריטי להצלחת הפרויקט. תהליך התכנון כולל:
+            </p>
+            <ol>
+                <li><strong>הגדרת יישויות</strong> - מהם האובייקטים העיקריים במערכת (משתמשים, מוצרים, הזמנות וכו')</li>
+                <li><strong>הגדרת תכונות</strong> - איזה מידע נשמור על כל יישות</li>
+                <li><strong>הגדרת קשרים</strong> - כיצד היישויות מתקשרות זו עם זו (1:1, 1:N, N:M)</li>
+                <li><strong>נורמליזציה</strong> - ארגון המידע כדי למנוע כפילויות ובעיות עקביות</li>
+            </ol>
+
+            <div class="highlight">
+                <h4>דוגמה לתכנון בסיס נתונים פשוט לחנות מקוונת:</h4>
+                <ul>
+                    <li><strong>טבלת משתמשים:</strong> ID, שם, אימייל, סיסמה, תאריך הרשמה</li>
+                    <li><strong>טבלת מוצרים:</strong> ID, שם, תיאור, מחיר, כמות במלאי</li>
+                    <li><strong>טבלת הזמנות:</strong> ID, ID משתמש, תאריך הזמנה, סטטוס</li>
+                    <li><strong>טבלת פריטי הזמנה:</strong> ID, ID הזמנה, ID מוצר, כמות, מחיר בעת ההזמנה</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="sql">
+            <h2>SQL - שפת שאילתות מובנית</h2>
+            <p>
+                SQL (Structured Query Language) היא שפת תכנות ייעודית לניהול ושליפת מידע מבסיסי נתונים טבלאיים.
+                SQL משמשת לביצוע כל הפעולות על בסיס הנתונים:
+            </p>
+
+            <h3>פקודות SQL בסיסיות</h3>
+            <ul>
+                <li><strong>CREATE:</strong> יצירת טבלאות ומבנים</li>
+                <li><strong>SELECT:</strong> שליפת נתונים</li>
+                <li><strong>INSERT:</strong> הוספת נתונים חדשים</li>
+                <li><strong>UPDATE:</strong> עדכון נתונים קיימים</li>
+                <li><strong>DELETE:</strong> מחיקת נתונים</li>
+                <li><strong>JOIN:</strong> חיבור בין טבלאות</li>
+            </ul>
+
+            <h3>דוגמאות SQL</h3>
+            <h4>יצירת טבלה:</h4>
+            <pre>
+CREATE TABLE users (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    username VARCHAR(50) NOT NULL,
+    email VARCHAR(100) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);</pre>
+
+            <h4>הוספת נתונים:</h4>
+            <pre>
+INSERT INTO users (username, email, password) 
+VALUES ('israel123', 'israel@example.com', 'hashed_password_here');</pre>
+
+            <h4>שליפת נתונים:</h4>
+            <pre>
+SELECT id, username, email, created_at 
+FROM users 
+WHERE username LIKE 'isr%' 
+ORDER BY created_at DESC 
+LIMIT 10;</pre>
+
+            <h4>עדכון נתונים:</h4>
+            <pre>
+UPDATE users 
+SET email = 'new_email@example.com' 
+WHERE id = 5;</pre>
+
+            <h4>מחיקת נתונים:</h4>
+            <pre>
+DELETE FROM users 
+WHERE created_at < '2022-01-01';</pre>
+
+            <h4>חיבור בין טבלאות (JOIN):</h4>
+            <pre>
+SELECT o.id as order_id, u.username, o.created_at, SUM(oi.price * oi.quantity) as total_price
+FROM orders o
+JOIN users u ON o.user_id = u.id
+JOIN order_items oi ON oi.order_id = o.id
+WHERE o.status = 'completed'
+GROUP BY o.id
+ORDER BY o.created_at DESC;</pre>
+
+            <div class="note">
+                <strong>טיפ:</strong> תמיד השתמש בפרמטרים מחוסנים (Prepared Statements) כאשר אתה מבצע שאילתות SQL כדי למנוע התקפות SQL Injection!
+            </div>
+        </section>
+
+        <section id="server">
+            <h2>צד שרת (Backend)</h2>
+            <p>
+                קוד צד שרת (Server-side code) הוא התוכנה שרצה על השרת (ולא בדפדפן של המשתמש).
+                קוד זה אחראי על:
+            </p>
+            <ul>
+                <li>טיפול בבקשות מהמשתמשים</li>
+                <li>אימות ואבטחה</li>
+                <li>גישה לבסיס הנתונים</li>
+                <li>עיבוד לוגיקה עסקית</li>
+                <li>יצירת תוכן דינמי</li>
+                <li>ניהול מצב (sessions)</li>
+            </ul>
+
+            <h3>ASP.NET - פיתוח צד שרת</h3>
+            <p>
+                במדריך זה נשתמש ב-ASP.NET לפיתוח צד השרת. ASP.NET היא מסגרת עבודה חזקה מבית Microsoft לפיתוח אפליקציות אינטרנט, המבוססת על שפת C#.
+            </p>
+            
+            <h4>יתרונות ASP.NET:</h4>
+            <ul>
+                <li>אינטגרציה מובנית עם SQL Server</li>
+                <li>ביצועים גבוהים וסקלביליות</li>
+                <li>אבטחה מתקדמת</li>
+                <li>תמיכה מלאה של Microsoft</li>
+                <li>כלי פיתוח חזקים (Visual Studio)</li>
+            </ul>
+
+            <h3>התקנת הכלים הנדרשים</h3>
+            <p>לפני שנתחיל, יש להתקין את הכלים הבאים:</p>
+            <ol>
+                <li><strong>Visual Studio</strong> - עדיף את הגרסה Community Edition שהיא בחינם</li>
+                <li><strong>SQL Server Express</strong> - גרסה חינמית של בסיס הנתונים</li>
+                <li><strong>SQL Server Management Studio (SSMS)</strong> - כלי לניהול בסיסי נתונים של SQL Server</li>
+            </ol>
+
+            <h3>יצירת פרויקט ASP.NET חדש</h3>
+            <p>כדי ליצור פרויקט ASP.NET חדש, פתחו את Visual Studio ובצעו את הצעדים הבאים:</p>
+            <ol>
+                <li>בחרו ב-File > New > Project</li>
+                <li>בחרו ב-ASP.NET Web Application (.NET Framework)</li>
+                <li>תנו שם לפרויקט, למשל "MyWebApp"</li>
+                <li>בחרו בתבנית Web Forms</li>
+                <li>לחצו על OK</li>
+            </ol>
+
+            <div class="note">
+                <strong>הערה:</strong> בחרנו בתבנית Web Forms מכיוון שהיא מתאימה למתחילים. קיימות גם תבניות MVC ו-Web API שמתאימות לפיתוח מתקדם יותר.
+            </div>
+
+            <h3>יצירת בסיס נתונים עבור המדריך</h3>
+            <p>
+                לפי המדריך, התלמידים צריכים ליצור בסיס נתונים פשוט עם טבלאות שישמשו את האתר שלהם. הנה כיצד לעשות זאת:
+            </p>
+            
+            <h4>צעד 1: יצירת בסיס נתונים ב-SQL Server</h4>
+            <p>פתחו את SQL Server Management Studio (SSMS) והתחברו לשרת המקומי:</p>
+            <pre>
+-- יצירת בסיס נתונים חדש
+CREATE DATABASE WebAppDB;
+GO
+
+-- בחירת בסיס הנתונים לשימוש
+USE WebAppDB;
+GO</pre>
+
+            <h4>צעד 2: יצירת טבלאות לפי המדריך</h4>
+            <p>
+                התלמידים צריכים ליצור את הטבלאות הבאות עבור האתר:
+            </p>
+            <pre>
+-- טבלת משתמשים - לשמירת פרטי המשתמשים באתר
+CREATE TABLE Users (
+    UserID INT PRIMARY KEY IDENTITY(1,1),
+    Username NVARCHAR(50) NOT NULL UNIQUE,
+    Email NVARCHAR(100) NOT NULL UNIQUE,
+    Password NVARCHAR(255) NOT NULL,
+    FullName NVARCHAR(100),
+    RegistrationDate DATETIME DEFAULT GETDATE(),
+    UserRole NVARCHAR(20) DEFAULT 'User'  -- 'Admin', 'User'
+);
+GO
+
+-- טבלת קטגוריות - לארגון התוכן באתר
+CREATE TABLE Categories (
+    CategoryID INT PRIMARY KEY IDENTITY(1,1),
+    CategoryName NVARCHAR(50) NOT NULL,
+    Description NVARCHAR(200)
+);
+GO
+
+-- טבלת מאמרים - לשמירת התוכן העיקרי באתר
+CREATE TABLE Articles (
+    ArticleID INT PRIMARY KEY IDENTITY(1,1),
+    Title NVARCHAR(100) NOT NULL,
+    Content NTEXT NOT NULL,
+    CategoryID INT FOREIGN KEY REFERENCES Categories(CategoryID),
+    AuthorID INT FOREIGN KEY REFERENCES Users(UserID),
+    PublishDate DATETIME DEFAULT GETDATE(),
+    IsPublished BIT DEFAULT 1
+);
+GO
+
+-- טבלת תגובות - לאפשר למשתמשים להגיב על מאמרים
+CREATE TABLE Comments (
+    CommentID INT PRIMARY KEY IDENTITY(1,1),
+    ArticleID INT FOREIGN KEY REFERENCES Articles(ArticleID),
+    UserID INT FOREIGN KEY REFERENCES Users(UserID),
+    CommentText NVARCHAR(500) NOT NULL,
+    CommentDate DATETIME DEFAULT GETDATE()
+);
+GO</pre>
+
+            <h4>צעד 3: הוספת נתוני דוגמה</h4>
+            <p>
+                כדי לבדוק את האתר, ניתן להוסיף כמה נתוני דוגמה:
+            </p>
+            <pre>
+-- הוספת משתמשים לדוגמה
+INSERT INTO Users (Username, Email, Password, FullName, UserRole)
+VALUES 
+    ('admin', 'admin@example.com', 'hashed_password_here', 'מנהל האתר', 'Admin'),
+    ('user1', 'user1@example.com', 'hashed_password_here', 'ישראל ישראלי', 'User');
+GO
+
+-- הוספת קטגוריות לדוגמה
+INSERT INTO Categories (CategoryName, Description)
+VALUES 
+    ('HTML', 'לימוד שפת HTML'),
+    ('CSS', 'עיצוב אתרים עם CSS'),
+    ('JavaScript', 'תכנות צד לקוח עם JavaScript'),
+    ('ASP.NET', 'פיתוח צד שרת עם ASP.NET');
+GO
+
+-- הוספת מאמרים לדוגמה
+INSERT INTO Articles (Title, Content, CategoryID, AuthorID)
+VALUES 
+    ('מבוא ל-HTML', 'תוכן המאמר כאן...', 1, 1),
+    ('עיצוב טפסים עם CSS', 'תוכן המאמר כאן...', 2, 1),
+    ('יסודות JavaScript', 'תוכן המאמר כאן...', 3, 2);
+GO</pre>
+
+            <h3>חיבור ASP.NET לבסיס הנתונים</h3>
+            <p>כעת נראה כיצד לחבר את אפליקציית ASP.NET לבסיס הנתונים שיצרנו:</p>
+            
+            <h4>צעד 1: הגדרת מחרוזת החיבור</h4>
+            <p>פתחו את קובץ Web.config והוסיפו את מחרוזת החיבור:</p>
+            <pre>
+&lt;configuration&gt;
+    &lt;connectionStrings&gt;
+        &lt;add name="WebAppDBConnection" 
+             connectionString="Data Source=.\SQLEXPRESS;Initial Catalog=WebAppDB;Integrated Security=True" 
+             providerName="System.Data.SqlClient" /&gt;
+    &lt;/connectionStrings&gt;
+    &lt;!-- שאר ההגדרות --&gt;
+&lt;/configuration&gt;</pre>
+
+            <h4>צעד 2: יצירת דף שמציג נתונים מבסיס הנתונים</h4>
+            <p>הנה דוגמה לקוד C# בדף ASPX שמציג את המאמרים מבסיס הנתונים:</p>
+            <pre>
+// בקובץ Articles.aspx.cs
+using System;
+using System.Data;
+using System.Data.SqlClient;
+using System.Configuration;
+using System.Web.UI;
+
+public partial class Articles : Page
+{
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        if (!IsPostBack)
+        {
+            LoadArticles();
+        }
+    }
+
+    private void LoadArticles()
+    {
+        string connectionString = ConfigurationManager.ConnectionStrings["WebAppDBConnection"].ConnectionString;
+        using (SqlConnection conn = new SqlConnection(connectionString))
+        {
+            string query = @"SELECT a.ArticleID, a.Title, a.PublishDate, u.FullName AS Author, c.CategoryName 
+                            FROM Articles a 
+                            JOIN Users u ON a.AuthorID = u.UserID 
+                            JOIN Categories c ON a.CategoryID = c.CategoryID 
+                            WHERE a.IsPublished = 1 
+                            ORDER BY a.PublishDate DESC";
+            
+            SqlCommand cmd = new SqlCommand(query, conn);
+            SqlDataAdapter adapter = new SqlDataAdapter(cmd);
+            DataTable dt = new DataTable();
+            
+            try
+            {
+                conn.Open();
+                adapter.Fill(dt);
+                
+                // קישור הנתונים לרשימה בדף
+                articlesRepeater.DataSource = dt;
+                articlesRepeater.DataBind();
+            }
+            catch (Exception ex)
+            {
+                // טיפול בשגיאות
+                errorLabel.Text = "שגיאה בטעינת המאמרים: " + ex.Message;
+                errorLabel.Visible = true;
+            }
+        }
+    }
+}</pre>
+
+            <p>ובדף ASPX עצמו (Articles.aspx):</p>
+            <pre>
+&lt;%@ Page Title="מאמרים" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="Articles.aspx.cs" Inherits="MyWebApp.Articles" %&gt;
+
+&lt;asp:Content ID="BodyContent" ContentPlaceHolderID="MainContent" runat="server"&gt;
+    &lt;h2&gt;מאמרים&lt;/h2&gt;
+    
+    &lt;asp:Label ID="errorLabel" runat="server" CssClass="text-danger" Visible="false"&gt;&lt;/asp:Label&gt;
+    
+    &lt;asp:Repeater ID="articlesRepeater" runat="server"&gt;
+        &lt;ItemTemplate&gt;
+            &lt;div class="article-item"&gt;
+                &lt;h3&gt;
+                    &lt;a href='ArticleDetails.aspx?id=&lt;%# Eval("ArticleID") %&gt;'&gt;
+                        &lt;%# Eval("Title") %&gt;
+                    &lt;/a&gt;
+                &lt;/h3&gt;
+                &lt;div class="article-meta"&gt;
+                    &lt;span&gt;מאת: &lt;%# Eval("Author") %&gt;&lt;/span&gt; | 
+                    &lt;span&gt;קטגוריה: &lt;%# Eval("CategoryName") %&gt;&lt;/span&gt; | 
+                    &lt;span&gt;פורסם: &lt;%# Eval("PublishDate", "{0:dd/MM/yyyy}") %&gt;&lt;/span&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+        &lt;/ItemTemplate&gt;
+    &lt;/asp:Repeater&gt;
+&lt;/asp:Content&gt;</pre>
+        </section>
+
+        <section id="concepts">
+            <h2>מושגי יסוד בפיתוח שרת</h2>
+            <h3>HTTP: Request ו-Response</h3>
+            <p>
+                תקשורת באינטרנט מבוססת על פרוטוקול HTTP, שמורכב מ-Request (בקשה) ו-Response (תגובה):
+            </p>
+            <ul>
+                <li><strong>Request:</strong> בקשה שנשלחת מהדפדפן לשרת. כוללת מידע כמו:
+                    <ul>
+                        <li>מתודה (GET, POST, PUT, DELETE וכו')</li>
+                        <li>נתיב/URL</li>
+                        <li>כותרות (Headers)</li>
+                        <li>פרמטרים</li>
+                        <li>גוף הבקשה (Body) - עבור POST/PUT</li>
+                    </ul>
+                </li>
+                <li><strong>Response:</strong> תגובה שנשלחת מהשרת חזרה לדפדפן. כוללת:
+                    <ul>
+                        <li>קוד סטטוס (200 להצלחה, 404 לדף לא נמצא, 500 לשגיאת שרת וכו')</li>
+                        <li>כותרות</li>
+                        <li>גוף התגובה (HTML, JSON, תמונה וכו')</li>
+                    </ul>
+                </li>
+            </ul>
+
+            <h3>Session ו-Application ב-ASP.NET</h3>
+            <p>
+                ASP.NET מספק מספר אובייקטים חשובים לניהול נתונים בין בקשות:
+            </p>
+            <ul>
+                <li><strong>Session:</strong> מאפשר לשמור מידע ספציפי למשתמש. הנתונים זמינים רק לאותו משתמש ונמחקים לאחר סיום הסשן (או timeout).</li>
+                <li><strong>Application:</strong> מאפשר לשמור מידע גלובלי הזמין לכל המשתמשים באפליקציה.</li>
+                <li><strong>Cookie:</strong> מידע שנשמר בדפדפן של המשתמש ונשלח עם כל בקשה.</li>
+                <li><strong>ViewState:</strong> מנגנון ייחודי ל-ASP.NET Web Forms לשמירת מצב הדף בין postbacks.</li>
+            </ul>
+
+            <div class="highlight">
+                <h4>דוגמה לשימוש ב-Session ב-ASP.NET:</h4>
+                <pre>
+// שמירת מידע ב-Session
+protected void LoginButton_Click(object sender, EventArgs e)
+{
+    // אימות המשתמש (לדוגמה)
+    if (IsValidUser(usernameTextBox.Text, passwordTextBox.Text))
+    {
+        // שמירת מידע ב-Session
+        Session["UserID"] = GetUserID(usernameTextBox.Text);
+        Session["Username"] = usernameTextBox.Text;
+        Session["IsLoggedIn"] = true;
+        
+        // הפניה לדף הבית
+        Response.Redirect("Default.aspx");
+    }
+    else
+    {
+        errorLabel.Text = "שם משתמש או סיסמה שגויים";
+        errorLabel.Visible = true;
+    }
+}
+
+// קריאת מידע מ-Session
+protected void Page_Load(object sender, EventArgs e)
+{
+    if (Session["IsLoggedIn"] != null && (bool)Session["IsLoggedIn"])
+    {
+        // המשתמש מחובר
+        welcomeLabel.Text = "שלום " + Session["Username"].ToString();
+        loginPanel.Visible = false;
+        logoutPanel.Visible = true;
+    }
+    else
+    {
+        // המשתמש לא מחובר
+        loginPanel.Visible = true;
+        logoutPanel.Visible = false;
+    }
+}</pre>
+            </div>
+
+            <h3>טיפול בבקשות ותגובות ב-ASP.NET</h3>
+            <p>
+                ASP.NET מספק אובייקטים Request ו-Response לטיפול בבקשות ותגובות HTTP:
+            </p>
+            <ul>
+                <li><strong>Request:</strong> אוסף את כל המידע על הבקשה הנוכחית מהדפדפן, כולל:
+                    <ul>
+                        <li>Request.QueryString - לקבלת פרמטרים מה-URL</li>
+                        <li>Request.Form - לקבלת נתונים שנשלחו בטופס</li>
+                        <li>Request.Cookies - לקריאת עוגיות</li>
+                    </ul>
+                </li>
+                <li><strong>Response:</strong> מאפשר לשלוח מידע חזרה לדפדפן:
+                    <ul>
+                        <li>Response.Write - להוספת טקסט לתגובה</li>
+                        <li>Response.Redirect - להפניית המשתמש לדף אחר</li>
+                        <li>Response.Cookies - ליצירת עוגיות</li>
+                    </ul>
+                </li>
+            </ul>
+
+            <pre>
+// דוגמה לשימוש ב-Request ו-Response
+protected void Page_Load(object sender, EventArgs e)
+{
+    // קריאת פרמטר מה-URL
+    string articleId = Request.QueryString["id"];
+    
+    if (string.IsNullOrEmpty(articleId))
+    {
+        // אם אין מזהה מאמר, מפנים לדף הראשי של המאמרים
+        Response.Redirect("Articles.aspx");
+    }
+    else
+    {
+        // טעינת המאמר מבסיס הנתונים לפי המזהה
+        LoadArticle(Convert.ToInt32(articleId));
+    }
+}
+</pre>
+
+            <h3>אבטחה ב-ASP.NET</h3>
+            <p>
+                ASP.NET מספק כלים רבים לאבטחת האפליקציה:
+            </p>
+            <ul>
+                <li><strong>SQL Injection:</strong> שימוש בפרמטרים (SqlParameters) בשאילתות SQL</li>
+                <li><strong>XSS (Cross-Site Scripting):</strong> סינון קלט באמצעות HttpUtility.HtmlEncode</li>
+                <li><strong>CSRF (Cross-Site Request Forgery):</strong> שימוש ב-ViewStateUserKey או ValidateAntiForgeryToken</li>
+                <li><strong>הצפנת סיסמאות:</strong> שימוש ב-ASP.NET Identity או בספריות הצפנה כמו BCrypt.NET</li>
+                <li><strong>אימות והרשאות:</strong> Forms Authentication או ASP.NET Identity</li>
+            </ul>
+
+            <div class="highlight">
+                <h4>דוגמה לקוד מאובטח בגישה לבסיס נתונים:</h4>
+                <pre>
+protected void CreateUser(string username, string email, string password)
+{
+    // הצפנת הסיסמה (מומלץ להשתמש בספריות ייעודיות)
+    string hashedPassword = FormsAuthentication.HashPasswordForStoringInConfigFile(password, "SHA1");
+    
+    string connectionString = ConfigurationManager.ConnectionStrings["WebAppDBConnection"].ConnectionString;
+    using (SqlConnection conn = new SqlConnection(connectionString))
+    {
+        string query = "INSERT INTO Users (Username, Email, Password) VALUES (@Username, @Email, @Password)";
+        
+        SqlCommand cmd = new SqlCommand(query, conn);
+        
+        // שימוש בפרמטרים למניעת SQL Injection
+        cmd.Parameters.AddWithValue("@Username", username);
+        cmd.Parameters.AddWithValue("@Email", email);
+        cmd.Parameters.AddWithValue("@Password", hashedPassword);
+        
+        try
+        {
+            conn.Open();
+            cmd.ExecuteNonQuery();
+            
+            // הודעת הצלחה
+            statusLabel.Text = "משתמש נוצר בהצלחה!";
+            statusLabel.ForeColor = System.Drawing.Color.Green;
+        }
+        catch (SqlException ex)
+        {
+            // טיפול בשגיאות ספציפיות (למשל, שם משתמש כבר קיים)
+            if (ex.Number == 2627)  // מספר שגיאה לערך ייחודי שכבר קיים
+            {
+                statusLabel.Text = "שם משתמש או אימייל כבר קיימים במערכת";
+            }
+            else
+            {
+                statusLabel.Text = "שגיאה ביצירת המשתמש: " + ex.Message;
+            }
+            statusLabel.ForeColor = System.Drawing.Color.Red;
+        }
+    }
+}</pre>
+            </div>
+        </section>
+
+        <section id="aspnet-practical">
+            <h2>פיתוח אתר ב-ASP.NET - מדריך מעשי</h2>
+            <p>
+                כעת נעבור לחלק המעשי של המדריך, בו נראה כיצד לפתח את האתר שלנו באמצעות ASP.NET ובסיס נתונים.
+            </p>
+            
+            <h3>משימה 1: יצירת Master Page והגדרת תפריט</h3>
+            <p>
+                בפיתוח אתר ASP.NET, חשוב להתחיל עם יצירת Master Page שתשמש כתבנית לכל דפי האתר.
+                בדרך זו ניתן להגדיר תפריט, כותרת עליונה (header) וכותרת תחתונה (footer) באופן אחיד לכל האתר.
+            </p>
+            
+            <ol>
+                <li>ראשית, ודאו שיש לכם פרויקט ASP.NET Web Forms חדש.</li>
+                <li>בחלונית Solution Explorer, לחצו על הפרויקט עם המקש הימני ובחרו Add > New Item</li>
+                <li>בחרו Master Page ותנו לה את השם Site.master</li>
+            </ol>
+            
+            <p>תוכן הדף Site.master:</p>
+            <pre>
+&lt;%@ Master Language="C#" AutoEventWireup="true" CodeBehind="Site.master.cs" Inherits="MyWebApp.SiteMaster" %&gt;
+
+&lt;!DOCTYPE html&gt;
+&lt;html lang="he" dir="rtl"&gt;
+&lt;head runat="server"&gt;
+    &lt;meta charset="utf-8" /&gt;
+    &lt;meta name="viewport" content="width=device-width, initial-scale=1.0" /&gt;
+    &lt;title&gt;&lt;%: Page.Title %&gt; - האתר שלי&lt;/title&gt;
+    
+    &lt;link href="~/Content/bootstrap.rtl.min.css" rel="stylesheet" /&gt;
+    &lt;link href="~/Content/Site.css" rel="stylesheet" /&gt;
+    
+    &lt;asp:ContentPlaceHolder ID="HeadContent" runat="server"&gt;
+    &lt;/asp:ContentPlaceHolder&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;form runat="server"&gt;
+        &lt;asp:ScriptManager runat="server"&gt;
+            &lt;Scripts&gt;
+                &lt;asp:ScriptReference Name="jquery" /&gt;
+                &lt;asp:ScriptReference Name="bootstrap" /&gt;
+                &lt;asp:ScriptReference Name="WebForms.js" Assembly="System.Web" /&gt;
+            &lt;/Scripts&gt;
+        &lt;/asp:ScriptManager&gt;
+        
+        &lt;!-- כותרת עליונה ותפריט --&gt;
+        &lt;header&gt;
+            &lt;div class="navbar navbar-inverse navbar-fixed-top"&gt;
+                &lt;div class="container"&gt;
+                    &lt;div class="navbar-header"&gt;
+                        &lt;button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse"&gt;
+                            &lt;span class="icon-bar"&gt;&lt;/span&gt;
+                            &lt;span class="icon-bar"&gt;&lt;/span&gt;
+                            &lt;span class="icon-bar"&gt;&lt;/span&gt;
+                        &lt;/button&gt;
+                        &lt;a class="navbar-brand" runat="server" href="~/"&gt;האתר שלי&lt;/a&gt;
+                    &lt;/div&gt;
+                    &lt;div class="navbar-collapse collapse"&gt;
+                        &lt;ul class="nav navbar-nav"&gt;
+                            &lt;li&gt;&lt;a runat="server" href="~/"&gt;דף הבית&lt;/a&gt;&lt;/li&gt;
+                            &lt;li&gt;&lt;a runat="server" href="~/Articles"&gt;מאמרים&lt;/a&gt;&lt;/li&gt;
+                            &lt;li&gt;&lt;a runat="server" href="~/Categories"&gt;קטגוריות&lt;/a&gt;&lt;/li&gt;
+                            &lt;li&gt;&lt;a runat="server" href="~/About"&gt;אודות&lt;/a&gt;&lt;/li&gt;
+                            &lt;li&gt;&lt;a runat="server" href="~/Contact"&gt;צור קשר&lt;/a&gt;&lt;/li&gt;
+                        &lt;/ul&gt;
+                        &lt;div class="navbar-left"&gt;
+                            &lt;asp:LoginView runat="server" ViewStateMode="Disabled"&gt;
+                                &lt;AnonymousTemplate&gt;
+                                    &lt;ul class="nav navbar-nav navbar-right"&gt;
+                                        &lt;li&gt;&lt;a runat="server" href="~/Account/Register"&gt;הרשמה&lt;/a&gt;&lt;/li&gt;
+                                        &lt;li&gt;&lt;a runat="server" href="~/Account/Login"&gt;התחברות&lt;/a&gt;&lt;/li&gt;
+                                    &lt;/ul&gt;
+                                &lt;/AnonymousTemplate&gt;
+                                &lt;LoggedInTemplate&gt;
+                                    &lt;ul class="nav navbar-nav navbar-right"&gt;
+                                        &lt;li&gt;
+                                            &lt;a runat="server" href="~/Account/Manage" title="ניהול החשבון"&gt;
+                                                שלום, &lt;%: Context.User.Identity.GetUserName() %&gt;!
+                                            &lt;/a&gt;
+                                        &lt;/li&gt;
+                                        &lt;li&gt;
+                                            &lt;asp:LoginStatus runat="server" LogoutAction="Redirect" 
+                                                LogoutText="התנתק" LogoutPageUrl="~/" OnLoggingOut="Unnamed_LoggingOut" /&gt;
+                                        &lt;/li&gt;
+                                    &lt;/ul&gt;
+                                &lt;/LoggedInTemplate&gt;
+                            &lt;/asp:LoginView&gt;
+                        &lt;/div&gt;
+                    &lt;/div&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+        &lt;/header&gt;
+        
+        &lt;!-- תוכן הדף --&gt;
+        &lt;div class="container body-content"&gt;
+            &lt;asp:ContentPlaceHolder ID="MainContent" runat="server"&gt;
+            &lt;/asp:ContentPlaceHolder&gt;
+            
+            &lt;hr /&gt;
+            
+            &lt;!-- כותרת תחתונה --&gt;
+            &lt;footer&gt;
+                &lt;p&gt;&amp;copy; &lt;%: DateTime.Now.Year %&gt; - האתר שלי&lt;/p&gt;
+            &lt;/footer&gt;
+        &lt;/div&gt;
+    &lt;/form&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+
+            <p>קוד הדף בקובץ Site.master.cs:</p>
+            <pre>
+using System;
+using System.Web;
+using System.Web.UI;
+
+namespace MyWebApp
+{
+    public partial class SiteMaster : MasterPage
+    {
+        protected void Page_Load(object sender, EventArgs e)
+        {
+            
+        }
+
+        protected void Unnamed_LoggingOut(object sender, LoginCancelEventArgs e)
+        {
+            // מחיקת ה-Session בעת התנתקות
+            Session.Clear();
+            Session.Abandon();
+            
+            // אם משתמשים במערכת Forms Authentication
+            // FormsAuthentication.SignOut();
+            
+            // הפניה לדף הבית
+            Response.Redirect("~/");
+        }
+    }
+}</pre>
+
+            <h3>משימה 2: יצירת דף הבית (Default.aspx)</h3>
+            <p>
+                לאחר יצירת ה-Master Page, נמשיך עם יצירת דף הבית שישתמש בתבנית זו:
+            </p>
+            
+            <ol>
+                <li>בחלונית Solution Explorer, לחצו על הפרויקט עם המקש הימני ובחרו Add > New Item</li>
+                <li>בחרו Web Form with Master Page ותנו לו את השם Default.aspx</li>
+                <li>בחרו את ה-Master Page שיצרתם (Site.master)</li>
+            </ol>
+            
+            <p>תוכן הדף Default.aspx:</p>
+            <pre>
+&lt;%@ Page Title="דף הבית" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="Default.aspx.cs" Inherits="MyWebApp._Default" %&gt;
+
+&lt;asp:Content ID="BodyContent" ContentPlaceHolderID="MainContent" runat="server"&gt;
+    &lt;div class="jumbotron"&gt;
+        &lt;h1&gt;ברוכים הבאים לאתר שלי&lt;/h1&gt;
+        &lt;p class="lead"&gt;זהו אתר לימודי שנבנה במסגרת קורס פיתוח אתרים עם ASP.NET.&lt;/p&gt;
+        &lt;p&gt;&lt;a href="Articles.aspx" class="btn btn-primary btn-lg"&gt;צפה במאמרים &raquo;&lt;/a&gt;&lt;/p&gt;
+    &lt;/div&gt;
+
+    &lt;div class="row"&gt;
+        &lt;div class="col-md-4"&gt;
+            &lt;h2&gt;מאמרים חדשים&lt;/h2&gt;
+            &lt;p&gt;
+                כאן תוכלו למצוא את המאמרים האחרונים שפורסמו באתר.
+            &lt;/p&gt;
+            &lt;asp:Repeater ID="latestArticlesRepeater" runat="server"&gt;
+                &lt;ItemTemplate&gt;
+                    &lt;div class="article-preview"&gt;
+                        &lt;h4&gt;&lt;a href='ArticleDetails.aspx?id=&lt;%# Eval("ArticleID") %&gt;'&gt;&lt;%# Eval("Title") %&gt;&lt;/a&gt;&lt;/h4&gt;
+                        &lt;small&gt;&lt;%# Eval("PublishDate", "{0:dd/MM/yyyy}") %&gt;&lt;/small&gt;
+                    &lt;/div&gt;
+                &lt;/ItemTemplate&gt;
+            &lt;/asp:Repeater&gt;
+            &lt;p&gt;&lt;a class="btn btn-default" href="Articles.aspx"&gt;עוד מאמרים &raquo;&lt;/a&gt;&lt;/p&gt;
+        &lt;/div&gt;
+        &lt;div class="col-md-4"&gt;
+            &lt;h2&gt;קטגוריות&lt;/h2&gt;
+            &lt;p&gt;עיון במאמרים לפי קטגוריות.&lt;/p&gt;
+            &lt;asp:Repeater ID="categoriesRepeater" runat="server"&gt;
+                &lt;ItemTemplate&gt;
+                    &lt;div class="category-item"&gt;
+                        &lt;a href='Articles.aspx?category=&lt;%# Eval("CategoryID") %&gt;'&gt;&lt;%# Eval("CategoryName") %&gt;&lt;/a&gt;
+                    &lt;/div&gt;
+                &lt;/ItemTemplate&gt;
+            &lt;/asp:Repeater&gt;
+            &lt;p&gt;&lt;a class="btn btn-default" href="Categories.aspx"&gt;כל הקטגוריות &raquo;&lt;/a&gt;&lt;/p&gt;
+        &lt;/div&gt;
+        &lt;div class="col-md-4"&gt;
+            &lt;h2&gt;הצטרפות&lt;/h2&gt;
+            &lt;p&gt;
+                הצטרפו כמשתמשים רשומים כדי לקבל גישה לתוכן מלא ולהגיב על מאמרים.
+            &lt;/p&gt;
+            &lt;p&gt;&lt;a class="btn btn-default" href="Account/Register.aspx"&gt;הרשמה &raquo;&lt;/a&gt;&lt;/p&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+&lt;/asp:Content&gt;</pre>
+
+            <p>קוד הדף בקובץ Default.aspx.cs:</p>
+            <pre>
+using System;
+using System.Data;
+using System.Data.SqlClient;
+using System.Configuration;
+using System.Web.UI;
+
+namespace MyWebApp
+{
+    public partial class _Default : Page
+    {
+        protected void Page_Load(object sender, EventArgs e)
+        {
+            if (!IsPostBack)
+            {
+                LoadLatestArticles();
+                LoadCategories();
+            }
+        }
+
+        private void LoadLatestArticles()
+        {
+            string connectionString = ConfigurationManager.ConnectionStrings["WebAppDBConnection"].ConnectionString;
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                string query = @"SELECT TOP 5 ArticleID, Title, PublishDate
+                                FROM Articles 
+                                WHERE IsPublished = 1 
+                                ORDER BY PublishDate DESC";
+                
+                SqlCommand cmd = new SqlCommand(query, conn);
+                SqlDataAdapter adapter = new SqlDataAdapter(cmd);
+                DataTable dt = new DataTable();
+                
+                try
+                {
+                    conn.Open();
+                    adapter.Fill(dt);
+                    
+                    latestArticlesRepeater.DataSource = dt;
+                    latestArticlesRepeater.DataBind();
+                }
+                catch (Exception)
+                {
+                    // טיפול בשגיאות אם יש צורך
+                }
+            }
+        }
+
+        private void LoadCategories()
+        {
+            string connectionString = ConfigurationManager.ConnectionStrings["WebAppDBConnection"].ConnectionString;
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                string query = @"SELECT TOP 10 c.CategoryID, c.CategoryName, COUNT(a.ArticleID) AS ArticleCount
+                                FROM Categories c
+                                LEFT JOIN Articles a ON c.CategoryID = a.CategoryID AND a.IsPublished = 1
+                                GROUP BY c.CategoryID, c.CategoryName
+                                ORDER BY ArticleCount DESC";
+                
+                SqlCommand cmd = new SqlCommand(query, conn);
+                SqlDataAdapter adapter = new SqlDataAdapter(cmd);
+                DataTable dt = new DataTable();
+                
+                try
+                {
+                    conn.Open();
+                    adapter.Fill(dt);
+                    
+                    categoriesRepeater.DataSource = dt;
+                    categoriesRepeater.DataBind();
+                }
+                catch (Exception)
+                {
+                    // טיפול בשגיאות אם יש צורך
+                }
+            }
+        }
+    }
+}</pre>
+
+            <h3>משימה 3: יצירת דף להצגת המאמרים</h3>
+            <p>עכשיו שיש לנו Master Page ודף בית, ניצור דף שיציג את כל המאמרים מבסיס הנתונים:</p>
+            
+            <p>תוכן הדף Articles.aspx:</p>
+            <pre>
+&lt;%@ Page Title="מאמרים" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="Articles.aspx.cs" Inherits="MyWebApp.Articles" %&gt;
+
+&lt;asp:Content ID="BodyContent" ContentPlaceHolderID="MainContent" runat="server"&gt;
+    &lt;div class="container"&gt;
+        &lt;h2&gt;מאמרים&lt;/h2&gt;
+        
+        &lt;asp:Label ID="errorLabel" runat="server" CssClass="text-danger" Visible="false"&gt;&lt;/asp:Label&gt;
+        
+        &lt;div class="row"&gt;
+            &lt;div class="col-md-3"&gt;
+                &lt;h4&gt;סינון לפי קטגוריה:&lt;/h4&gt;
+                &lt;asp:DropDownList ID="categoryDropDown" runat="server" AutoPostBack="true" 
+                    OnSelectedIndexChanged="categoryDropDown_SelectedIndexChanged" CssClass="form-control"&gt;
+                    &lt;asp:ListItem Text="כל הקטגוריות" Value="0" /&gt;
+                &lt;/asp:DropDownList&gt;
+            &lt;/div&gt;
+            
+            &lt;div class="col-md-9"&gt;
+                &lt;asp:GridView ID="articlesGrid" runat="server" AutoGenerateColumns="false" 
+                    CssClass="table table-striped table-hover" DataKeyNames="ArticleID"
+                    OnRowCommand="articlesGrid_RowCommand" AllowPaging="true" PageSize="10"
+                    OnPageIndexChanging="articlesGrid_PageIndexChanging"&gt;
+                    &lt;Columns&gt;
+                        &lt;asp:BoundField DataField="Title" HeaderText="כותרת" /&gt;
+                        &lt;asp:BoundField DataField="CategoryName" HeaderText="קטגוריה" /&gt;
+                        &lt;asp:BoundField DataField="Author" HeaderText="מחבר" /&gt;
+                        &lt;asp:BoundField DataField="PublishDate" HeaderText="תאריך פרסום" 
+                            DataFormatString="{0:dd/MM/yyyy}" /&gt;
+                        &lt;asp:ButtonField ButtonType="Button" CommandName="ViewArticle" Text="הצג" 
+                            ControlStyle-CssClass="btn btn-primary btn-sm" /&gt;
+                    &lt;/Columns&gt;
+                    &lt;EmptyDataTemplate&gt;
+                        &lt;div class="alert alert-info"&gt;לא נמצאו מאמרים.&lt;/div&gt;
+                    &lt;/EmptyDataTemplate&gt;
+                    &lt;PagerStyle CssClass="pagination-container" /&gt;
+                &lt;/asp:GridView&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+&lt;/asp:Content&gt;</pre>
+
+            <p>קוד הדף בקובץ Articles.aspx.cs:</p>
+            <pre>
+using System;
+using System.Data;
+using System.Data.SqlClient;
+using System.Configuration;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+
+namespace MyWebApp
+{
+    public partial class Articles : Page
+    {
+        protected void Page_Load(object sender, EventArgs e)
+        {
+            if (!IsPostBack)
+            {
+                LoadCategories();
+                LoadArticles(0);  // 0 מייצג "כל הקטגוריות"
+            }
+        }
+
+        private void LoadCategories()
+        {
+            string connectionString = ConfigurationManager.ConnectionStrings["WebAppDBConnection"].ConnectionString;
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                string query = "SELECT CategoryID, CategoryName FROM Categories ORDER BY CategoryName";
+                SqlCommand cmd = new SqlCommand(query, conn);
+                
+                try
+                {
+                    conn.Open();
+                    SqlDataReader reader = cmd.ExecuteReader();
+                    
+                    // כבר הוספנו את "כל הקטגוריות" בקוד HTML
+                    while (reader.Read())
+                    {
+                        categoryDropDown.Items.Add(new ListItem(
+                            reader["CategoryName"].ToString(),
+                            reader["CategoryID"].ToString()
+                        ));
+                    }
+                }
+                catch (Exception ex)
+                {
+                    errorLabel.Text = "שגיאה בטעינת קטגוריות: " + ex.Message;
+                    errorLabel.Visible = true;
+                }
+            }
+        }
+
+        private void LoadArticles(int categoryId)
+        {
+            string connectionString = ConfigurationManager.ConnectionStrings["WebAppDBConnection"].ConnectionString;
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                string query = @"SELECT a.ArticleID, a.Title, c.CategoryName, u.FullName AS Author, 
+                                 a.PublishDate 
+                                 FROM Articles a 
+                                 JOIN Categories c ON a.CategoryID = c.CategoryID 
+                                 JOIN Users u ON a.AuthorID = u.UserID 
+                                 WHERE a.IsPublished = 1 ";
+                
+                // אם נבחרה קטגוריה ספציפית
+                if (categoryId > 0)
+                {
+                    query += " AND a.CategoryID = @CategoryID";
+                }
+                
+                query += " ORDER BY a.PublishDate DESC";
+                
+                SqlCommand cmd = new SqlCommand(query, conn);
+                
+                if (categoryId > 0)
+                {
+                    cmd.Parameters.AddWithValue("@CategoryID", categoryId);
+                }
+                
+                SqlDataAdapter adapter = new SqlDataAdapter(cmd);
+                DataTable dt = new DataTable();
+                
+                try
+                {
+                    conn.Open();
+                    adapter.Fill(dt);
+                    
+                    articlesGrid.DataSource = dt;
+                    articlesGrid.DataBind();
+                }
+                catch (Exception ex)
+                {
+                    errorLabel.Text = "שגיאה בטעינת מאמרים: " + ex.Message;
+                    errorLabel.Visible = true;
+                }
+            }
+        }
+
+        protected void categoryDropDown_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            int categoryId = Convert.ToInt32(categoryDropDown.SelectedValue);
+            LoadArticles(categoryId);
+        }
+
+        protected void articlesGrid_RowCommand(object sender, GridViewCommandEventArgs e)
+        {
+            if (e.CommandName == "ViewArticle")
+            {
+                int index = Convert.ToInt32(e.CommandArgument);
+                int articleId = Convert.ToInt32(articlesGrid.DataKeys[index].Value);
+                
+                // הפניה לדף המאמר
+                Response.Redirect($"ArticleDetails.aspx?id={articleId}");
+            }
+        }
+
+        protected void articlesGrid_PageIndexChanging(object sender, GridViewPageEventArgs e)
+        {
+            articlesGrid.PageIndex = e.NewPageIndex;
+            int categoryId = Convert.ToInt32(categoryDropDown.SelectedValue);
+            LoadArticles(categoryId);
+        }
+    }
+}</pre>
+
+            <h3>משימה 2: יצירת דף להוספת מאמר חדש</h3>
+            <p>עכשיו ניצור דף שיאפשר למשתמשים מורשים להוסיף מאמרים חדשים:</p>
+            
+            <ol>
+                <li>הוסיפו דף Web Form חדש בשם AddArticle.aspx</li>
+                <li>הוסיפו בקרים עבור הטופס: כותרת, תוכן, קטגוריה</li>
+                <li>יישמו את לוגיקת השמירה בבסיס הנתונים</li>
+            </ol>
+            
+            <p>תוכן הדף AddArticle.aspx:</p>
+            <pre>
+&lt;%@ Page Title="הוספת מאמר חדש" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="AddArticle.aspx.cs" Inherits="MyWebApp.AddArticle" %&gt;
+
+&lt;asp:Content ID="BodyContent" ContentPlaceHolderID="MainContent" runat="server"&gt;
+    &lt;div class="container"&gt;
+        &lt;h2&gt;הוספת מאמר חדש&lt;/h2&gt;
+        
+        &lt;asp:Panel ID="loginWarning" runat="server" Visible="false" CssClass="alert alert-warning"&gt;
+            עליך להתחבר כדי להוסיף מאמר חדש.
+            &lt;asp:HyperLink runat="server" NavigateUrl="~/Login.aspx" Text="התחבר כאן" /&gt;
+        &lt;/asp:Panel&gt;
+        
+        &lt;asp:Panel ID="addArticleForm" runat="server"&gt;
+            &lt;div class="form-group"&gt;
+                &lt;asp:Label runat="server" AssociatedControlID="titleTextBox"&gt;כותרת המאמר:&lt;/asp:Label&gt;
+                &lt;asp:TextBox ID="titleTextBox" runat="server" CssClass="form-control" required="required" /&gt;
+                &lt;asp:RequiredFieldValidator runat="server" ControlToValidate="titleTextBox"
+                    CssClass="text-danger" ErrorMessage="כותרת המאמר היא שדה חובה." /&gt;
+            &lt;/div&gt;
+            
+            &lt;div class="form-group"&gt;
+                &lt;asp:Label runat="server" AssociatedControlID="categoryDropDown"&gt;קטגוריה:&lt;/asp:Label&gt;
+                &lt;asp:DropDownList ID="categoryDropDown" runat="server" CssClass="form-control" /&gt;
+                &lt;asp:RequiredFieldValidator runat="server" ControlToValidate="categoryDropDown"
+                    CssClass="text-danger" ErrorMessage="יש לבחור קטגוריה." InitialValue="" /&gt;
+            &lt;/div&gt;
+            
+            &lt;div class="form-group"&gt;
+                &lt;asp:Label runat="server" AssociatedControlID="contentTextBox"&gt;תוכן המאמר:&lt;/asp:Label&gt;
+                &lt;asp:TextBox ID="contentTextBox" runat="server" TextMode="MultiLine" Rows="10"
+                    CssClass="form-control" required="required" /&gt;
+                &lt;asp:RequiredFieldValidator runat="server" ControlToValidate="contentTextBox"
+                    CssClass="text-danger" ErrorMessage="תוכן המאמר הוא שדה חובה." /&gt;
+            &lt;/div&gt;
+            
+            &lt;div class="form-group"&gt;
+                &lt;asp:CheckBox ID="publishCheckBox" runat="server" Checked="true" /&gt;
+                &lt;asp:Label runat="server" AssociatedControlID="publishCheckBox"&gt;פרסם מיד&lt;/asp:Label&gt;
+            &lt;/div&gt;
+            
+            &lt;div class="form-group"&gt;
+                &lt;asp:Button ID="saveButton" runat="server" Text="שמור מאמר" 
+                    CssClass="btn btn-primary" OnClick="saveButton_Click" /&gt;
+                &lt;asp:Button ID="cancelButton" runat="server" Text="ביטול" 
+                    CssClass="btn btn-default" CausesValidation="false" 
+                    OnClick="cancelButton_Click" /&gt;
+            &lt;/div&gt;
+            
+            &lt;asp:Label ID="statusLabel" runat="server" CssClass="text-info" Visible="false" /&gt;
+        &lt;/asp:Panel&gt;
+    &lt;/div&gt;
+&lt;/asp:Content&gt;</pre>
+
+            <p>קוד הדף בקובץ AddArticle.aspx.cs:</p>
+            <pre>
+using System;
+using System.Data;
+using System.Data.SqlClient;
+using System.Configuration;
+using System.Web.UI;
+
+namespace MyWebApp
+{
+    public partial class AddArticle : Page
+    {
+        protected void Page_Load(object sender, EventArgs e)
+        {
+            // בדיקה אם המשתמש מחובר
+            if (Session["UserID"] == null)
+            {
+                loginWarning.Visible = true;
+                addArticleForm.Visible = false;
+                return;
+            }
+            
+            if (!IsPostBack)
+            {
+                LoadCategories();
+            }
+        }
+
+        private void LoadCategories()
+        {
+            string connectionString = ConfigurationManager.ConnectionStrings["WebAppDBConnection"].ConnectionString;
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                string query = "SELECT CategoryID, CategoryName FROM Categories ORDER BY CategoryName";
+                SqlCommand cmd = new SqlCommand(query, conn);
+                
+                try
+                {
+                    conn.Open();
+                    SqlDataReader reader = cmd.ExecuteReader();
+                    
+                    categoryDropDown.Items.Clear();
+                    categoryDropDown.Items.Add(new ListItem("-- בחר קטגוריה --", ""));
+                    
+                    while (reader.Read())
+                    {
+                        categoryDropDown.Items.Add(new ListItem(
+                            reader["CategoryName"].ToString(),
+                            reader["CategoryID"].ToString()
+                        ));
+                    }
+                }
+                catch (Exception ex)
+                {
+                    statusLabel.Text = "שגיאה בטעינת קטגוריות: " + ex.Message;
+                    statusLabel.Visible = true;
+                }
+            }
+        }
+
+        protected void saveButton_Click(object sender, EventArgs e)
+        {
+            if (!Page.IsValid)
+                return;
+
+            // שמירת המאמר בבסיס הנתונים
+            string connectionString = ConfigurationManager.ConnectionStrings["WebAppDBConnection"].ConnectionString;
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                string query = @"INSERT INTO Articles (Title, Content, CategoryID, AuthorID, IsPublished) 
+                               VALUES (@Title, @Content, @CategoryID, @AuthorID, @IsPublished);
+                               SELECT SCOPE_IDENTITY();";
+                
+                SqlCommand cmd = new SqlCommand(query, conn);
+                cmd.Parameters.AddWithValue("@Title", titleTextBox.Text.Trim());
+                cmd.Parameters.AddWithValue("@Content", contentTextBox.Text);
+                cmd.Parameters.AddWithValue("@CategoryID", Convert.ToInt32(categoryDropDown.SelectedValue));
+                cmd.Parameters.AddWithValue("@AuthorID", Convert.ToInt32(Session["UserID"]));
+                cmd.Parameters.AddWithValue("@IsPublished", publishCheckBox.Checked);
+                
+                try
+                {
+                    conn.Open();
+                    // ההוראה SCOPE_IDENTITY() מחזירה את המזהה שנוצר למאמר החדש
+                    int newArticleId = Convert.ToInt32(cmd.ExecuteScalar());
+                    
+                    // הפניה לדף המאמר החדש
+                    Response.Redirect($"ArticleDetails.aspx?id={newArticleId}");
+                }
+                catch (Exception ex)
+                {
+                    statusLabel.Text = "שגיאה בשמירת המאמר: " + ex.Message;
+                    statusLabel.ForeColor = System.Drawing.Color.Red;
+                    statusLabel.Visible = true;
+                }
+            }
+        }
+
+        protected void cancelButton_Click(object sender, EventArgs e)
+        {
+            // חזרה לדף המאמרים
+            Response.Redirect("Articles.aspx");
+        }
+    }
+}</pre>
+
+            <div class="note">
+                <strong>הערה חשובה:</strong> יש להקפיד על אבטחת המערכת! בדוגמאות לעיל השתמשנו בשיטות בסיסיות לזיהוי משתמשים וטיפול בנתונים. במערכת אמיתית, יש להוסיף אבטחה מתקדמת יותר, כגון הרשאות, אימות טפסים, וסינון קלט.
+            </div>
+            
+            <h3>משימה 3: הפרויקט המעשי לתלמידים</h3>
+            <p>
+                עבור הפרויקט המעשי, התלמידים יידרשו לפתח אתר מלא עם הפונקציונליות הבאה:
+            </p>
+            <ol>
+                <li><strong>מערכת רישום והתחברות</strong> - יצירת משתמשים חדשים והתחברות</li>
+                <li><strong>ניהול מאמרים</strong> - צפייה, הוספה, עריכה ומחיקת מאמרים</li>
+                <li><strong>מערכת תגובות</strong> - אפשרות להוסיף תגובות למאמרים</li>
+                <li><strong>חיפוש וסינון</strong> - חיפוש מאמרים לפי מילות מפתח וסינון לפי קטגוריות</li>
+                <li><strong>פאנל ניהול</strong> - למשתמשים עם הרשאות מנהל</li>
+            </ol>
+            
+            <p>
+                לאחר סיום הפרויקט, התלמידים יידרשו להציג אותו ולהסביר את הקוד ואת הפונקציונליות השונה.
+            </p>
+        </section>
+
+        <section>
+            <h2>סיכום והמשך למידה</h2>
+            <p>
+                בחלק זה של המדריך למדנו על:
+            </p>
+            <ul>
+                <li>בסיסי נתונים טבלאיים ושפת SQL</li>
+                <li>פיתוח צד שרת באמצעות ASP.NET</li>
+                <li>חיבור בין אפליקציית אינטרנט לבסיס נתונים</li>
+                <li>ניהול מצב באמצעות Session, Request ו-Response</li>
+                <li>שיקולי אבטחה בפיתוח אתרים</li>
+            </ul>
+            
+            <div class="highlight">
+                <h4>משאבים להמשך למידה:</h4>
+                <ul>
+                    <li><strong>התיעוד הרשמי של Microsoft:</strong> MSDN Library עבור ASP.NET</li>
+                    <li><strong>W3Schools:</strong> מדריכים מקיפים ל-SQL ו-ASP.NET</li>
+                    <li><strong>Pluralsight וקורסים מקוונים:</strong> קורסים מתקדמים בפיתוח ASP.NET</li>
+                    <li><strong>Stack Overflow:</strong> קהילת מפתחים לשאלות ותשובות</li>
+                </ul>
+            </div>
+            
+            <p>
+                בחלק הבא של המדריך נלמד כיצד לפרסם את האתר שלנו לאינטרנט באמצעות שירותי אחסון ושרתים.
+            </p>
+        </section>
+        </section>
+
+        <section>
+            <h2>צעדים הבאים</h2>
+            <p>
+                כעת שיש לך הבנה בסיסית של בסיסי נתונים וצד שרת, הנה כמה רעיונות להמשך הלמידה:
+            </p>
+            <ol>
+                <li>בחר שפת צד שרת שמעניינת אותך (Node.js, PHP, Python וכו') והתחל ללמוד אותה לעומק</li>
+                <li>התקן שרת מקומי על המחשב שלך לצורך תרגול (למשל XAMPP, Node.js או WAMP)</li>
+                <li>התקן ותרגל עבודה עם בסיס נתונים (MySQL, PostgreSQL או MongoDB)</li>
+                <li>למד מסגרת עבודה (framework) פופולרית לשפה שבחרת</li>
+                <li>בנה פרויקט שמשלב צד לקוח, צד שרת ובסיס נתונים</li>
+            </ol>
+            <div class="note">
+                <strong>טיפ מתקדם:</strong> למד על API RESTful וארכיטקטורת MVC (Model-View-Controller) להבנה טובה יותר של ארגון קוד שרת.
+            </div>
+        </section>
+    </main>
+    <footer style="background-color: #375a8e; color: white; text-align: center; padding: 1rem; margin-top: 2rem;">
+        <p>© 2025 מדריך לפיתוח אתרים. כל הזכויות שמורות.</p>
+    </footer>
+</body>
+</html>
