@@ -1,0 +1,1879 @@
+<div class="step">
+                <h4>צעד 5: יצירת דף לחיפוש משתמשים</h4>
+                <p>כעת ניצור דף שיאפשר למנהל לחפש משתמשים לפי קריטריונים שונים:</p>
+                
+                <p>צור קובץ חדש בשם SearchUsers.aspx בתיקיית Admin:</p>
+                <pre>
+&lt;%@ Page Title="חיפוש משתמשים" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="SearchUsers.aspx.cs" Inherits="MyWebApp.Admin.SearchUsers" %&gt;
+
+&lt;asp:Content ID="BodyContent" ContentPlaceHolderID="MainContent" runat="server"&gt;
+    &lt;div class="row"&gt;
+        &lt;div class="col-md-3"&gt;
+            &lt;div class="panel panel-primary"&gt;
+                &lt;div class="panel-heading"&gt;
+                    &lt;h3 class="panel-title"&gt;תפריט מנהל&lt;/h3&gt;
+                &lt;/div&gt;
+                &lt;div class="panel-body"&gt;
+                    &lt;ul class="nav nav-pills nav-stacked"&gt;
+                        &lt;li&gt;&lt;a href="Default.aspx"&gt;לוח בקרה&lt;/a&gt;&lt;/li&gt;
+                        &lt;li&gt;&lt;a href="ResetCounters.aspx"&gt;איפוס מונים&lt;/a&gt;&lt;/li&gt;
+                        &lt;li&gt;&lt;a href="ManageUsers.aspx"&gt;ניהול משתמשים&lt;/a&gt;&lt;/li&gt;
+                        &lt;li class="active"&gt;&lt;a href="SearchUsers.aspx"&gt;חיפוש משתמשים&lt;/a&gt;&lt;/li&gt;
+                        &lt;li&gt;&lt;a href="ManageSurveys.aspx"&gt;ניהול סקרים&lt;/a&gt;&lt;/li&gt;
+                    &lt;/ul&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+        
+        &lt;div class="col-md-9"&gt;
+            &lt;div class="panel panel-default"&gt;
+                &lt;div class="panel-heading"&gt;
+                    &lt;h3 class="panel-title"&gt;חיפוש משתמשים&lt;/h3&gt;
+                &lt;/div&gt;
+                &lt;div class="panel-body"&gt;
+                    &lt;ul class="nav nav-tabs" role="tablist"&gt;
+                        &lt;li role="presentation" class="active"&gt;
+                            &lt;a href="#simple-search" aria-controls="simple-search" role="tab" data-toggle="tab"&gt;חיפוש פשוט&lt;/a&gt;
+                        &lt;/li&gt;
+                        &lt;li role="presentation"&gt;
+                            &lt;a href="#advanced-search" aria-controls="advanced-search" role="tab" data-toggle="tab"&gt;חיפוש מתקדם&lt;/a&gt;
+                        &lt;/li&gt;
+                    &lt;/ul&gt;
+                    
+                    &lt;div class="tab-content"&gt;
+                        &lt;div role="tabpanel" class="tab-pane active" id="simple-search"&gt;
+                            &lt;div class="form-horizontal" style="margin-top: 20px;"&gt;
+                                &lt;div class="form-group"&gt;
+                                    &lt;label class="col-md-2 control-label"&gt;חיפוש:&lt;/label&gt;
+                                    &lt;div class="col-md-8"&gt;
+                                        &lt;asp:TextBox ID="txtSimpleSearch" runat="server" CssClass="form-control" 
+                                            placeholder="הכנס שם משתמש, אימייל או שם מלא"&gt;&lt;/asp:TextBox&gt;
+                                    &lt;/div&gt;
+                                    &lt;div class="col-md-2"&gt;
+                                        &lt;asp:Button ID="btnSimpleSearch" runat="server" Text="חפש" 
+                                            CssClass="btn btn-primary" OnClick="btnSimpleSearch_Click" /&gt;
+                                    &lt;/div&gt;
+                                &lt;/div&gt;
+                            &lt;/div&gt;
+                        &lt;/div&gt;
+                        
+                        &lt;div role="tabpanel" class="tab-pane" id="advanced-search"&gt;
+                            &lt;div class="form-horizontal" style="margin-top: 20px;"&gt;
+                                &lt;div class="form-group"&gt;
+                                    &lt;label class="col-md-3 control-label"&gt;שם משתמש:&lt;/label&gt;
+                                    &lt;div class="col-md-9"&gt;
+                                        &lt;asp:TextBox ID="txtUsername" runat="server" CssClass="form-control"&gt;&lt;/asp:TextBox&gt;
+                                    &lt;/div&gt;
+                                &lt;/div&gt;
+                                
+                                &lt;div class="form-group"&gt;
+                                    &lt;label class="col-md-3 control-label"&gt;אימייל:&lt;/label&gt;
+                                    &lt;div class="col-md-9"&gt;
+                                        &lt;asp:TextBox ID="txtEmail" runat="server" CssClass="form-control"&gt;&lt;/asp:TextBox&gt;
+                                    &lt;/div&gt;
+                                &lt;/div&gt;
+                                
+                                &lt;div class="form-group"&gt;
+                                    &lt;label class="col-md-3 control-label"&gt;שם מלא:&lt;/label&gt;
+                                    &lt;div class="col-md-9"&gt;
+                                        &lt;asp:TextBox ID="txtFullName" runat="server" CssClass="form-control"&gt;&lt;/asp:TextBox&gt;
+                                    &lt;/div&gt;
+                                &lt;/div&gt;
+                                
+                                &lt;div class="form-group"&gt;
+                                    &lt;label class="col-md-3 control-label"&gt;תאריך רישום:&lt;/label&gt;
+                                    &lt;div class="col-md-4"&gt;
+                                        &lt;asp:TextBox ID="txtFromDate" runat="server" CssClass="form-control" 
+                                            placeholder="מתאריך (DD/MM/YYYY)" TextMode="Date"&gt;&lt;/asp:TextBox&gt;
+                                    &lt;/div&gt;
+                                    &lt;div class="col-md-4"&gt;
+                                        &lt;asp:TextBox ID="txtToDate" runat="server" CssClass="form-control" 
+                                            placeholder="עד תאריך (DD/MM/YYYY)" TextMode="Date"&gt;&lt;/asp:TextBox&gt;
+                                    &lt;/div&gt;
+                                &lt;/div&gt;
+                                
+                                &lt;div class="form-group"&gt;
+                                    &lt;label class="col-md-3 control-label"&gt;סוג משתמש:&lt;/label&gt;
+                                    &lt;div class="col-md-9"&gt;
+                                        &lt;asp:DropDownList ID="ddlUserType" runat="server" CssClass="form-control"&gt;
+                                            &lt;asp:ListItem Text="הכל" Value="" Selected="True"&gt;&lt;/asp:ListItem&gt;
+                                            &lt;asp:ListItem Text="מנהלים" Value="1"&gt;&lt;/asp:ListItem&gt;
+                                            &lt;asp:ListItem Text="משתמשים רגילים" Value="0"&gt;&lt;/asp:ListItem&gt;
+                                        &lt;/asp:DropDownList&gt;
+                                    &lt;/div&gt;
+                                &lt;/div&gt;
+                                
+                                &lt;div class="form-group"&gt;
+                                    &lt;div class="col-md-offset-3 col-md-9"&gt;
+                                        &lt;asp:Button ID="btnAdvancedSearch" runat="server" Text="חפש" 
+                                            CssClass="btn btn-primary" OnClick="btnAdvancedSearch_Click" /&gt;
+                                        &lt;asp:Button ID="btnClear" runat="server" Text="נקה" 
+                                            CssClass="btn btn-default" OnClick="btnClear_Click" /&gt;
+                                    &lt;/div&gt;
+                                &lt;/div&gt;
+                            &lt;/div&gt;
+                        &lt;/div&gt;
+                    &lt;/div&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+            
+            &lt;div class="panel panel-default"&gt;
+                &lt;div class="panel-heading"&gt;
+                    &lt;h3 class="panel-title"&gt;תוצאות חיפוש&lt;/h3&gt;
+                &lt;/div&gt;
+                &lt;div class="panel-body"&gt;
+                    &lt;asp:GridView ID="gvSearchResults" runat="server" AutoGenerateColumns="false" 
+                        CssClass="table table-striped table-hover" DataKeyNames="UserID"
+                        OnRowCommand="gvSearchResults_RowCommand" AllowPaging="true" PageSize="10"
+                        OnPageIndexChanging="gvSearchResults_PageIndexChanging" 
+                        EmptyDataText="לא נמצאו משתמשים מתאימים לחיפוש."&gt;
+                        &lt;Columns&gt;
+                            &lt;asp:BoundField DataField="UserID" HeaderText="מזהה" HeaderStyle-Width="50px" /&gt;
+                            &lt;asp:BoundField DataField="Username" HeaderText="שם משתמש" /&gt;
+                            &lt;asp:BoundField DataField="Email" HeaderText="אימייל" /&gt;
+                            &lt;asp:BoundField DataField="FullName" HeaderText="שם מלא" /&gt;
+                            &lt;asp:BoundField DataField="RegistrationDate" HeaderText="תאריך רישום" 
+                                DataFormatString="{0:dd/MM/yyyy}" /&gt;
+                            &lt;asp:TemplateField HeaderText="מנהל"&gt;
+                                &lt;ItemTemplate&gt;
+                                    &lt;asp:CheckBox ID="chkIsAdmin" runat="server" Enabled="false"
+                                        Checked='&lt;%# Convert.ToBoolean(Eval("IsAdmin")) %&gt;' /&gt;
+                                &lt;/ItemTemplate&gt;
+                            &lt;/asp:TemplateField&gt;
+                            &lt;asp:TemplateField HeaderText="פעולות"&gt;
+                                &lt;ItemTemplate&gt;
+                                    &lt;asp:LinkButton ID="btnView" runat="server" CssClass="btn btn-sm btn-info"
+                                        CommandName="ViewUser" CommandArgument='&lt;%# Eval("UserID") %&gt;'&gt;
+                                        &lt;i class="glyphicon glyphicon-eye-open"&gt;&lt;/i&gt; צפייה
+                                    &lt;/asp:LinkButton&gt;
+                                &lt;/ItemTemplate&gt;
+                            &lt;/asp:TemplateField&gt;
+                        &lt;/Columns&gt;
+                        &lt;PagerSettings Mode="NumericFirstLast" FirstPageText="ראשון" LastPageText="אחרון" /&gt;
+                        &lt;PagerStyle CssClass="pagination-container" /&gt;
+                    &lt;/asp:GridView&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+&lt;/asp:Content&gt;</pre>
+
+                <p>וקוד ה-C# בקובץ SearchUsers.aspx.cs:</p>
+                <pre>
+using System;
+using System.Data;
+using System.Data.SqlClient;
+using System.Configuration;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using System.Text;
+
+namespace MyWebApp.Admin
+{
+    public partial class SearchUsers : Page
+    {
+        protected void Page_Load(object sender, EventArgs e)
+        {
+            // בדיקה שהמשתמש הוא מנהל
+            if (Session["IsAdmin"] == null || !(bool)Session["IsAdmin"])
+            {
+                Response.Redirect("~/Account/Login.aspx?ReturnUrl=" + Request.RawUrl);
+                return;
+            }
+        }
+        
+        protected void btnSimpleSearch_Click(object sender, EventArgs e)
+        {
+            if (string.IsNullOrWhiteSpace(txtSimpleSearch.Text))
+                return;
+                
+            string searchTerm = txtSimpleSearch.Text.Trim();
+            SearchUsers(searchTerm, null, null, null, null, null, null);
+        }
+        
+        protected void btnAdvancedSearch_Click(object sender, EventArgs e)
+        {
+            string username = txtUsername.Text.Trim();
+            string email = txtEmail.Text.Trim();
+            string fullName = txtFullName.Text.Trim();
+            DateTime? fromDate = null;
+            DateTime? toDate = null;
+            bool? isAdmin = null;
+            
+            if (!string.IsNullOrEmpty(txtFromDate.Text))
+            {
+                fromDate = DateTime.Parse(txtFromDate.Text);
+            }
+            
+            if (!string.IsNullOrEmpty(txtToDate.Text))
+            {
+                toDate = DateTime.Parse(txtToDate.Text);
+            }
+            
+            if (!string.IsNullOrEmpty(ddlUserType.SelectedValue))
+            {
+                isAdmin = ddlUserType.SelectedValue == "1";
+            }
+            
+            SearchUsers(null, username, email, fullName, fromDate, toDate, isAdmin);
+        }
+        
+        protected void btnClear_Click(object sender, EventArgs e)
+        {
+            // ניקוי כל השדות
+            txtUsername.Text = "";
+            txtEmail.Text = "";
+            txtFullName.Text = "";
+            txtFromDate.Text = "";
+            txtToDate.Text = "";
+            ddlUserType.SelectedIndex = 0;
+            
+            // ניקוי תוצאות החיפוש
+            gvSearchResults.DataSource = null;
+            gvSearchResults.DataBind();
+        }
+        
+        private void SearchUsers(string simpleSearch, string username, string email, string fullName, 
+                               DateTime? fromDate, DateTime? toDate, bool? isAdmin)
+        {
+            string connectionString = ConfigurationManager.ConnectionStrings["WebAppDBConnection"].ConnectionString;
+            
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                StringBuilder queryBuilder = new StringBuilder();
+                queryBuilder.Append(@"SELECT UserID, Username, Email, FullName, RegistrationDate, IsAdmin 
+                                    FROM Users WHERE 1=1 ");
+                
+                SqlCommand cmd = new SqlCommand();
+                
+                // בניית התנאים לפי הפרמטרים שהועברו
+                if (!string.IsNullOrEmpty(simpleSearch))
+                {
+                    queryBuilder.Append(@" AND (Username LIKE @SimpleSearch OR Email LIKE @SimpleSearch 
+                                         OR FullName LIKE @SimpleSearch)");
+                    cmd.Parameters.AddWithValue("@SimpleSearch", "%" + simpleSearch + "%");
+                }
+                else
+                {
+                    if (!string.IsNullOrEmpty(username))
+                    {
+                        queryBuilder.Append(" AND Username LIKE @Username");
+                        cmd.Parameters.AddWithValue("@Username", "%" + username + "%");
+                    }
+                    
+                    if (!string.IsNullOrEmpty(email))
+                    {
+                        queryBuilder.Append(" AND Email LIKE @Email");
+                        cmd.Parameters.AddWithValue("@Email", "%" + email + "%");
+                    }
+                    
+                    if (!string.IsNullOrEmpty(fullName))
+                    {
+                        queryBuilder.Append(" AND FullName LIKE @FullName");
+                        cmd.Parameters.AddWithValue("@FullName", "%" + fullName + "%");
+                    }
+                    
+                    if (fromDate.HasValue)
+                    {
+                        queryBuilder.Append(" AND RegistrationDate >= @FromDate");
+                        cmd.Parameters.AddWithValue("@FromDate", fromDate.Value);
+                    }
+                    
+                    if (toDate.HasValue)
+                    {
+                        queryBuilder.Append(" AND RegistrationDate <= @ToDate");
+                        cmd.Parameters.AddWithValue("@ToDate", toDate.Value.AddDays(1)); // כולל את היום שנבחר
+                    }
+                    
+                    if (isAdmin.HasValue)
+                    {
+                        queryBuilder.Append(" AND IsAdmin = @IsAdmin");
+                        cmd.Parameters.AddWithValue("@IsAdmin", isAdmin.Value);
+                    }
+                }
+                
+                queryBuilder.Append(" ORDER BY RegistrationDate DESC");
+                
+                cmd.CommandText = queryBuilder.ToString();
+                cmd.Connection = conn;
+                
+                SqlDataAdapter adapter = new SqlDataAdapter(cmd);
+                DataTable dt = new DataTable();
+                
+                try
+                {
+                    conn.Open();
+                    adapter.Fill(dt);
+                    
+                    gvSearchResults.DataSource = dt;
+                    gvSearchResults.DataBind();
+                }
+                catch (Exception ex)
+                {
+                    // טיפול בשגיאות אם יש צורך
+                }
+            }
+        }
+        
+        protected void gvSearchResults_RowCommand(object sender, GridViewCommandEventArgs e)
+        {
+            if (e.CommandName == "ViewUser")
+            {
+                int userId = Convert.ToInt32(e.CommandArgument);
+                Response.Redirect($"ViewUser.aspx?id={userId}");
+            }
+        }
+        
+        protected void gvSearchResults_PageIndexChanging(object sender, GridViewPageEventArgs e)
+        {
+            gvSearchResults.PageIndex = e.NewPageIndex;
+            
+            // בדיקה אם היה חיפוש פשוט או מתקדם ושליחת הפרמטרים המתאימים
+            if (!string.IsNullOrEmpty(txtSimpleSearch.Text))
+            {
+                btnSimpleSearch_Click(sender, e);
+            }
+            else
+            {
+                btnAdvancedSearch_Click(sender, e);
+            }
+        }
+    }
+}</pre>
+            </div>
+        </section>
+
+        <section id="login-registration">
+            <h2>4-5. מערכת התחברות והתנתקות</h2>
+            <p>
+                כעת ניצור את מערכת ההתחברות וההתנתקות שתאפשר למשתמשים להתחבר לאתר ולהתנתק ממנו. 
+                בנוסף, ניישם מנגנון שיאפשר לנו לזהות אם המשתמש הוא מנהל.
+            </p>
+            
+            <div class="step">
+                <h4>צעד 1: יצירת דף התחברות</h4>
+                <p>ראשית, ניצור תיקייה חדשה בשם Account לדפי הרישום וההתחברות:</p>
+                
+                <p>צור קובץ חדש בשם Login.aspx בתיקיית Account:</p>
+                <pre>
+&lt;%@ Page Title="התחברות" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="Login.aspx.cs" Inherits="MyWebApp.Account.Login" %&gt;
+
+&lt;asp:Content ID="BodyContent" ContentPlaceHolderID="MainContent" runat="server"&gt;
+    &lt;div class="row"&gt;
+        &lt;div class="col-md-8 col-md-offset-2"&gt;
+            &lt;div class="panel panel-primary"&gt;
+                &lt;div class="panel-heading"&gt;
+                    &lt;h3 class="panel-title"&gt;התחברות&lt;/h3&gt;
+                &lt;/div&gt;
+                &lt;div class="panel-body"&gt;
+                    &lt;div class="row"&gt;
+                        &lt;div class="col-md-6"&gt;
+                            &lt;div class="form-horizontal"&gt;
+                                &lt;h4&gt;התחבר עם חשבון קיים&lt;/h4&gt;
+                                &lt;hr /&gt;
+                                
+                                &lt;asp:PlaceHolder runat="server" ID="ErrorMessage" Visible="false"&gt;
+                                    &lt;div class="alert alert-danger"&gt;
+                                        &lt;asp:Literal runat="server" ID="FailureText" /&gt;
+                                    &lt;/div&gt;
+                                &lt;/asp:PlaceHolder&gt;
+                                
+                                &lt;div class="form-group"&gt;
+                                    &lt;label class="col-md-4 control-label"&gt;שם משתמש:&lt;/label&gt;
+                                    &lt;div class="col-md-8"&gt;
+                                        &lt;asp:TextBox runat="server" ID="Username" CssClass="form-control" /&gt;
+                                        &lt;asp:RequiredFieldValidator runat="server" ControlToValidate="Username"
+                                            CssClass="text-danger" ErrorMessage="שדה שם המשתמש הוא חובה." /&gt;
+                                    &lt;/div&gt;
+                                &lt;/div&gt;
+                                
+                                &lt;div class="form-group"&gt;
+                                    &lt;label class="col-md-4 control-label"&gt;סיסמה:&lt;/label&gt;
+                                    &lt;div class="col-md-8"&gt;
+                                        &lt;asp:TextBox runat="server" ID="Password" TextMode="Password" CssClass="form-control" /&gt;
+                                        &lt;asp:RequiredFieldValidator runat="server" ControlToValidate="Password"
+                                            CssClass="text-danger" ErrorMessage="שדה הסיסמה הוא חובה." /&gt;
+                                    &lt;/div&gt;
+                                &lt;/div&gt;
+                                
+                                &lt;div class="form-group"&gt;
+                                    &lt;div class="col-md-offset-4 col-md-8"&gt;
+                                        &lt;div class="checkbox"&gt;
+                                            &lt;asp:CheckBox runat="server" ID="RememberMe" /&gt;
+                                            &lt;label for="&lt;%= RememberMe.ClientID %&gt;"&gt;זכור אותי&lt;/label&gt;
+                                        &lt;/div&gt;
+                                    &lt;/div&gt;
+                                &lt;/div&gt;
+                                
+                                &lt;div class="form-group"&gt;
+                                    &lt;div class="col-md-offset-4 col-md-8"&gt;
+                                        &lt;asp:Button runat="server" ID="LoginButton" Text="התחבר" CssClass="btn btn-primary" 
+                                            OnClick="LoginButton_Click" /&gt;
+                                    &lt;/div&gt;
+                                &lt;/div&gt;
+                            &lt;/div&gt;
+                        &lt;/div&gt;
+                        
+                        &lt;div class="col-md-6"&gt;
+                            &lt;div class="well"&gt;
+                                &lt;h4&gt;אין לך חשבון?&lt;/h4&gt;
+                                &lt;p&gt;הירשם כדי להנות מכל האפשרויות באתר.&lt;/p&gt;
+                                &lt;p&gt;
+                                    &lt;a href="Register.aspx" class="btn btn-success"&gt;הירשם עכשיו&lt;/a&gt;
+                                &lt;/p&gt;
+                            &lt;/div&gt;
+                        &lt;/div&gt;
+                    &lt;/div&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+&lt;/asp:Content&gt;</pre>
+
+                <p>וקוד ה-C# בקובץ Login.aspx.cs:</p>
+                <pre>
+using System;
+using System.Data;
+using System.Data.SqlClient;
+using System.Configuration;
+using System.Web;
+using System.Web.UI;
+using System.Web.Security;
+
+namespace MyWebApp.Account
+{
+    public partial class Login : Page
+    {
+        protected void Page_Load(object sender, EventArgs e)
+        {
+            // אם המשתמש כבר מחובר, מפנים אותו לדף הבית
+            if (Session["UserID"] != null)
+            {
+                Response.Redirect("~/Default.aspx");
+            }
+
+            // אם יש פרמטר ReturnUrl, שומרים אותו ב-ViewState לשימוש מאוחר יותר
+            if (!IsPostBack)
+            {
+                string returnUrl = Request.QueryString["ReturnUrl"];
+                if (!string.IsNullOrEmpty(returnUrl))
+                {
+                    ViewState["ReturnUrl"] = returnUrl;
+                }
+            }
+        }
+
+        protected void LoginButton_Click(object sender, EventArgs e)
+        {
+            if (IsValid)
+            {
+                // בדיקת הפרטים מול בסיס הנתונים
+                if (ValidateUser(Username.Text, Password.Text))
+                {
+                    // שמירת מידע על המשתמש ב-Session
+                    Session["Username"] = Username.Text;
+
+                    // אם הוגדר ReturnUrl, מפנים לשם
+                    if (ViewState["ReturnUrl"] != null)
+                    {
+                        Response.Redirect(ViewState["ReturnUrl"].ToString());
+                    }
+                    else
+                    {
+                        Response.Redirect("~/Default.aspx");
+                    }
+                }
+                else
+                {
+                    // הצגת הודעת שגיאה
+                    FailureText.Text = "שם משתמש או סיסמה שגויים.";
+                    ErrorMessage.Visible = true;
+                }
+            }
+        }
+
+        private bool ValidateUser(string username, string password)
+        {
+            string connectionString = ConfigurationManager.ConnectionStrings["WebAppDBConnection"].ConnectionString;
+            
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                string query = "SELECT UserID, IsAdmin FROM Users WHERE Username = @Username AND Password = @Password";
+                SqlCommand cmd = new SqlCommand(query, conn);
+                cmd.Parameters.AddWithValue("@Username", username);
+                
+                // בסביבת אמת יש להשתמש בהצפנת סיסמאות!
+                // כאן למטרות לימוד בלבד נשתמש בסיסמה לא מוצפנת
+                cmd.Parameters.AddWithValue("@Password", password);
+                
+                try
+                {
+                    conn.Open();
+                    SqlDataReader reader = cmd.ExecuteReader();
+                    
+                    if (reader.Read())
+                    {
+                        // שמירת מזהה המשתמש וסטטוס המנהל ב-Session
+                        Session["UserID"] = reader["UserID"];
+                        Session["IsAdmin"] = Convert.ToBoolean(reader["IsAdmin"]);
+                        
+                        // עדכון תאריך ההתחברות האחרון
+                        UpdateLastLoginDate(Convert.ToInt32(reader["UserID"]));
+                        
+                        return true;
+                    }
+                    
+                    return false;
+                }
+                catch (Exception)
+                {
+                    return false;
+                }
+            }
+        }
+        
+        private void UpdateLastLoginDate(int userId)
+        {
+            string connectionString = ConfigurationManager.ConnectionStrings["WebAppDBConnection"].ConnectionString;
+            
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                string query = "UPDATE Users SET LastLogin = GETDATE() WHERE UserID = @UserID";
+                SqlCommand cmd = new SqlCommand(query, conn);
+                cmd.Parameters.AddWithValue("@UserID", userId);
+                
+                try
+                {
+                    conn.Open();
+                    cmd.ExecuteNonQuery();
+                }
+                catch (Exception)
+                {
+                    // טיפול בשגיאות אם יש צורך
+                }
+            }
+        }
+    }
+}</pre>
+            </div>
+            
+            <div class="step">
+                <h4>צעד 2: יצירת דף הרשמה</h4>
+                <p>צור קובץ חדש בשם Register.aspx בתיקיית Account:</p>
+                <pre>
+&lt;%@ Page Title="הרשמה" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="Register.aspx.cs" Inherits="MyWebApp.Account.Register" %&gt;
+
+&lt;asp:Content ID="BodyContent" ContentPlaceHolderID="MainContent" runat="server"&gt;
+    &lt;div class="row"&gt;
+        &lt;div class="col-md-8 col-md-offset-2"&gt;
+            &lt;div class="panel panel-primary"&gt;
+                &lt;div class="panel-heading"&gt;
+                    &lt;h3 class="panel-title"&gt;הרשמה&lt;/h3&gt;
+                &lt;/div&gt;
+                &lt;div class="panel-body"&gt;
+                    &lt;div class="form-horizontal"&gt;
+                        &lt;h4&gt;צור חשבון חדש&lt;/h4&gt;
+                        &lt;hr /&gt;
+                        
+                        &lt;asp:ValidationSummary runat="server" CssClass="text-danger" /&gt;
+                        
+                        &lt;asp:Panel ID="panelMessage" runat="server" CssClass="alert alert-success" Visible="false"&gt;
+                            &lt;asp:Literal runat="server" ID="SuccessMessage" /&gt;
+                        &lt;/asp:Panel&gt;
+                        
+                        &lt;div class="form-group"&gt;
+                            &lt;label class="col-md-4 control-label"&gt;שם משתמש:&lt;/label&gt;
+                            &lt;div class="col-md-8"&gt;
+                                &lt;asp:TextBox runat="server" ID="Username" CssClass="form-control" /&gt;
+                                &lt;asp:RequiredFieldValidator runat="server" ControlToValidate="Username"
+                                    CssClass="text-danger" ErrorMessage="שדה שם המשתמש הוא חובה." /&gt;
+                            &lt;/div&gt;
+                        &lt;/div&gt;
+                        
+                        &lt;div class="form-group"&gt;
+                            &lt;label class="col-md-4 control-label"&gt;שם מלא:&lt;/label&gt;
+                            &lt;div class="col-md-8"&gt;
+                                &lt;asp:TextBox runat="server" ID="FullName" CssClass="form-control" /&gt;
+                                &lt;asp:RequiredFieldValidator runat="server" ControlToValidate="FullName"
+                                    CssClass="text-danger" ErrorMessage="שדה השם המלא הוא חובה." /&gt;
+                            &lt;/div&gt;
+                        &lt;/div&gt;
+                        
+                        &lt;div class="form-group"&gt;
+                            &lt;label class="col-md-4 control-label"&gt;כתובת אימייל:&lt;/label&gt;
+                            &lt;div class="col-md-8"&gt;
+                                &lt;asp:TextBox runat="server" ID="Email" CssClass="form-control" TextMode="Email" /&gt;
+                                &lt;asp:RequiredFieldValidator runat="server" ControlToValidate="Email"
+                                    CssClass="text-danger" ErrorMessage="שדה האימייל הוא חובה." /&gt;
+                                &lt;asp:RegularExpressionValidator runat="server" ControlToValidate="Email"
+                                    CssClass="text-danger" ErrorMessage="כתובת האימייל אינה תקינה."
+                                    ValidationExpression="^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$" /&gt;
+                            &lt;/div&gt;
+                        &lt;/div&gt;
+                        
+                        &lt;div class="form-group"&gt;
+                            &lt;label class="col-md-4 control-label"&gt;סיסמה:&lt;/label&gt;
+                            &lt;div class="col-md-8"&gt;
+                                &lt;asp:TextBox runat="server" ID="Password" TextMode="Password" CssClass="form-control" /&gt;
+                                &lt;asp:RequiredFieldValidator runat="server" ControlToValidate="Password"
+                                    CssClass="text-danger" ErrorMessage="שדה הסיסמה הוא חובה." /&gt;
+                                &lt;asp:RegularExpressionValidator runat="server" ControlToValidate="Password"
+                                    CssClass="text-danger" ErrorMessage="הסיסמה חייבת להכיל לפחות 6 תווים."
+                                    ValidationExpression="^.{6,}$" /&gt;
+                            &lt;/div&gt;
+                        &lt;/div&gt;
+                        
+                        &lt;div class="form-group"&gt;
+                            &lt;label class="col-md-4 control-label"&gt;אימות סיסמה:&lt;/label&gt;
+                            &lt;div class="col-md-8"&gt;
+                                &lt;asp:TextBox runat="server" ID="ConfirmPassword" TextMode="Password" CssClass="form-control" /&gt;
+                                &lt;asp:RequiredFieldValidator runat="server" ControlToValidate="ConfirmPassword"
+                                    CssClass="text-danger" ErrorMessage="שדה אימות הסיסמה הוא חובה." /&gt;
+                                &lt;asp:CompareValidator runat="server" ControlToCompare="Password" ControlToValidate="ConfirmPassword"
+                                    CssClass="text-danger" ErrorMessage="הסיסמאות אינן תואמות." /&gt;
+                            &lt;/div&gt;
+                        &lt;/div&gt;
+                        
+                        &lt;div class="form-group"&gt;
+                            &lt;div class="col-md-offset-4 col-md-8"&gt;
+                                &lt;asp:Button runat="server" ID="RegisterButton" Text="הירשם" CssClass="btn btn-primary" 
+                                    OnClick="RegisterButton_Click" /&gt;
+                                &lt;a href="Login.aspx" class="btn btn-default"&gt;ביטול&lt;/a&gt;
+                            &lt;/div&gt;
+                        &lt;/div&gt;
+                    &lt;/div&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+&lt;/asp:Content&gt;</pre>
+
+                <p>וקוד ה-C# בקובץ Register.aspx.cs:</p>
+                <pre>
+using System;
+using System.Data;
+using System.Data.SqlClient;
+using System.Configuration;
+using System.Web;
+using System.Web.UI;
+
+namespace MyWebApp.Account
+{
+    public partial class Register : Page
+    {
+        protected void Page_Load(object sender, EventArgs e)
+        {
+            // אם המשתמש כבר מחובר, מפנים אותו לדף הבית
+            if (Session["UserID"] != null)
+            {
+                Response.Redirect("~/Default.aspx");
+            }
+        }
+
+        protected void RegisterButton_Click(object sender, EventArgs e)
+        {
+            if (IsValid)
+            {
+                // בדיקה אם שם המשתמש או האימייל כבר קיימים
+                if (IsUsernameTaken(Username.Text))
+                {
+                    ShowError("שם המשתמש שבחרת כבר קיים במערכת. אנא בחר שם משתמש אחר.");
+                    return;
+                }
+                
+                if (IsEmailTaken(Email.Text))
+                {
+                    ShowError("כתובת האימייל שהזנת כבר קיימת במערכת. אנא השתמש בכתובת אחרת או התחבר לחשבון הקיים.");
+                    return;
+                }
+                
+                // יצירת המשתמש בבסיס הנתונים
+                if (CreateUser())
+                {
+                    // הצגת הודעת הצלחה
+                    panelMessage.CssClass = "alert alert-success";
+                    panelMessage.Visible = true;
+                    SuccessMessage.Text = "ההרשמה בוצעה בהצלחה! <a href='Login.aspx'>לחץ כאן</a> כדי להתחבר.";
+                    
+                    // ניקוי השדות
+                    Username.Text = "";
+                    FullName.Text = "";
+                    Email.Text = "";
+                    Password.Text = "";
+                    ConfirmPassword.Text = "";
+                }
+                else
+                {
+                    ShowError("אירעה שגיאה במהלך ההרשמה. אנא נסה שנית מאוחר יותר.");
+                }
+            }
+        }
+        
+        private bool IsUsernameTaken(string username)
+        {
+            string connectionString = ConfigurationManager.ConnectionStrings["WebAppDBConnection"].ConnectionString;
+            
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                string query = "SELECT COUNT(*) FROM Users WHERE Username = @Username";
+                SqlCommand cmd = new SqlCommand(query, conn);
+                cmd.Parameters.AddWithValue("@Username", username);
+                
+                try
+                {
+                    conn.Open();
+                    int count = (int)cmd.ExecuteScalar();
+                    return count > 0;
+                }
+                catch
+                {
+                    return false;
+                }
+            }
+        }
+        
+        private bool IsEmailTaken(string email)
+        {
+            string connectionString = ConfigurationManager.ConnectionStrings["WebAppDBConnection"].ConnectionString;
+            
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                string query = "SELECT COUNT(*) FROM Users WHERE Email = @Email";
+                SqlCommand cmd = new SqlCommand(query, conn);
+                cmd.Parameters.AddWithValue("@Email", email);
+                
+                try
+                {
+                    conn.Open();
+                    int count = (int)cmd.ExecuteScalar();
+                    return count > 0;
+                }
+                catch
+                {
+                    return false;
+                }
+            }
+        }
+        
+        private bool CreateUser()
+        {
+            string connectionString = ConfigurationManager.ConnectionStrings["WebAppDBConnection"].ConnectionString;
+            
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                string query = @"INSERT INTO Users (Username, Email, Password, FullName, RegistrationDate, IsAdmin, RegistrationIP) 
+                               VALUES (@Username, @Email, @Password, @FullName, GETDATE(), 0, @IP)";
+                
+                SqlCommand cmd = new SqlCommand(query, conn);
+                cmd.Parameters.AddWithValue("@Username", Username.Text);
+                cmd.Parameters.AddWithValue("@Email", Email.Text);
+                cmd.Parameters.AddWithValue("@Password", Password.Text); // בסביבת אמת יש להצפין!
+                cmd.Parameters.AddWithValue("@FullName", FullName.Text);
+                cmd.Parameters.AddWithValue("@IP", GetUserIP());
+                
+                try
+                {
+                    conn.Open();
+                    int result = cmd.ExecuteNonQuery();
+                    return result > 0;
+                }
+                catch
+                {
+                    return false;
+                }
+            }
+        }
+        
+        private string GetUserIP()
+        {
+            string ipAddress = Request.ServerVariables["HTTP_X_FORWARDED_FOR"];
+            
+            if (string.IsNullOrEmpty(ipAddress))
+            {
+                ipAddress = Request.ServerVariables["REMOTE_ADDR"];
+            }
+            
+            return ipAddress;
+        }
+        
+        private void ShowError(string message)
+        {
+            panelMessage.CssClass = "alert alert-danger";
+            panelMessage.Visible = true;
+            SuccessMessage.Text = message;
+        }
+    }
+}</pre>
+            </div>
+
+            <div class="step">
+                <h4>צעד 3: יצירת דף התנתקות</h4>
+                <p>צור קובץ חדש בשם Logout.aspx בתיקיית Account:</p>
+                <pre>
+&lt;%@ Page Title="התנתקות" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="Logout.aspx.cs" Inherits="MyWebApp.Account.Logout" %&gt;
+
+&lt;asp:Content ID="BodyContent" ContentPlaceHolderID="MainContent" runat="server"&gt;
+    &lt;div class="row"&gt;
+        &lt;div class="col-md-8 col-md-offset-2"&gt;
+            &lt;div class="panel panel-primary"&gt;
+                &lt;div class="panel-heading"&gt;
+                    &lt;h3 class="panel-title"&gt;התנתקות&lt;/h3&gt;
+                &lt;/div&gt;
+                &lt;div class="panel-body"&gt;
+                    &lt;div class="text-center"&gt;
+                        &lt;h4&gt;התנתקת בהצלחה!&lt;/h4&gt;
+                        &lt;p&gt;תודה שביקרת באתר שלנו.&lt;/p&gt;
+                        &lt;a href="~/Default.aspx" runat="server" class="btn btn-primary"&gt;חזרה לדף הבית&lt;/a&gt;
+                    &lt;/div&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+&lt;/asp:Content&gt;</pre>
+
+                <p>וקוד ה-C# בקובץ Logout.aspx.cs:</p>
+                <pre>
+using System;
+using System.Web;
+using System.Web.UI;
+
+namespace MyWebApp.Account
+{
+    public partial class Logout : Page
+    {
+        protected void Page_Load(object sender, EventArgs e)
+        {
+            // ניקוי ה-Session
+            Session.Clear();
+            Session.Abandon();
+            
+            // מחיקת עוגיות אם יש
+            if (Request.Cookies["ASP.NET_SessionId"] != null)
+            {
+                Response.Cookies["ASP.NET_SessionId"].Expires = DateTime.Now.AddDays(-1);
+            }
+            
+            if (Request.Cookies["Survey_Voted"] != null)
+            {
+                Response.Cookies["Survey_Voted"].Expires = DateTime.Now.AddDays(-1);
+            }
+            
+            // אם נרצה להפנות ישירות לדף הבית במקום להציג דף התנתקות
+            // Response.Redirect("~/Default.aspx");
+        }
+    }
+}</pre>
+            </div>
+
+            <div class="step">
+                <h4>צעד 4: עדכון ה-Master Page כדי לשקף את מצב ההתחברות</h4>
+                <p>כעת נעדכן את ה-Master Page כדי להציג/להסתיר את קישורי ההתחברות/התנתקות בהתאם למצב המשתמש:</p>
+                <pre>
+&lt;!-- בתוך Site.master בחלק של התפריט בצד שמאל (עבור תצוגה RTL) --&gt;
+&lt;div class="navbar-left"&gt;
+    &lt;asp:Panel ID="pnlAnonymous" runat="server" Visible="true"&gt;
+        &lt;ul class="nav navbar-nav navbar-right"&gt;
+            &lt;li&gt;&lt;a runat="server" href="~/Account/Register"&gt;הרשמה&lt;/a&gt;&lt;/li&gt;
+            &lt;li&gt;&lt;a runat="server" href="~/Account/Login"&gt;התחברות&lt;/a&gt;&lt;/li&gt;
+        &lt;/ul&gt;
+    &lt;/asp:Panel&gt;
+    
+    &lt;asp:Panel ID="pnlLoggedIn" runat="server" Visible="false"&gt;
+        &lt;ul class="nav navbar-nav navbar-right"&gt;
+            &lt;li&gt;
+                &lt;a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" 
+                   aria-haspopup="true" aria-expanded="false"&gt;
+                    שלום, &lt;asp:Label ID="lblUsername" runat="server"&gt;&lt;/asp:Label&gt;
+                    &lt;span class="caret"&gt;&lt;/span&gt;
+                &lt;/a&gt;
+                &lt;ul class="dropdown-menu"&gt;
+                    &lt;li&gt;&lt;a runat="server" href="~/Account/Profile"&gt;הפרופיל שלי&lt;/a&gt;&lt;/li&gt;
+                    &lt;asp:Panel ID="pnlAdminMenu" runat="server" Visible="false"&gt;
+                        &lt;li role="separator" class="divider"&gt;&lt;/li&gt;
+                        &lt;li&gt;&lt;a runat="server" href="~/Admin/Default"&gt;ניהול האתר&lt;/a&gt;&lt;/li&gt;
+                    &lt;/asp:Panel&gt;
+                    &lt;li role="separator" class="divider"&gt;&lt;/li&gt;
+                    &lt;li&gt;&lt;a runat="server" href="~/Account/Logout"&gt;התנתק&lt;/a&gt;&lt;/li&gt;
+                &lt;/ul&gt;
+            &lt;/li&gt;
+        &lt;/ul&gt;
+    &lt;/asp:Panel&gt;
+&lt;/div&gt;</pre>
+
+                <p>ובקובץ Site.master.cs:</p>
+                <pre>
+protected void Page_Load(object sender, EventArgs e)
+{
+    // בדיקת מצב התחברות
+    if (Session["UserID"] != null)
+    {
+        // המשתמש מחובר
+        pnlAnonymous.Visible = false;
+        pnlLoggedIn.Visible = true;
+        lblUsername.Text = Session["Username"].ToString();
+        
+        // בדיקה אם המשתמש הוא מנהל
+        if (Session["IsAdmin"] != null && (bool)Session["IsAdmin"])
+        {
+            pnlAdminMenu.Visible = true;
+        }
+    }
+    else
+    {
+        // המשתמש לא מחובר
+        pnlAnonymous.Visible = true;
+        pnlLoggedIn.Visible = false;
+    }
+}</pre>
+            </div>
+        </section>
+
+        <section id="security">
+            <h2>6. אבטחה ובדיקות תקינות</h2>
+            <p>
+                לפני שנסיים, חשוב לוודא שהאתר שלנו מאובטח ושהוא מבצע בדיקות תקינות לכל קלט המשתמש.
+                נוסיף מנגנון בסיסי למניעת גישה לדפים מאובטחים ללא התחברות.
+            </p>
+            
+            <div class="step">
+                <h4>צעד 1: יצירת Base Page למבקרי גישה</h4>
+                <p>נתחיל ביצירת קובץ בתיקיית App_Code בשם SecurePage.cs:</p>
+                <pre>
+// קובץ App_Code/SecurePage.cs
+using System;
+using System.Web.UI;
+
+public class SecurePage : Page
+{
+    protected override void OnInit(EventArgs e)
+    {
+        base.OnInit(e);
+        
+        // וידוא שהמשתמש מחובר
+        if (Session["UserID"] == null)
+        {
+            Response.Redirect("~/Account/Login.aspx?ReturnUrl=" + Request.RawUrl);
+        }
+    }
+}
+
+public class AdminPage : Page
+{
+    protected override void OnInit(EventArgs e)
+    {
+        base.OnInit(e);
+        
+        // וידוא שהמשתמש מחובר והוא מנהל
+        if (Session["UserID"] == null || Session["IsAdmin"] == null || !(bool)Session["IsAdmin"])
+        {
+            Response.Redirect("~/Account/Login.aspx?ReturnUrl=" + Request.RawUrl);
+        }
+    }
+}</pre>
+
+                <p>עכשיו, במקום לרשת מ-Page, נוכל לרשת מ-SecurePage או AdminPage לכל דף שדורש אימות:</p>
+                <pre>
+// דוגמה לשימוש ב-SecurePage עבור דף שדורש התחברות
+namespace MyWebApp.Account
+{
+    public partial class Profile : SecurePage
+    {
+        protected void Page_Load(object sender, EventArgs e)
+        {
+            // המשתמש מחובר מוודא
+            // ...
+        }
+    }
+}
+
+// דוגמה לשימוש ב-AdminPage עבור דף מנהל
+namespace MyWebApp.Admin
+{
+    public partial class Default : AdminPage
+    {
+        protected void Page_Load(object sender, EventArgs e)
+        {
+            // המשתמש הוא מנהל מוודא
+            // ...
+        }
+    }
+}</pre>
+            </div>
+            
+            <div class="step">
+                <h4>צעד 2: הגדרת אבטחה בקובץ Web.config</h4>
+                <p>הוסף את הקוד הבא לקובץ Web.config בתיקיית Admin:</p>
+                <pre>
+&lt;?xml version="1.0"?&gt;
+&lt;configuration&gt;
+  &lt;system.web&gt;
+    &lt;authorization&gt;
+      &lt;deny users="?"/&gt; &lt;!-- מניעת גישה ממשתמשים לא מאומתים --&gt;
+    &lt;/authorization&gt;
+  &lt;/system.web&gt;
+&lt;/configuration&gt;</pre>
+
+                <p>וכן, מומלץ להוסיף את הקוד הבא לקובץ Web.config הראשי עבור אבטחת האתר:</p>
+                <pre>
+&lt;configuration&gt;
+  &lt;system.web&gt;
+    &lt;!-- הגדרות אבטחה כלליות --&gt;
+    &lt;httpRuntime enableVersionHeader="false" requestValidationMode="2.0" /&gt;
+    &lt;pages validateRequest="true" /&gt;
+    &lt;machineKey validation="SHA1" /&gt;
+    
+    &lt;!-- הגדרת Session --&gt;
+    &lt;sessionState mode="InProc" cookieless="false" timeout="20" /&gt;
+  &lt;/system.web&gt;
+  
+  &lt;system.webServer&gt;
+    &lt;!-- הסרת מידע רגיש מהכותרות --&gt;
+    &lt;httpProtocol&gt;
+      &lt;customHeaders&gt;
+        &lt;remove name="X-Powered-By" /&gt;
+        &lt;add name="X-Frame-Options" value="SAMEORIGIN" /&gt;
+        &lt;add name="X-XSS-Protection" value="1; mode=block" /&gt;
+        &lt;add name="X-Content-Type-Options" value="nosniff" /&gt;
+      &lt;/customHeaders&gt;
+    &lt;/httpProtocol&gt;
+  &lt;/system.webServer&gt;
+&lt;/configuration&gt;</pre>
+            </div>
+        </section>
+
+        <section id="summary">
+            <h2>סיכום</h2>
+            <p>
+                בפרק זה יצרנו את המרכיבים הבאים בצד השרת של אתר ASP.NET:
+            </p>
+            <ol>
+                <li><strong>מונה מבקרים</strong> - שסופר את מספר הביקורים באתר ומאפשר למנהל לאפס אותו.</li>
+                <li><strong>סקר</strong> - שמאפשר למשתמשים להצביע ולראות את תוצאות ההצבעה.</li>
+                <li><strong>דף מנהל</strong> - עם תפריט המאפשר למנהל לבצע פעולות ניהול שונות:
+                    <ul>
+                        <li>איפוס מונה המבקרים</li>
+                        <li>איפוס מוני הסקר</li>
+                        <li>תצוגת פרטי הנרשמים לאתר</li>
+                        <li>מחיקת משתמשים</li>
+                        <li>חיפוש משתמשים (פשוט ומתקדם)</li>
+                    </ul>
+                </li>
+                <li><strong>מערכת התחברות</strong> - שמאפשרת למשתמשים להתחבר לאתר ולגשת לדפים מאובטחים.</li>
+                <li><strong>מערכת הרשמה</strong> - שמאפשרת למשתמשים חדשים להירשם לאתר, עם בדיקות תקינות.</li>
+                <li><strong>מערכת התנתקות</strong> - שמאפשרת למשתמשים להתנתק מהאתר.</li>
+                <li><strong>אבטחה</strong> - מנגנוני אבטחה בסיסיים למניעת גישה לדפים מאובטחים ללא התחברות.</li>
+            </ol>
+            
+            <div class="note">
+                <strong>הערה חשובה:</strong> הקוד במדריך זה נועד למטרות לימוד בלבד. בסביבת ייצור יש להתייחס לנושאי אבטחה נוספים:
+                <ul>
+                    <li>הצפנת סיסמאות בבסיס הנתונים (למשל, באמצעות bcrypt או משהו דומה)</li>
+                    <li>מניעת SQL Injection על ידי שימוש תמיד בפרמטרים (כפי שהודגם במדריך)</li>
+                    <li>הגנה מפני Cross-Site Scripting (XSS) על ידי סינון תוכן המשתמש</li>
+                    <li>שימוש ב-HTTPS להצפנת התקשורת</li>
+                    <li>טיפול בשגיאות באופן בטוח</li>
+                </ul>
+            </div>
+        </section>
+    </main>
+    <footer style="background-color: #375a8e; color: white; text-align: center; padding: 1rem; margin-top: 2rem;">
+        <p>© 2025 מדריך פיתוח אתרים. כל הזכויות שמורות.</p>
+    </footer>
+</body>
+</html>            <div class="step">
+                <h4>צעד 5: יצירת דף לחיפו<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>מדריך פרקטי למימוש פרויקט ASP.NET - חלק השרת</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-color: #f8f9fa;
+            color: #333;
+        }
+        header {
+            background-color: #4a6da7;
+            color: white;
+            text-align: center;
+            padding: 1rem;
+        }
+        main {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            background-color: white;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        section {
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #eee;
+        }
+        h1, h2, h3, h4 {
+            color: #2a4572;
+        }
+        code {
+            background-color: #f5f5f5;
+            padding: 0.2rem 0.4rem;
+            border-radius: 3px;
+            font-family: Consolas, Monaco, 'Andale Mono', monospace;
+        }
+        pre {
+            background-color: #f5f5f5;
+            padding: 1rem;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-family: Consolas, Monaco, 'Andale Mono', monospace;
+        }
+        .note {
+            background-color: #e8f4f8;
+            border-right: 4px solid #4a6da7;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+        .warning {
+            background-color: #fff3cd;
+            border-right: 4px solid #ffc107;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+        .highlight {
+            background-color: #fffde7;
+            padding: 1rem;
+            border-radius: 5px;
+            margin: 1rem 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+        th, td {
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 0 auto;
+        }
+        .step {
+            background-color: #f0f7ff;
+            border-radius: 5px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+        .step h4 {
+            margin-top: 0;
+            color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>מדריך פרקטי למימוש פרויקט ASP.NET</h1>
+        <p>יישום פונקציונליות שרת מתקדמת</p>
+    </header>
+    <main>
+        <section id="intro">
+            <h2>מבוא</h2>
+            <p>
+                במדריך זה נראה כיצד ליישם את הדרישות המתקדמות בפרויקט ASP.NET שלכם, כולל מונה מבקרים, סקר, דף מנהל, מערכת התחברות והרשמה.
+                נעבור על כל דרישה בנפרד ונראה את הקוד הדרוש למימושה.
+            </p>
+            <div class="note">
+                <strong>הערה:</strong> מדריך זה מניח שכבר יצרתם את ה-Master Page ואת מבנה האתר הבסיסי כפי שנלמד בשיעורים הקודמים.
+            </div>
+        </section>
+
+        <section id="db-updates">
+            <h2>הרחבת בסיס הנתונים</h2>
+            <p>
+                לפני שנתחיל, עלינו להרחיב את בסיס הנתונים כדי לתמוך בפונקציונליות החדשה. 
+                נוסיף טבלאות עבור מונה מבקרים, סקר, ומידע נוסף למשתמשים.
+            </p>
+            
+            <pre>
+-- טבלת נתוני אתר לשמירת מידע כמו מונה מבקרים
+CREATE TABLE SiteStats (
+    StatID INT PRIMARY KEY IDENTITY(1,1),
+    StatName NVARCHAR(50) NOT NULL,
+    StatValue INT DEFAULT 0,
+    LastReset DATETIME
+);
+GO
+
+-- הוספת ערכים התחלתיים
+INSERT INTO SiteStats (StatName, StatValue, LastReset)
+VALUES ('VisitorCount', 0, GETDATE());
+GO
+
+-- טבלת סקרים
+CREATE TABLE Surveys (
+    SurveyID INT PRIMARY KEY IDENTITY(1,1),
+    Question NVARCHAR(200) NOT NULL,
+    IsActive BIT DEFAULT 1,
+    CreateDate DATETIME DEFAULT GETDATE()
+);
+GO
+
+-- טבלת אפשרויות לסקרים
+CREATE TABLE SurveyOptions (
+    OptionID INT PRIMARY KEY IDENTITY(1,1),
+    SurveyID INT FOREIGN KEY REFERENCES Surveys(SurveyID),
+    OptionText NVARCHAR(100) NOT NULL,
+    VoteCount INT DEFAULT 0
+);
+GO
+
+-- הוספת סקר לדוגמה
+INSERT INTO Surveys (Question) 
+VALUES ('מה דעתך על האתר החדש שלנו?');
+
+INSERT INTO SurveyOptions (SurveyID, OptionText) 
+VALUES 
+(1, 'מצוין'), 
+(1, 'טוב'), 
+(1, 'סביר'), 
+(1, 'צריך שיפור');
+GO
+
+-- הרחבת טבלת המשתמשים עם שדות לניהול הרשאות
+ALTER TABLE Users ADD 
+    IsAdmin BIT DEFAULT 0,
+    LastLogin DATETIME,
+    RegistrationIP NVARCHAR(50);
+GO
+
+-- הפיכת המשתמש הראשון למנהל
+UPDATE Users SET IsAdmin = 1 WHERE UserID = 1;
+GO
+</pre>
+        </section>
+
+        <section id="visitor-counter">
+            <h2>1. מונה מבקרים</h2>
+            <p>
+                מונה המבקרים יציג את מספר הביקורים באתר. בכל פעם שמשתמש מבקר באתר, המונה יתעדכן.
+                נשמור את המונה בבסיס הנתונים כדי שהוא יישמר גם לאחר הפעלה מחדש של השרת.
+            </p>
+            
+            <div class="step">
+                <h4>צעד 1: יצירת קלאס לניהול סטטיסטיקות האתר</h4>
+                <p>ראשית, ניצור קלאס שינהל את הסטטיסטיקות של האתר:</p>
+                <pre>
+// קובץ App_Code/SiteStatistics.cs
+using System;
+using System.Data;
+using System.Data.SqlClient;
+using System.Configuration;
+
+public class SiteStatistics
+{
+    // קבלת מונה המבקרים מבסיס הנתונים
+    public static int GetVisitorCount()
+    {
+        int count = 0;
+        string connectionString = ConfigurationManager.ConnectionStrings["WebAppDBConnection"].ConnectionString;
+        
+        using (SqlConnection conn = new SqlConnection(connectionString))
+        {
+            string query = "SELECT StatValue FROM SiteStats WHERE StatName = 'VisitorCount'";
+            SqlCommand cmd = new SqlCommand(query, conn);
+            
+            try
+            {
+                conn.Open();
+                object result = cmd.ExecuteScalar();
+                
+                if (result != null && result != DBNull.Value)
+                {
+                    count = Convert.ToInt32(result);
+                }
+            }
+            catch (Exception)
+            {
+                // טיפול בשגיאות לפי הצורך
+            }
+        }
+        
+        return count;
+    }
+    
+    // הגדלת מונה המבקרים ב-1
+    public static void IncrementVisitorCount()
+    {
+        string connectionString = ConfigurationManager.ConnectionStrings["WebAppDBConnection"].ConnectionString;
+        
+        using (SqlConnection conn = new SqlConnection(connectionString))
+        {
+            string query = "UPDATE SiteStats SET StatValue = StatValue + 1 WHERE StatName = 'VisitorCount'";
+            SqlCommand cmd = new SqlCommand(query, conn);
+            
+            try
+            {
+                conn.Open();
+                cmd.ExecuteNonQuery();
+            }
+            catch (Exception)
+            {
+                // טיפול בשגיאות לפי הצורך
+            }
+        }
+    }
+    
+    // איפוס מונה המבקרים
+    public static void ResetVisitorCount()
+    {
+        string connectionString = ConfigurationManager.ConnectionStrings["WebAppDBConnection"].ConnectionString;
+        
+        using (SqlConnection conn = new SqlConnection(connectionString))
+        {
+            string query = "UPDATE SiteStats SET StatValue = 0, LastReset = GETDATE() WHERE StatName = 'VisitorCount'";
+            SqlCommand cmd = new SqlCommand(query, conn);
+            
+            try
+            {
+                conn.Open();
+                cmd.ExecuteNonQuery();
+            }
+            catch (Exception)
+            {
+                // טיפול בשגיאות לפי הצורך
+            }
+        }
+    }
+}</pre>
+            </div>
+            
+            <div class="step">
+                <h4>צעד 2: שימוש במונה בדף הראשי (Master Page)</h4>
+                <p>עכשיו נוסיף את מונה המבקרים ל-Master Page כדי שיוצג בכל הדפים:</p>
+                <pre>
+&lt;!-- בתוך Site.master, בתוך תגית הfooter --&gt;
+&lt;footer&gt;
+    &lt;div class="container"&gt;
+        &lt;div class="row"&gt;
+            &lt;div class="col-md-6"&gt;
+                &lt;p&gt;&amp;copy; &lt;%: DateTime.Now.Year %&gt; - האתר שלי&lt;/p&gt;
+            &lt;/div&gt;
+            &lt;div class="col-md-6 text-left"&gt;
+                &lt;p&gt;מספר מבקרים: &lt;asp:Label ID="lblVisitorCount" runat="server"&gt;&lt;/asp:Label&gt;&lt;/p&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+&lt;/footer&gt;</pre>
+
+                <p>ובקובץ Site.master.cs:</p>
+                <pre>
+protected void Page_Load(object sender, EventArgs e)
+{
+    // טעינת מונה המבקרים
+    lblVisitorCount.Text = SiteStatistics.GetVisitorCount().ToString();
+    
+    // בדיקה אם זו גישה חדשה ולא postback
+    if (!IsPostBack)
+    {
+        // הגדלת מונה המבקרים רק בגישה ראשונית לדף
+        SiteStatistics.IncrementVisitorCount();
+        
+        // טעינה מחדש של המונה לאחר העדכון
+        lblVisitorCount.Text = SiteStatistics.GetVisitorCount().ToString();
+    }
+}</pre>
+            </div>
+            
+            <div class="note">
+                <strong>הערה:</strong> כדי למנוע ספירה כפולה של אותו משתמש, ניתן להשתמש ב-Session כדי לוודא שהמונה גדל רק פעם אחת לכל משתמש בכל ביקור.
+            </div>
+        </section>
+
+        <section id="survey">
+            <h2>2. סקר</h2>
+            <p>
+                הסקר יאפשר למבקרים באתר להצביע על נושא מסוים. נציג את השאלה ואת האפשרויות לבחירה, ונשמור את ההצבעה בבסיס הנתונים.
+            </p>
+            
+            <div class="step">
+                <h4>צעד 1: יצירת בקר משתמש (User Control) עבור הסקר</h4>
+                <p>נתחיל ביצירת בקר משתמש שיכיל את הסקר:</p>
+                <ol>
+                    <li>בחלונית Solution Explorer, לחצו על התיקייה של הפרויקט עם המקש הימני</li>
+                    <li>בחרו Add > New Folder ותנו לתיקייה את השם "UserControls"</li>
+                    <li>לחצו על התיקייה החדשה עם המקש הימני ובחרו Add > New Item</li>
+                    <li>בחרו Web User Control ותנו לו את השם "Survey.ascx"</li>
+                </ol>
+
+                <p>תוכן הקובץ Survey.ascx:</p>
+                <pre>
+&lt;%@ Control Language="C#" AutoEventWireup="true" CodeBehind="Survey.ascx.cs" Inherits="MyWebApp.UserControls.Survey" %&gt;
+
+&lt;div class="panel panel-primary"&gt;
+    &lt;div class="panel-heading"&gt;
+        &lt;h3 class="panel-title"&gt;סקר&lt;/h3&gt;
+    &lt;/div&gt;
+    &lt;div class="panel-body"&gt;
+        &lt;asp:Panel ID="surveyPanel" runat="server"&gt;
+            &lt;asp:Label ID="lblQuestion" runat="server" CssClass="survey-question"&gt;&lt;/asp:Label&gt;
+            
+            &lt;div class="survey-options"&gt;
+                &lt;asp:RadioButtonList ID="rblOptions" runat="server" CssClass="survey-options-list"&gt;
+                &lt;/asp:RadioButtonList&gt;
+            &lt;/div&gt;
+            
+            &lt;asp:Button ID="btnVote" runat="server" Text="הצבע" CssClass="btn btn-primary btn-sm" 
+                OnClick="btnVote_Click" /&gt;
+            
+            &lt;asp:Label ID="lblMessage" runat="server" CssClass="survey-message" Visible="false"&gt;&lt;/asp:Label&gt;
+        &lt;/asp:Panel&gt;
+        
+        &lt;asp:Panel ID="resultsPanel" runat="server" Visible="false"&gt;
+            &lt;h4&gt;&lt;asp:Label ID="lblResultQuestion" runat="server"&gt;&lt;/asp:Label&gt;&lt;/h4&gt;
+            
+            &lt;asp:Repeater ID="rptResults" runat="server"&gt;
+                &lt;ItemTemplate&gt;
+                    &lt;div class="survey-result-item"&gt;
+                        &lt;div class="option-text"&gt;
+                            &lt;%# Eval("OptionText") %&gt; (&lt;%# Eval("VoteCount") %&gt; הצבעות)
+                        &lt;/div&gt;
+                        &lt;div class="progress"&gt;
+                            &lt;div class="progress-bar" role="progressbar" aria-valuenow='&lt;%# Eval("Percentage") %&gt;'
+                                aria-valuemin="0" aria-valuemax="100" style="width: &lt;%# Eval("Percentage") %&gt;%;"&gt;
+                                &lt;%# Eval("Percentage") %&gt;%
+                            &lt;/div&gt;
+                        &lt;/div&gt;
+                    &lt;/div&gt;
+                &lt;/ItemTemplate&gt;
+            &lt;/asp:Repeater&gt;
+            
+            &lt;asp:Label ID="lblTotalVotes" runat="server" CssClass="total-votes"&gt;&lt;/asp:Label&gt;
+        &lt;/asp:Panel&gt;
+    &lt;/div&gt;
+&lt;/div&gt;</pre>
+
+                <p>תוכן הקובץ Survey.ascx.cs:</p>
+                <pre>
+using System;
+using System.Data;
+using System.Data.SqlClient;
+using System.Configuration;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using System.Collections.Generic;
+
+namespace MyWebApp.UserControls
+{
+    public partial class Survey : UserControl
+    {
+        protected void Page_Load(object sender, EventArgs e)
+        {
+            if (!IsPostBack)
+            {
+                // בדיקה אם המשתמש כבר הצביע בסקר זה
+                if (HasUserVoted())
+                {
+                    // הצגת תוצאות הסקר
+                    ShowResults();
+                }
+                else
+                {
+                    // טעינת הסקר הפעיל
+                    LoadActiveSurvey();
+                }
+            }
+        }
+
+        private bool HasUserVoted()
+        {
+            // בדיקה האם המשתמש כבר הצביע באמצעות עוגייה
+            HttpCookie cookie = Request.Cookies["Survey_Voted"];
+            return cookie != null;
+        }
+
+        private void LoadActiveSurvey()
+        {
+            string connectionString = ConfigurationManager.ConnectionStrings["WebAppDBConnection"].ConnectionString;
+            
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                // שליפת הסקר הפעיל האחרון
+                string query = @"SELECT TOP 1 s.SurveyID, s.Question, o.OptionID, o.OptionText 
+                                FROM Surveys s 
+                                JOIN SurveyOptions o ON s.SurveyID = o.SurveyID 
+                                WHERE s.IsActive = 1 
+                                ORDER BY s.CreateDate DESC, o.OptionID";
+                
+                SqlCommand cmd = new SqlCommand(query, conn);
+                SqlDataAdapter adapter = new SqlDataAdapter(cmd);
+                DataTable dt = new DataTable();
+                
+                try
+                {
+                    conn.Open();
+                    adapter.Fill(dt);
+                    
+                    if (dt.Rows.Count > 0)
+                    {
+                        // שמירת מזהה הסקר ב-ViewState לשימוש מאוחר יותר
+                        ViewState["SurveyID"] = dt.Rows[0]["SurveyID"];
+                        
+                        // הצגת השאלה
+                        lblQuestion.Text = dt.Rows[0]["Question"].ToString();
+                        
+                        // מילוי אפשרויות הבחירה
+                        rblOptions.Items.Clear();
+                        foreach (DataRow row in dt.Rows)
+                        {
+                            ListItem item = new ListItem(
+                                row["OptionText"].ToString(),
+                                row["OptionID"].ToString()
+                            );
+                            rblOptions.Items.Add(item);
+                        }
+                    }
+                    else
+                    {
+                        // אין סקר פעיל
+                        surveyPanel.Visible = false;
+                        lblMessage.Text = "אין סקר פעיל כרגע.";
+                        lblMessage.Visible = true;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    // טיפול בשגיאות
+                    surveyPanel.Visible = false;
+                    lblMessage.Text = "שגיאה בטעינת הסקר: " + ex.Message;
+                    lblMessage.Visible = true;
+                }
+            }
+        }
+
+        protected void btnVote_Click(object sender, EventArgs e)
+        {
+            // בדיקה שנבחרה אפשרות
+            if (rblOptions.SelectedItem == null)
+            {
+                lblMessage.Text = "יש לבחור אפשרות כדי להצביע.";
+                lblMessage.Visible = true;
+                return;
+            }
+            
+            int optionId = Convert.ToInt32(rblOptions.SelectedValue);
+            
+            // שמירת ההצבעה בבסיס הנתונים
+            if (SaveVote(optionId))
+            {
+                // הוספת עוגייה כדי לסמן שהמשתמש הצביע
+                HttpCookie cookie = new HttpCookie("Survey_Voted", "true");
+                cookie.Expires = DateTime.Now.AddDays(30); // תוקף העוגייה - 30 יום
+                Response.Cookies.Add(cookie);
+                
+                // הצגת תוצאות הסקר
+                ShowResults();
+            }
+            else
+            {
+                lblMessage.Text = "אירעה שגיאה בשמירת ההצבעה. נסה שנית מאוחר יותר.";
+                lblMessage.Visible = true;
+            }
+        }
+
+        private bool SaveVote(int optionId)
+        {
+            string connectionString = ConfigurationManager.ConnectionStrings["WebAppDBConnection"].ConnectionString;
+            
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                string query = "UPDATE SurveyOptions SET VoteCount = VoteCount + 1 WHERE OptionID = @OptionID";
+                SqlCommand cmd = new SqlCommand(query, conn);
+                cmd.Parameters.AddWithValue("@OptionID", optionId);
+                
+                try
+                {
+                    conn.Open();
+                    int result = cmd.ExecuteNonQuery();
+                    return result > 0;
+                }
+                catch
+                {
+                    return false;
+                }
+            }
+        }
+
+        private void ShowResults()
+        {
+            surveyPanel.Visible = false;
+            resultsPanel.Visible = true;
+            
+            string connectionString = ConfigurationManager.ConnectionStrings["WebAppDBConnection"].ConnectionString;
+            
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                int surveyId = Convert.ToInt32(ViewState["SurveyID"]);
+                
+                string query = @"SELECT s.Question, o.OptionID, o.OptionText, o.VoteCount, 
+                                 (SELECT SUM(VoteCount) FROM SurveyOptions WHERE SurveyID = @SurveyID) AS TotalVotes
+                                 FROM Surveys s 
+                                 JOIN SurveyOptions o ON s.SurveyID = o.SurveyID 
+                                 WHERE s.SurveyID = @SurveyID
+                                 ORDER BY o.VoteCount DESC";
+                
+                SqlCommand cmd = new SqlCommand(query, conn);
+                cmd.Parameters.AddWithValue("@SurveyID", surveyId);
+                
+                SqlDataAdapter adapter = new SqlDataAdapter(cmd);
+                DataTable dt = new DataTable();
+                
+                try
+                {
+                    conn.Open();
+                    adapter.Fill(dt);
+                    
+                    if (dt.Rows.Count > 0)
+                    {
+                        // הצגת שאלת הסקר
+                        lblResultQuestion.Text = dt.Rows[0]["Question"].ToString();
+                        
+                        int totalVotes = Convert.ToInt32(dt.Rows[0]["TotalVotes"]);
+                        lblTotalVotes.Text = $"סה\"כ הצבעות: {totalVotes}";
+                        
+                        // הכנת נתונים עם אחוזים לתצוגה
+                        List<SurveyResult> results = new List<SurveyResult>();
+                        
+                        foreach (DataRow row in dt.Rows)
+                        {
+                            int votes = Convert.ToInt32(row["VoteCount"]);
+                            double percentage = totalVotes > 0 ? Math.Round(100.0 * votes / totalVotes, 1) : 0;
+                            
+                            results.Add(new SurveyResult
+                            {
+                                OptionText = row["OptionText"].ToString(),
+                                VoteCount = votes,
+                                Percentage = percentage
+                            });
+                        }
+                        
+                        rptResults.DataSource = results;
+                        rptResults.DataBind();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    // טיפול בשגיאות
+                    resultsPanel.Visible = false;
+                    surveyPanel.Visible = false;
+                    lblMessage.Text = "שגיאה בטעינת תוצאות הסקר: " + ex.Message;
+                    lblMessage.Visible = true;
+                }
+            }
+        }
+        
+        // קלאס לאחסון תוצאות הסקר
+        public class SurveyResult
+        {
+            public string OptionText { get; set; }
+            public int VoteCount { get; set; }
+            public double Percentage { get; set; }
+        }
+    }
+}</pre>
+            </div>
+            
+            <div class="step">
+                <h4>צעד 2: הוספת הסקר לדף הבית</h4>
+                <p>כעת נוסיף את בקר המשתמש לדף הבית (Default.aspx):</p>
+                <pre>
+&lt;!-- בתוך Default.aspx, במקום מתאים בדף --&gt;
+&lt;div class="col-md-4"&gt;
+    &lt;%@ Register Src="~/UserControls/Survey.ascx" TagPrefix="uc" TagName="Survey" %&gt;
+    &lt;uc:Survey runat="server" ID="surveyCotrol" /&gt;
+&lt;/div&gt;</pre>
+            </div>
+        </section>
+
+        <section id="admin-page">
+            <h2>3. דף המנהל (תפריט המנהל)</h2>
+            <p>
+                דף המנהל יאפשר למשתמשים בעלי הרשאות מנהל לבצע פעולות ניהול שונות, כמו איפוס מוני המבקרים, ניהול משתמשים וכו'.
+            </p>
+            
+            <div class="step">
+                <h4>צעד 1: יצירת תיקייה מאובטחת למנהלים</h4>
+                <p>ראשית, ניצור תיקייה ייעודית לדפי המנהל ונגביל את הגישה אליה למנהלים בלבד:</p>
+                <ol>
+                    <li>צור תיקייה חדשה בשם "Admin" בתיקיית הפרויקט</li>
+                    <li>הוסף קובץ Web.config לתיקייה זו עם ההגבלות הבאות:</li>
+                </ol>
+                <pre>
+&lt;?xml version="1.0"?&gt;
+&lt;configuration&gt;
+  &lt;system.web&gt;
+    &lt;authorization&gt;
+      &lt;deny users="?"/&gt; &lt;!-- מונע גישה ממשתמשים לא מאומתים --&gt;
+    &lt;/authorization&gt;
+  &lt;/system.web&gt;
+&lt;/configuration&gt;</pre>
+            </div>
+            
+            <div class="step">
+                <h4>צעד 2: יצירת דף ראשי למנהל</h4>
+                <p>עכשיו ניצור דף ראשי למנהל עם תפריט לכל הפעולות האדמיניסטרטיביות:</p>
+                <pre>
+&lt;%@ Page Title="דף המנהל" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="Default.aspx.cs" Inherits="MyWebApp.Admin.Default" %&gt;
+
+&lt;asp:Content ID="BodyContent" ContentPlaceHolderID="MainContent" runat="server"&gt;
+    &lt;div class="row"&gt;
+        &lt;div class="col-md-3"&gt;
+            &lt;div class="panel panel-primary"&gt;
+                &lt;div class="panel-heading"&gt;
+                    &lt;h3 class="panel-title"&gt;תפריט מנהל&lt;/h3&gt;
+                &lt;/div&gt;
+                &lt;div class="panel-body"&gt;
+                    &lt;ul class="nav nav-pills nav-stacked"&gt;
+                        &lt;li&gt;&lt;a href="Default.aspx"&gt;לוח בקרה&lt;/a&gt;&lt;/li&gt;
+                        &lt;li&gt;&lt;a href="ResetCounters.aspx"&gt;איפוס מונים&lt;/a&gt;&lt;/li&gt;
+                        &lt;li&gt;&lt;a href="ManageUsers.aspx"&gt;ניהול משתמשים&lt;/a&gt;&lt;/li&gt;
+                        &lt;li&gt;&lt;a href="SearchUsers.aspx"&gt;חיפוש משתמשים&lt;/a&gt;&lt;/li&gt;
+                        &lt;li&gt;&lt;a href="ManageSurveys.aspx"&gt;ניהול סקרים&lt;/a&gt;&lt;/li&gt;
+                    &lt;/ul&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+        
+        &lt;div class="col-md-9"&gt;
+            &lt;div class="panel panel-default"&gt;
+                &lt;div class="panel-heading"&gt;
+                    &lt;h3 class="panel-title"&gt;לוח בקרה&lt;/h3&gt;
+                &lt;/div&gt;
+                &lt;div class="panel-body"&gt;
+                    &lt;h4&gt;ברוך הבא, &lt;asp:Label ID="lblAdminName" runat="server"&gt;&lt;/asp:Label&gt;!&lt;/h4&gt;
+                    &lt;p&gt;זהו דף הניהול של האתר. כאן תוכל לצפות בסטטיסטיקות ולבצע פעולות ניהול.&lt;/p&gt;
+                    
+                    &lt;div class="row"&gt;
+                        &lt;div class="col-md-4"&gt;
+                            &lt;div class="panel panel-info"&gt;
+                                &lt;div class="panel-heading"&gt;
+                                    &lt;h3 class="panel-title"&gt;מבקרים באתר&lt;/h3&gt;
+                                &lt;/div&gt;
+                                &lt;div class="panel-body text-center"&gt;
+                                    &lt;h2&gt;&lt;asp:Label ID="lblVisitorCount" runat="server"&gt;&lt;/asp:Label&gt;&lt;/h2&gt;
+                                    &lt;p&gt;מספר כולל של ביקורים באתר&lt;/p&gt;
+                                &lt;/div&gt;
+                            &lt;/div&gt;
+                        &lt;/div&gt;
+                        
+                        &lt;div class="col-md-4"&gt;
+                            &lt;div class="panel panel-info"&gt;
+                                &lt;div class="panel-heading"&gt;
+                                    &lt;h3 class="panel-title"&gt;משתמשים רשומים&lt;/h3&gt;
+                                &lt;/div&gt;
+                                &lt;div class="panel-body text-center"&gt;
+                                    &lt;h2&gt;&lt;asp:Label ID="lblUserCount" runat="server"&gt;&lt;/asp:Label&gt;&lt;/h2&gt;
+                                    &lt;p&gt;מספר המשתמשים הרשומים&lt;/p&gt;
+                                &lt;/div&gt;
+                            &lt;/div&gt;
+                        &lt;/div&gt;
+                        
+                        &lt;div class="col-md-4"&gt;
+                            &lt;div class="panel panel-info"&gt;
+                                &lt;div class="panel-heading"&gt;
+                                    &lt;h3 class="panel-title"&gt;הצבעות בסקר&lt;/h3&gt;
+                                &lt;/div&gt;
+                                &lt;div class="panel-body text-center"&gt;
+                                    &lt;h2&gt;&lt;asp:Label ID="lblSurveyVotes" runat="server"&gt;&lt;/asp:Label&gt;&lt;/h2&gt;
+                                    &lt;p&gt;סה"כ הצבעות בסקר הפעיל&lt;/p&gt;
+                                &lt;/div&gt;
+                            &lt;/div&gt;
+                        &lt;/div&gt;
+                    &lt;/div&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+&lt;/asp:Content&gt;</pre>
+
+                <p>קוד הדף בקובץ Default.aspx.cs:</p>
+                <pre>
+using System;
+using System.Data;
+using System.Data.SqlClient;
+using System.Configuration;
+using System.Web.UI;
+
+namespace MyWebApp.Admin
+{
+    public partial class Default : Page
+    {
+        protected void Page_Load(object sender, EventArgs e)
+        {
+            // בדיקה שהמשתמש הוא מנהל (אופציונלי - כבר מוגבל ע"י Web.config)
+            if (Session["IsAdmin"] == null || !(bool)Session["IsAdmin"])
+            {
+                Response.Redirect("~/Account/Login.aspx?ReturnUrl=" + Request.RawUrl);
+                return;
+            }
+            
+            if (!IsPostBack)
+            {
+                // הצגת שם המנהל
+                lblAdminName.Text = Session["Username"].ToString();
+                
+                // טעינת נתונים לדף הבקרה
+                LoadStatistics();
+            }
+        }
+        
+        private void LoadStatistics()
+        {
+            // טעינת מונה המבקרים
+            lblVisitorCount.Text = SiteStatistics.GetVisitorCount().ToString();
+            
+            string connectionString = ConfigurationManager.ConnectionStrings["WebAppDBConnection"].ConnectionString;
+            
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                try
+                {
+                    conn.Open();
+                    
+                    // ספירת המשתמשים הרשומים
+                    string userQuery = "SELECT COUNT(*) FROM Users";
+                    SqlCommand userCmd = new SqlCommand(userQuery, conn);
+                    int userCount = Convert.ToInt32(userCmd.ExecuteScalar());
+                    lblUserCount.Text = userCount.ToString();
+                    
+                    // סה"כ הצבעות בסקר הפעיל
+                    string surveyQuery = @"SELECT SUM(o.VoteCount) 
+                                         FROM SurveyOptions o 
+                                         JOIN Surveys s ON o.SurveyID = s.SurveyID 
+                                         WHERE s.IsActive = 1";
+                    SqlCommand surveyCmd = new SqlCommand(surveyQuery, conn);
+                    object surveyResult = surveyCmd.ExecuteScalar();
+                    
+                    int surveyVotes = 0;
+                    if (surveyResult != null && surveyResult != DBNull.Value)
+                    {
+                        surveyVotes = Convert.ToInt32(surveyResult);
+                    }
+                    
+                    lblSurveyVotes.Text = surveyVotes.ToString();
+                }
+                catch (Exception)
+                {
+                    // טיפול בשגיאות אם יש צורך
+                }
+            }
+        }
+    }
+}
