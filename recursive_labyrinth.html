@@ -1,0 +1,1597 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>The Recursive Labyrinth – Mystical Edition</title>
+<style>
+/* ——— Base layout ——— */
+body {
+  margin: 0;
+  padding: 0;
+  background: radial-gradient(circle at center, #0b0c10 0%, #030406 100%);
+  color: #e6e6e6;
+  font-family: "Segoe UI", "Trebuchet MS", sans-serif;
+  text-align: center;
+  overflow-x: hidden;
+  transition: opacity 0.6s ease;
+}
+
+/* ——— Headings ——— */
+h1, h2 {
+  font-family: "Cinzel", serif;
+  letter-spacing: 1px;
+  color: #dcd0ff;
+  text-shadow: 0 0 10px rgba(210,190,255,0.6),
+               0 0 20px rgba(140,110,255,0.3);
+  margin-top: 1.5em;
+}
+h2 {
+  font-size: 1.8em;
+}
+
+/* ——— Paragraphs & code ——— */
+p { font-size: 1rem; line-height: 1.5; color: #ddd; }
+code, pre {
+  background: rgba(255,255,255,0.06);
+  color: #b3e5fc;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-family: "Consolas", "Courier New", monospace;
+}
+
+/* ——— Input & buttons ——— */
+input {
+  background: #111;
+  color: #fff;
+  border: 1px solid #666;
+  border-radius: 6px;
+  padding: 6px 10px;
+  width: 180px;
+  margin-top: 8px;
+  text-align: center;
+}
+button {
+  background: linear-gradient(90deg,#4b2e83,#7047a3);
+  border: none;
+  border-radius: 6px;
+  color: #fff;
+  font-weight: 600;
+  margin: 5px;
+  padding: 8px 16px;
+  cursor: pointer;
+  box-shadow: 0 0 10px rgba(150,110,255,0.3);
+  transition: transform 0.15s, box-shadow 0.3s;
+}
+button:hover {
+  transform: scale(1.06);
+  box-shadow: 0 0 15px rgba(200,160,255,0.6);
+}
+
+/* ——— Feedback divs ——— */
+#f4,#f5,#f6,#f7,#f8,#f11 {
+  font-weight: 500;
+  margin-top: 10px;
+  color: #a0e0ff;
+  text-shadow: 0 0 8px rgba(160,224,255,0.5);
+}
+
+/* ——— Canvas containers ——— */
+canvas {
+  width: 90vw;
+  height: 55vh;
+  max-width: 900px;
+  max-height: 500px;
+  display: block;
+  margin: 25px auto;
+  border-radius: 12px;
+}
+
+/* ——— Certificate screen ——— */
+#cert {
+  display: block;
+  margin: 20px auto;
+  border: 3px solid #a78bfa;
+  border-radius: 12px;
+  box-shadow: 0 0 25px rgba(167,139,250,0.5);
+}
+
+/* ——— Smooth fade when switching rooms ——— */
+body.fade {
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+/* === Fix text alignment and layout inside rooms === */
+.room, 
+.room pre, 
+.room p, 
+.room code, 
+.room input, 
+.room button {
+  text-align: left !important;
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 800px;
+  display: block;
+}
+
+/* Keep headings centered for style */
+.room h2, 
+#start-screen h1, 
+#finale h1 {
+  text-align: center !important;
+}
+/* === Refined parchment column layout === */
+.room {
+  max-width: 850px;
+  margin: 0 auto;
+  padding: 20px 40px;
+  background: rgba(255,255,255,0.03);
+  border-left: 2px solid rgba(255,255,255,0.1);
+  border-right: 2px solid rgba(255,255,255,0.1);
+  border-radius: 12px;
+  box-shadow: inset 0 0 15px rgba(255,255,255,0.05);
+}
+
+/* Slightly narrower text lines for readability */
+.room p, .room pre, .room code {
+  max-width: 700px;
+  line-height: 1.55;
+}
+
+/* Headings stay wide and centered */
+.room h2 {
+  margin-bottom: 10px;
+  text-align: center;
+  color: #dcd0ff;
+  text-shadow: 0 0 12px rgba(170,130,255,0.7);
+}
+
+/* Inputs and buttons left-aligned but neatly grouped */
+.room input, .room button {
+  margin-left: 0;
+}
+/* === Extend parchment-column style to Start & Finale === */
+
+/* Shared parchment container look */
+#start-screen, #finale {
+  background: radial-gradient(circle at center, #0b0c10 0%, #030406 100%);
+  border-left: 2px solid rgba(255,255,255,0.08);
+  border-right: 2px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+  box-shadow: inset 0 0 20px rgba(255,255,255,0.04),
+              0 0 40px rgba(140,110,255,0.15);
+  max-width: 850px;
+  margin: 6vh auto;
+  padding: 40px 50px 80px;
+}
+
+/* Start screen text refinement */
+#start-screen p {
+  font-size: 1.05em;
+  color: #ddd;
+  line-height: 1.6;
+  max-width: 650px;
+  margin: 10px auto;
+  text-align: left;
+}
+
+/* Finale certificate wrapper */
+#finale h1 {
+  font-size: 2.2em;
+  color: #d9b26c;
+  text-shadow: 0 0 15px rgba(255,230,160,0.5);
+  margin-bottom: 1em;
+  text-align: center;
+}
+#finale canvas {
+  display: block;
+  margin: 0 auto 30px;
+  border: 3px solid #d2b48c;
+  border-radius: 12px;
+  box-shadow: 0 0 40px rgba(210,180,140,0.4);
+}
+#downloadCert {
+  display: inline-block;
+  background: linear-gradient(90deg,#d2b48c,#c19a6b);
+  color: #3b1f0e;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 26px;
+  font-weight: bold;
+  font-size: 1.1em;
+  cursor: pointer;
+  box-shadow: 0 0 15px rgba(100,60,20,0.4);
+  transition: transform 0.2s, box-shadow 0.3s;
+}
+#downloadCert:hover {
+  transform: scale(1.08);
+  box-shadow: 0 0 20px rgba(210,180,140,0.7);
+}
+
+/* Keep headings centered but everything else in a tidy column */
+#start-screen h1, #finale h1 {
+  text-align: center;
+  letter-spacing: 1px;
+  font-family: "Cinzel", serif;
+}
+/* === Magical Page-Turn Transition === */
+
+/* Container for page-turn overlay */
+#page-turn {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: radial-gradient(circle at center,
+              rgba(240,220,180,0.3) 0%, rgba(80,60,30,0.9) 100%);
+  pointer-events: none;
+  opacity: 0;
+  z-index: 9999;
+  transform-origin: left center;
+}
+
+/* Keyframes for the turn effect */
+@keyframes pageTurn {
+  0%   { opacity: 0; transform: scaleX(0); }
+  25%  { opacity: 1; transform: scaleX(1.02) skewY(2deg); }
+  50%  { opacity: 0.9; transform: scaleX(1) skewY(-2deg); }
+  100% { opacity: 0; transform: scaleX(0); }
+}
+
+/* Smooth fade-in/out enhancement */
+@keyframes parchmentFade {
+  from { opacity: 0; transform: translateX(20px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+/* Apply parchment fade to main room container */
+.room {
+
+</style>
+
+</head>
+<body>
+<div id="stars"></div>
+<h1>🌀 The Recursive Labyrinth 🌀</h1>
+<button id="enter" onclick="startGame()">Enter the Labyrinth →</button>
+<script>
+/* === Magical page-turn overlay + safe room transition === */
+document.addEventListener("DOMContentLoaded", () => {
+  // Create overlay safely after DOM is ready
+  const pageOverlay = document.createElement("div");
+  pageOverlay.id = "page-turn";
+  pageOverlay.style.pointerEvents = "none";
+  document.body.appendChild(pageOverlay);
+
+  // Attach Enter button listener safely
+  const btn = document.getElementById("start-btn");
+  if (btn) {
+    btn.addEventListener("click", () => {
+      const start = document.getElementById("start-screen");
+      start.style.transition = "opacity 1s ease";
+      start.style.opacity = 0;
+      setTimeout(() => {
+        start.remove();
+        playAmbience("mystic");
+        show(1);
+      }, 1000);
+    });
+  }
+});
+
+// Smooth page-turn between rooms
+function goToRoom(nextId, delay = 2500) {
+  const overlay = document.getElementById("page-turn");
+  setTimeout(() => {
+    if (!overlay) return show(nextId);
+    overlay.style.pointerEvents = "auto";
+    overlay.style.animation = "pageTurn 1.2s ease forwards";
+    setTimeout(() => {
+      show(nextId);
+      overlay.style.animation = "";
+      overlay.style.pointerEvents = "none";
+    }, 600);
+  }, delay);
+}
+
+// Universal room switch helper
+
+/* create starfield */
+const stars=document.getElementById('stars');
+for(let i=0;i<200;i++){
+ const s=document.createElement('div');
+ s.className='star';
+ s.style.top=Math.random()*100+'%';
+ s.style.left=Math.random()*100+'%';
+ s.style.animationDelay=(Math.random()*5)+'s';
+ stars.appendChild(s);
+}
+/* ───── Mystical Labyrinth Game Core – Part 1 ───── */
+const game = {
+  room: 0,
+  score: 0,
+  solved: {},
+  hints: {},
+  rooms: 12
+};
+
+/* smooth fade-transition */
+/* unified room display */
+function show(id){
+  let html="";
+  switch(id){
+    case 1: html=room1(); break;
+    case 2: html=room2(); break;
+    case 3: html=room3(); break;
+    case 4:
+	  html = room4();
+	  break;
+    case 5: html=room5(); break;
+    case 6: html=room6(); break;
+    case 7: html=room7(); break;
+    case 8: html=room8(); break;
+	case 9: html=room9(); break;
+	case 10: html=room10(); break;
+	case 11: html=room11(); break;
+	case 12: html=room12(); break;
+
+    default: html="<h2>Room not found.</h2>";
+  }
+  document.body.innerHTML = `<div class="room" style="animation:fade 1s;">${html}</div>`;
+  		
+  if(id===1) animateGate();
+if(id===2) animateCave();
+if(id===3) animateMirror();
+if(id===4) drawFractal();
+if(id===5) animatePortalReverse();
+if(id===6) animateArrayEcho();
+if(id===7) animateFibonacci();
+if(id===8) animateWizardSpell();
+if(id===9) animateMirrorMaze();
+if(id===10) animateForest();
+if(id===11) animateHanoi();
+if(id===12) animateKeeper();
+
+
+}
+
+function award(r,base=20){
+  if(game.solved[r]) return 0;
+  const penalty = (game.hints[r]||0)*3;
+  const pts = Math.max(base-penalty,2);
+  game.solved[r]=true;
+  game.score+=pts;
+  return pts;
+}
+
+/* hint system (conceptual) */
+function hint(r){
+  game.hints[r]=(game.hints[r]||0)+1;
+  alert({
+    1:[
+      "Ask yourself: when should factorial *stop* multiplying?",
+      "Think about the smallest positive n that doesn't require recursion."
+    ],
+    2:[
+      "Every recursion must move toward a base case.",
+      "One line must *reduce* n each time, another must *stop* when it reaches its goal."
+    ],
+    3:[
+      "Look carefully: printing happens *before* the recursive call.",
+      "What order does that produce?"
+    ]
+  }[r][Math.min(game.hints[r]-1,1)]);
+}
+
+/* ───── Room 1: Base Case Gate ───── */
+function room1(){
+return `
+  <h2 style="color:#a78bfa;">Room I – The Base Case Gate</h2>
+  <p>The gate whispers: <em>"Define your end, or wander forever."</em></p>
+  <pre><code>int fact(int n){
+    // TODO: base case
+    return n * fact(n - 1);
+}</code></pre>
+  <input id="a1" placeholder="type your base case line">
+  <button onclick="check1()">Submit</button>
+  <button onclick="hint(1)">Hint</button>
+  <div id="f1"></div>`;
+}
+function check1(){
+  const t=document.getElementById('a1').value;
+  if(/n\s*==\s*1/.test(t)||/<=\s*1/.test(t)){
+    const g=award(1);
+    document.getElementById('f1').innerHTML=`<p style="color:#7ef">✨ Gate opens (+${g} pts)</p>`;
+    goToRoom(2,1500);
+  }else{
+    document.getElementById('f1').innerHTML=`<p style="color:#f88">Not yet. Your spell lacks an end.</p>`;
+  }
+}
+
+/* ───── Room 2: Endless Cave ───── */
+function room2(){
+return `
+  <h2 style="color:#8ee;">Room II – The Endless Cave</h2>
+  <p>Echoes repeat your steps. Your code … repeats your calls.</p>
+  <pre><code>void loop(int n){
+    System.out.println(n);
+    loop(n); // infinite
+}</code></pre>
+  <p>Fix the recursion so it eventually halts.</p>
+  <input id="a2" placeholder="write one correcting line">
+  <button onclick="check2()">Submit</button>
+  <button onclick="hint(2)">Hint</button>
+  <div id="f2"></div>`;
+}
+function check2(){
+  const t=document.getElementById('a2').value;
+  if(/n\s*-\s*1/.test(t)||/==\s*0/.test(t)){
+    const g=award(2);
+    document.getElementById('f2').innerHTML=`<p style="color:#7ef">💫 The echo fades (+${g} pts)</p>`;
+    goToRoom(3,1500);
+  }else{
+    document.getElementById('f2').innerHTML=`<p style="color:#f88">The loop still echoes forever … adjust your spell.</p>`;
+  }
+}
+
+/* ───── Room 3: Mirror Chamber ───── */
+function room3(){
+return `
+  <h2 style="color:#9cf;">Room III – The Mirror Chamber</h2>
+  <p>Mirrors reflect your calls in reverse order.</p>
+  <pre><code>void f(int n){
+    if (n == 0) return;
+    System.out.print(n + " ");
+    f(n - 1);
+}</code></pre>
+  <p>What does <code>f(3)</code> print?</p>
+  <input id="a3" placeholder="e.g. 3 2 1">
+  <button onclick="check3()">Submit</button>
+  <button onclick="hint(3)">Hint</button>
+  <div id="f3"></div>`;
+}
+function check3(){
+  const t=document.getElementById('a3').value.trim();
+  if(/^3\s*2\s*1$/.test(t)){
+    const g=award(3);
+    document.getElementById('f3').innerHTML=`<p style="color:#7ef">🔮 Reflections align (+${g} pts)</p>`;
+    goToRoom(4,1500);
+
+  }else{
+    document.getElementById('f3').innerHTML=`<p style="color:#f88">The order is wrong — trace the calls again.</p>`;
+  }
+}
+
+/* ───── Animation for Room 1 – Base Case Gate ───── */
+function animateGate() {
+  const c = document.createElement("canvas");
+  c.id = "gateCanvas";
+  c.width = 500; c.height = 300;
+  c.style.cssText = "display:block;margin:20px auto;background:#090b12;" +
+                    "border:2px solid #f7d96f;border-radius:8px;" +
+                    "box-shadow:0 0 25px #f7d96f;";
+  document.querySelector(".room")?.prepend(c);
+
+  const ctx = c.getContext("2d");
+  let r = 20, dir = 1;
+  function pulse() {
+    ctx.clearRect(0, 0, c.width, c.height);
+    const grad = ctx.createRadialGradient(250,150,10,250,150,r);
+    grad.addColorStop(0,"#fff9c4");
+    grad.addColorStop(1,"#f7d96f00");
+    ctx.fillStyle = grad;
+    ctx.fillRect(0,0,c.width,c.height);
+    r += dir*3;
+    if (r > 250 || r < 20) dir *= -1;
+    requestAnimationFrame(pulse);
+  }
+  pulse();
+}
+
+
+/* ───── Animation for Room 2 – Endless Cave ───── */
+function animateCave() {
+  const tunnel = document.createElement("div");
+  tunnel.id = "caveTunnel";
+  tunnel.style.cssText =
+    "width:500px;height:300px;margin:20px auto;" +
+    "background:radial-gradient(circle at center,#7ecfff,#000 70%);" +
+    "border-radius:50%;box-shadow:0 0 30px #7ecfff;";
+  document.querySelector(".room")?.prepend(tunnel);
+
+  let scale = 1, dir = 1;
+  function zoom() {
+    tunnel.style.transform = `scale(${scale})`;
+    tunnel.style.filter = `brightness(${1.2 + 0.3*Math.sin(scale*5)})`;
+    scale += 0.01*dir;
+    if (scale > 1.2 || scale < 1) dir *= -1;
+    requestAnimationFrame(zoom);
+  }
+  zoom();
+}
+
+/* ───── Animation for Room 3 – Mirror Chamber ───── */
+function animateMirror() {
+  const box = document.createElement("div");
+  box.id = "mirrorBox";
+  box.style.cssText =
+    "position:relative;width:500px;height:200px;margin:20px auto;" +
+    "background:#1a0b17;border:1px solid #f7a8b8;" +
+    "box-shadow:0 0 20px #f7a8b8;overflow:hidden;";
+  const span = document.createElement("span");
+  span.id = "mirrorText";
+  span.textContent = "REVERSE";
+  span.style.cssText =
+    "position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);" +
+    "font-size:48px;color:#f7a8b8;font-weight:bold;letter-spacing:5px;";
+  box.appendChild(span);
+  document.querySelector(".room")?.prepend(box);
+
+  let deg = 0;
+  function spin() {
+    deg += 2;
+    span.style.transform = `translate(-50%,-50%) rotateY(${deg}deg)`;
+    span.style.opacity = 0.7 + 0.3*Math.sin(deg*Math.PI/180);
+    requestAnimationFrame(spin);
+  }
+  spin();
+}
+
+
+
+/* ───── Room 4 – The Fractal Garden (verified) ───── */
+function room4() {
+  // return HTML (no script tags inside)
+  return `
+    <h2 style="color:#cba6f7;">Room IV – The Fractal Garden</h2>
+    <p>Stairs climb upon themselves; each flower repeats its pattern.</p>
+
+    <canvas id="fractalCanvas" width="500" height="350"
+            style="display:block;margin:20px auto;background:#0b0e17;
+                   border:1px solid #4c2a85;border-radius:8px;
+                   box-shadow:0 0 15px #a78bfa;"></canvas>
+
+    <pre style="text-align:left;"><code>
+void stars(int n){
+  if (n == 0) return;
+  stars(n - 1);
+  for (int i = 0; i &lt; n; i++) System.out.print("*");
+  System.out.println();
+}
+    </code></pre>
+
+    <p>How many <code>*</code> characters are printed for <code>stars(4)</code>?</p>
+    <input id="a4" type="text" placeholder="Enter a number"
+           style="padding:8px;font-size:16px;border-radius:5px;
+                  border:1px solid #a78bfa;">
+    <button onclick="check4()" style="margin-left:10px;">Submit</button>
+    <button onclick="hint4()">Hint</button>
+    <div id="f4" style="margin-top:10px;"></div>
+  `;
+}
+
+function check4() {
+  const val = document.getElementById("a4").value.trim();
+  const fb  = document.getElementById("f4");
+  if (val === "10") {
+    const g = award(4, 20);
+    fb.innerHTML = `🌸 Pattern complete (+${g} pts)`;
+    setTimeout(() => show(5), 1500);
+  } else {
+    fb.innerHTML = "Count again – the total is 1 + 2 + 3 + 4.";
+  }
+}
+
+function hint4() {
+  alert("Each recursive step prints n stars; total = 1 + 2 + … + n.");
+}
+
+/* ───── Fractal animation helper ───── */
+/* ───── Animated Fractal Garden ───── */
+
+/* ──────────────── CINEMATIC ANIMATION UPGRADE v2 ─────────────── */
+
+// ✦ helpers -------------------------------------------------------
+function transitionEffect(nextId){
+  document.body.style.transition = "opacity 0.6s ease";
+  document.body.style.opacity = 0;
+  setTimeout(()=>{
+    show(nextId);
+    document.body.style.opacity = 1;
+  },600);
+}
+function nextRoom(id,delay=2500){ setTimeout(()=>transitionEffect(id),delay); }
+
+// === Page-turn overlay ===
+const pageOverlay = document.createElement("div");
+pageOverlay.id = "page-turn";
+document.body.appendChild(pageOverlay);
+
+function pageTurn(nextId, delay = 2500) {
+  const overlay = document.getElementById("page-turn");
+  overlay.style.animation = "pageTurn 1.2s ease forwards";
+  setTimeout(() => {
+    show(nextId);
+    overlay.style.animation = "";
+  }, 600);
+}
+
+
+function makeCanvas(border,glow){
+  const c=document.createElement("canvas");
+  c.style.cssText=`
+    display:block;margin:25px auto;
+    width:90vw;height:55vh;max-width:900px;max-height:500px;
+    background:#000;border:2px solid ${border};border-radius:12px;
+    box-shadow:0 0 25px ${glow};
+  `;
+  document.querySelector(".room")?.prepend(c);
+  const ctx=c.getContext("2d");
+  const resize=()=>{c.width=c.offsetWidth;c.height=c.offsetHeight;};
+  window.addEventListener("resize",resize); resize();
+  return {c,ctx};
+}
+function playAmbience(kind="mystic"){
+  try{
+    const src = kind==="forest"
+      ? "https://actions.google.com/sounds/v1/ambiences/forest_night.ogg"
+      : "https://actions.google.com/sounds/v1/ambiences/space_hum.ogg";
+    const a=new Audio(src); a.volume=0.25; a.play();
+  }catch(e){/* ignore if blocked */}
+}
+
+/* ───── Room 4 – Fractal Garden ───── */
+function drawFractal(full){
+  const {c,ctx}=makeCanvas("#cba6f7","#cba6f7");
+  playAmbience("forest");
+  const W=c.width,H=c.height,scale=Math.min(W/600,H/350);
+  const maxDepth=full?6:3; let t=0;
+  function branch(x,y,len,ang,depth){
+    if(depth<=0)return;
+    const x2=x+len*Math.cos(ang),y2=y-len*Math.sin(ang);
+    ctx.strokeStyle=`hsl(${270-depth*25},80%,70%)`;
+    ctx.lineWidth=Math.max(1,depth*0.8*scale);
+    ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x2,y2);ctx.stroke();
+    const sway=Math.sin(t*0.02+depth)*0.1;
+    setTimeout(()=>branch(x2,y2,len*0.75,ang-Math.PI/6+sway,depth-1),120);
+    setTimeout(()=>branch(x2,y2,len*0.75,ang+Math.PI/6+sway,depth-1),120);
+  }
+  function animate(){
+    ctx.fillStyle="rgba(10,15,18,0.2)";ctx.fillRect(0,0,W,H);
+    const pulse=0.5+0.5*Math.sin(t*0.05);
+    const g=ctx.createRadialGradient(W/2,H-20,0,W/2,H-20,80*scale);
+    g.addColorStop(0,`rgba(203,166,247,${0.5+pulse*0.3})`);
+    g.addColorStop(1,"transparent");
+    ctx.fillStyle=g;ctx.beginPath();ctx.arc(W/2,H-20,80*scale,0,2*Math.PI);ctx.fill();
+    if(t%20===0)branch(W/2,H-30,60*scale,Math.PI/2,maxDepth);
+    t++;requestAnimationFrame(animate);
+  }
+  animate();
+}
+
+/* ───── Room 5 – Energy Stream Reversal ───── */
+function animatePortalReverse(full){
+  const {c,ctx}=makeCanvas("#4dd0e1","#4dd0e1");
+  playAmbience("mystic");
+  const W=c.width,H=c.height,scale=Math.min(W/600,H/350);
+  const text="ELDDIM",chars=[...text],target=text.split("").reverse();
+  const particles=[];const total=full?chars.length:2;
+  for(let i=0;i<chars.length;i++){
+    particles.push({ch:chars[i],x:-50-i*40*scale,y:H/2+(Math.random()*40-20),
+                    vx:(2+Math.random())*scale,color:`hsl(${180+i*25},90%,65%)`});
+  }
+  let frame=0;
+  function draw(){
+    ctx.fillStyle="rgba(3,6,17,0.3)";ctx.fillRect(0,0,W,H);
+    ctx.strokeStyle="rgba(77,208,225,0.2)";
+    for(let y=0;y<H;y+=20*scale){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
+    particles.forEach(p=>{
+      p.x+=p.vx;if(p.x>W+60)p.x=-60;
+      ctx.fillStyle=p.color;ctx.font=`${32*scale}px monospace`;
+      ctx.fillText(p.ch,p.x,p.y);
+    });
+    if(full){ctx.fillStyle="#fff";ctx.font=`${40*scale}px monospace`;
+      const rev=Math.min(Math.floor(frame/20),chars.length);
+      ctx.fillText(target.slice(0,rev).join(""),W/2-100*scale,H-40*scale);}
+    frame++;requestAnimationFrame(draw);
+  }
+  draw();
+}
+
+/* ───── Room 6 – Echoing Crystals ───── */
+function animateArrayEcho(full){
+  const {c,ctx}=makeCanvas("#aaf0d1","#aaf0d1");
+  playAmbience("forest");
+  const W=c.width,H=c.height,scale=Math.min(W/600,H/350);
+  const arr=[2,4,6,8];const crystals=arr.map((v,i)=>({
+    x:100*scale+i*150*scale,y:H/2,r:0,glow:0,color:`hsl(${160+i*20},80%,70%)`,active:false
+  }));
+  let frame=0,constActive=full?crystals.length:2;
+  function draw(){
+    ctx.fillStyle="rgba(8,16,16,0.3)";ctx.fillRect(0,0,W,H);
+    crystals.forEach((cr,i)=>{
+      if(i<constActive&&frame%60===i*15)cr.active=true;
+      if(cr.active)cr.glow+=0.05;const g=Math.sin(cr.glow)*0.5+0.5;
+      if(cr.active){ctx.beginPath();
+        ctx.arc(cr.x,cr.y,40*scale+20*scale*Math.sin(frame*0.1-i),0,2*Math.PI);
+        ctx.strokeStyle=`rgba(170,240,209,${0.1+g*0.2})`;ctx.lineWidth=2;ctx.stroke();}
+      const s=20*scale+5*scale*g;
+      ctx.beginPath();ctx.moveTo(cr.x,cr.y-s);
+      for(let k=1;k<6;k++){const a=k*Math.PI*2/6;
+        ctx.lineTo(cr.x+s*Math.cos(a),cr.y+s*Math.sin(a));}
+      ctx.closePath();ctx.fillStyle=`hsla(${160+i*20},80%,60%,${0.8+0.2*g})`;
+      ctx.shadowColor=cr.color;ctx.shadowBlur=20*g;ctx.fill();ctx.shadowBlur=0;
+      ctx.fillStyle="#aaf0d1";ctx.font=`${18*scale}px monospace`;ctx.fillText(arr[i],cr.x-6*scale,cr.y+6*scale);
+    });
+    if(full){ctx.fillStyle="#aaf0d1";ctx.font=`${28*scale}px monospace`;
+      ctx.globalAlpha=0.6+0.4*Math.sin(frame*0.1);ctx.fillText("Σ = 20",W/2-30*scale,H-30*scale);ctx.globalAlpha=1;}
+    frame++;requestAnimationFrame(draw);
+  }
+  draw();
+}
+
+/* ───── Room 7 – Twin Suns (Fibonacci) ───── */
+function animateFibonacci(full){
+  const {c,ctx}=makeCanvas("#ffd580","#ffd580");
+  playAmbience("mystic");
+  const W=c.width,H=c.height,scale=Math.min(W/600,H/350);
+  let t=0,constMax=full?120*scale:60*scale;
+  const orbs=[
+    {r:40*scale,color:"hsl(40,100%,60%)",phase:0},
+    {r:40*scale,color:"hsl(55,100%,65%)",phase:Math.PI}
+  ];
+  function draw(){
+    ctx.fillStyle="rgba(7,8,14,0.25)";ctx.fillRect(0,0,W,H);
+    const cx=W/2,cy=H/2;
+    orbs.forEach(o=>{
+      const orbit=constMax*Math.sin(t*0.01+o.phase);
+      const x=cx+orbit*Math.cos(t*0.02+o.phase);
+      const y=cy+orbit*Math.sin(t*0.02+o.phase);
+      const pulse=1.2+Math.sin(t*0.1)*0.5;
+      const g=ctx.createRadialGradient(x,y,0,x,y,25*scale*pulse);
+      g.addColorStop(0,o.color);g.addColorStop(1,"transparent");
+      ctx.fillStyle=g;ctx.beginPath();ctx.arc(x,y,25*scale*pulse,0,2*Math.PI);ctx.fill();
+    });
+    if(full&&Math.abs(Math.sin(t*0.02))<0.05){
+      ctx.fillStyle="rgba(255,230,150,0.6)";
+      ctx.beginPath();ctx.arc(W/2,H/2,70*scale,0,2*Math.PI);ctx.fill();
+    }
+    t++;requestAnimationFrame(draw);
+  }
+  draw();
+}
+
+/* ───── Room 8 – Wizard’s Spell ───── */
+function animateWizardSpell(full){
+  const {c,ctx}=makeCanvas("#fffacd","#fffacd");
+  playAmbience("mystic");
+  const W=c.width,H=c.height,scale=Math.min(W/600,H/350);
+  const cx=W/2,cy=H/2,words=["WE","LOVE","JAVA"],maxActive=full?3:2;
+  let f=0;
+  function draw(){
+    ctx.fillStyle="rgba(13,10,22,0.25)";ctx.fillRect(0,0,W,H);
+    const g=0.6+0.4*Math.sin(f*0.05);
+    const gr=ctx.createRadialGradient(cx,cy,10*scale,cx,cy,200*scale);
+    gr.addColorStop(0,`rgba(255,250,205,${0.5+g*0.4})`);
+    gr.addColorStop(1,"transparent");
+    ctx.fillStyle=gr;ctx.beginPath();ctx.arc(cx,cy,200*scale,0,2*Math.PI);ctx.fill();
+    for(let i=0;i<maxActive;i++){
+      const a=f*0.03+(i/maxActive)*Math.PI*2;
+      const r=100*scale+10*scale*Math.sin(f*0.1+i);
+      const x=cx+r*Math.cos(a),y=cy+r*Math.sin(a);
+      const hue=50+i*60;
+      ctx.fillStyle=`hsl(${hue},100%,70%)`;
+      ctx.font=`bold ${28*scale}px serif`;
+      ctx.shadowColor=ctx.fillStyle;ctx.shadowBlur=20;ctx.fillText(words[i],x-25*scale,y+8*scale);ctx.shadowBlur=0;
+    }
+    if(full){
+      ctx.fillStyle="#fffacd";ctx.font=`${28*scale}px serif`;
+      const reveal=Math.min(Math.floor(f/15),13);
+      const text="JAVA LOVE WE".slice(0,reveal);
+      ctx.fillText(text,cx-100*scale,cy+120*scale);
+    }
+    f++;requestAnimationFrame(draw);
+  }
+  draw();
+}
+
+/* ───── Room 11 – Tower of Hanoi Animated ───── */
+function animateHanoi(full=true){
+  const {c,ctx}=makeCanvas("#ffe5b4","#ffe5b4");
+  playAmbience("mystic");
+  const W=c.width,H=c.height,scale=Math.min(W/600,H/350);
+  const pegs=[150*scale,300*scale,450*scale];
+  const colors=["#aaf","#8f8","#ff8","#f88"];
+  const stacks=[[0,1,2,3],[],[]],moves=[];
+  function hanoi(n,from,to,aux){if(n===1)moves.push([from,to]);
+    else{hanoi(n-1,from,aux,to);moves.push([from,to]);hanoi(n-1,aux,to,from);}}
+  hanoi(4,0,2,1);
+  const total=full?moves.length:Math.min(4,moves.length);
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    ctx.fillStyle="#333";ctx.fillRect(0,H-20*scale,W,20*scale);
+    pegs.forEach(x=>{ctx.fillStyle="#555";ctx.fillRect(x-5*scale,H-220*scale,10*scale,200*scale);});
+    for(let p=0;p<3;p++){
+      stacks[p].forEach((d,i)=>{
+        const w=60*scale+d*25*scale,y=H-25*scale-i*22*scale;
+        ctx.fillStyle=colors[d];ctx.fillRect(pegs[p]-w/2,y,w,20*scale);ctx.strokeRect(pegs[p]-w/2,y,w,20*scale);
+      });
+    }
+  }
+  let moveIndex=0;
+  function step(){
+    if(moveIndex>=total)return;
+    const [from,to]=moves[moveIndex++];const disc=stacks[from].shift();
+    animateDisc(from,to,disc,()=>{stacks[to].unshift(disc);draw();setTimeout(step,300);});
+  }
+  function animateDisc(from,to,disc,done){
+    const startX=pegs[from],endX=pegs[to],yTop=H-250*scale;let t=0;
+    function frame(){
+      t+=0.03;
+      const x=startX+(endX-startX)*t,y=(1-Math.pow(2*t-1,2))*-60*scale+yTop+60*scale;
+      draw();const w=60*scale+disc*25*scale;
+      ctx.fillStyle=colors[disc];ctx.fillRect(x-w/2,y,w,20*scale);
+      if(t<1)requestAnimationFrame(frame);else done();
+    }
+    requestAnimationFrame(frame);
+  }
+  draw();setTimeout(step,500);
+}
+
+/* ───── Shared helper for floating sprites ───── */
+function makeSprite(emoji, color){
+  const el=document.createElement("span");
+  el.textContent=emoji;
+  el.style.cssText=
+    `position:absolute;font-size:32px;pointer-events:none;
+     filter:drop-shadow(0 0 6px ${color});`;
+  document.querySelector(".room")?.appendChild(el);
+  el.style.left=Math.random()*80+10+"%";
+  el.style.top=Math.random()*50+20+"%";
+  return el;
+}
+function floaty(el,speed=0.4,amp=15){
+  let t=Math.random()*1000;
+  function loop(){
+    t+=speed;
+    el.style.transform=`translateY(${Math.sin(t/20)*amp}px)`;
+    requestAnimationFrame(loop);
+  }
+  loop();
+}
+
+/* ───── Room 5 – Final Portal 🌀 Spirit ───── */
+function animatePortal(){
+  const spirit=makeSprite("🌀","#7ef");
+  floaty(spirit,0.6,20);
+  let rot=0;
+  function spin(){
+    rot+=2;
+    spirit.style.transform=`rotate(${rot}deg) translateY(${15*Math.sin(rot/10)}px)`;
+    requestAnimationFrame(spin);
+  }
+  spin();
+}
+
+/* ───── Room 6 – Array Echo Hall 🎵 Echo Wisp ───── */
+function animateEcho(){
+  for(let i=0;i<3;i++){
+    const w=makeSprite("🎵","#aaf0d1");
+    w.style.fontSize="28px";
+    floaty(w,0.5+i*0.1,10+i*5);
+  }
+}
+
+/* ───── Room 7 – Twin Paths 🧍‍♂️🧍‍♀️ Twins ───── */
+function animateTwins(){
+  const left=makeSprite("🧍‍♂️","#ffd580");
+  const right=makeSprite("🧍‍♀️","#ffd580");
+  let offset=0;
+  function move(){
+    offset+=0.02;
+    left.style.transform=`translateX(${Math.sin(offset)*30}px)`;
+    right.style.transform=`translateX(${Math.sin(offset+Math.PI)*30}px)`;
+    requestAnimationFrame(move);
+  }
+  move();
+}
+
+/* ───── Room 8 – Wizard’s Test 🧙‍♂️ Wizard Orbit ───── */
+
+/* ───── Room 9 – Mirror Maze 👤 Reflection ───── */
+function animateMirrorMaze(){
+  const ref=makeSprite("👤","#f0b6e1");
+  document.querySelector(".room").addEventListener("mousemove",e=>{
+    const r=e.target.getBoundingClientRect?.()||{left:0,top:0};
+    ref.style.left=(e.clientX-r.left-20)+"px";
+    ref.style.top=(e.clientY-r.top-20)+"px";
+  });
+  floaty(ref,0.5,10);
+}
+
+/* ───── Room 10 – Fractal Forest 🌿 Sprout Spirit ───── */
+function animateForest(){
+  for(let i=0;i<5;i++){
+    const s=makeSprite("🌿","#a8e6cf");
+    s.style.fontSize="24px";
+    floaty(s,0.3+i*0.1,10+i*3);
+  }
+}
+
+/* ───── Room 11 – Tower of Hanoi 🪆 Disc Golem ───── */
+
+/* ───── Room 12 – Labyrinth Keeper 🧠 Data Sprite ───── */
+function animateKeeper(){
+  const cube=makeSprite("🧠","#b2dfdb");
+  floaty(cube,0.4,20);
+  let rot=0;
+  function pulse(){
+    rot+=3;
+    cube.style.transform=`scale(${1+0.1*Math.sin(rot*Math.PI/180)})`;
+    requestAnimationFrame(pulse);
+  }
+  pulse();
+}
+
+
+/* ───── Room 5: Final Portal (String) ───── */
+function room5(){
+return `
+<h2 style="color:#b3e5fc;">Room V – The Final Portal</h2>
+<p>The portal reveals a word only when reversed by magic.</p>
+<pre><code>String rev(String s){
+  if (s.length()==0) return "";
+  return rev(s.substring(1)) + s.charAt(0);
+}</code></pre>
+<p>If <code>s = "ELDDIM"</code>, what is the result of <code>rev(s)</code>?</p>
+<input id="a5" placeholder="type word">
+<button onclick="check5()">Submit</button>
+<button onclick="hint5()">Hint</button>
+<div id="f5"></div>`;}
+/* ───── Room 5 – Final Portal (Energy Stream Reversal) ───── */
+function check5() {
+  const val = document.getElementById("a5").value.trim().toUpperCase();
+  const fb = document.getElementById("f5");
+  if (val === "MIDDLE") {
+    const g = award(5, 20);
+    fb.innerHTML = `⚡️ Energy stream stabilises (+${g} pts)`;
+    animatePortalReverse(true);        // full animation
+    goToRoom(6,1500);
+
+  } else {
+    fb.innerHTML = "The portal hums… its energy still mis-aligned.";
+    animatePortalReverse(false);       // short teaser
+  }
+}
+
+function animatePortalReverse(full) {
+  const c = document.createElement("canvas");
+  c.width = 600; c.height = 350;
+  c.style.cssText =
+    "display:block;margin:20px auto;background:#030611;" +
+    "border:2px solid #4dd0e1;border-radius:8px;" +
+    "box-shadow:0 0 25px #4dd0e1;";
+  document.querySelector(".room")?.prepend(c);
+  const ctx = c.getContext("2d");
+  const W = c.width = c.offsetWidth;
+const H = c.height = c.offsetHeight;
+
+
+  const text = "ELDDIM";
+  const chars = [...text];
+  const target = text.split("").reverse();
+  const particles = [];
+  const total = full ? chars.length : 2;
+
+  // build particles for each letter
+  for (let i = 0; i < chars.length; i++) {
+    particles.push({
+      ch: chars[i],
+      x: -50 - i * 40,
+      y: H / 2 + (Math.random() * 40 - 20),
+      vx: 2 + Math.random(),
+      color: "hsl(" + (180 + i * 25) + ",90%,65%)",
+    });
+  }
+
+  let frame = 0;
+  function draw() {
+    ctx.fillStyle = "rgba(3,6,17,0.3)";
+    ctx.fillRect(0, 0, W, H);
+
+    // glowing energy lines
+    ctx.strokeStyle = "rgba(77,208,225,0.3)";
+    ctx.beginPath();
+    for (let y = 0; y < H; y += 20)
+      ctx.moveTo(0, y), ctx.lineTo(W, y);
+    ctx.stroke();
+
+    // move particles
+    particles.forEach((p, i) => {
+      p.x += p.vx;
+      if (p.x > W + 60) p.x = -60;
+      ctx.fillStyle = p.color;
+      ctx.font = "32px monospace";
+      ctx.fillText(p.ch, p.x, p.y);
+    });
+
+    // reversed word indicator (appears gradually)
+    if (full) {
+      ctx.fillStyle = "#fff";
+      ctx.font = "40px monospace";
+      const reveal = Math.min(Math.floor(frame / 20), chars.length);
+      const showText = target.slice(0, reveal).join("");
+      ctx.fillText(showText, W / 2 - 100, H - 50);
+    }
+
+    frame++;
+    requestAnimationFrame(draw);
+  }
+
+  draw();
+}
+
+function hint5(){alert("The function builds the string backwards.");}
+
+/* ───── Room 6: Array Echo Hall ───── */
+function room6(){
+return `
+<h2 style="color:#aaf0d1;">Room VI – The Array Echo Hall</h2>
+<p>The walls whisper each element of an ancient list.</p>
+<pre><code>int sum(int[] arr, int i){
+  if (i == arr.length) return 0;
+  return arr[i] + sum(arr, i + 1);
+}</code></pre>
+<p>If <code>arr = {2,4,6,8}</code>, what does <code>sum(arr,0)</code> return?</p>
+<input id="a6" placeholder="number">
+<button onclick="check6()">Submit</button>
+<button onclick="hint6()">Hint</button>
+<div id="f6"></div>`;}
+/* ───── Room 6 – The Array Echo Hall (Echoing Crystals) ───── */
+function check6() {
+  const val = parseInt(document.getElementById("a6").value);
+  const fb = document.getElementById("f6");
+  if (val === 20) {
+    const g = award(6, 25);
+    fb.innerHTML = `🔮 The echoes unite (+${g} pts)`;
+    animateArrayEcho(true);             // full harmony
+    goToRoom(7,1500);
+
+  } else {
+    fb.innerHTML = "The echoes fade – listen to all the calls.";
+    animateArrayEcho(false);            // short teaser
+  }
+}
+
+function animateArrayEcho(full) {
+  const c = document.createElement("canvas");
+  c.width = 600; c.height = 300;
+  c.style.cssText =
+    "display:block;margin:20px auto;background:#081010;" +
+    "border:2px solid #aaf0d1;border-radius:8px;" +
+    "box-shadow:0 0 25px #aaf0d1;";
+  document.querySelector(".room")?.prepend(c);
+  const ctx = c.getContext("2d");
+  const W = c.width = c.offsetWidth;
+const H = c.height = c.offsetHeight;
+
+
+  const arr = [2, 4, 6, 8];
+  const crystals = arr.map((val, i) => ({
+    x: 100 + i * 120,
+    y: H / 2,
+    r: 0,
+    glow: 0,
+    color: `hsl(${160 + i * 20},80%,70%)`,
+    active: false
+  }));
+
+  let frame = 0;
+  const activeCount = full ? crystals.length : 2;
+
+  function draw() {
+    ctx.fillStyle = "rgba(8,16,16,0.3)";
+    ctx.fillRect(0, 0, W, H);
+
+    // soft background grid
+    ctx.strokeStyle = "rgba(170,240,209,0.1)";
+    ctx.beginPath();
+    for (let x = 0; x < W; x += 40) {
+      ctx.moveTo(x, 0); ctx.lineTo(x, H);
+    }
+    ctx.stroke();
+
+    // animate crystals
+    crystals.forEach((cr, i) => {
+      if (i < activeCount && frame % 60 === i * 15) cr.active = true;
+      if (cr.active) cr.glow += 0.05;
+      const glow = Math.sin(cr.glow) * 0.5 + 0.5;
+
+      // ripple
+      if (cr.active) {
+        ctx.beginPath();
+        ctx.arc(cr.x, cr.y, 40 + 20 * Math.sin(frame * 0.1 - i), 0, Math.PI * 2);
+        ctx.strokeStyle = `rgba(170,240,209,${0.1 + glow * 0.2})`;
+        ctx.lineWidth = 2;
+        ctx.stroke();
+      }
+
+      // crystal
+      const size = 20 + 5 * glow;
+      ctx.beginPath();
+      ctx.moveTo(cr.x, cr.y - size);
+      for (let k = 1; k < 6; k++) {
+        const angle = k * (Math.PI * 2) / 6;
+        ctx.lineTo(cr.x + size * Math.cos(angle), cr.y + size * Math.sin(angle));
+      }
+      ctx.closePath();
+      ctx.fillStyle = `hsla(${160 + i * 20},80%,60%,${0.8 + 0.2 * glow})`;
+      ctx.shadowColor = cr.color;
+      ctx.shadowBlur = 20 * glow;
+      ctx.fill();
+      ctx.shadowBlur = 0;
+
+      // numeric label
+      ctx.fillStyle = "#aaf0d1";
+      ctx.font = "18px monospace";
+      ctx.fillText(arr[i], cr.x - 6, cr.y + 6);
+    });
+
+    // total display for full mode
+    if (full) {
+      ctx.fillStyle = "#aaf0d1";
+      ctx.font = "26px monospace";
+      const totalGlow = 0.5 + 0.5 * Math.sin(frame * 0.1);
+      ctx.globalAlpha = totalGlow;
+      ctx.fillText("Σ = 20", W / 2 - 30, H - 30);
+      ctx.globalAlpha = 1;
+    }
+
+    frame++;
+    requestAnimationFrame(draw);
+  }
+
+  draw();
+}
+
+function hint6(){alert("Add each element recursively until the index reaches arr.length.");}
+
+/* ───── Room 7: Twin Paths (Fibonacci) ───── */
+function room7(){
+return `
+<h2 style="color:#ffd580;">Room VII – The Twin Paths</h2>
+<p>Two roads diverge at every call.</p>
+<pre><code>int fib(int n){
+  if (n &lt;= 1) return n;
+  return fib(n - 1) + fib(n - 2);
+}</code></pre>
+<p>How many calls are made for <code>fib(5)</code>?</p>
+<input id="a7" placeholder="number">
+<button onclick="check7()">Submit</button>
+<button onclick="hint7()">Hint</button>
+<div id="f7"></div>`;}
+
+
+/* ───── Room 7 – Twin Paths: Living Fibonacci Fireflies ───── */
+/* ───── Room 7 – Twin Suns (Fibonacci Fusion) ───── */
+/* ───── Room 7 – Twin Paths: Living Fibonacci Fireflies ───── */
+function check7() {
+  const val = parseInt(document.getElementById("a7").value);
+  const fb = document.getElementById("f7");
+  if (val === 15) {
+    const g = award(7, 25);
+    fb.innerHTML = `🌗 The twin paths resonate (+${g} pts)`;
+    animateFibonacci(true);            // full swarm
+    goToRoom(8,1500);
+
+  } else {
+    fb.innerHTML = "The light divides… but not far enough.";
+    animateFibonacci(false);           // short teaser
+  }
+}
+
+function animateFibonacci(full) {
+  const c = document.createElement("canvas");
+  c.width = 600; c.height = 350;
+  c.style.cssText =
+    "display:block;margin:20px auto;background:#0a0b12;" +
+    "border:2px solid #ffd580;border-radius:8px;" +
+    "box-shadow:0 0 25px #ffd580;";
+  document.querySelector(".room")?.prepend(c);
+  const ctx = c.getContext("2d");
+  const W = c.width = c.offsetWidth;
+const H = c.height = c.offsetHeight;
+
+
+  const maxGen = full ? 7 : 3;
+  const fireflies = [{x: W/2, y: H-40, dx: 0, dy: -2, gen: 0, hue: 40}];
+
+  function spawn(f) {
+    if (f.gen >= maxGen) return;
+    // split into two new flies with mirrored angles
+    for (let dir of [-1, 1]) {
+      fireflies.push({
+        x: f.x,
+        y: f.y,
+        dx: dir * (1.2 + Math.random()*0.4),
+        dy: -2.2 + Math.random()*-0.3,
+        gen: f.gen + 1,
+        hue: 40 + f.gen * 15
+      });
+    }
+  }
+
+  function draw() {
+    ctx.fillStyle = "rgba(10,11,18,0.3)";
+    ctx.fillRect(0,0,W,H);
+
+    fireflies.forEach((f,i) => {
+      f.x += f.dx; f.y += f.dy;
+      f.dy += 0.03;                 // gentle gravity curve
+      ctx.beginPath();
+      ctx.fillStyle = `hsl(${f.hue},100%,65%)`;
+      ctx.shadowColor = `hsl(${f.hue},100%,65%)`;
+      ctx.shadowBlur = 10 + f.gen*2;
+      ctx.arc(f.x, f.y, 3+f.gen*0.3, 0, Math.PI*2);
+      ctx.fill();
+      // split occasionally until limit
+      if (Math.random()<0.005 && f.gen<maxGen) spawn(f);
+    });
+
+    requestAnimationFrame(draw);
+  }
+
+  draw();
+}
+
+function hint7(){alert("Each non-base call creates two new calls; trace fib(3) to see the pattern.");}
+
+/* ───── Room 8: Wizard’s Test (mixed) ───── */
+function room8(){
+return `
+<h2 style="color:#fffacd;">Room VIII – The Wizard’s Test</h2>
+<p>The final challenge: combine string and array recursion.</p>
+<pre><code>String spell(String[] w, int i){
+  if (i == w.length) return "";
+  return spell(w, i + 1) + " " + w[i];
+}</code></pre>
+<p>If <code>w = {"WE","LOVE","JAVA"}</code>, what string is returned?</p>
+<input id="a8" placeholder="answer">
+<button onclick="check8()">Submit</button>
+<button onclick="hint8()">Hint</button>
+<div id="f8"></div>`;}
+/* ───── Room 8 – The Wizard’s Test (Spell Fusion) ───── */
+function check8() {
+  const val = document.getElementById("a8").value.trim().toUpperCase();
+  const fb = document.getElementById("f8");
+  if (val === "JAVA LOVE WE") {
+    const g = award(8, 25);
+    fb.innerHTML = `🪄 The spell completes (+${g} pts)`;
+    animateWizardSpell(true);         // full spell
+    goToRoom(9,1500);
+
+  } else {
+    fb.innerHTML = "The runes flicker – their order feels wrong.";
+    animateWizardSpell(false);        // partial teaser
+  }
+}
+
+function animateWizardSpell(full) {
+  const c = document.createElement("canvas");
+  c.width = 600; c.height = 350;
+  c.style.cssText =
+    "display:block;background:#0d0a16;" +
+    "border:2px solid #fffacd;width:90vw;height:55vh;max-width:900px;max-height:500px;margin:25px auto;border-radius: 12px;" +
+    "box-shadow:0 0 25px #fffacd;";
+	
+  document.querySelector(".room")?.prepend(c);
+
+  const ctx = c.getContext("2d");
+  const W = c.width = c.offsetWidth;
+const H = c.height = c.offsetHeight;
+
+  const cx = W / 2, cy = H / 2;
+
+  const words = ["WE", "LOVE", "JAVA"];
+  const maxActive = full ? words.length : 2;
+  let frame = 0;
+
+  function draw() {
+    ctx.fillStyle = "rgba(13,10,22,0.25)";
+    ctx.fillRect(0, 0, W, H);
+
+    // central scroll glow
+    const glow = 0.6 + 0.4 * Math.sin(frame * 0.05);
+    const scrollGrad = ctx.createRadialGradient(cx, cy, 10, cx, cy, 200);
+    scrollGrad.addColorStop(0, `rgba(255,250,205,${0.5 + glow * 0.4})`);
+    scrollGrad.addColorStop(1, "transparent");
+    ctx.fillStyle = scrollGrad;
+    ctx.beginPath();
+    ctx.arc(cx, cy, 200, 0, Math.PI * 2);
+    ctx.fill();
+
+    // draw orbiting runes
+    for (let i = 0; i < maxActive; i++) {
+      const ang = frame * 0.03 + (i / maxActive) * Math.PI * 2;
+      const radius = 100 + 10 * Math.sin(frame * 0.1 + i);
+      const x = cx + radius * Math.cos(ang);
+      const y = cy + radius * Math.sin(ang);
+      const hue = 50 + i * 60;
+      ctx.fillStyle = `hsl(${hue},100%,70%)`;
+      ctx.font = "bold 28px serif";
+      ctx.shadowColor = ctx.fillStyle;
+      ctx.shadowBlur = 20;
+      ctx.fillText(words[i], x - 25, y + 8);
+      ctx.shadowBlur = 0;
+    }
+
+    // reveal combined phrase for correct answer
+    if (full) {
+      ctx.fillStyle = "#fffacd";
+      ctx.font = "28px serif";
+      const reveal = Math.min(Math.floor(frame / 15), 13);
+      const spellText = "JAVA LOVE WE".slice(0, reveal);
+      ctx.fillText(spellText, cx - 100, cy + 110);
+    }
+
+    frame++;
+    requestAnimationFrame(draw);
+  }
+
+  draw();
+}
+
+function hint8(){alert("The recursion builds from the end of the array toward the start.");}
+
+/* ───── ADVANCED EXPANSION PACK: ROOMS 9–12 ───── */
+
+/* ───── Room 9: Mirror Maze of Strings ───── */
+function room9(){
+return `
+<h2 style="color:#f0b6e1;">Room IX – The Mirror Maze of Strings</h2>
+<p>Inside the mirror, words repeat within words...</p>
+<pre><code>boolean contains(String s, String sub){
+  if (s.length() &lt; sub.length()) return false;
+  if (s.startsWith(sub)) return true;
+  return contains(s.substring(1), sub);
+}</code></pre>
+<p>Does <code>contains("RECURSION", "CUR")</code> return true or false?</p>
+<input id="a9" placeholder="true / false">
+<button onclick="check9()">Submit</button>
+<button onclick="hint9()">Hint</button>
+<div id="f9"></div>`;}
+function check9(){
+ const t=document.getElementById('a9').value.trim().toLowerCase();
+ if(t==="true"){
+   const g=award(9,25);
+   document.getElementById('f9').innerHTML=`✨ The reflection matches (+${g} pts)`;
+   goToRoom(10,1500);
+
+ } else {
+   document.getElementById('f9').innerHTML="Look again – the substring *is* within.";
+ }
+}
+function hint9(){
+ alert("Think about what happens when the prefix doesn't match — the function slides one letter forward.");
+}
+
+/* ───── Room 10: The Fractal Forest ───── */
+function room10(){
+return `
+<h2 style="color:#a8e6cf;">Room X – The Fractal Forest</h2>
+<p>Trees within trees... branches splitting endlessly.</p>
+<pre><code>int leaves(int n){
+  if (n == 0) return 1;
+  return 2 * leaves(n - 1);
+}</code></pre>
+<p>How many leaves are there when <code>n = 5</code>?</p>
+<input id="a10" placeholder="number">
+<button onclick="check10()">Submit</button>
+<button onclick="hint10()">Hint</button>
+<div id="f10"></div>`;}
+function check10(){
+ const t=parseInt(document.getElementById('a10').value);
+ if(t===32){
+   const g=award(10,25);
+   document.getElementById('f10').innerHTML=`🌳 The forest doubles again (+${g} pts)`;
+   goToRoom(11,1500);
+
+ } else {
+   document.getElementById('f10').innerHTML="Each depth doubles the leaves – try again.";
+ }
+}
+function hint10(){
+ alert("At each level, every leaf becomes two new leaves — what pattern does that form?");
+}
+
+/* ───── Room 11: The Tower of Hanoi ───── */
+
+/* ───── Room 11 – Tower of Hanoi Animated ───── */
+function room11(){
+  return `
+    <h2 style="color:#ffe5b4;">Room XI – The Tower of Hanoi</h2>
+    <p>Disks rise and fall in recursive rhythm.</p>
+
+    <canvas id="hanoiCanvas" width="600" height="350"
+            style="display:block;margin:20px auto;background:#111;
+                   border:2px solid #ffe5b4;border-radius:8px;
+                   box-shadow:0 0 25px #ffe5b4;"></canvas>
+
+<pre><code>void hanoi(int n, char from, char to, char aux){
+  if (n == 1){
+    System.out.println(from + " -> " + to);
+    return;
+  }
+  hanoi(n-1, from, aux, to);
+  System.out.println(from + " -> " + to);
+  hanoi(n-1, aux, to, from);
+}</code></pre>
+
+<p>How many total moves for <code>n = 4</code>?</p>
+<input id="a11" placeholder="number">
+<button onclick="check11()">Submit</button>
+<button onclick="hint11()">Hint</button>
+<div id="f11"></div>`;
+}
+
+function check11(){
+  const v=parseInt(document.getElementById("a11").value);
+  if(v===15){
+    const g=award(11,25);
+    document.getElementById("f11").innerHTML=`🏯 The disks rest in order (+${g} pts)`;
+    goToRoom(12,1500);
+
+  }else{
+    document.getElementById("f11").innerHTML="Remember: total moves = 2ⁿ − 1.";
+  }
+}
+function hint11(){alert("Each smaller tower moves twice – total = 2ⁿ − 1 moves.");}
+
+/* ───── Animation: flying discs over pegs ───── */
+function animateHanoi(){
+  const c=document.getElementById("hanoiCanvas");
+  if(!c)return;
+  const ctx=c.getContext("2d");
+  const W = c.width = c.offsetWidth;
+const H = c.height = c.offsetHeight;
+
+  const pegs=[150,300,450];
+  const colors=["#aaf","#8f8","#ff8","#f88"];
+  const stacks=[[0,1,2,3],[],[]]; // discs 0=smallest,3=largest
+  const moves=[];
+  // precompute recursive sequence
+  function hanoi(n,from,to,aux){
+    if(n===1)moves.push([from,to]);
+    else{hanoi(n-1,from,aux,to);moves.push([from,to]);hanoi(n-1,aux,to,from);}
+  }
+  hanoi(4,0,2,1);
+
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    // bases
+    ctx.fillStyle="#333";ctx.fillRect(0,H-20,W,20);
+    pegs.forEach(x=>{
+      ctx.fillStyle="#555";
+      ctx.fillRect(x-5,H-220,10,200);
+    });
+    // draw discs
+    for(let p=0;p<3;p++){
+      stacks[p].forEach((d,i)=>{
+        const w=60+ d*25;
+        const y=H-25 - i*22;
+        ctx.fillStyle=colors[d];
+        ctx.fillRect(pegs[p]-w/2,y,w,20,5);
+        ctx.strokeStyle="#000";ctx.strokeRect(pegs[p]-w/2,y,w,20);
+      });
+    }
+  }
+
+  let moveIndex=0, anim=null;
+  function step(){
+    if(moveIndex>=moves.length)return;
+    const [from,to]=moves[moveIndex++];
+    const disc=stacks[from].shift(); // remove top disc
+    animateDisc(from,to,disc,()=>{
+      stacks[to].unshift(disc);
+      draw();
+      setTimeout(step,300);
+    });
+  }
+
+  function animateDisc(from,to,disc,done){
+    const startX=pegs[from], endX=pegs[to];
+    const yTop=H-250;
+    let t=0;
+    function frame(){
+      t+=0.03;
+      const x=startX+(endX-startX)*t;
+      const y=(1-Math.pow(2*t-1,2))*-60+yTop+60;
+      draw();
+      const w=60+disc*25;
+      ctx.fillStyle=colors[disc];
+      ctx.fillRect(x-w/2,y,w,20);
+      if(t<1)requestAnimationFrame(frame);else done();
+    }
+    requestAnimationFrame(frame);
+  }
+
+  draw();
+  setTimeout(step,500);
+}
+
+/* ───── Room 7 – Twin Paths (Fibonacci) ───── */
+
+/* ───── Room 12: The Labyrinth Keeper ───── */
+function room12(){
+return `
+<h2 style="color:#b2dfdb;">Room XII – The Labyrinth Keeper</h2>
+<p>You reach the keeper of data — each gate hides smaller gates.</p>
+<pre><code>int sum(Object[] arr){
+  int total = 0;
+  for (Object x : arr){
+    if (x instanceof Integer) total += (Integer)x;
+    else total += sum((Object[])x);
+  }
+  return total;
+}</code></pre>
+<p>What does <code>sum([1,[2,3],[4,[5]]])</code> return?</p>
+<input id="a12" placeholder="number">
+<button onclick="check12()">Submit</button>
+<button onclick="hint12()">Hint</button>
+<div id="f12"></div>`;}
+function check12(){
+ const t=parseInt(document.getElementById('a12').value);
+ if(t===15){
+   const g=award(12,30);
+   document.getElementById('f12').innerHTML=`🧩 Keeper nods (+${g} pts)`;
+   setTimeout(()=>finale(),1500);
+ } else {
+   document.getElementById('f12').innerHTML="Each gate hides numbers within... think recursively.";
+ }
+}
+function hint12(){
+ alert("Each nested list is another recursive call; add everything within until nothing remains.");
+}
+
+/* ───── Finale & Certificate ───── */
+function finale(){
+ document.body.innerHTML=`
+  <h2 style="color:#a78bfa;text-align:center;margin-top:10vh;">🏁 You Escaped the Recursive Labyrinth! 🏁</h2>
+  <p style="text-align:center">Total Score: ${game.score} / 150</p>
+  <canvas id="cert" width="800" height="500"></canvas>
+  <div style="text-align:center;margin-top:20px">
+  <button onclick="downloadCert()">Download Certificate (PNG)</button>
+  </div>`;
+ drawCert();
+}
+function drawCert(){
+ const c=document.getElementById('cert');const ctx=c.getContext('2d');
+ /* parchment */
+ const grad=ctx.createLinearGradient(0,0,800,500);
+ grad.addColorStop(0,'#e8d9b5');grad.addColorStop(1,'#d8c28d');
+ ctx.fillStyle=grad;ctx.fillRect(0,0,800,500);
+ /* burnt edges */
+ ctx.strokeStyle='#3b1f0e';ctx.lineWidth=20;ctx.strokeRect(10,10,780,480);
+ ctx.font='32px "Times New Roman"';ctx.fillStyle='#4b2e05';ctx.textAlign='center';
+ ctx.fillText('Certificate of Escape',400,100);
+ ctx.font='22px serif';ctx.fillText('This certifies that',400,170);
+ ctx.font='28px serif';ctx.fillText(prompt("Enter your name for the certificate:"),400,220);
+ ctx.font='20px serif';ctx.fillText('has successfully escaped The Recursive Labyrinth',400,260);
+ ctx.fillText('with a score of '+game.score+' points.',400,300);
+ ctx.font='18px serif';ctx.fillText('🪶 Mystical Edition v2',400,360);
+}
+function downloadCert(){
+ const c=document.getElementById('cert');
+ const a=document.createElement('a');
+ a.download='RecursiveLabyrinth_Certificate.png';
+ a.href=c.toDataURL('image/png');
+ a.click();
+}
+
+/* Start sequence override */
+function startGame(){show(1);}
+
+</script>
+</body>
+</html>
