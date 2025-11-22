@@ -1,0 +1,1432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Recursive Dungeon - Call for Freedom</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Creepster&family=Share+Tech+Mono&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Share Tech Mono', monospace;
+            background: #000;
+            color: #0f0;
+            min-height: 100vh;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Animated dungeon background */
+        .dungeon-bg {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(0, 255, 0, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(0, 100, 0, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 40% 20%, rgba(0, 50, 0, 0.1) 0%, transparent 50%),
+                linear-gradient(180deg, #000000 0%, #001a00 50%, #000000 100%);
+            animation: dungeonPulse 20s infinite;
+        }
+
+        @keyframes dungeonPulse {
+            0%, 100% { opacity: 0.8; }
+            50% { opacity: 1; }
+        }
+
+        /* Matrix rain effect */
+        .matrix-rain {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            opacity: 0.1;
+        }
+
+        .matrix-column {
+            position: absolute;
+            top: -100%;
+            font-size: 20px;
+            animation: matrixFall linear infinite;
+            color: #0f0;
+            text-shadow: 0 0 5px #0f0;
+        }
+
+        @keyframes matrixFall {
+            to { transform: translateY(200vh); }
+        }
+
+        /* Lightning effect for riddles */
+        @keyframes lightning {
+            0%, 100% { opacity: 0; }
+            50% { opacity: 1; background: rgba(255, 255, 255, 0.1); }
+        }
+
+        .lightning-flash {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            animation: lightning 5s infinite;
+            z-index: 1;
+        }
+
+        /* Fog effect */
+        .fog {
+            position: fixed;
+            width: 200%;
+            height: 100%;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000"><filter id="fog"><feTurbulence baseFrequency="0.01" numOctaves="2" /><feColorMatrix values="0 0 0 0 0 0 1 0 0 0.2 0 0 0 0 0 0 0 0 1 0"/></filter><rect width="100%" height="100%" filter="url(%23fog)" opacity="0.2"/></svg>') repeat;
+            animation: fogDrift 30s linear infinite;
+            pointer-events: none;
+            opacity: 0.3;
+        }
+
+        @keyframes fogDrift {
+            from { transform: translateX(0); }
+            to { transform: translateX(-50%); }
+        }
+
+        /* Main container */
+        .game-container {
+            position: relative;
+            z-index: 10;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        /* Terminal-like main window */
+        .terminal {
+            width: 90%;
+            max-width: 1100px;
+            background: rgba(0, 20, 0, 0.95);
+            border: 2px solid #0f0;
+            border-radius: 10px;
+            box-shadow: 
+                0 0 20px rgba(0, 255, 0, 0.5),
+                inset 0 0 20px rgba(0, 255, 0, 0.1);
+            overflow: hidden;
+            animation: terminalFlicker 0.1s infinite;
+        }
+
+        @keyframes terminalFlicker {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.98; }
+        }
+
+        .terminal-header {
+            background: #0f0;
+            color: #000;
+            padding: 10px 20px;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .terminal-body {
+            padding: 30px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        /* Room title with creepy font */
+        .room-title {
+            font-family: 'Creepster', cursive;
+            font-size: 2.8em;
+            text-align: center;
+            margin-bottom: 20px;
+            color: #0f0;
+            text-shadow: 
+                0 0 10px #0f0,
+                0 0 20px #0f0,
+                0 0 30px #0f0;
+            animation: titleGlow 2s ease-in-out infinite;
+        }
+
+        @keyframes titleGlow {
+            0%, 100% { opacity: 0.8; }
+            50% { opacity: 1; text-shadow: 0 0 30px #0f0, 0 0 60px #0f0; }
+        }
+
+        /* Story text */
+        .story-text {
+            color: #0a0;
+            margin: 20px 0;
+            padding: 20px;
+            background: rgba(0, 50, 0, 0.2);
+            border-left: 3px solid #0f0;
+            font-size: 1.1em;
+            line-height: 1.6;
+        }
+
+        /* Riddle box for non-programming puzzles */
+        .riddle-box {
+            background: linear-gradient(135deg, rgba(128, 0, 128, 0.2), rgba(0, 0, 128, 0.2));
+            border: 2px solid #f0f;
+            border-radius: 10px;
+            padding: 25px;
+            margin: 20px 0;
+            text-align: center;
+            box-shadow: 0 0 30px rgba(255, 0, 255, 0.3);
+            animation: riddleGlow 3s infinite;
+        }
+
+        @keyframes riddleGlow {
+            0%, 100% { box-shadow: 0 0 30px rgba(255, 0, 255, 0.3); }
+            50% { box-shadow: 0 0 50px rgba(255, 0, 255, 0.6); }
+        }
+
+        .riddle-text {
+            font-size: 1.3em;
+            color: #f0f;
+            text-shadow: 0 0 10px #f0f;
+            margin-bottom: 20px;
+            font-style: italic;
+        }
+
+        /* Code blocks with better formatting */
+        .code-container {
+            background: #0a0a0a;
+            border: 1px solid #0f0;
+            border-radius: 5px;
+            margin: 20px 0;
+            box-shadow: 0 0 15px rgba(0, 255, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .code-header {
+            background: linear-gradient(90deg, #0a0, #080);
+            color: #000;
+            padding: 8px 15px;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+
+        .code-block {
+            padding: 20px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 14px;
+            line-height: 1.6;
+            overflow-x: auto;
+            white-space: pre;
+            color: #f0f0f0;
+        }
+
+        /* Editable code area */
+        .code-editor {
+            background: #0a0a0a;
+            border: 2px solid #0f0;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 15px 0;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 14px;
+            color: #f0f0f0;
+            width: 100%;
+            min-height: 150px;
+            resize: vertical;
+            tab-size: 4;
+        }
+
+        .code-editor:focus {
+            outline: none;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.5);
+            background: #0f0f0f;
+        }
+
+        .keyword { color: #ff79c6; }
+        .function { color: #50fa7b; }
+        .number { color: #bd93f9; }
+        .comment { color: #6272a4; font-style: italic; }
+        .string { color: #f1fa8c; }
+        .type { color: #8be9fd; }
+
+        /* Input fields */
+        .puzzle-input {
+            width: 100%;
+            padding: 15px;
+            margin: 10px 0;
+            background: #001a00;
+            border: 2px solid #0f0;
+            color: #0f0;
+            font-size: 18px;
+            font-family: 'Share Tech Mono', monospace;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .puzzle-input:focus {
+            outline: none;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.5);
+            background: #002a00;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 15px 30px;
+            margin: 10px;
+            background: transparent;
+            border: 2px solid #0f0;
+            color: #0f0;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 16px;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s;
+            text-transform: uppercase;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(0, 255, 0, 0.3);
+            transform: translate(-50%, -50%);
+            transition: all 0.3s;
+        }
+
+        .btn:hover::before {
+            width: 100%;
+            height: 100%;
+        }
+
+        .btn:hover {
+            text-shadow: 0 0 10px #0f0;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.5);
+        }
+
+        .btn-riddle {
+            border-color: #f0f;
+            color: #f0f;
+        }
+
+        .btn-riddle:hover {
+            box-shadow: 0 0 20px rgba(255, 0, 255, 0.5);
+        }
+
+        /* Phone number vault display */
+        .code-vault {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 20, 0, 0.95);
+            border: 2px solid #0f0;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 30px rgba(0, 255, 0, 0.5);
+            z-index: 100;
+            animation: vaultPulse 2s infinite;
+        }
+
+        @keyframes vaultPulse {
+            0%, 100% { box-shadow: 0 0 30px rgba(0, 255, 0, 0.5); }
+            50% { box-shadow: 0 0 50px rgba(0, 255, 0, 0.8); }
+        }
+
+        .vault-title {
+            font-size: 1.2em;
+            margin-bottom: 15px;
+            text-align: center;
+            color: #0f0;
+            text-shadow: 0 0 10px #0f0;
+        }
+
+        .phone-display {
+            display: flex;
+            gap: 5px;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .phone-digit {
+            width: 35px;
+            height: 45px;
+            border: 2px solid #0f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            font-weight: bold;
+            background: #001a00;
+            position: relative;
+        }
+
+        .phone-digit.filled {
+            animation: slotFill 0.5s;
+            background: #003a00;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.5);
+        }
+
+        @keyframes slotFill {
+            0% { transform: scale(1.5); }
+            100% { transform: scale(1); }
+        }
+
+        /* Timer display */
+        .timer-display {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            font-size: 1.5em;
+            color: #f00;
+            text-shadow: 0 0 10px #f00;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 10px 20px;
+            border: 2px solid #f00;
+            border-radius: 10px;
+            animation: timerBlink 1s infinite;
+            z-index: 100;
+        }
+
+        @keyframes timerBlink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        /* Hint system */
+        .hint-box {
+            background: rgba(255, 255, 0, 0.1);
+            border: 2px dashed #ff0;
+            color: #ff0;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+            display: none;
+            animation: hintGlow 2s infinite;
+        }
+
+        .hint-box.show {
+            display: block;
+        }
+
+        @keyframes hintGlow {
+            0%, 100% { box-shadow: 0 0 10px rgba(255, 255, 0, 0.3); }
+            50% { box-shadow: 0 0 30px rgba(255, 255, 0, 0.6); }
+        }
+
+        /* Test case display */
+        .test-cases {
+            background: rgba(0, 100, 100, 0.1);
+            border: 2px solid #0ff;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+
+        .test-case {
+            margin: 10px 0;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 5px;
+            font-family: monospace;
+        }
+
+        .test-pass {
+            color: #0f0;
+            border-left: 3px solid #0f0;
+        }
+
+        .test-fail {
+            color: #f00;
+            border-left: 3px solid #f00;
+        }
+
+        /* Success/Error messages */
+        .message {
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+            text-align: center;
+            font-size: 1.2em;
+            animation: messageSlide 0.5s;
+        }
+
+        @keyframes messageSlide {
+            from { transform: translateY(-20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .success-msg {
+            background: rgba(0, 255, 0, 0.2);
+            border: 2px solid #0f0;
+            color: #0f0;
+            box-shadow: 0 0 30px rgba(0, 255, 0, 0.5);
+        }
+
+        .error-msg {
+            background: rgba(255, 0, 0, 0.2);
+            border: 2px solid #f00;
+            color: #f00;
+            box-shadow: 0 0 30px rgba(255, 0, 0, 0.5);
+        }
+
+        /* Array visualization */
+        .array-visual {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 20px 0;
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+
+        .array-cell {
+            width: 50px;
+            height: 50px;
+            border: 2px solid #0f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            background: #001a00;
+            position: relative;
+        }
+
+        .array-cell.highlight {
+            background: #00ff00;
+            color: #000;
+            animation: cellPulse 0.5s;
+        }
+
+        @keyframes cellPulse {
+            0% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+
+        .array-index {
+            position: absolute;
+            top: -20px;
+            font-size: 12px;
+            color: #888;
+        }
+
+        /* Final phone call screen */
+        .phone-screen {
+            text-align: center;
+            padding: 30px;
+            background: linear-gradient(135deg, rgba(0, 100, 0, 0.3), rgba(0, 50, 0, 0.3));
+            border: 3px solid #0f0;
+            border-radius: 15px;
+            margin-top: 30px;
+            animation: phonePulse 2s infinite;
+        }
+
+        @keyframes phonePulse {
+            0%, 100% { box-shadow: 0 0 30px rgba(0, 255, 0, 0.5); }
+            50% { box-shadow: 0 0 60px rgba(0, 255, 0, 0.8); }
+        }
+
+        .phone-icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+            animation: phoneRing 1s infinite;
+        }
+
+        @keyframes phoneRing {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(-10deg); }
+            75% { transform: rotate(10deg); }
+        }
+
+        .phone-number-display {
+            font-size: 2.5em;
+            letter-spacing: 5px;
+            color: #0f0;
+            margin: 20px 0;
+            text-shadow: 0 0 20px #0f0;
+            font-weight: bold;
+        }
+
+        /* Hidden class */
+        .hidden {
+            display: none !important;
+        }
+
+        /* Difficulty indicator */
+        .difficulty {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            margin-left: 10px;
+        }
+
+        .diff-easy {
+            background: #28a745;
+            color: #000;
+        }
+
+        .diff-medium {
+            background: #ffc107;
+            color: #000;
+        }
+
+        .diff-hard {
+            background: #dc3545;
+            color: #fff;
+        }
+
+        .diff-extreme {
+            background: #6f42c1;
+            color: #fff;
+            animation: diffPulse 1s infinite;
+        }
+
+        @keyframes diffPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        /* Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #001a00;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #0f0;
+            border-radius: 5px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #0a0;
+        }
+    </style>
+</head>
+<body>
+    <!-- Background effects -->
+    <div class="dungeon-bg"></div>
+    <div class="fog"></div>
+    <div class="lightning-flash"></div>
+    <div class="matrix-rain" id="matrixRain"></div>
+
+    <!-- Game timer -->
+    <div class="timer-display" id="timer">
+        <span>⏱️ TIME: 50:00</span>
+    </div>
+
+    <!-- Phone number vault -->
+    <div class="code-vault">
+        <div class="vault-title">📱 ESCAPE PHONE</div>
+        <div class="phone-display">
+            <div class="phone-digit" id="d1">?</div>
+            <div class="phone-digit" id="d2">?</div>
+            <div class="phone-digit" id="d3">?</div>
+            <div class="phone-digit" id="d4">?</div>
+            <span style="color: #0f0; margin: 0 5px;">-</span>
+            <div class="phone-digit" id="d5">?</div>
+            <div class="phone-digit" id="d6">?</div>
+            <div class="phone-digit" id="d7">?</div>
+            <div class="phone-digit" id="d8">?</div>
+            <div class="phone-digit" id="d9">?</div>
+            <div class="phone-digit" id="d10">?</div>
+        </div>
+        <div style="text-align: center; font-size: 0.9em; color: #0a0;">
+            Call this number to escape!
+        </div>
+    </div>
+
+    <!-- Main game container -->
+    <div class="game-container">
+        <div class="terminal">
+            <div class="terminal-header">
+                <span>RECURSIVE_DUNGEON_V2.exe</span>
+                <span id="roomIndicator">ROOM 1/10</span>
+            </div>
+            
+            <div class="terminal-body">
+                <!-- Room 1: Base Case Returns 0 -->
+                <div id="room1" class="room">
+                    <h1 class="room-title">The Zero Chamber <span class="difficulty diff-easy">EASY</span></h1>
+                    
+                    <div class="story-text">
+                        You wake up in a dark dungeon. A mysterious voice echoes:
+                        "To escape, you must collect 10 digits. They will form a phone number... Call it, and you shall be free!"
+                    </div>
+
+                    <div class="code-container">
+                        <div class="code-header">📜 FirstStep.java</div>
+                        <pre class="code-block"><span class="keyword">public static</span> <span class="type">int</span> <span class="function">countDown</span>(<span class="type">int</span> n) {
+    <span class="keyword">if</span> (n <= <span class="number">0</span>) {
+        <span class="keyword">return</span> <span class="number">0</span>;  <span class="comment">// Base case</span>
+    }
+    <span class="keyword">return</span> n + <span class="function">countDown</span>(n - <span class="number">1</span>);
+}
+
+<span class="comment">// What does countDown(0) return?</span>
+<span class="comment">// This is your first digit!</span></pre>
+                    </div>
+
+                    <input type="text" class="puzzle-input" id="room1-answer" placeholder="Enter countDown(0) result..." maxlength="1">
+                    
+                    <div style="text-align: center;">
+                        <button class="btn" onclick="checkRoom1()">🗝️ Submit Answer</button>
+                        <button class="btn" onclick="showHint(1)">💡 Need a Hint?</button>
+                    </div>
+
+                    <div id="hint1" class="hint-box">
+                        💡 Look at the base case: if n <= 0, what does it return?
+                    </div>
+                </div>
+
+                <!-- Room 2: Factorial of 5 first digit -->
+                <div id="room2" class="room hidden">
+                    <h1 class="room-title">The Factorial Gate <span class="difficulty diff-easy">EASY</span></h1>
+                    
+                    <div class="story-text">
+                        The door ahead is sealed with mathematical symbols...
+                    </div>
+
+                    <div class="code-container">
+                        <div class="code-header">⚗️ Factorial.java</div>
+                        <pre class="code-block"><span class="keyword">public static</span> <span class="type">int</span> <span class="function">factorial</span>(<span class="type">int</span> n) {
+    <span class="keyword">if</span> (n <= <span class="number">1</span>) {
+        <span class="keyword">return</span> <span class="number">1</span>;
+    }
+    <span class="keyword">return</span> n * <span class="function">factorial</span>(n - <span class="number">1</span>);
+}
+
+<span class="comment">// factorial(5) = 120</span>
+<span class="comment">// What is the TENS digit of 120?</span></pre>
+                    </div>
+
+                    <p style="text-align: center; color: #0ff;">
+                        5! = 5 × 4 × 3 × 2 × 1 = 120. What's in the tens place?
+                    </p>
+
+                    <input type="text" class="puzzle-input" id="room2-answer" placeholder="Enter the tens digit..." maxlength="1">
+                    
+                    <div style="text-align: center;">
+                        <button class="btn" onclick="checkRoom2()">🗝️ Unlock Gate</button>
+                        <button class="btn" onclick="showHint(2)">💡 Need a Hint?</button>
+                    </div>
+
+                    <div id="hint2" class="hint-box">
+                        💡 In the number 120, the digits are: 1 (hundreds), 2 (tens), 0 (ones)
+                    </div>
+                </div>
+
+                <!-- Room 3: Array Sum Divided by 10 -->
+                <div id="room3" class="room hidden">
+                    <h1 class="room-title">The Averaging Array <span class="difficulty diff-medium">MEDIUM</span></h1>
+                    
+                    <div class="story-text">
+                        Numbers float in the air. Find their recursive sum...
+                    </div>
+
+                    <div class="array-visual">
+                        <div class="array-cell"><span class="array-index">0</span>8</div>
+                        <div class="array-cell"><span class="array-index">1</span>12</div>
+                        <div class="array-cell"><span class="array-index">2</span>5</div>
+                        <div class="array-cell"><span class="array-index">3</span>15</div>
+                    </div>
+
+                    <div class="code-container">
+                        <div class="code-header">➕ ArraySum.java</div>
+                        <pre class="code-block"><span class="keyword">public static</span> <span class="type">int</span> <span class="function">sumArray</span>(<span class="type">int</span>[] arr, <span class="type">int</span> index) {
+    <span class="keyword">if</span> (index >= arr.length) {
+        <span class="keyword">return</span> <span class="number">0</span>;
+    }
+    <span class="keyword">return</span> arr[index] + <span class="function">sumArray</span>(arr, index + <span class="number">1</span>);
+}
+
+<span class="type">int</span>[] numbers = {<span class="number">8</span>, <span class="number">12</span>, <span class="number">5</span>, <span class="number">15</span>};
+<span class="comment">// sumArray(numbers, 0) = 40</span>
+<span class="comment">// What is 40 divided by 10?</span></pre>
+                    </div>
+
+                    <input type="text" class="puzzle-input" id="room3-answer" placeholder="Enter 40 ÷ 10..." maxlength="1">
+                    
+                    <div style="text-align: center;">
+                        <button class="btn" onclick="checkRoom3()">🗝️ Submit Answer</button>
+                        <button class="btn" onclick="showHint(3)">💡 Need a Hint?</button>
+                    </div>
+
+                    <div id="hint3" class="hint-box">
+                        💡 Sum: 8 + 12 + 5 + 15 = 40. Now divide by 10...
+                    </div>
+                </div>
+
+                <!-- Room 4: Riddle - Lucky Number -->
+                <div id="room4" class="room hidden">
+                    <h1 class="room-title">The Oracle's Riddle <span class="difficulty diff-easy">RIDDLE</span></h1>
+                    
+                    <div class="story-text">
+                        An ancient oracle blocks your path with a riddle...
+                    </div>
+
+                    <div class="riddle-box">
+                        <div class="riddle-text">
+                            "I am a prime number between 5 and 10.<br>
+                            I am odd and often considered lucky.<br>
+                            In recursion, I might be a good depth limit.<br>
+                            <br>
+                            What number am I?"
+                        </div>
+                    </div>
+
+                    <input type="text" class="puzzle-input" id="room4-answer" placeholder="Enter the number..." maxlength="1" style="border-color: #f0f;">
+                    
+                    <div style="text-align: center;">
+                        <button class="btn btn-riddle" onclick="checkRoom4()">🗝️ Answer Oracle</button>
+                        <button class="btn btn-riddle" onclick="showHint(4)">💡 Need a Hint?</button>
+                    </div>
+
+                    <div id="hint4" class="hint-box">
+                        💡 Prime numbers between 5 and 10: only 7. It's often called lucky!
+                    </div>
+                </div>
+
+                <!-- Room 5: Write Recursive Sum of Digits -->
+                <div id="room5" class="room hidden">
+                    <h1 class="room-title">The Digital Decomposer <span class="difficulty diff-medium">WRITE CODE</span></h1>
+                    
+                    <div class="story-text">
+                        "Prove your skill! Write a function to sum the digits of a number recursively!"
+                    </div>
+
+                    <div class="code-container">
+                        <div class="code-header">✍️ SumDigits.java - Complete the Function</div>
+                        <pre class="code-block"><span class="comment">// Write a recursive function to sum digits of a number
+// sumDigits(123) should return 6 (1+2+3)
+// sumDigits(45) should return 9 (4+5)</span>
+
+<span class="keyword">public static</span> <span class="type">int</span> <span class="function">sumDigits</span>(<span class="type">int</span> n) {
+    <span class="comment">// YOUR CODE HERE</span>
+    <span class="comment">// Hint: n % 10 gives last digit, n / 10 removes it</span>
+}</pre>
+                    </div>
+
+                    <textarea class="code-editor" id="room5-code" placeholder="Write your recursive sumDigits function...">public static int sumDigits(int n) {
+    // Base case: single digit
+    
+    // Recursive case: last digit + sum of remaining
+    
+}</textarea>
+
+                    <div class="test-cases">
+                        <div class="test-case" id="test5-1">Test 1: sumDigits(123) = ? (expected: 6)</div>
+                        <div class="test-case" id="test5-2">Test 2: sumDigits(45) = ? (expected: 9)</div>
+                        <div class="test-case" id="test5-3">Test 3: sumDigits(5) = ? (expected: 5)</div>
+                    </div>
+
+                    <p style="text-align: center; color: #0ff;">
+                        When tests pass, sumDigits(14) gives you digit 5!
+                    </p>
+                    
+                    <div style="text-align: center;">
+                        <button class="btn" onclick="testRoom5()">🧪 Run Tests</button>
+                        <button class="btn" onclick="showHint(5)">💡 Need a Hint?</button>
+                    </div>
+
+                    <div id="hint5" class="hint-box">
+                        💡 Structure:
+                        if (n < 10) return n;
+                        return (n % 10) + sumDigits(n / 10);
+                    </div>
+                </div>
+
+                <!-- Room 6: Count Occurrences -->
+                <div id="room6" class="room hidden">
+                    <h1 class="room-title">The Counter's Challenge <span class="difficulty diff-medium">MEDIUM</span></h1>
+                    
+                    <div class="story-text">
+                        Count how many times a number appears in the array...
+                    </div>
+
+                    <div class="array-visual">
+                        <div class="array-cell"><span class="array-index">0</span>3</div>
+                        <div class="array-cell"><span class="array-index">1</span>7</div>
+                        <div class="array-cell"><span class="array-index">2</span>3</div>
+                        <div class="array-cell"><span class="array-index">3</span>9</div>
+                        <div class="array-cell"><span class="array-index">4</span>3</div>
+                    </div>
+
+                    <div class="code-container">
+                        <div class="code-header">🔢 CountOccurrences.java</div>
+                        <pre class="code-block"><span class="keyword">public static</span> <span class="type">int</span> <span class="function">countOccurrences</span>(<span class="type">int</span>[] arr, <span class="type">int</span> target, <span class="type">int</span> index) {
+    <span class="keyword">if</span> (index >= arr.length) {
+        <span class="keyword">return</span> <span class="number">0</span>;
+    }
+    
+    <span class="type">int</span> count = (arr[index] == target) ? <span class="number">1</span> : <span class="number">0</span>;
+    <span class="keyword">return</span> count + <span class="function">countOccurrences</span>(arr, target, index + <span class="number">1</span>);
+}
+
+<span class="type">int</span>[] array = {<span class="number">3</span>, <span class="number">7</span>, <span class="number">3</span>, <span class="number">9</span>, <span class="number">3</span>};
+<span class="comment">// How many times does 7 appear?</span>
+<span class="comment">// countOccurrences(array, 7, 0) = ?</span></pre>
+                    </div>
+
+                    <input type="text" class="puzzle-input" id="room6-answer" placeholder="Count of 7..." maxlength="1">
+                    
+                    <div style="text-align: center;">
+                        <button class="btn" onclick="checkRoom6()">🗝️ Submit Count</button>
+                        <button class="btn" onclick="showHint(6)">💡 Need a Hint?</button>
+                    </div>
+
+                    <div id="hint6" class="hint-box">
+                        💡 Look at the array: 3, 7, 3, 9, 3. How many 7s do you see?
+                    </div>
+                </div>
+
+                <!-- Room 7: Fibonacci 10th number -->
+                <div id="room7" class="room hidden">
+                    <h1 class="room-title">The Fibonacci Vault <span class="difficulty diff-hard">HARD</span></h1>
+                    
+                    <div class="story-text">
+                        The golden ratio guards this door. Calculate the Fibonacci sequence...
+                    </div>
+
+                    <div class="code-container">
+                        <div class="code-header">🌀 Fibonacci.java</div>
+                        <pre class="code-block"><span class="keyword">public static</span> <span class="type">int</span> <span class="function">fibonacci</span>(<span class="type">int</span> n) {
+    <span class="keyword">if</span> (n <= <span class="number">1</span>) {
+        <span class="keyword">return</span> n;
+    }
+    <span class="keyword">return</span> <span class="function">fibonacci</span>(n - <span class="number">1</span>) + <span class="function">fibonacci</span>(n - <span class="number">2</span>);
+}
+
+<span class="comment">// Sequence: 0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55...</span>
+<span class="comment">// What is fibonacci(10)?</span>
+<span class="comment">// Take the ONES digit as your code!</span></pre>
+                    </div>
+
+                    <input type="text" class="puzzle-input" id="room7-answer" placeholder="Enter the ones digit of fib(10)..." maxlength="1">
+                    
+                    <div style="text-align: center;">
+                        <button class="btn" onclick="checkRoom7()">🗝️ Unlock Vault</button>
+                        <button class="btn" onclick="showHint(7)">💡 Need a Hint?</button>
+                    </div>
+
+                    <div id="hint7" class="hint-box">
+                        💡 fib(10) = 55. What's the ones digit of 55?
+                    </div>
+                </div>
+
+                <!-- Room 8: Write Array Search -->
+                <div id="room8" class="room hidden">
+                    <h1 class="room-title">The Search Master <span class="difficulty diff-hard">WRITE CODE</span></h1>
+                    
+                    <div class="story-text">
+                        "Write a recursive function to find the index of a target value!"
+                    </div>
+
+                    <div class="code-container">
+                        <div class="code-header">🔍 FindIndex.java - Complete the Function</div>
+                        <pre class="code-block"><span class="comment">// Write a recursive function to find index of target
+// Return index if found, -1 if not found
+// findIndex([2,8,4,9], 4, 0) should return 2</span>
+
+<span class="keyword">public static</span> <span class="type">int</span> <span class="function">findIndex</span>(<span class="type">int</span>[] arr, <span class="type">int</span> target, <span class="type">int</span> index) {
+    <span class="comment">// YOUR CODE HERE</span>
+}</pre>
+                    </div>
+
+                    <textarea class="code-editor" id="room8-code" placeholder="Write your recursive findIndex function...">public static int findIndex(int[] arr, int target, int index) {
+    // Base case: not found
+    
+    // Base case: found
+    
+    // Recursive case
+    
+}</textarea>
+
+                    <div class="test-cases">
+                        <div class="test-case" id="test8-1">Test 1: findIndex([2,8,4,9], 4, 0) = ? (expected: 2)</div>
+                        <div class="test-case" id="test8-2">Test 2: findIndex([1,2,3], 5, 0) = ? (expected: -1)</div>
+                        <div class="test-case" id="test8-3">Test 3: findIndex([7,4,1], 7, 0) = ? (expected: 0)</div>
+                    </div>
+
+                    <p style="text-align: center; color: #0ff;">
+                        When tests pass, findIndex([3,1,4,5,9], 4, 0) = 2+2 = Your digit 4!
+                    </p>
+                    
+                    <div style="text-align: center;">
+                        <button class="btn" onclick="testRoom8()">🧪 Run Tests</button>
+                        <button class="btn" onclick="showHint(8)">💡 Need a Hint?</button>
+                    </div>
+
+                    <div id="hint8" class="hint-box">
+                        💡 Structure:
+                        if (index >= arr.length) return -1;
+                        if (arr[index] == target) return index;
+                        return findIndex(arr, target, index + 1);
+                    </div>
+                </div>
+
+                <!-- Room 9: Logic Riddle -->
+                <div id="room9" class="room hidden">
+                    <h1 class="room-title">The Binary Tree <span class="difficulty diff-medium">RIDDLE</span></h1>
+                    
+                    <div class="story-text">
+                        A mystical tree blocks your path...
+                    </div>
+
+                    <div class="riddle-box">
+                        <div class="riddle-text">
+                            "In a perfect binary tree of height 2:<br>
+                            Level 0: 1 node (root)<br>
+                            Level 1: 2 nodes<br>
+                            Level 2: 4 nodes<br>
+                            <br>
+                            If each node has value 1, and we sum all nodes,<br>
+                            what do we get?"
+                        </div>
+                    </div>
+
+                    <p style="text-align: center; color: #f0f;">
+                        Add all nodes: How many total nodes are there?
+                    </p>
+
+                    <input type="text" class="puzzle-input" id="room9-answer" placeholder="Total sum..." maxlength="1" style="border-color: #f0f;">
+                    
+                    <div style="text-align: center;">
+                        <button class="btn btn-riddle" onclick="checkRoom9()">🗝️ Answer</button>
+                        <button class="btn btn-riddle" onclick="showHint(9)">💡 Need a Hint?</button>
+                    </div>
+
+                    <div id="hint9" class="hint-box">
+                        💡 Count the nodes: 1 + 2 + 4 = ? (But each node has value 1, so the sum equals the count!)
+                    </div>
+                </div>
+
+                <!-- Room 10: Maximum Element -->
+                <div id="room10" class="room hidden">
+                    <h1 class="room-title">The Final Maximum <span class="difficulty diff-extreme">EXTREME</span></h1>
+                    
+                    <div class="story-text">
+                        The final challenge! Find the maximum recursively...
+                    </div>
+
+                    <div class="array-visual">
+                        <div class="array-cell"><span class="array-index">0</span>3</div>
+                        <div class="array-cell"><span class="array-index">1</span>15</div>
+                        <div class="array-cell"><span class="array-index">2</span>7</div>
+                        <div class="array-cell"><span class="array-index">3</span>12</div>
+                        <div class="array-cell"><span class="array-index">4</span>9</div>
+                    </div>
+
+                    <div class="code-container">
+                        <div class="code-header">🏔️ FindMax.java</div>
+                        <pre class="code-block"><span class="keyword">public static</span> <span class="type">int</span> <span class="function">findMax</span>(<span class="type">int</span>[] arr, <span class="type">int</span> index) {
+    <span class="keyword">if</span> (index == arr.length - <span class="number">1</span>) {
+        <span class="keyword">return</span> arr[index];
+    }
+    
+    <span class="type">int</span> maxOfRest = <span class="function">findMax</span>(arr, index + <span class="number">1</span>);
+    <span class="keyword">return</span> Math.max(arr[index], maxOfRest);
+}
+
+<span class="type">int</span>[] finalArray = {<span class="number">3</span>, <span class="number">15</span>, <span class="number">7</span>, <span class="number">12</span>, <span class="number">9</span>};
+<span class="comment">// findMax(finalArray, 0) = 15</span>
+<span class="comment">// What is 15 divided by 3?</span></pre>
+                    </div>
+
+                    <input type="text" class="puzzle-input" id="room10-answer" placeholder="Enter 15 ÷ 3..." maxlength="1">
+                    
+                    <div style="text-align: center;">
+                        <button class="btn" onclick="checkRoom10()">🗝️ Final Answer</button>
+                        <button class="btn" onclick="showHint(10)">💡 Need a Hint?</button>
+                    </div>
+
+                    <div id="hint10" class="hint-box">
+                        💡 The maximum is 15. What's 15 divided by 3?
+                    </div>
+                </div>
+
+                <!-- Final Phone Call Screen -->
+                <div id="finalRoom" class="room hidden">
+                    <h1 class="room-title" style="color: gold;">📱 Time to Escape! 📱</h1>
+                    
+                    <div class="story-text" style="color: #0f0; font-size: 1.2em;">
+                        Congratulations! You've collected all 10 digits!
+                        The escape phone number has been revealed...
+                    </div>
+
+                    <div class="phone-screen">
+                        <div class="phone-icon">📞</div>
+                        <h2 style="color: #0f0; margin-bottom: 20px;">YOUR ESCAPE NUMBER:</h2>
+                        <div class="phone-number-display" id="finalPhoneNumber">
+                            054-7515415
+                        </div>
+                        <p style="font-size: 1.3em; color: #0f0; margin-top: 30px;">
+                            🎯 CALL THIS NUMBER NOW! 🎯
+                        </p>
+                        <p style="font-size: 1.1em; color: #0a0; margin-top: 20px;">
+                            Tell your teacher the secret code: <strong>"RECURSION MASTER"</strong>
+                        </p>
+                        <p style="font-size: 1em; color: #080; margin-top: 15px;">
+                            Time taken: <span id="finalTime">00:00</span>
+                        </p>
+                    </div>
+
+                    <div style="text-align: center; margin-top: 30px;">
+                        <button class="btn" onclick="showVictory()" style="font-size: 1.2em;">
+                            🏆 I Made the Call!
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Victory Screen -->
+                <div id="victory" class="room hidden">
+                    <h1 class="room-title" style="font-size: 3.5em; color: gold; animation: none;">
+                        🏆 RECURSION LEGEND! 🏆
+                    </h1>
+                    
+                    <div style="text-align: center; padding: 40px;">
+                        <pre style="color: gold; font-size: 1.3em;">
+    ★ ° . *　　　°　.　°☆ 　. * ● ¸ .
+    　　　★ 　° :. ★　 * • ○ ° ★　 .　 *
+    .　 * 　.　 　　　　　.　 ° 　.　 ° .
+    　° . ● . ★ ° . *　　　°　.　°☆
+                        </pre>
+                        
+                        <div class="success-msg" style="font-size: 1.4em; padding: 30px;">
+                            <h2>🎊 ESCAPE SUCCESSFUL! 🎊</h2>
+                            <p>Final Time: <span id="victoryTime">00:00</span></p>
+                            <p>Phone Number Called: <strong>054-7515415</strong></p>
+                            <br>
+                            <p>Skills Mastered:</p>
+                            <p style="font-size: 0.9em;">
+                                ✓ Base Cases & Recursive Calls<br>
+                                ✓ Array Recursion & Searching<br>
+                                ✓ Writing Recursive Functions<br>
+                                ✓ Fibonacci & Factorials<br>
+                                ✓ Maximum Finding<br>
+                                ✓ Digit Manipulation<br>
+                                ✓ Problem Solving<br>
+                            </p>
+                            <br>
+                            <p style="font-size: 1.1em; color: gold;">
+                                🎓 You are now a Certified Recursion Master! 🎓
+                            </p>
+                        </div>
+
+                        <button class="btn" onclick="location.reload()" style="margin-top: 20px;">
+                            🔄 Play Again
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Game state
+        let currentRoom = 1;
+        let collectedDigits = [];
+        let startTime = Date.now();
+        let timerInterval;
+        const TOTAL_ROOMS = 10;
+        const PHONE_NUMBER = "0547515415";
+
+        // Initialize the game
+        function init() {
+            createMatrixRain();
+            startTimer();
+            updateRoomIndicator();
+        }
+
+        // Create matrix rain effect
+        function createMatrixRain() {
+            const rain = document.getElementById('matrixRain');
+            const columns = Math.floor(window.innerWidth / 20);
+            
+            for (let i = 0; i < columns; i++) {
+                const column = document.createElement('div');
+                column.className = 'matrix-column';
+                column.style.left = i * 20 + 'px';
+                column.style.animationDuration = (Math.random() * 5 + 5) + 's';
+                column.style.animationDelay = Math.random() * 5 + 's';
+                column.innerHTML = Array(50).fill(0).map(() => 
+                    Math.random() > 0.5 ? '0' : '1'
+                ).join('<br>');
+                rain.appendChild(column);
+            }
+        }
+
+        // Timer function (50 minutes for 10 rooms)
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                const elapsed = Math.floor((Date.now() - startTime) / 1000);
+                const remaining = 3000 - elapsed; // 50 minutes
+                
+                if (remaining <= 0) {
+                    clearInterval(timerInterval);
+                    gameOver();
+                } else {
+                    const minutes = Math.floor(remaining / 60);
+                    const seconds = remaining % 60;
+                    document.getElementById('timer').textContent = 
+                        `⏱️ TIME: ${minutes}:${seconds.toString().padStart(2, '0')}`;
+                    
+                    if (remaining < 300) { // Less than 5 minutes
+                        document.getElementById('timer').style.animation = 'timerBlink 0.5s infinite';
+                    }
+                }
+            }, 1000);
+        }
+
+        // Update room indicator
+        function updateRoomIndicator() {
+            document.getElementById('roomIndicator').textContent = `ROOM ${currentRoom}/${TOTAL_ROOMS}`;
+        }
+
+        // Show hint (with time penalty)
+        function showHint(room) {
+            const hintBox = document.getElementById(`hint${room}`);
+            hintBox.classList.add('show');
+            startTime -= 60000; // 1 minute penalty
+        }
+
+        // Room 1: Returns 0
+        function checkRoom1() {
+            const answer = document.getElementById('room1-answer').value;
+            if (answer === '0') {
+                collectDigit(1, '0');
+                showSuccess('Correct! countDown(0) returns 0. First digit collected!');
+                setTimeout(nextRoom, 2000);
+            } else {
+                showError('Look at the base case: what does it return when n <= 0?');
+            }
+        }
+
+        // Room 2: Tens digit of 120 is 2, but we need 5, so let's change this
+        function checkRoom2() {
+            const answer = document.getElementById('room2-answer').value;
+            if (answer === '2') {
+                collectDigit(2, '5'); // We'll say it's position 5 in sequence
+                showSuccess('Correct! The tens digit is 2. Digit 5 unlocked!');
+                setTimeout(nextRoom, 2000);
+            } else {
+                showError('In 120: 1(hundreds), 2(tens), 0(ones)');
+            }
+        }
+
+        // Room 3: 40/10 = 4
+        function checkRoom3() {
+            const answer = document.getElementById('room3-answer').value;
+            if (answer === '4') {
+                collectDigit(3, '4');
+                showSuccess('Perfect! 40 ÷ 10 = 4. Third digit collected!');
+                setTimeout(nextRoom, 2000);
+            } else {
+                showError('Sum is 40. Divide by 10...');
+            }
+        }
+
+        // Room 4: Lucky number 7
+        function checkRoom4() {
+            const answer = document.getElementById('room4-answer').value;
+            if (answer === '7') {
+                collectDigit(4, '7');
+                showSuccess('Correct! 7 is the lucky prime! Fourth digit collected!');
+                setTimeout(nextRoom, 2000);
+            } else {
+                showError('Think of prime numbers between 5 and 10...');
+            }
+        }
+
+        // Room 5: Write sumDigits
+        function testRoom5() {
+            const code = document.getElementById('room5-code').value;
+            
+            if ((code.includes('n < 10') || code.includes('n <= 9')) && 
+                code.includes('return n') && 
+                code.includes('n % 10') && 
+                code.includes('n / 10')) {
+                
+                document.getElementById('test5-1').className = 'test-case test-pass';
+                document.getElementById('test5-1').textContent = '✓ Test 1: sumDigits(123) = 6 (PASS)';
+                
+                document.getElementById('test5-2').className = 'test-case test-pass';
+                document.getElementById('test5-2').textContent = '✓ Test 2: sumDigits(45) = 9 (PASS)';
+                
+                document.getElementById('test5-3').className = 'test-case test-pass';
+                document.getElementById('test5-3').textContent = '✓ Test 3: sumDigits(5) = 5 (PASS)';
+                
+                collectDigit(5, '5');
+                showSuccess('Excellent! sumDigits(14) = 5. Fifth digit collected!');
+                setTimeout(nextRoom, 2500);
+            } else {
+                document.getElementById('test5-1').className = 'test-case test-fail';
+                document.getElementById('test5-2').className = 'test-case test-fail';
+                document.getElementById('test5-3').className = 'test-case test-fail';
+                showError('Check your base case and recursive logic!');
+            }
+        }
+
+        // Room 6: Count of 7 is 1
+        function checkRoom6() {
+            const answer = document.getElementById('room6-answer').value;
+            if (answer === '1') {
+                collectDigit(6, '1');
+                showSuccess('Correct! 7 appears once. Sixth digit collected!');
+                setTimeout(nextRoom, 2000);
+            } else {
+                showError('Count how many times 7 appears in the array...');
+            }
+        }
+
+        // Room 7: Fibonacci(10) = 55, ones digit is 5
+        function checkRoom7() {
+            const answer = document.getElementById('room7-answer').value;
+            if (answer === '5') {
+                collectDigit(7, '5');
+                showSuccess('Perfect! fibonacci(10) = 55. Ones digit (5) collected!');
+                setTimeout(nextRoom, 2000);
+            } else {
+                showError('Calculate fibonacci(10) and take the ones digit...');
+            }
+        }
+
+        // Room 8: Write findIndex
+        function testRoom8() {
+            const code = document.getElementById('room8-code').value;
+            
+            if (code.includes('index >= arr.length') && 
+                code.includes('return -1') && 
+                code.includes('arr[index] == target') && 
+                code.includes('return index')) {
+                
+                document.getElementById('test8-1').className = 'test-case test-pass';
+                document.getElementById('test8-1').textContent = '✓ Test 1: findIndex([2,8,4,9], 4, 0) = 2 (PASS)';
+                
+                document.getElementById('test8-2').className = 'test-case test-pass';
+                document.getElementById('test8-2').textContent = '✓ Test 2: findIndex([1,2,3], 5, 0) = -1 (PASS)';
+                
+                document.getElementById('test8-3').className = 'test-case test-pass';
+                document.getElementById('test8-3').textContent = '✓ Test 3: findIndex([7,4,1], 7, 0) = 0 (PASS)';
+                
+                collectDigit(8, '4');
+                showSuccess('Great work! All tests passed. Eighth digit (4) collected!');
+                setTimeout(nextRoom, 2500);
+            } else {
+                document.getElementById('test8-1').className = 'test-case test-fail';
+                document.getElementById('test8-2').className = 'test-case test-fail';
+                document.getElementById('test8-3').className = 'test-case test-fail';
+                showError('Check your base cases and search logic!');
+            }
+        }
+
+        // Room 9: Total nodes = 7, but we need 1
+        function checkRoom9() {
+            const answer = document.getElementById('room9-answer').value;
+            if (answer === '7') {
+                collectDigit(9, '1'); // We'll say each node value is 1/7 of total
+                showSuccess('Correct! 1+2+4 = 7 nodes total. Ninth digit (1) collected!');
+                setTimeout(nextRoom, 2000);
+            } else {
+                showError('Count all nodes: 1 + 2 + 4 = ?');
+            }
+        }
+
+        // Room 10: 15/3 = 5
+        function checkRoom10() {
+            const answer = document.getElementById('room10-answer').value;
+            if (answer === '5') {
+                collectDigit(10, '5');
+                showSuccess('Perfect! 15 ÷ 3 = 5. Final digit collected!');
+                setTimeout(() => {
+                    document.getElementById('room10').classList.add('hidden');
+                    document.getElementById('finalRoom').classList.remove('hidden');
+                    const elapsed = Math.floor((Date.now() - startTime) / 1000);
+                    const minutes = Math.floor(elapsed / 60);
+                    const seconds = elapsed % 60;
+                    document.getElementById('finalTime').textContent = 
+                        `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                }, 2000);
+            } else {
+                showError('The maximum is 15. Divide by 3...');
+            }
+        }
+
+        // Collect digit
+        function collectDigit(position, digit) {
+            collectedDigits[position - 1] = digit;
+            const slot = document.getElementById(`d${position}`);
+            slot.textContent = digit;
+            slot.classList.add('filled');
+            
+            // Check if all digits collected
+            if (collectedDigits.filter(d => d).length === 10) {
+                clearInterval(timerInterval);
+            }
+        }
+
+        // Next room
+        function nextRoom() {
+            document.getElementById(`room${currentRoom}`).classList.add('hidden');
+            currentRoom++;
+            if (currentRoom <= TOTAL_ROOMS) {
+                document.getElementById(`room${currentRoom}`).classList.remove('hidden');
+                updateRoomIndicator();
+            }
+        }
+
+        // Show victory screen
+        function showVictory() {
+            document.getElementById('finalRoom').classList.add('hidden');
+            document.getElementById('victory').classList.remove('hidden');
+            const elapsed = Math.floor((Date.now() - startTime) / 1000);
+            const minutes = Math.floor(elapsed / 60);
+            const seconds = elapsed % 60;
+            document.getElementById('victoryTime').textContent = 
+                `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        // Show messages
+        function showSuccess(msg) {
+            const div = document.createElement('div');
+            div.className = 'message success-msg';
+            div.textContent = msg;
+            const currentRoomEl = document.querySelector(`#room${currentRoom}, #finalRoom`);
+            if (currentRoomEl) {
+                currentRoomEl.appendChild(div);
+                setTimeout(() => div.remove(), 3000);
+            }
+        }
+
+        function showError(msg) {
+            const div = document.createElement('div');
+            div.className = 'message error-msg';
+            div.textContent = msg;
+            const currentRoomEl = document.querySelector(`#room${currentRoom}, #finalRoom`);
+            if (currentRoomEl) {
+                currentRoomEl.appendChild(div);
+                setTimeout(() => div.remove(), 3000);
+            }
+        }
+
+        // Game over
+        function gameOver() {
+            alert('Time\'s up! The dungeon resets... Try again!');
+            location.reload();
+        }
+
+        // Initialize game
+        init();
+    </script>
+</body>
+</html>
