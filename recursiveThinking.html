@@ -227,6 +227,16 @@
             text-align: left;
             overflow-x: auto;
             margin: 15px 0;
+            white-space: pre-line;  /* Allow line breaks */
+        }
+        
+        .code-line {
+            display: block;
+            white-space: pre;  /* Preserve spaces */
+        }
+        
+        .code-line:hover {
+            background: rgba(255, 255, 255, 0.05);
         }
         
         .keyword { color: #c678dd; }
@@ -814,14 +824,14 @@
                     { text: 'factorial(6) = factorial(5) × factorial(1)', correct: false }
                 ],
                 formula: 'factorial(n) = n × factorial(n-1)',
-                code: `<span class="keyword">public static</span> <span class="keyword">int</span> <span class="function">factorial</span>(<span class="keyword">int</span> <span class="parameter">n</span>) {
-    <span class="comment">// תנאי עצירה</span>
-    <span class="keyword">if</span> (<span class="parameter">n</span> <= <span class="number">1</span>) {
-        <span class="keyword">return</span> <span class="number">1</span>;
-    }
-    <span class="comment">// קריאה רקורסיבית</span>
-    <span class="keyword">return</span> <span class="parameter">n</span> * <span class="function">factorial</span>(<span class="parameter">n</span> - <span class="number">1</span>);
-}`,
+                code: `<div class="code-line"><span class="keyword">public static</span> <span class="keyword">int</span> <span class="function">factorial</span>(<span class="keyword">int</span> <span class="parameter">n</span>) {</div>
+<div class="code-line">    <span class="comment">// תנאי עצירה</span></div>
+<div class="code-line">    <span class="keyword">if</span> (<span class="parameter">n</span> <= <span class="number">1</span>) {</div>
+<div class="code-line">        <span class="keyword">return</span> <span class="number">1</span>;</div>
+<div class="code-line">    }</div>
+<div class="code-line">    <span class="comment">// קריאה רקורסיבית</span></div>
+<div class="code-line">    <span class="keyword">return</span> <span class="parameter">n</span> * <span class="function">factorial</span>(<span class="parameter">n</span> - <span class="number">1</span>);</div>
+<div class="code-line">}</div>`,
                 codeExplanation: [
                     '1. בודקים תנאי עצירה: אם n קטן או שווה ל-1, מחזירים 1',
                     '2. אחרת: מחזירים n כפול העצרת של n-1',
@@ -885,14 +895,14 @@
                     { text: 'power(3,5) = 3 + power(3,4)', correct: false }
                 ],
                 formula: 'power(x, n) = x × power(x, n-1)',
-                code: `<span class="keyword">public static</span> <span class="keyword">int</span> <span class="function">power</span>(<span class="keyword">int</span> <span class="parameter">x</span>, <span class="keyword">int</span> <span class="parameter">n</span>) {
-    <span class="comment">// תנאי עצירה</span>
-    <span class="keyword">if</span> (<span class="parameter">n</span> == <span class="number">0</span>) {
-        <span class="keyword">return</span> <span class="number">1</span>;
-    }
-    <span class="comment">// קריאה רקורסיבית</span>
-    <span class="keyword">return</span> <span class="parameter">x</span> * <span class="function">power</span>(<span class="parameter">x</span>, <span class="parameter">n</span> - <span class="number">1</span>);
-}`,
+                code: `<div class="code-line"><span class="keyword">public static</span> <span class="keyword">int</span> <span class="function">power</span>(<span class="keyword">int</span> <span class="parameter">x</span>, <span class="keyword">int</span> <span class="parameter">n</span>) {</div>
+<div class="code-line">    <span class="comment">// תנאי עצירה</span></div>
+<div class="code-line">    <span class="keyword">if</span> (<span class="parameter">n</span> == <span class="number">0</span>) {</div>
+<div class="code-line">        <span class="keyword">return</span> <span class="number">1</span>;</div>
+<div class="code-line">    }</div>
+<div class="code-line">    <span class="comment">// קריאה רקורסיבית</span></div>
+<div class="code-line">    <span class="keyword">return</span> <span class="parameter">x</span> * <span class="function">power</span>(<span class="parameter">x</span>, <span class="parameter">n</span> - <span class="number">1</span>);</div>
+<div class="code-line">}</div>`,
                 codeExplanation: [
                     '1. תנאי עצירה: אם n=0, מחזירים 1',
                     '2. אחרת: מחזירים x כפול x בחזקת n-1',
@@ -957,18 +967,18 @@
                     { text: 'נבדוק את "vel"', correct: false }
                 ],
                 formula: 'isPalindrome(s) = (ראשון == אחרון) && isPalindrome(אמצע)',
-                code: `<span class="keyword">public static</span> <span class="keyword">boolean</span> <span class="function">isPalindrome</span>(<span class="keyword">String</span> <span class="parameter">s</span>, <span class="keyword">int</span> <span class="parameter">start</span>, <span class="keyword">int</span> <span class="parameter">end</span>) {
-    <span class="comment">// תנאי עצירה - נשאר תו אחד או פחות</span>
-    <span class="keyword">if</span> (<span class="parameter">start</span> >= <span class="parameter">end</span>) {
-        <span class="keyword">return</span> <span class="keyword">true</span>;
-    }
-    <span class="comment">// בודקים אם הקצוות זהים</span>
-    <span class="keyword">if</span> (<span class="parameter">s</span>.charAt(<span class="parameter">start</span>) != <span class="parameter">s</span>.charAt(<span class="parameter">end</span>)) {
-        <span class="keyword">return</span> <span class="keyword">false</span>;
-    }
-    <span class="comment">// בודקים את האמצע רקורסיבית</span>
-    <span class="keyword">return</span> <span class="function">isPalindrome</span>(<span class="parameter">s</span>, <span class="parameter">start</span> + <span class="number">1</span>, <span class="parameter">end</span> - <span class="number">1</span>);
-}`,
+                code: `<div class="code-line"><span class="keyword">public static</span> <span class="keyword">boolean</span> <span class="function">isPalindrome</span>(<span class="keyword">String</span> <span class="parameter">s</span>, <span class="keyword">int</span> <span class="parameter">start</span>, <span class="keyword">int</span> <span class="parameter">end</span>) {</div>
+<div class="code-line">    <span class="comment">// תנאי עצירה - נשאר תו אחד או פחות</span></div>
+<div class="code-line">    <span class="keyword">if</span> (<span class="parameter">start</span> >= <span class="parameter">end</span>) {</div>
+<div class="code-line">        <span class="keyword">return</span> <span class="keyword">true</span>;</div>
+<div class="code-line">    }</div>
+<div class="code-line">    <span class="comment">// בודקים אם הקצוות זהים</span></div>
+<div class="code-line">    <span class="keyword">if</span> (<span class="parameter">s</span>.charAt(<span class="parameter">start</span>) != <span class="parameter">s</span>.charAt(<span class="parameter">end</span>)) {</div>
+<div class="code-line">        <span class="keyword">return</span> <span class="keyword">false</span>;</div>
+<div class="code-line">    }</div>
+<div class="code-line">    <span class="comment">// בודקים את האמצע רקורסיבית</span></div>
+<div class="code-line">    <span class="keyword">return</span> <span class="function">isPalindrome</span>(<span class="parameter">s</span>, <span class="parameter">start</span> + <span class="number">1</span>, <span class="parameter">end</span> - <span class="number">1</span>);</div>
+<div class="code-line">}</div>`,
                 codeExplanation: [
                     '1. אם נשאר תו אחד או פחות - זה פלינדרום',
                     '2. משווים את התווים בקצוות',
@@ -1029,14 +1039,14 @@
                     { text: '5 ספרות', correct: false }
                 ],
                 formula: 'countDigits(n) = 1 + countDigits(n/10)',
-                code: `<span class="keyword">public static</span> <span class="keyword">int</span> <span class="function">countDigits</span>(<span class="keyword">int</span> <span class="parameter">n</span>) {
-    <span class="comment">// תנאי עצירה - מספר חד-ספרתי</span>
-    <span class="keyword">if</span> (<span class="parameter">n</span> < <span class="number">10</span>) {
-        <span class="keyword">return</span> <span class="number">1</span>;
-    }
-    <span class="comment">// קריאה רקורסיבית</span>
-    <span class="keyword">return</span> <span class="number">1</span> + <span class="function">countDigits</span>(<span class="parameter">n</span> / <span class="number">10</span>);
-}`,
+                code: `<div class="code-line"><span class="keyword">public static</span> <span class="keyword">int</span> <span class="function">countDigits</span>(<span class="keyword">int</span> <span class="parameter">n</span>) {</div>
+<div class="code-line">    <span class="comment">// תנאי עצירה - מספר חד-ספרתי</span></div>
+<div class="code-line">    <span class="keyword">if</span> (<span class="parameter">n</span> < <span class="number">10</span>) {</div>
+<div class="code-line">        <span class="keyword">return</span> <span class="number">1</span>;</div>
+<div class="code-line">    }</div>
+<div class="code-line">    <span class="comment">// קריאה רקורסיבית</span></div>
+<div class="code-line">    <span class="keyword">return</span> <span class="number">1</span> + <span class="function">countDigits</span>(<span class="parameter">n</span> / <span class="number">10</span>);</div>
+<div class="code-line">}</div>`,
                 codeExplanation: [
                     '1. אם המספר קטן מ-10, יש בו ספרה אחת',
                     '2. אחרת: סופרים ספרה אחת + הספרות של n/10',
@@ -1098,15 +1108,15 @@
                     { text: '"cab"', correct: false }
                 ],
                 formula: 'reverse(s) = s.charAt(n-1) + reverse(s.substring(0, n-1))',
-                code: `<span class="keyword">public static</span> <span class="keyword">String</span> <span class="function">reverse</span>(<span class="keyword">String</span> <span class="parameter">s</span>) {
-    <span class="comment">// תנאי עצירה - מחרוזת ריקה או תו בודד</span>
-    <span class="keyword">if</span> (<span class="parameter">s</span>.length() <= <span class="number">1</span>) {
-        <span class="keyword">return</span> <span class="parameter">s</span>;
-    }
-    <span class="comment">// קריאה רקורסיבית</span>
-    <span class="keyword">return</span> <span class="parameter">s</span>.charAt(<span class="parameter">s</span>.length() - <span class="number">1</span>) + 
-           <span class="function">reverse</span>(<span class="parameter">s</span>.substring(<span class="number">0</span>, <span class="parameter">s</span>.length() - <span class="number">1</span>));
-}`,
+                code: `<div class="code-line"><span class="keyword">public static</span> <span class="keyword">String</span> <span class="function">reverse</span>(<span class="keyword">String</span> <span class="parameter">s</span>) {</div>
+<div class="code-line">    <span class="comment">// תנאי עצירה - מחרוזת ריקה או תו בודד</span></div>
+<div class="code-line">    <span class="keyword">if</span> (<span class="parameter">s</span>.length() <= <span class="number">1</span>) {</div>
+<div class="code-line">        <span class="keyword">return</span> <span class="parameter">s</span>;</div>
+<div class="code-line">    }</div>
+<div class="code-line">    <span class="comment">// קריאה רקורסיבית</span></div>
+<div class="code-line">    <span class="keyword">return</span> <span class="parameter">s</span>.charAt(<span class="parameter">s</span>.length() - <span class="number">1</span>) + </div>
+<div class="code-line">           <span class="function">reverse</span>(<span class="parameter">s</span>.substring(<span class="number">0</span>, <span class="parameter">s</span>.length() - <span class="number">1</span>));</div>
+<div class="code-line">}</div>`,
                 codeExplanation: [
                     '1. אם המחרוזת ריקה או עם תו אחד - מחזירים אותה',
                     '2. אחרת: התו האחרון + היפוך של השאר',
@@ -1223,6 +1233,16 @@
             
             // Step 5: Code
             document.getElementById('finalCode').innerHTML = problem.code;
+            
+            // Add line numbers
+            const codeLines = document.querySelectorAll('#finalCode .code-line');
+            codeLines.forEach((line, index) => {
+                const lineNum = document.createElement('span');
+                lineNum.style.cssText = 'color: #5c6370; margin-left: 10px; padding-left: 5px; border-left: 1px solid #3e4451; display: inline-block; width: 25px; text-align: left; user-select: none;';
+                lineNum.textContent = (index + 1).toString().padStart(2, ' ');
+                line.prepend(lineNum);
+            });
+            
             document.getElementById('codeExplanation').innerHTML = 
                 problem.codeExplanation.map(exp => `<div>• ${exp}</div>`).join('');
             
