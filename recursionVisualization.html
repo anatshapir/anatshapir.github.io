@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ויזואליזציה של רקורסיה - מדמה דיבאגר</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.2em;
+        }
+        
+        .main-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .code-section {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            border: 2px solid #dee2e6;
+        }
+        
+        .code-header {
+            font-weight: bold;
+            color: #495057;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+        
+        .code-display {
+            background: #282c34;
+            color: #abb2bf;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 14px;
+            line-height: 1.6;
+            direction: ltr;
+            text-align: left;
+            position: relative;
+            overflow-x: auto;
+        }
+        
+        .code-line {
+            padding: 2px 0;
+            position: relative;
+        }
+        
+        .code-line.active {
+            background: rgba(97, 175, 239, 0.2);
+            border-right: 3px solid #61afef;
+            margin-right: -20px;
+            padding-right: 17px;
+        }
+        
+        .keyword { color: #c678dd; }
+        .function { color: #61afef; }
+        .number { color: #d19a66; }
+        .string { color: #98c379; }
+        .comment { color: #5c6370; font-style: italic; }
+        .parameter { color: #e06c75; }
+        
+        .stack-section {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            border: 2px solid #dee2e6;
+        }
+        
+        .stack-header {
+            font-weight: bold;
+            color: #495057;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+        
+        .call-stack {
+            display: flex;
+            flex-direction: column-reverse;
+            gap: 10px;
+            min-height: 400px;
+            background: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+        }
+        
+        .stack-frame {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            animation: slideIn 0.5s ease-out;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .stack-frame.returning {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            animation: pulse 0.5s ease-out;
+        }
+        
+        .stack-frame.completed {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            opacity: 0.7;
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateX(-100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .frame-title {
+            font-weight: bold;
+            margin-bottom: 8px;
+            font-size: 1.1em;
+        }
+        
+        .frame-content {
+            display: grid;
+            gap: 5px;
+            font-size: 0.95em;
+        }
+        
+        .frame-variable {
+            background: rgba(255,255,255,0.2);
+            padding: 5px 10px;
+            border-radius: 5px;
+            display: inline-block;
+            margin-left: 5px;
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        button {
+            padding: 12px 30px;
+            font-size: 1.1em;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .btn-next {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn-next:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+        }
+        
+        .btn-reset {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+        
+        .btn-reset:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+        }
+        
+        .btn-auto {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+        }
+        
+        .btn-auto:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+        }
+        
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .info-panel {
+            background: #e7f5ff;
+            border-right: 4px solid #1c7ed6;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+        
+        .info-title {
+            font-weight: bold;
+            color: #1c7ed6;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+        }
+        
+        .info-content {
+            color: #495057;
+            line-height: 1.8;
+        }
+        
+        .highlight {
+            background: #fff3bf;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-weight: bold;
+        }
+        
+        .example-selector {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .example-btn {
+            padding: 8px 20px;
+            background: #f1f3f5;
+            color: #495057;
+            border: 2px solid #dee2e6;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .example-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: #667eea;
+        }
+        
+        .example-btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .result-display {
+            background: #d3f9d8;
+            border: 2px solid #51cf66;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #2b8a3e;
+            display: none;
+            margin-top: 20px;
+        }
+        
+        .result-display.show {
+            display: block;
+            animation: slideIn 0.5s ease-out;
+        }
+        
+        .variables-display {
+            background: #fff;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 20px;
+            border: 1px solid #dee2e6;
+        }
+        
+        .variables-title {
+            font-weight: bold;
+            color: #495057;
+            margin-bottom: 10px;
+        }
+        
+        .variable-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px;
+            background: #f8f9fa;
+            margin-bottom: 5px;
+            border-radius: 5px;
+        }
+        
+        .variable-name {
+            font-weight: bold;
+            color: #495057;
+        }
+        
+        .variable-value {
+            color: #e06c75;
+            font-family: monospace;
+        }
+        
+        .speed-control {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        
+        .speed-label {
+            font-weight: bold;
+            color: #495057;
+        }
+        
+        .speed-slider {
+            width: 200px;
+        }
+        
+        .speed-value {
+            color: #667eea;
+            font-weight: bold;
+            min-width: 50px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 ויזואליזציה של פונקציה רקורסיבית</h1>
+        <p class="subtitle">סימולציה של הרצה בדיבאגר - צעד אחר צעד</p>
+        
+        <div class="example-selector">
+            <button class="example-btn active" onclick="selectExample('factorial')">עצרת (Factorial)</button>
+            <button class="example-btn" onclick="selectExample('sum')">סכום מערך</button>
+            <button class="example-btn" onclick="selectExample('fibonacci')">פיבונאצ'י</button>
+        </div>
+        
+        <div class="info-panel">
+            <div class="info-title">📌 מה קורה עכשיו?</div>
+            <div class="info-content" id="currentAction">
+                לחץ על "צעד הבא" כדי להתחיל את הסימולציה. 
+                הפונקציה תחשב <span class="highlight" id="exampleDescription">5! (עצרת של 5)</span>
+            </div>
+        </div>
+        
+        <div class="main-layout">
+            <div class="code-section">
+                <div class="code-header">📝 הקוד</div>
+                <div class="code-display" id="codeDisplay">
+                    <!-- Code will be inserted here -->
+                </div>
+            </div>
+            
+            <div class="stack-section">
+                <div class="stack-header">📚 מחסנית הקריאות (Call Stack)</div>
+                <div class="call-stack" id="callStack">
+                    <!-- Stack frames will be added here -->
+                </div>
+            </div>
+        </div>
+        
+        <div class="variables-display">
+            <div class="variables-title">🔍 משתנים גלובליים</div>
+            <div id="globalVars">
+                <div class="variable-item">
+                    <span class="variable-name">מספר קריאות:</span>
+                    <span class="variable-value" id="callCount">0</span>
+                </div>
+                <div class="variable-item">
+                    <span class="variable-name">עומק רקורסיה נוכחי:</span>
+                    <span class="variable-value" id="recursionDepth">0</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="speed-control">
+            <span class="speed-label">מהירות אנימציה:</span>
+            <input type="range" class="speed-slider" id="speedSlider" min="500" max="3000" value="1500" step="500">
+            <span class="speed-value" id="speedValue">1.5 שניות</span>
+        </div>
+        
+        <div class="controls">
+            <button class="btn-next" onclick="nextStep()" id="nextBtn">▶ צעד הבא</button>
+            <button class="btn-auto" onclick="autoPlay()" id="autoBtn">⚡ הרצה אוטומטית</button>
+            <button class="btn-reset" onclick="reset()">🔄 התחל מחדש</button>
+        </div>
+        
+        <div class="result-display" id="resultDisplay">
+            <!-- Result will be shown here -->
+        </div>
+    </div>
+    
+    <script>
+        // Example configurations
+        const examples = {
+            factorial: {
+                name: 'עצרת',
+                description: '5! (עצרת של 5)',
+                input: 5,
+                code: [
+                    '<span class="keyword">public static</span> <span class="keyword">int</span> <span class="function">factorial</span>(<span class="keyword">int</span> <span class="parameter">n</span>) {',
+                    '    <span class="comment">// תנאי עצירה</span>',
+                    '    <span class="keyword">if</span> (<span class="parameter">n</span> <= <span class="number">1</span>) {',
+                    '        <span class="keyword">return</span> <span class="number">1</span>;',
+                    '    }',
+                    '    <span class="comment">// קריאה רקורסיבית</span>',
+                    '    <span class="keyword">return</span> <span class="parameter">n</span> * <span class="function">factorial</span>(<span class="parameter">n</span> - <span class="number">1</span>);',
+                    '}'
+                ]
+            },
+            sum: {
+                name: 'סכום מערך',
+                description: 'סכום המערך [3, 5, 2, 7]',
+                input: {arr: [3, 5, 2, 7], index: 0},
+                code: [
+                    '<span class="keyword">public static</span> <span class="keyword">int</span> <span class="function">sumArray</span>(<span class="keyword">int</span>[] <span class="parameter">arr</span>, <span class="keyword">int</span> <span class="parameter">index</span>) {',
+                    '    <span class="comment">// תנאי עצירה</span>',
+                    '    <span class="keyword">if</span> (<span class="parameter">index</span> >= <span class="parameter">arr</span>.length) {',
+                    '        <span class="keyword">return</span> <span class="number">0</span>;',
+                    '    }',
+                    '    <span class="comment">// קריאה רקורסיבית</span>',
+                    '    <span class="keyword">return</span> <span class="parameter">arr</span>[<span class="parameter">index</span>] + <span class="function">sumArray</span>(<span class="parameter">arr</span>, <span class="parameter">index</span> + <span class="number">1</span>);',
+                    '}'
+                ]
+            },
+            fibonacci: {
+                name: 'פיבונאצ\'י',
+                description: 'המספר ה-6 בסדרת פיבונאצ\'י',
+                input: 6,
+                code: [
+                    '<span class="keyword">public static</span> <span class="keyword">int</span> <span class="function">fibonacci</span>(<span class="keyword">int</span> <span class="parameter">n</span>) {',
+                    '    <span class="comment">// תנאי עצירה</span>',
+                    '    <span class="keyword">if</span> (<span class="parameter">n</span> <= <span class="number">1</span>) {',
+                    '        <span class="keyword">return</span> <span class="parameter">n</span>;',
+                    '    }',
+                    '    <span class="comment">// שתי קריאות רקורסיביות</span>',
+                    '    <span class="keyword">return</span> <span class="function">fibonacci</span>(<span class="parameter">n</span> - <span class="number">1</span>) + <span class="function">fibonacci</span>(<span class="parameter">n</span> - <span class="number">2</span>);',
+                    '}'
+                ]
+            }
+        };
+        
+        let currentExample = 'factorial';
+        let steps = [];
+        let currentStep = 0;
+        let callStack = [];
+        let callCounter = 0;
+        let autoPlayInterval = null;
+        let animationSpeed = 1500;
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            selectExample('factorial');
+            updateSpeedDisplay();
+        });
+        
+        // Speed control
+        document.getElementById('speedSlider').addEventListener('input', function() {
+            animationSpeed = parseInt(this.value);
+            updateSpeedDisplay();
+        });
+        
+        function updateSpeedDisplay() {
+            document.getElementById('speedValue').textContent = (animationSpeed / 1000).toFixed(1) + ' שניות';
+        }
+        
+        function selectExample(example) {
+            currentExample = example;
+            reset();
+            
+            // Update UI
+            document.querySelectorAll('.example-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Update code display
+            const codeDisplay = document.getElementById('codeDisplay');
+            codeDisplay.innerHTML = examples[example].code.map((line, index) => 
+                `<div class="code-line" data-line="${index}">${line}</div>`
+            ).join('\n');
+            
+            // Update description
+            document.getElementById('exampleDescription').textContent = examples[example].description;
+            
+            // Generate steps
+            generateSteps();
+        }
+        
+        function generateSteps() {
+            steps = [];
+            callStack = [];
+            
+            switch(currentExample) {
+                case 'factorial':
+                    generateFactorialSteps(examples.factorial.input);
+                    break;
+                case 'sum':
+                    generateSumSteps(examples.sum.input.arr, examples.sum.input.index);
+                    break;
+                case 'fibonacci':
+                    generateFibonacciSteps(examples.fibonacci.input);
+                    break;
+            }
+        }
+        
+        function generateFactorialSteps(n) {
+            // Generate forward steps (calling)
+            const forwardSteps = [];
+            for (let i = n; i >= 1; i--) {
+                forwardSteps.push({
+                    type: 'call',
+                    function: 'factorial',
+                    params: {n: i},
+                    line: i > 1 ? 6 : 3,
+                    message: i > 1 ? 
+                        `קוראים ל-factorial(${i}) - צריך לחשב ${i} * factorial(${i-1})` :
+                        `factorial(1) - תנאי עצירה! מחזירים 1`
+                });
+            }
+            
+            // Generate return steps
+            const returnSteps = [];
+            let result = 1;
+            for (let i = 1; i <= n; i++) {
+                const oldResult = result;
+                result = i * result;
+                returnSteps.push({
+                    type: 'return',
+                    function: 'factorial',
+                    params: {n: i},
+                    returnValue: i === 1 ? 1 : result,
+                    line: i === 1 ? 3 : 6,
+                    message: i === 1 ? 
+                        `factorial(1) מחזיר 1` :
+                        `factorial(${i}) מחזיר ${i} * ${oldResult} = ${result}`
+                });
+            }
+            
+            steps = [...forwardSteps, ...returnSteps];
+        }
+        
+        function generateSumSteps(arr, startIndex) {
+            // Generate forward steps
+            const forwardSteps = [];
+            for (let i = startIndex; i <= arr.length; i++) {
+                if (i < arr.length) {
+                    forwardSteps.push({
+                        type: 'call',
+                        function: 'sumArray',
+                        params: {arr: '[' + arr.join(', ') + ']', index: i, value: arr[i]},
+                        line: 6,
+                        message: `קוראים ל-sumArray עם index=${i}, arr[${i}]=${arr[i]}`
+                    });
+                } else {
+                    forwardSteps.push({
+                        type: 'call',
+                        function: 'sumArray',
+                        params: {arr: '[' + arr.join(', ') + ']', index: i},
+                        line: 3,
+                        message: `תנאי עצירה! index=${i} >= אורך המערך (${arr.length})`
+                    });
+                }
+            }
+            
+            // Generate return steps
+            const returnSteps = [];
+            let sum = 0;
+            for (let i = arr.length; i >= startIndex; i--) {
+                if (i >= arr.length) {
+                    returnSteps.push({
+                        type: 'return',
+                        function: 'sumArray',
+                        params: {index: i},
+                        returnValue: 0,
+                        line: 3,
+                        message: `מחזירים 0 (תנאי עצירה)`
+                    });
+                } else {
+                    const oldSum = sum;
+                    sum = arr[i] + sum;
+                    returnSteps.push({
+                        type: 'return',
+                        function: 'sumArray',
+                        params: {index: i, value: arr[i]},
+                        returnValue: sum,
+                        line: 6,
+                        message: `מחזירים ${arr[i]} + ${oldSum} = ${sum}`
+                    });
+                }
+            }
+            
+            steps = [...forwardSteps, ...returnSteps];
+        }
+        
+        function generateFibonacciSteps(n) {
+            // Simplified for visualization - showing main path
+            const calls = [];
+            const fibCache = {};
+            
+            function fibTrace(num, depth = 0) {
+                if (num <= 1) {
+                    calls.push({
+                        type: 'call',
+                        function: 'fibonacci',
+                        params: {n: num},
+                        line: 3,
+                        message: `fibonacci(${num}) - תנאי עצירה! מחזירים ${num}`,
+                        depth: depth
+                    });
+                    calls.push({
+                        type: 'return',
+                        function: 'fibonacci',
+                        params: {n: num},
+                        returnValue: num,
+                        line: 3,
+                        message: `fibonacci(${num}) מחזיר ${num}`,
+                        depth: depth
+                    });
+                    return num;
+                }
+                
+                calls.push({
+                    type: 'call',
+                    function: 'fibonacci',
+                    params: {n: num},
+                    line: 6,
+                    message: `קוראים ל-fibonacci(${num}) - צריך fibonacci(${num-1}) + fibonacci(${num-2})`,
+                    depth: depth
+                });
+                
+                const val1 = fibTrace(num - 1, depth + 1);
+                const val2 = fibTrace(num - 2, depth + 1);
+                const result = val1 + val2;
+                
+                calls.push({
+                    type: 'return',
+                    function: 'fibonacci',
+                    params: {n: num},
+                    returnValue: result,
+                    line: 6,
+                    message: `fibonacci(${num}) מחזיר ${val1} + ${val2} = ${result}`,
+                    depth: depth
+                });
+                
+                return result;
+            }
+            
+            fibTrace(n);
+            steps = calls.slice(0, 20); // Limit steps for visualization
+        }
+        
+        function nextStep() {
+            if (currentStep >= steps.length) {
+                showResult();
+                return;
+            }
+            
+            const step = steps[currentStep];
+            updateDisplay(step);
+            currentStep++;
+            
+            // Update button state
+            if (currentStep >= steps.length) {
+                document.getElementById('nextBtn').textContent = '✅ סיום';
+            }
+        }
+        
+        function updateDisplay(step) {
+            // Update current action
+            document.getElementById('currentAction').innerHTML = 
+                `<span class="highlight">${step.message}</span>`;
+            
+            // Update line highlighting
+            document.querySelectorAll('.code-line').forEach(line => {
+                line.classList.remove('active');
+            });
+            if (step.line !== undefined) {
+                const activeLine = document.querySelector(`[data-line="${step.line}"]`);
+                if (activeLine) activeLine.classList.add('active');
+            }
+            
+            // Update call stack
+            const stackDiv = document.getElementById('callStack');
+            
+            if (step.type === 'call') {
+                callCounter++;
+                const frame = document.createElement('div');
+                frame.className = 'stack-frame';
+                frame.id = `frame-${callCounter}`;
+                
+                let paramsHtml = '';
+                for (const [key, value] of Object.entries(step.params)) {
+                    if (value !== undefined) {
+                        paramsHtml += `<span class="frame-variable">${key} = ${value}</span>`;
+                    }
+                }
+                
+                frame.innerHTML = `
+                    <div class="frame-title">📍 ${step.function}() - קריאה #${callCounter}</div>
+                    <div class="frame-content">
+                        פרמטרים: ${paramsHtml}
+                        <div style="margin-top: 5px;">ממתין לתוצאה...</div>
+                    </div>
+                `;
+                
+                stackDiv.appendChild(frame);
+                callStack.push({id: callCounter, ...step});
+                
+            } else if (step.type === 'return') {
+                // Find the matching call frame
+                const matchingFrame = callStack.find(f => 
+                    f.function === step.function && 
+                    JSON.stringify(f.params) === JSON.stringify(step.params)
+                );
+                
+                if (matchingFrame) {
+                    const frameElement = document.getElementById(`frame-${matchingFrame.id}`);
+                    if (frameElement) {
+                        frameElement.classList.add('returning');
+                        setTimeout(() => {
+                            frameElement.classList.add('completed');
+                            frameElement.classList.remove('returning');
+                            frameElement.querySelector('.frame-content').innerHTML += 
+                                `<div style="margin-top: 5px; font-weight: bold;">
+                                    ✅ החזיר: ${step.returnValue}
+                                </div>`;
+                        }, 300);
+                    }
+                }
+            }
+            
+            // Update counters
+            document.getElementById('callCount').textContent = callCounter;
+            document.getElementById('recursionDepth').textContent = 
+                callStack.filter(f => f.type === 'call' && !f.returned).length;
+        }
+        
+        function showResult() {
+            const resultDiv = document.getElementById('resultDisplay');
+            let finalResult = '';
+            
+            switch(currentExample) {
+                case 'factorial':
+                    finalResult = `התוצאה הסופית: ${examples.factorial.input}! = ${factorial(examples.factorial.input)}`;
+                    break;
+                case 'sum':
+                    finalResult = `סכום המערך [${examples.sum.input.arr.join(', ')}] = ${examples.sum.input.arr.reduce((a,b) => a+b, 0)}`;
+                    break;
+                case 'fibonacci':
+                    finalResult = `fibonacci(${examples.fibonacci.input}) = ${fibonacci(examples.fibonacci.input)}`;
+                    break;
+            }
+            
+            resultDiv.innerHTML = `🎉 ${finalResult}`;
+            resultDiv.classList.add('show');
+            
+            document.getElementById('nextBtn').disabled = true;
+            document.getElementById('autoBtn').disabled = true;
+        }
+        
+        function factorial(n) {
+            return n <= 1 ? 1 : n * factorial(n - 1);
+        }
+        
+        function fibonacci(n) {
+            return n <= 1 ? n : fibonacci(n - 1) + fibonacci(n - 2);
+        }
+        
+        function autoPlay() {
+            const autoBtn = document.getElementById('autoBtn');
+            
+            if (autoPlayInterval) {
+                clearInterval(autoPlayInterval);
+                autoPlayInterval = null;
+                autoBtn.textContent = '⚡ הרצה אוטומטית';
+                document.getElementById('nextBtn').disabled = false;
+            } else {
+                autoBtn.textContent = '⏸ עצור';
+                document.getElementById('nextBtn').disabled = true;
+                
+                autoPlayInterval = setInterval(() => {
+                    nextStep();
+                    if (currentStep >= steps.length) {
+                        clearInterval(autoPlayInterval);
+                        autoPlayInterval = null;
+                        autoBtn.textContent = '⚡ הרצה אוטומטית';
+                        autoBtn.disabled = true;
+                    }
+                }, animationSpeed);
+            }
+        }
+        
+        function reset() {
+            // Clear auto play
+            if (autoPlayInterval) {
+                clearInterval(autoPlayInterval);
+                autoPlayInterval = null;
+            }
+            
+            // Reset variables
+            currentStep = 0;
+            callCounter = 0;
+            callStack = [];
+            
+            // Reset UI
+            document.getElementById('callStack').innerHTML = '';
+            document.getElementById('currentAction').innerHTML = 
+                `לחץ על "צעד הבא" כדי להתחיל את הסימולציה. 
+                הפונקציה תחשב <span class="highlight">${examples[currentExample].description}</span>`;
+            document.getElementById('callCount').textContent = '0';
+            document.getElementById('recursionDepth').textContent = '0';
+            document.getElementById('nextBtn').textContent = '▶ צעד הבא';
+            document.getElementById('nextBtn').disabled = false;
+            document.getElementById('autoBtn').textContent = '⚡ הרצה אוטומטית';
+            document.getElementById('autoBtn').disabled = false;
+            document.getElementById('resultDisplay').classList.remove('show');
+            
+            // Remove code highlighting
+            document.querySelectorAll('.code-line').forEach(line => {
+                line.classList.remove('active');
+            });
+            
+            // Regenerate steps
+            generateSteps();
+        }
+    </script>
+</body>
+</html>
