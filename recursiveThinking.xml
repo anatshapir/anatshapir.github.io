@@ -1,0 +1,1379 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>מדריך לחשיבה רקורסיבית - איך פותרים בעיה רקורסיבית</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.2em;
+        }
+        
+        .problem-selector {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+        
+        .problem-btn {
+            padding: 12px 25px;
+            background: linear-gradient(135deg, #f1f3f5 0%, #e9ecef 100%);
+            color: #495057;
+            border: 2px solid #dee2e6;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1.1em;
+            font-weight: bold;
+        }
+        
+        .problem-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .problem-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: #667eea;
+        }
+        
+        .step-indicator {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 40px;
+            position: relative;
+            padding: 0 20px;
+        }
+        
+        .step-indicator::before {
+            content: '';
+            position: absolute;
+            top: 25px;
+            right: 50px;
+            left: 50px;
+            height: 3px;
+            background: #e9ecef;
+            z-index: 1;
+        }
+        
+        .step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .step-circle {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: #e9ecef;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.3em;
+            color: #868e96;
+            transition: all 0.3s;
+            margin-bottom: 10px;
+        }
+        
+        .step.active .step-circle {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            transform: scale(1.2);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .step.completed .step-circle {
+            background: linear-gradient(135deg, #51cf66 0%, #37b24d 100%);
+            color: white;
+        }
+        
+        .step-label {
+            text-align: center;
+            font-size: 0.9em;
+            color: #495057;
+            max-width: 120px;
+        }
+        
+        .step.active .step-label {
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .content-area {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            min-height: 400px;
+            margin-bottom: 30px;
+        }
+        
+        .step-content {
+            display: none;
+            animation: fadeIn 0.5s ease-out;
+        }
+        
+        .step-content.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .step-title {
+            color: #667eea;
+            font-size: 1.8em;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .explanation-box {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border-right: 4px solid #667eea;
+        }
+        
+        .hint-box {
+            background: #fff3cd;
+            border-right: 4px solid #ffd43b;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+        
+        .hint-title {
+            font-weight: bold;
+            color: #fab005;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .example-box {
+            background: #e7f5ff;
+            border-right: 4px solid #339af0;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        
+        .example-title {
+            font-weight: bold;
+            color: #1c7ed6;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+        
+        .code-block {
+            background: #282c34;
+            color: #abb2bf;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 14px;
+            line-height: 1.6;
+            direction: ltr;
+            text-align: left;
+            overflow-x: auto;
+            margin: 15px 0;
+        }
+        
+        .keyword { color: #c678dd; }
+        .function { color: #61afef; }
+        .number { color: #d19a66; }
+        .string { color: #98c379; }
+        .comment { color: #5c6370; font-style: italic; }
+        .parameter { color: #e06c75; }
+        
+        .interactive-area {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+        
+        .question {
+            font-size: 1.1em;
+            color: #495057;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+        
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .option {
+            padding: 15px;
+            background: #f8f9fa;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .option:hover {
+            background: #e9ecef;
+            border-color: #667eea;
+        }
+        
+        .option.selected {
+            background: #e7f5ff;
+            border-color: #339af0;
+        }
+        
+        .option.correct {
+            background: #d3f9d8;
+            border-color: #51cf66;
+        }
+        
+        .option.incorrect {
+            background: #ffe3e3;
+            border-color: #ff6b6b;
+        }
+        
+        .feedback {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            display: none;
+        }
+        
+        .feedback.show {
+            display: block;
+        }
+        
+        .feedback.correct {
+            background: #d3f9d8;
+            color: #2b8a3e;
+        }
+        
+        .feedback.incorrect {
+            background: #ffe3e3;
+            color: #c92a2a;
+        }
+        
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+        }
+        
+        button {
+            padding: 12px 30px;
+            font-size: 1.1em;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .btn-prev {
+            background: linear-gradient(135deg, #868e96 0%, #495057 100%);
+            color: white;
+        }
+        
+        .btn-next {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+        }
+        
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .tree-diagram {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+        }
+        
+        .tree-node {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0 10px;
+        }
+        
+        .node-box {
+            background: white;
+            border: 2px solid #667eea;
+            padding: 10px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-weight: bold;
+            position: relative;
+        }
+        
+        .node-children {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .node-box::after {
+            content: '';
+            position: absolute;
+            bottom: -20px;
+            right: 50%;
+            width: 2px;
+            height: 20px;
+            background: #667eea;
+        }
+        
+        .arrow-down {
+            font-size: 20px;
+            color: #667eea;
+            margin: 10px 0;
+        }
+        
+        .pattern-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        
+        .pattern-table th,
+        .pattern-table td {
+            border: 1px solid #dee2e6;
+            padding: 12px;
+            text-align: center;
+        }
+        
+        .pattern-table th {
+            background: #667eea;
+            color: white;
+        }
+        
+        .pattern-table tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+        
+        .highlight-cell {
+            background: #fff3cd !important;
+            font-weight: bold;
+        }
+        
+        .formula-display {
+            background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #374151;
+            margin: 20px 0;
+            border: 2px solid #d1d5db;
+        }
+        
+        .success-message {
+            background: linear-gradient(135deg, #51cf66 0%, #37b24d 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            font-size: 1.3em;
+            display: none;
+            margin: 20px 0;
+        }
+        
+        .success-message.show {
+            display: block;
+            animation: celebrate 0.5s ease-out;
+        }
+        
+        @keyframes celebrate {
+            0% {
+                transform: scale(0.8);
+                opacity: 0;
+            }
+            50% {
+                transform: scale(1.1);
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+        
+        .input-area {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+            align-items: center;
+        }
+        
+        .input-field {
+            padding: 10px;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            font-size: 1.1em;
+            flex: 1;
+        }
+        
+        .check-btn {
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #339af0 0%, #1c7ed6 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        
+        .check-btn:hover {
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 מדריך לחשיבה רקורסיבית</h1>
+        <p class="subtitle">לומדים איך לפתור בעיה רקורסיבית צעד אחר צעד</p>
+        
+        <div class="problem-selector">
+            <button class="problem-btn active" onclick="selectProblem('factorial')">חישוב עצרת</button>
+            <button class="problem-btn" onclick="selectProblem('power')">חזקה</button>
+            <button class="problem-btn" onclick="selectProblem('palindrome')">בדיקת פלינדרום</button>
+            <button class="problem-btn" onclick="selectProblem('countDigits')">ספירת ספרות</button>
+            <button class="problem-btn" onclick="selectProblem('reverseString')">היפוך מחרוזת</button>
+        </div>
+        
+        <div class="step-indicator">
+            <div class="step active" id="step1">
+                <div class="step-circle">1</div>
+                <div class="step-label">הבנת הבעיה</div>
+            </div>
+            <div class="step" id="step2">
+                <div class="step-circle">2</div>
+                <div class="step-label">מציאת דפוס</div>
+            </div>
+            <div class="step" id="step3">
+                <div class="step-circle">3</div>
+                <div class="step-label">תנאי עצירה</div>
+            </div>
+            <div class="step" id="step4">
+                <div class="step-circle">4</div>
+                <div class="step-label">הקשר הרקורסיבי</div>
+            </div>
+            <div class="step" id="step5">
+                <div class="step-circle">5</div>
+                <div class="step-label">כתיבת הקוד</div>
+            </div>
+            <div class="step" id="step6">
+                <div class="step-circle">6</div>
+                <div class="step-label">בדיקה</div>
+            </div>
+        </div>
+        
+        <div class="content-area">
+            <!-- Step 1: Understanding the Problem -->
+            <div class="step-content active" id="content1">
+                <div class="step-title">
+                    <span>📚</span>
+                    <span>שלב 1: הבנת הבעיה</span>
+                </div>
+                
+                <div class="explanation-box">
+                    <div id="problemDescription">
+                        <!-- Problem description will be inserted here -->
+                    </div>
+                </div>
+                
+                <div class="example-box">
+                    <div class="example-title">דוגמאות:</div>
+                    <div id="problemExamples">
+                        <!-- Examples will be inserted here -->
+                    </div>
+                </div>
+                
+                <div class="hint-box">
+                    <div class="hint-title">💡 טיפ חשוב:</div>
+                    <div>לפני שממשיכים, וודאו שאתם מבינים לגמרי מה הפונקציה צריכה לעשות!</div>
+                </div>
+                
+                <div class="interactive-area">
+                    <div class="question">האם הבנת את הבעיה?</div>
+                    <div class="options">
+                        <div class="option" onclick="confirmUnderstanding(true)">
+                            ✅ כן, ברור לי מה צריך לעשות
+                        </div>
+                        <div class="option" onclick="confirmUnderstanding(false)">
+                            ❓ לא, אני צריך/ה עוד הסבר
+                        </div>
+                    </div>
+                    <div class="feedback" id="understandingFeedback"></div>
+                </div>
+            </div>
+            
+            <!-- Step 2: Finding Pattern -->
+            <div class="step-content" id="content2">
+                <div class="step-title">
+                    <span>🔍</span>
+                    <span>שלב 2: מציאת הדפוס</span>
+                </div>
+                
+                <div class="explanation-box">
+                    <h3>נחפש דפוס - איך בעיה גדולה מתחלקת לבעיות קטנות?</h3>
+                    <div id="patternExplanation">
+                        <!-- Pattern explanation will be inserted here -->
+                    </div>
+                </div>
+                
+                <div class="pattern-table" id="patternTable">
+                    <!-- Pattern table will be inserted here -->
+                </div>
+                
+                <div class="hint-box">
+                    <div class="hint-title">💡 השאלה המרכזית:</div>
+                    <div id="patternHint">
+                        <!-- Pattern hint will be inserted here -->
+                    </div>
+                </div>
+                
+                <div class="interactive-area">
+                    <div class="question" id="patternQuestion">
+                        <!-- Pattern question will be inserted here -->
+                    </div>
+                    <div class="options" id="patternOptions">
+                        <!-- Pattern options will be inserted here -->
+                    </div>
+                    <div class="feedback" id="patternFeedback"></div>
+                </div>
+            </div>
+            
+            <!-- Step 3: Base Case -->
+            <div class="step-content" id="content3">
+                <div class="step-title">
+                    <span>🛑</span>
+                    <span>שלב 3: תנאי העצירה (Base Case)</span>
+                </div>
+                
+                <div class="explanation-box">
+                    <h3>מתי הרקורסיה נעצרת?</h3>
+                    <p>תנאי העצירה הוא המקרה הפשוט ביותר שאנחנו יודעים לפתור ישירות, בלי רקורסיה.</p>
+                </div>
+                
+                <div class="example-box">
+                    <div class="example-title">חשבו: מה המקרה הכי פשוט?</div>
+                    <div id="baseCaseHint">
+                        <!-- Base case hint will be inserted here -->
+                    </div>
+                </div>
+                
+                <div class="hint-box">
+                    <div class="hint-title">⚠️ חשוב מאוד:</div>
+                    <div>בלי תנאי עצירה נכון, הרקורסיה תמשיך לנצח!</div>
+                </div>
+                
+                <div class="interactive-area">
+                    <div class="question" id="baseCaseQuestion">
+                        <!-- Base case question will be inserted here -->
+                    </div>
+                    <div class="input-area">
+                        <input type="text" class="input-field" id="baseCaseInput" placeholder="הקלד את התשובה שלך...">
+                        <button class="check-btn" onclick="checkBaseCase()">בדוק</button>
+                    </div>
+                    <div class="feedback" id="baseCaseFeedback"></div>
+                </div>
+            </div>
+            
+            <!-- Step 4: Recursive Relation -->
+            <div class="step-content" id="content4">
+                <div class="step-title">
+                    <span>🔗</span>
+                    <span>שלב 4: הקשר הרקורסיבי</span>
+                </div>
+                
+                <div class="explanation-box">
+                    <h3>איך מחברים את התוצאה של הבעיה הקטנה לבעיה הגדולה?</h3>
+                    <div id="recursiveRelation">
+                        <!-- Recursive relation will be inserted here -->
+                    </div>
+                </div>
+                
+                <div class="tree-diagram" id="treeDiagram">
+                    <!-- Tree diagram will be inserted here -->
+                </div>
+                
+                <div class="formula-display" id="formulaDisplay">
+                    <!-- Formula will be inserted here -->
+                </div>
+                
+                <div class="hint-box">
+                    <div class="hint-title">💡 הכלל:</div>
+                    <div id="recursiveHint">
+                        <!-- Recursive hint will be inserted here -->
+                    </div>
+                </div>
+                
+                <div class="interactive-area">
+                    <div class="question" id="recursiveQuestion">
+                        <!-- Recursive question will be inserted here -->
+                    </div>
+                    <div class="options" id="recursiveOptions">
+                        <!-- Recursive options will be inserted here -->
+                    </div>
+                    <div class="feedback" id="recursiveFeedback"></div>
+                </div>
+            </div>
+            
+            <!-- Step 5: Writing Code -->
+            <div class="step-content" id="content5">
+                <div class="step-title">
+                    <span>💻</span>
+                    <span>שלב 5: כתיבת הקוד</span>
+                </div>
+                
+                <div class="explanation-box">
+                    <h3>עכשיו נרכיב את הכל יחד!</h3>
+                    <p>נכתוב את הפונקציה הרקורסיבית המלאה:</p>
+                </div>
+                
+                <div class="code-block" id="finalCode">
+                    <!-- Final code will be inserted here -->
+                </div>
+                
+                <div class="example-box">
+                    <div class="example-title">הסבר הקוד:</div>
+                    <div id="codeExplanation">
+                        <!-- Code explanation will be inserted here -->
+                    </div>
+                </div>
+                
+                <div class="hint-box">
+                    <div class="hint-title">📝 מבנה כללי של פונקציה רקורסיבית:</div>
+                    <div>
+                        1. בדיקת תנאי עצירה - אם כן, החזר ערך<br>
+                        2. חישוב רקורסיבי - קרא לפונקציה עם קלט קטן יותר<br>
+                        3. שלב את התוצאה והחזר
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Step 6: Testing -->
+            <div class="step-content" id="content6">
+                <div class="step-title">
+                    <span>✅</span>
+                    <span>שלב 6: בדיקת הפתרון</span>
+                </div>
+                
+                <div class="explanation-box">
+                    <h3>בואו נבדוק שהפתרון עובד!</h3>
+                    <p>נעקוב אחרי הרצה של הפונקציה עם דוגמה:</p>
+                </div>
+                
+                <div id="testTrace">
+                    <!-- Test trace will be inserted here -->
+                </div>
+                
+                <div class="success-message" id="successMessage">
+                    🎉 מצוין! הבנת איך לפתור בעיה רקורסיבית!
+                </div>
+                
+                <div class="interactive-area">
+                    <div class="question">נסה לחזות: מה יהיה הפלט עבור קלט אחר?</div>
+                    <div id="testQuestion">
+                        <!-- Test question will be inserted here -->
+                    </div>
+                    <div class="input-area">
+                        <input type="text" class="input-field" id="testInput" placeholder="הקלד את התשובה...">
+                        <button class="check-btn" onclick="checkTest()">בדוק</button>
+                    </div>
+                    <div class="feedback" id="testFeedback"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="navigation">
+            <button class="btn-prev" onclick="previousStep()" id="prevBtn" disabled>
+                ← הקודם
+            </button>
+            <button class="btn-next" onclick="nextStep()" id="nextBtn">
+                הבא →
+            </button>
+        </div>
+    </div>
+    
+    <script>
+        // Problem definitions
+        const problems = {
+            factorial: {
+                name: 'חישוב עצרת',
+                description: 'עצרת של מספר n (מסומנת n!) היא מכפלת כל המספרים מ-1 עד n.',
+                examples: [
+                    '5! = 5 × 4 × 3 × 2 × 1 = 120',
+                    '4! = 4 × 3 × 2 × 1 = 24',
+                    '3! = 3 × 2 × 1 = 6',
+                    '1! = 1',
+                    '0! = 1 (הגדרה)'
+                ],
+                pattern: 'n! = n × (n-1)!',
+                patternTable: `
+                    <table class="pattern-table">
+                        <tr><th>n</th><th>n!</th><th>איך מחשבים?</th></tr>
+                        <tr><td>5</td><td>120</td><td class="highlight-cell">5 × 4!</td></tr>
+                        <tr><td>4</td><td>24</td><td class="highlight-cell">4 × 3!</td></tr>
+                        <tr><td>3</td><td>6</td><td class="highlight-cell">3 × 2!</td></tr>
+                        <tr><td>2</td><td>2</td><td class="highlight-cell">2 × 1!</td></tr>
+                        <tr><td>1</td><td>1</td><td>1</td></tr>
+                    </table>
+                `,
+                patternHint: 'איך אפשר לחשב את n! אם אנחנו כבר יודעים את (n-1)!?',
+                patternQuestion: 'מה הקשר בין 5! ל-4!?',
+                patternOptions: [
+                    { text: '5! = 5 + 4!', correct: false },
+                    { text: '5! = 5 × 4!', correct: true },
+                    { text: '5! = 5 - 4!', correct: false }
+                ],
+                baseCaseHint: 'מתי החישוב הכי פשוט? מתי אין יותר מה לכפול?',
+                baseCaseQuestion: 'מה הערך של 0! או 1!?',
+                baseCaseAnswer: '1',
+                recursiveRelation: 'אם אנחנו יודעים את (n-1)!, אז n! = n × (n-1)!',
+                recursiveHint: 'כל מספר כפול העצרת של המספר הקטן ממנו ב-1',
+                recursiveQuestion: 'איך נחשב את factorial(6) אם יש לנו את factorial(5)?',
+                recursiveOptions: [
+                    { text: 'factorial(6) = 6 + factorial(5)', correct: false },
+                    { text: 'factorial(6) = 6 × factorial(5)', correct: true },
+                    { text: 'factorial(6) = factorial(5) × factorial(1)', correct: false }
+                ],
+                formula: 'factorial(n) = n × factorial(n-1)',
+                code: `<span class="keyword">public static</span> <span class="keyword">int</span> <span class="function">factorial</span>(<span class="keyword">int</span> <span class="parameter">n</span>) {
+    <span class="comment">// תנאי עצירה</span>
+    <span class="keyword">if</span> (<span class="parameter">n</span> <= <span class="number">1</span>) {
+        <span class="keyword">return</span> <span class="number">1</span>;
+    }
+    <span class="comment">// קריאה רקורסיבית</span>
+    <span class="keyword">return</span> <span class="parameter">n</span> * <span class="function">factorial</span>(<span class="parameter">n</span> - <span class="number">1</span>);
+}`,
+                codeExplanation: [
+                    '1. בודקים תנאי עצירה: אם n קטן או שווה ל-1, מחזירים 1',
+                    '2. אחרת: מחזירים n כפול העצרת של n-1',
+                    '3. הפונקציה קוראת לעצמה עם ערך קטן יותר בכל פעם'
+                ],
+                testExample: 'factorial(3)',
+                testTrace: `
+                    <div class="example-box">
+                        <div class="example-title">מעקב אחרי factorial(3):</div>
+                        <div style="padding: 15px; direction: ltr; font-family: monospace;">
+                            factorial(3)<br>
+                            → 3 × factorial(2)<br>
+                            → 3 × (2 × factorial(1))<br>
+                            → 3 × (2 × 1)<br>
+                            → 3 × 2<br>
+                            → 6
+                        </div>
+                    </div>
+                `,
+                testQuestion: 'מה יחזיר factorial(4)?',
+                testAnswer: '24'
+            },
+            power: {
+                name: 'חישוב חזקה',
+                description: 'חישוב x בחזקת n (x^n) - כלומר x כפול עצמו n פעמים.',
+                examples: [
+                    '2^5 = 2 × 2 × 2 × 2 × 2 = 32',
+                    '3^4 = 3 × 3 × 3 × 3 = 81',
+                    '5^3 = 5 × 5 × 5 = 125',
+                    '7^1 = 7',
+                    'x^0 = 1 (לכל x)'
+                ],
+                pattern: 'x^n = x × x^(n-1)',
+                patternTable: `
+                    <table class="pattern-table">
+                        <tr><th>חזקה</th><th>תוצאה</th><th>איך מחשבים?</th></tr>
+                        <tr><td>2^5</td><td>32</td><td class="highlight-cell">2 × 2^4</td></tr>
+                        <tr><td>2^4</td><td>16</td><td class="highlight-cell">2 × 2^3</td></tr>
+                        <tr><td>2^3</td><td>8</td><td class="highlight-cell">2 × 2^2</td></tr>
+                        <tr><td>2^2</td><td>4</td><td class="highlight-cell">2 × 2^1</td></tr>
+                        <tr><td>2^1</td><td>2</td><td class="highlight-cell">2 × 2^0</td></tr>
+                        <tr><td>2^0</td><td>1</td><td>1 (הגדרה)</td></tr>
+                    </table>
+                `,
+                patternHint: 'שימו לב: כל חזקה היא הבסיס כפול החזקה הקודמת!',
+                patternQuestion: 'מה הקשר בין 3^5 ל-3^4?',
+                patternOptions: [
+                    { text: '3^5 = 3 + 3^4', correct: false },
+                    { text: '3^5 = 3 × 3^4', correct: true },
+                    { text: '3^5 = 5 × 3^4', correct: false }
+                ],
+                baseCaseHint: 'מתי החישוב הכי פשוט? מה קורה כשהמעריך הוא 0?',
+                baseCaseQuestion: 'מה הערך של x^0?',
+                baseCaseAnswer: '1',
+                recursiveRelation: 'אם אנחנו יודעים את x^(n-1), אז x^n = x × x^(n-1)',
+                recursiveHint: 'כל חזקה היא הבסיס כפול החזקה הקטנה ממנה ב-1',
+                recursiveQuestion: 'איך נחשב את power(3,5) אם יש לנו את power(3,4)?',
+                recursiveOptions: [
+                    { text: 'power(3,5) = 5 × power(3,4)', correct: false },
+                    { text: 'power(3,5) = 3 × power(3,4)', correct: true },
+                    { text: 'power(3,5) = 3 + power(3,4)', correct: false }
+                ],
+                formula: 'power(x, n) = x × power(x, n-1)',
+                code: `<span class="keyword">public static</span> <span class="keyword">int</span> <span class="function">power</span>(<span class="keyword">int</span> <span class="parameter">x</span>, <span class="keyword">int</span> <span class="parameter">n</span>) {
+    <span class="comment">// תנאי עצירה</span>
+    <span class="keyword">if</span> (<span class="parameter">n</span> == <span class="number">0</span>) {
+        <span class="keyword">return</span> <span class="number">1</span>;
+    }
+    <span class="comment">// קריאה רקורסיבית</span>
+    <span class="keyword">return</span> <span class="parameter">x</span> * <span class="function">power</span>(<span class="parameter">x</span>, <span class="parameter">n</span> - <span class="number">1</span>);
+}`,
+                codeExplanation: [
+                    '1. תנאי עצירה: אם n=0, מחזירים 1',
+                    '2. אחרת: מחזירים x כפול x בחזקת n-1',
+                    '3. המעריך קטן ב-1 בכל קריאה'
+                ],
+                testExample: 'power(2, 3)',
+                testTrace: `
+                    <div class="example-box">
+                        <div class="example-title">מעקב אחרי power(2, 3):</div>
+                        <div style="padding: 15px; direction: ltr; font-family: monospace;">
+                            power(2, 3)<br>
+                            → 2 × power(2, 2)<br>
+                            → 2 × (2 × power(2, 1))<br>
+                            → 2 × (2 × (2 × power(2, 0)))<br>
+                            → 2 × (2 × (2 × 1))<br>
+                            → 2 × (2 × 2)<br>
+                            → 2 × 4<br>
+                            → 8
+                        </div>
+                    </div>
+                `,
+                testQuestion: 'מה יחזיר power(3, 3)?',
+                testAnswer: '27'
+            },
+            palindrome: {
+                name: 'בדיקת פלינדרום',
+                description: 'פלינדרום הוא מחרוזת שנקראת אותו דבר מהתחלה לסוף ומהסוף להתחלה.',
+                examples: [
+                    '"אבא" - פלינדרום',
+                    '"רדאר" - פלינדרום (radar)',
+                    '"level" - פלינדרום',
+                    '"hello" - לא פלינדרום',
+                    '"a" - פלינדרום (תו בודד)',
+                    '"" - פלינדרום (מחרוזת ריקה)'
+                ],
+                pattern: 'פלינדרום = התו הראשון זהה לאחרון, והאמצע גם פלינדרום',
+                patternTable: `
+                    <table class="pattern-table">
+                        <tr><th>מחרוזת</th><th>בדיקה</th><th>תוצאה</th></tr>
+                        <tr><td>"level"</td><td class="highlight-cell">l=l והאמצע "eve"</td><td>✓</td></tr>
+                        <tr><td>"eve"</td><td class="highlight-cell">e=e והאמצע "v"</td><td>✓</td></tr>
+                        <tr><td>"v"</td><td>תו בודד</td><td>✓</td></tr>
+                        <tr><td>"hello"</td><td class="highlight-cell">h≠o</td><td>✗</td></tr>
+                    </table>
+                `,
+                patternHint: 'בודקים את התווים בקצוות, ואז בודקים את מה שבאמצע',
+                patternQuestion: 'איך בודקים אם "radar" הוא פלינדרום?',
+                patternOptions: [
+                    { text: 'בודקים אם r=r ואז בודקים את "ada"', correct: true },
+                    { text: 'בודקים רק את האמצע', correct: false },
+                    { text: 'בודקים רק את הקצוות', correct: false }
+                ],
+                baseCaseHint: 'מתי אין יותר מה לבדוק? (רמז: מחרוזת ריקה או תו בודד)',
+                baseCaseQuestion: 'מתי מחרוזת בהכרח פלינדרום?',
+                baseCaseAnswer: 'ריקה או תו בודד',
+                recursiveRelation: 'אם הקצוות זהים, בודקים את האמצע רקורסיבית',
+                recursiveHint: 'משווים קצוות וממשיכים לבדוק את מה שביניהם',
+                recursiveQuestion: 'אם "level" מתחיל ומסתיים ב-l, מה נבדוק אחר כך?',
+                recursiveOptions: [
+                    { text: 'נבדוק את "leve"', correct: false },
+                    { text: 'נבדוק את "eve"', correct: true },
+                    { text: 'נבדוק את "vel"', correct: false }
+                ],
+                formula: 'isPalindrome(s) = (ראשון == אחרון) && isPalindrome(אמצע)',
+                code: `<span class="keyword">public static</span> <span class="keyword">boolean</span> <span class="function">isPalindrome</span>(<span class="keyword">String</span> <span class="parameter">s</span>, <span class="keyword">int</span> <span class="parameter">start</span>, <span class="keyword">int</span> <span class="parameter">end</span>) {
+    <span class="comment">// תנאי עצירה - נשאר תו אחד או פחות</span>
+    <span class="keyword">if</span> (<span class="parameter">start</span> >= <span class="parameter">end</span>) {
+        <span class="keyword">return</span> <span class="keyword">true</span>;
+    }
+    <span class="comment">// בודקים אם הקצוות זהים</span>
+    <span class="keyword">if</span> (<span class="parameter">s</span>.charAt(<span class="parameter">start</span>) != <span class="parameter">s</span>.charAt(<span class="parameter">end</span>)) {
+        <span class="keyword">return</span> <span class="keyword">false</span>;
+    }
+    <span class="comment">// בודקים את האמצע רקורסיבית</span>
+    <span class="keyword">return</span> <span class="function">isPalindrome</span>(<span class="parameter">s</span>, <span class="parameter">start</span> + <span class="number">1</span>, <span class="parameter">end</span> - <span class="number">1</span>);
+}`,
+                codeExplanation: [
+                    '1. אם נשאר תו אחד או פחות - זה פלינדרום',
+                    '2. משווים את התווים בקצוות',
+                    '3. אם הם זהים - בודקים את האמצע רקורסיבית'
+                ],
+                testExample: 'isPalindrome("aba", 0, 2)',
+                testTrace: `
+                    <div class="example-box">
+                        <div class="example-title">מעקב אחרי isPalindrome("aba", 0, 2):</div>
+                        <div style="padding: 15px; direction: ltr; font-family: monospace;">
+                            isPalindrome("aba", 0, 2)<br>
+                            → 'a' == 'a' ✓<br>
+                            → isPalindrome("aba", 1, 1)<br>
+                            → start >= end ✓<br>
+                            → true
+                        </div>
+                    </div>
+                `,
+                testQuestion: 'מה יחזיר isPalindrome("dad", 0, 2)?',
+                testAnswer: 'true'
+            },
+            countDigits: {
+                name: 'ספירת ספרות',
+                description: 'ספירת מספר הספרות במספר שלם חיובי.',
+                examples: [
+                    '1234 → 4 ספרות',
+                    '567 → 3 ספרות',
+                    '89 → 2 ספרות',
+                    '5 → ספרה אחת',
+                    '0 → ספרה אחת'
+                ],
+                pattern: 'מספר הספרות = 1 + מספר הספרות אחרי חלוקה ב-10',
+                patternTable: `
+                    <table class="pattern-table">
+                        <tr><th>מספר</th><th>אחרי חלוקה ב-10</th><th>ספרות</th></tr>
+                        <tr><td>1234</td><td>123</td><td class="highlight-cell">1 + ספרות(123)</td></tr>
+                        <tr><td>123</td><td>12</td><td class="highlight-cell">1 + ספרות(12)</td></tr>
+                        <tr><td>12</td><td>1</td><td class="highlight-cell">1 + ספרות(1)</td></tr>
+                        <tr><td>1</td><td>0</td><td>1</td></tr>
+                    </table>
+                `,
+                patternHint: 'כשמחלקים ב-10, "מורידים" ספרה אחת',
+                patternQuestion: 'כמה ספרות יש ב-567 אם ב-56 יש 2 ספרות?',
+                patternOptions: [
+                    { text: '2 ספרות', correct: false },
+                    { text: '3 ספרות', correct: true },
+                    { text: '4 ספרות', correct: false }
+                ],
+                baseCaseHint: 'מה קורה כשהמספר קטן מ-10?',
+                baseCaseQuestion: 'כמה ספרות במספר חד-ספרתי?',
+                baseCaseAnswer: '1',
+                recursiveRelation: 'countDigits(n) = 1 + countDigits(n/10)',
+                recursiveHint: 'כל מספר = ספרה אחת + הספרות של המספר בלי הספרה האחרונה',
+                recursiveQuestion: 'אם ב-123 יש 3 ספרות, כמה יש ב-1234?',
+                recursiveOptions: [
+                    { text: '3 ספרות', correct: false },
+                    { text: '4 ספרות', correct: true },
+                    { text: '5 ספרות', correct: false }
+                ],
+                formula: 'countDigits(n) = 1 + countDigits(n/10)',
+                code: `<span class="keyword">public static</span> <span class="keyword">int</span> <span class="function">countDigits</span>(<span class="keyword">int</span> <span class="parameter">n</span>) {
+    <span class="comment">// תנאי עצירה - מספר חד-ספרתי</span>
+    <span class="keyword">if</span> (<span class="parameter">n</span> < <span class="number">10</span>) {
+        <span class="keyword">return</span> <span class="number">1</span>;
+    }
+    <span class="comment">// קריאה רקורסיבית</span>
+    <span class="keyword">return</span> <span class="number">1</span> + <span class="function">countDigits</span>(<span class="parameter">n</span> / <span class="number">10</span>);
+}`,
+                codeExplanation: [
+                    '1. אם המספר קטן מ-10, יש בו ספרה אחת',
+                    '2. אחרת: סופרים ספרה אחת + הספרות של n/10',
+                    '3. חלוקה ב-10 "מורידה" את הספרה האחרונה'
+                ],
+                testExample: 'countDigits(456)',
+                testTrace: `
+                    <div class="example-box">
+                        <div class="example-title">מעקב אחרי countDigits(456):</div>
+                        <div style="padding: 15px; direction: ltr; font-family: monospace;">
+                            countDigits(456)<br>
+                            → 1 + countDigits(45)<br>
+                            → 1 + (1 + countDigits(4))<br>
+                            → 1 + (1 + 1)<br>
+                            → 1 + 2<br>
+                            → 3
+                        </div>
+                    </div>
+                `,
+                testQuestion: 'מה יחזיר countDigits(9876)?',
+                testAnswer: '4'
+            },
+            reverseString: {
+                name: 'היפוך מחרוזת',
+                description: 'היפוך סדר התווים במחרוזת.',
+                examples: [
+                    '"hello" → "olleh"',
+                    '"abc" → "cba"',
+                    '"a" → "a"',
+                    '"" → ""'
+                ],
+                pattern: 'היפוך = התו האחרון + היפוך השאר',
+                patternTable: `
+                    <table class="pattern-table">
+                        <tr><th>מחרוזת</th><th>תו אחרון</th><th>היפוך</th></tr>
+                        <tr><td>"hello"</td><td>'o'</td><td class="highlight-cell">'o' + reverse("hell")</td></tr>
+                        <tr><td>"hell"</td><td>'l'</td><td class="highlight-cell">'l' + reverse("hel")</td></tr>
+                        <tr><td>"hel"</td><td>'l'</td><td class="highlight-cell">'l' + reverse("he")</td></tr>
+                        <tr><td>"he"</td><td>'e'</td><td class="highlight-cell">'e' + reverse("h")</td></tr>
+                        <tr><td>"h"</td><td>'h'</td><td>"h"</td></tr>
+                    </table>
+                `,
+                patternHint: 'לוקחים את התו האחרון ומוסיפים את היפוך השאר',
+                patternQuestion: 'איך הופכים את "cat"?',
+                patternOptions: [
+                    { text: '"c" + היפוך של "at"', correct: false },
+                    { text: '"t" + היפוך של "ca"', correct: true },
+                    { text: '"a" + היפוך של "ct"', correct: false }
+                ],
+                baseCaseHint: 'מה קורה כשהמחרוזת ריקה או עם תו אחד?',
+                baseCaseQuestion: 'מה ההיפוך של מחרוזת ריקה?',
+                baseCaseAnswer: 'ריקה',
+                recursiveRelation: 'reverse(s) = lastChar + reverse(rest)',
+                recursiveHint: 'התו האחרון עובר להתחלה, והשאר מתהפך',
+                recursiveQuestion: 'אם reverse("ab") = "ba", מה יהיה reverse("cab")?',
+                recursiveOptions: [
+                    { text: '"abc"', correct: false },
+                    { text: '"bac"', correct: true },
+                    { text: '"cab"', correct: false }
+                ],
+                formula: 'reverse(s) = s.charAt(n-1) + reverse(s.substring(0, n-1))',
+                code: `<span class="keyword">public static</span> <span class="keyword">String</span> <span class="function">reverse</span>(<span class="keyword">String</span> <span class="parameter">s</span>) {
+    <span class="comment">// תנאי עצירה - מחרוזת ריקה או תו בודד</span>
+    <span class="keyword">if</span> (<span class="parameter">s</span>.length() <= <span class="number">1</span>) {
+        <span class="keyword">return</span> <span class="parameter">s</span>;
+    }
+    <span class="comment">// קריאה רקורסיבית</span>
+    <span class="keyword">return</span> <span class="parameter">s</span>.charAt(<span class="parameter">s</span>.length() - <span class="number">1</span>) + 
+           <span class="function">reverse</span>(<span class="parameter">s</span>.substring(<span class="number">0</span>, <span class="parameter">s</span>.length() - <span class="number">1</span>));
+}`,
+                codeExplanation: [
+                    '1. אם המחרוזת ריקה או עם תו אחד - מחזירים אותה',
+                    '2. אחרת: התו האחרון + היפוך של השאר',
+                    '3. substring מחזיר את המחרוזת בלי התו האחרון'
+                ],
+                testExample: 'reverse("dog")',
+                testTrace: `
+                    <div class="example-box">
+                        <div class="example-title">מעקב אחרי reverse("dog"):</div>
+                        <div style="padding: 15px; direction: ltr; font-family: monospace;">
+                            reverse("dog")<br>
+                            → 'g' + reverse("do")<br>
+                            → 'g' + ('o' + reverse("d"))<br>
+                            → 'g' + ('o' + "d")<br>
+                            → 'g' + "od"<br>
+                            → "god"
+                        </div>
+                    </div>
+                `,
+                testQuestion: 'מה יחזיר reverse("abc")?',
+                testAnswer: 'cba'
+            }
+        };
+        
+        // Global variables
+        let currentProblem = 'factorial';
+        let currentStepNum = 1;
+        let userProgress = {};
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            selectProblem('factorial');
+        });
+        
+        // Problem selection
+        function selectProblem(problemKey) {
+            currentProblem = problemKey;
+            currentStepNum = 1;
+            userProgress = {};
+            
+            // Update UI
+            document.querySelectorAll('.problem-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Reset steps
+            for (let i = 1; i <= 6; i++) {
+                document.getElementById(`step${i}`).classList.remove('active', 'completed');
+                document.getElementById(`content${i}`).classList.remove('active');
+            }
+            document.getElementById('step1').classList.add('active');
+            document.getElementById('content1').classList.add('active');
+            
+            // Update navigation
+            document.getElementById('prevBtn').disabled = true;
+            document.getElementById('nextBtn').disabled = false;
+            document.getElementById('nextBtn').textContent = 'הבא →';
+            
+            // Load problem content
+            loadProblemContent();
+        }
+        
+        function loadProblemContent() {
+            const problem = problems[currentProblem];
+            
+            // Step 1: Understanding
+            document.getElementById('problemDescription').innerHTML = `
+                <h3>${problem.name}</h3>
+                <p>${problem.description}</p>
+            `;
+            
+            document.getElementById('problemExamples').innerHTML = 
+                problem.examples.map(ex => `<div>• ${ex}</div>`).join('');
+            
+            // Step 2: Pattern
+            document.getElementById('patternExplanation').innerHTML = `
+                <p>בואו נסתכל על דוגמאות ונחפש דפוס:</p>
+            `;
+            document.getElementById('patternTable').innerHTML = problem.patternTable;
+            document.getElementById('patternHint').textContent = problem.patternHint;
+            document.getElementById('patternQuestion').textContent = problem.patternQuestion;
+            
+            const patternOptions = document.getElementById('patternOptions');
+            patternOptions.innerHTML = '';
+            problem.patternOptions.forEach((option, index) => {
+                const div = document.createElement('div');
+                div.className = 'option';
+                div.textContent = option.text;
+                div.onclick = () => checkPattern(index);
+                patternOptions.appendChild(div);
+            });
+            
+            // Step 3: Base Case
+            document.getElementById('baseCaseHint').textContent = problem.baseCaseHint;
+            document.getElementById('baseCaseQuestion').textContent = problem.baseCaseQuestion;
+            document.getElementById('baseCaseInput').value = '';
+            
+            // Step 4: Recursive Relation
+            document.getElementById('recursiveRelation').innerHTML = `<p>${problem.recursiveRelation}</p>`;
+            document.getElementById('formulaDisplay').textContent = problem.formula;
+            document.getElementById('recursiveHint').textContent = problem.recursiveHint;
+            document.getElementById('recursiveQuestion').textContent = problem.recursiveQuestion;
+            
+            const recursiveOptions = document.getElementById('recursiveOptions');
+            recursiveOptions.innerHTML = '';
+            problem.recursiveOptions.forEach((option, index) => {
+                const div = document.createElement('div');
+                div.className = 'option';
+                div.textContent = option.text;
+                div.onclick = () => checkRecursive(index);
+                recursiveOptions.appendChild(div);
+            });
+            
+            // Step 5: Code
+            document.getElementById('finalCode').innerHTML = problem.code;
+            document.getElementById('codeExplanation').innerHTML = 
+                problem.codeExplanation.map(exp => `<div>• ${exp}</div>`).join('');
+            
+            // Step 6: Testing
+            document.getElementById('testTrace').innerHTML = problem.testTrace;
+            document.getElementById('testQuestion').innerHTML = `<strong>${problem.testQuestion}</strong>`;
+            document.getElementById('testInput').value = '';
+            
+            // Clear feedbacks
+            document.querySelectorAll('.feedback').forEach(fb => {
+                fb.classList.remove('show', 'correct', 'incorrect');
+                fb.textContent = '';
+            });
+        }
+        
+        // Step navigation
+        function nextStep() {
+            if (currentStepNum < 6) {
+                // Mark current step as completed
+                document.getElementById(`step${currentStepNum}`).classList.remove('active');
+                document.getElementById(`step${currentStepNum}`).classList.add('completed');
+                document.getElementById(`content${currentStepNum}`).classList.remove('active');
+                
+                // Move to next step
+                currentStepNum++;
+                document.getElementById(`step${currentStepNum}`).classList.add('active');
+                document.getElementById(`content${currentStepNum}`).classList.add('active');
+                
+                // Update navigation
+                document.getElementById('prevBtn').disabled = false;
+                if (currentStepNum === 6) {
+                    document.getElementById('nextBtn').textContent = 'סיים ✅';
+                }
+            } else {
+                // Show success message
+                document.getElementById('successMessage').classList.add('show');
+                document.getElementById('nextBtn').disabled = true;
+            }
+        }
+        
+        function previousStep() {
+            if (currentStepNum > 1) {
+                // Remove active from current step
+                document.getElementById(`step${currentStepNum}`).classList.remove('active');
+                document.getElementById(`content${currentStepNum}`).classList.remove('active');
+                
+                // Move to previous step
+                currentStepNum--;
+                document.getElementById(`step${currentStepNum}`).classList.remove('completed');
+                document.getElementById(`step${currentStepNum}`).classList.add('active');
+                document.getElementById(`content${currentStepNum}`).classList.add('active');
+                
+                // Update navigation
+                if (currentStepNum === 1) {
+                    document.getElementById('prevBtn').disabled = true;
+                }
+                document.getElementById('nextBtn').disabled = false;
+                document.getElementById('nextBtn').textContent = 'הבא →';
+                
+                // Hide success message if visible
+                document.getElementById('successMessage').classList.remove('show');
+            }
+        }
+        
+        // Interactive checks
+        function confirmUnderstanding(understood) {
+            const feedback = document.getElementById('understandingFeedback');
+            if (understood) {
+                feedback.textContent = '✅ מצוין! בואו נמשיך לשלב הבא.';
+                feedback.className = 'feedback correct show';
+                setTimeout(() => nextStep(), 1500);
+            } else {
+                feedback.textContent = '📖 קראו שוב את ההסבר והדוגמאות. חשוב להבין את הבעיה לפני שממשיכים!';
+                feedback.className = 'feedback incorrect show';
+            }
+        }
+        
+        function checkPattern(index) {
+            const problem = problems[currentProblem];
+            const options = document.querySelectorAll('#patternOptions .option');
+            const feedback = document.getElementById('patternFeedback');
+            
+            options[index].classList.add('selected');
+            
+            if (problem.patternOptions[index].correct) {
+                options[index].classList.add('correct');
+                feedback.textContent = '✅ נכון! זיהית את הדפוס הרקורסיבי!';
+                feedback.className = 'feedback correct show';
+                userProgress.patternCompleted = true;
+                setTimeout(() => {
+                    if (confirm('מעולה! רוצה להמשיך לשלב הבא?')) {
+                        nextStep();
+                    }
+                }, 1500);
+            } else {
+                options[index].classList.add('incorrect');
+                feedback.textContent = '❌ לא בדיוק. חשבו שוב על הקשר בין הבעיה הגדולה לקטנה.';
+                feedback.className = 'feedback incorrect show';
+                setTimeout(() => {
+                    options[index].classList.remove('selected', 'incorrect');
+                }, 2000);
+            }
+        }
+        
+        function checkBaseCase() {
+            const problem = problems[currentProblem];
+            const input = document.getElementById('baseCaseInput').value.trim();
+            const feedback = document.getElementById('baseCaseFeedback');
+            
+            if (input.toLowerCase() === problem.baseCaseAnswer.toLowerCase() || 
+                (problem.baseCaseAnswer.includes('או') && 
+                 problem.baseCaseAnswer.toLowerCase().includes(input.toLowerCase()))) {
+                feedback.textContent = '✅ מצוין! זיהית נכון את תנאי העצירה!';
+                feedback.className = 'feedback correct show';
+                userProgress.baseCaseCompleted = true;
+                setTimeout(() => {
+                    if (confirm('יופי! בואו נמשיך לשלב הבא.')) {
+                        nextStep();
+                    }
+                }, 1500);
+            } else {
+                feedback.textContent = '❌ נסה שוב. חשוב על המקרה הפשוט ביותר.';
+                feedback.className = 'feedback incorrect show';
+            }
+        }
+        
+        function checkRecursive(index) {
+            const problem = problems[currentProblem];
+            const options = document.querySelectorAll('#recursiveOptions .option');
+            const feedback = document.getElementById('recursiveFeedback');
+            
+            options[index].classList.add('selected');
+            
+            if (problem.recursiveOptions[index].correct) {
+                options[index].classList.add('correct');
+                feedback.textContent = '✅ מדויק! הבנת את הקשר הרקורסיבי!';
+                feedback.className = 'feedback correct show';
+                userProgress.recursiveCompleted = true;
+                setTimeout(() => {
+                    if (confirm('מעולה! עכשיו נכתוב את הקוד.')) {
+                        nextStep();
+                    }
+                }, 1500);
+            } else {
+                options[index].classList.add('incorrect');
+                feedback.textContent = '❌ לא מדויק. חשבו איך התוצאה של הבעיה הקטנה עוזרת לפתור את הגדולה.';
+                feedback.className = 'feedback incorrect show';
+                setTimeout(() => {
+                    options[index].classList.remove('selected', 'incorrect');
+                }, 2000);
+            }
+        }
+        
+        function checkTest() {
+            const problem = problems[currentProblem];
+            const input = document.getElementById('testInput').value.trim();
+            const feedback = document.getElementById('testFeedback');
+            
+            if (input === problem.testAnswer) {
+                feedback.textContent = '✅ מצוין! הבנת איך הפונקציה עובדת!';
+                feedback.className = 'feedback correct show';
+                document.getElementById('successMessage').classList.add('show');
+            } else {
+                feedback.textContent = '❌ נסה שוב. עקוב אחרי הדוגמה למעלה.';
+                feedback.className = 'feedback incorrect show';
+            }
+        }
+    </script>
+</body>
+</html>
