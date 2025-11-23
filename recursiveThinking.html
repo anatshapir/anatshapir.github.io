@@ -424,6 +424,22 @@
             color: #374151;
             margin: 20px 0;
             border: 2px solid #d1d5db;
+            direction: ltr;  /* Force LTR for formulas */
+        }
+        
+        .math-content {
+            direction: ltr;
+            display: inline-block;
+        }
+        
+        /* Ensure tables with numbers display correctly */
+        .pattern-table td {
+            direction: ltr;
+            text-align: center;
+        }
+        
+        .pattern-table td.highlight-cell {
+            direction: rtl;  /* Hebrew text in highlighted cells */
         }
         
         .success-message {
@@ -762,25 +778,25 @@
                 name: 'חישוב עצרת',
                 description: 'עצרת של מספר n (מסומנת n!) היא מכפלת כל המספרים מ-1 עד n.',
                 examples: [
-                    '5! = 5 × 4 × 3 × 2 × 1 = 120',
-                    '4! = 4 × 3 × 2 × 1 = 24',
-                    '3! = 3 × 2 × 1 = 6',
-                    '1! = 1',
-                    '0! = 1 (הגדרה)'
+                    '<span dir="ltr">5! = 5 × 4 × 3 × 2 × 1 = 120</span>',
+                    '<span dir="ltr">4! = 4 × 3 × 2 × 1 = 24</span>',
+                    '<span dir="ltr">3! = 3 × 2 × 1 = 6</span>',
+                    '<span dir="ltr">1! = 1</span>',
+                    '<span dir="ltr">0! = 1</span> (הגדרה)'
                 ],
                 pattern: 'n! = n × (n-1)!',
                 patternTable: `
                     <table class="pattern-table">
-                        <tr><th>n</th><th>n!</th><th>איך מחשבים?</th></tr>
-                        <tr><td>5</td><td>120</td><td class="highlight-cell">5 × 4!</td></tr>
-                        <tr><td>4</td><td>24</td><td class="highlight-cell">4 × 3!</td></tr>
-                        <tr><td>3</td><td>6</td><td class="highlight-cell">3 × 2!</td></tr>
-                        <tr><td>2</td><td>2</td><td class="highlight-cell">2 × 1!</td></tr>
+                        <tr><th>n</th><th>!n</th><th>איך מחשבים?</th></tr>
+                        <tr><td>5</td><td>120</td><td><span class="math-content">5 × 4!</span></td></tr>
+                        <tr><td>4</td><td>24</td><td><span class="math-content">4 × 3!</span></td></tr>
+                        <tr><td>3</td><td>6</td><td><span class="math-content">3 × 2!</span></td></tr>
+                        <tr><td>2</td><td>2</td><td><span class="math-content">2 × 1!</span></td></tr>
                         <tr><td>1</td><td>1</td><td>1</td></tr>
                     </table>
                 `,
                 patternHint: 'איך אפשר לחשב את n! אם אנחנו כבר יודעים את (n-1)!?',
-                patternQuestion: 'מה הקשר בין 5! ל-4!?',
+                patternQuestion: 'מה הקשר בין <span class="math-content">5!</span> ל-<span class="math-content">4!</span>?',
                 patternOptions: [
                     { text: '5! = 5 + 4!', correct: false },
                     { text: '5! = 5 × 4!', correct: true },
@@ -832,22 +848,22 @@
                 name: 'חישוב חזקה',
                 description: 'חישוב x בחזקת n (x^n) - כלומר x כפול עצמו n פעמים.',
                 examples: [
-                    '2^5 = 2 × 2 × 2 × 2 × 2 = 32',
-                    '3^4 = 3 × 3 × 3 × 3 = 81',
-                    '5^3 = 5 × 5 × 5 = 125',
-                    '7^1 = 7',
-                    'x^0 = 1 (לכל x)'
+                    '<span dir="ltr">2^5 = 2 × 2 × 2 × 2 × 2 = 32</span>',
+                    '<span dir="ltr">3^4 = 3 × 3 × 3 × 3 = 81</span>',
+                    '<span dir="ltr">5^3 = 5 × 5 × 5 = 125</span>',
+                    '<span dir="ltr">7^1 = 7</span>',
+                    '<span dir="ltr">x^0 = 1</span> (לכל x)'
                 ],
                 pattern: 'x^n = x × x^(n-1)',
                 patternTable: `
                     <table class="pattern-table">
                         <tr><th>חזקה</th><th>תוצאה</th><th>איך מחשבים?</th></tr>
-                        <tr><td>2^5</td><td>32</td><td class="highlight-cell">2 × 2^4</td></tr>
-                        <tr><td>2^4</td><td>16</td><td class="highlight-cell">2 × 2^3</td></tr>
-                        <tr><td>2^3</td><td>8</td><td class="highlight-cell">2 × 2^2</td></tr>
-                        <tr><td>2^2</td><td>4</td><td class="highlight-cell">2 × 2^1</td></tr>
-                        <tr><td>2^1</td><td>2</td><td class="highlight-cell">2 × 2^0</td></tr>
-                        <tr><td>2^0</td><td>1</td><td>1 (הגדרה)</td></tr>
+                        <tr><td><span class="math-content">2^5</span></td><td>32</td><td><span class="math-content">2 × 2^4</span></td></tr>
+                        <tr><td><span class="math-content">2^4</span></td><td>16</td><td><span class="math-content">2 × 2^3</span></td></tr>
+                        <tr><td><span class="math-content">2^3</span></td><td>8</td><td><span class="math-content">2 × 2^2</span></td></tr>
+                        <tr><td><span class="math-content">2^2</span></td><td>4</td><td><span class="math-content">2 × 2^1</span></td></tr>
+                        <tr><td><span class="math-content">2^1</span></td><td>2</td><td><span class="math-content">2 × 2^0</span></td></tr>
+                        <tr><td><span class="math-content">2^0</span></td><td>1</td><td>1 (הגדרה)</td></tr>
                     </table>
                 `,
                 patternHint: 'שימו לב: כל חזקה היא הבסיס כפול החזקה הקודמת!',
@@ -916,10 +932,10 @@
                 patternTable: `
                     <table class="pattern-table">
                         <tr><th>מחרוזת</th><th>בדיקה</th><th>תוצאה</th></tr>
-                        <tr><td>"level"</td><td class="highlight-cell">l=l והאמצע "eve"</td><td>✓</td></tr>
-                        <tr><td>"eve"</td><td class="highlight-cell">e=e והאמצע "v"</td><td>✓</td></tr>
-                        <tr><td>"v"</td><td>תו בודד</td><td>✓</td></tr>
-                        <tr><td>"hello"</td><td class="highlight-cell">h≠o</td><td>✗</td></tr>
+                        <tr><td dir="ltr">"level"</td><td><span dir="ltr">l=l</span> והאמצע <span dir="ltr">"eve"</span></td><td>✓</td></tr>
+                        <tr><td dir="ltr">"eve"</td><td><span dir="ltr">e=e</span> והאמצע <span dir="ltr">"v"</span></td><td>✓</td></tr>
+                        <tr><td dir="ltr">"v"</td><td>תו בודד</td><td>✓</td></tr>
+                        <tr><td dir="ltr">"hello"</td><td><span dir="ltr">h≠o</span></td><td>✗</td></tr>
                     </table>
                 `,
                 patternHint: 'בודקים את התווים בקצוות, ואז בודקים את מה שבאמצע',
@@ -978,19 +994,19 @@
                 name: 'ספירת ספרות',
                 description: 'ספירת מספר הספרות במספר שלם חיובי.',
                 examples: [
-                    '1234 → 4 ספרות',
-                    '567 → 3 ספרות',
-                    '89 → 2 ספרות',
-                    '5 → ספרה אחת',
-                    '0 → ספרה אחת'
+                    '<span dir="ltr">1234</span> ← 4 ספרות',
+                    '<span dir="ltr">567</span> ← 3 ספרות',
+                    '<span dir="ltr">89</span> ← 2 ספרות',
+                    '<span dir="ltr">5</span> ← ספרה אחת',
+                    '<span dir="ltr">0</span> ← ספרה אחת'
                 ],
                 pattern: 'מספר הספרות = 1 + מספר הספרות אחרי חלוקה ב-10',
                 patternTable: `
                     <table class="pattern-table">
                         <tr><th>מספר</th><th>אחרי חלוקה ב-10</th><th>ספרות</th></tr>
-                        <tr><td>1234</td><td>123</td><td class="highlight-cell">1 + ספרות(123)</td></tr>
-                        <tr><td>123</td><td>12</td><td class="highlight-cell">1 + ספרות(12)</td></tr>
-                        <tr><td>12</td><td>1</td><td class="highlight-cell">1 + ספרות(1)</td></tr>
+                        <tr><td>1234</td><td>123</td><td><span dir="rtl">1 + ספרות(123)</span></td></tr>
+                        <tr><td>123</td><td>12</td><td><span dir="rtl">1 + ספרות(12)</span></td></tr>
+                        <tr><td>12</td><td>1</td><td><span dir="rtl">1 + ספרות(1)</span></td></tr>
                         <tr><td>1</td><td>0</td><td>1</td></tr>
                     </table>
                 `,
@@ -1056,11 +1072,11 @@
                 patternTable: `
                     <table class="pattern-table">
                         <tr><th>מחרוזת</th><th>תו אחרון</th><th>היפוך</th></tr>
-                        <tr><td>"hello"</td><td>'o'</td><td class="highlight-cell">'o' + reverse("hell")</td></tr>
-                        <tr><td>"hell"</td><td>'l'</td><td class="highlight-cell">'l' + reverse("hel")</td></tr>
-                        <tr><td>"hel"</td><td>'l'</td><td class="highlight-cell">'l' + reverse("he")</td></tr>
-                        <tr><td>"he"</td><td>'e'</td><td class="highlight-cell">'e' + reverse("h")</td></tr>
-                        <tr><td>"h"</td><td>'h'</td><td>"h"</td></tr>
+                        <tr><td dir="ltr">"hello"</td><td dir="ltr">'o'</td><td><span dir="ltr">'o' + reverse("hell")</span></td></tr>
+                        <tr><td dir="ltr">"hell"</td><td dir="ltr">'l'</td><td><span dir="ltr">'l' + reverse("hel")</span></td></tr>
+                        <tr><td dir="ltr">"hel"</td><td dir="ltr">'l'</td><td><span dir="ltr">'l' + reverse("he")</span></td></tr>
+                        <tr><td dir="ltr">"he"</td><td dir="ltr">'e'</td><td><span dir="ltr">'e' + reverse("h")</span></td></tr>
+                        <tr><td dir="ltr">"h"</td><td dir="ltr">'h'</td><td dir="ltr">"h"</td></tr>
                     </table>
                 `,
                 patternHint: 'לוקחים את התו האחרון ומוסיפים את היפוך השאר',
@@ -1179,7 +1195,7 @@
             problem.patternOptions.forEach((option, index) => {
                 const div = document.createElement('div');
                 div.className = 'option';
-                div.textContent = option.text;
+                div.innerHTML = `<span class="math-content">${option.text}</span>`;
                 div.onclick = () => checkPattern(index);
                 patternOptions.appendChild(div);
             });
@@ -1200,7 +1216,7 @@
             problem.recursiveOptions.forEach((option, index) => {
                 const div = document.createElement('div');
                 div.className = 'option';
-                div.textContent = option.text;
+                div.innerHTML = `<span class="math-content">${option.text}</span>`;
                 div.onclick = () => checkRecursive(index);
                 recursiveOptions.appendChild(div);
             });
