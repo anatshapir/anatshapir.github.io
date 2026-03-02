@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🔴🔵 ויזואליזציה — DFS ו-BFS איטרטיבי</title>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;600;800&family=Fira+Code:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0e1a;
+    --bg2: #111827;
+    --card: #1a2332;
+    --dfs: #ef4444;
+    --dfs-glow: rgba(239,68,68,0.15);
+    --bfs: #3b82f6;
+    --bfs-glow: rgba(59,130,246,0.15);
+    --gold: #f59e0b;
+    --green: #10b981;
+    --text: #e2e8f0;
+    --muted: #64748b;
+    --code-bg: #0c1322;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Heebo', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+  body::before {
+    content: '';
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: radial-gradient(ellipse at 30% 60%, var(--dfs-glow) 0%, transparent 50%),
+                radial-gradient(ellipse at 70% 30%, var(--bfs-glow) 0%, transparent 50%);
+    pointer-events: none; z-index: 0;
+    transition: background 0.5s;
+  }
+  body.bfs-mode::before {
+    background: radial-gradient(ellipse at 70% 60%, var(--bfs-glow) 0%, transparent 50%),
+                radial-gradient(ellipse at 30% 30%, rgba(6,182,212,0.05) 0%, transparent 50%);
+  }
+  .container { position: relative; z-index: 1; max-width: 1150px; margin: 0 auto; padding: 20px; }
+
+  h1 {
+    text-align: center; font-size: 1.5em; font-weight: 800; margin-bottom: 12px;
+    transition: all 0.4s;
+  }
+  h1.dfs { background: linear-gradient(135deg, #ef4444, #f97316); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  h1.bfs { background: linear-gradient(135deg, #3b82f6, #06b6d4); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+
+  /* Mode toggle */
+  .mode-toggle { display: flex; justify-content: center; gap: 10px; margin-bottom: 16px; }
+  .mode-btn {
+    padding: 9px 28px; border-radius: 24px; border: 2px solid #2a2a4a;
+    background: rgba(20,20,40,0.6); color: var(--muted); font-family: 'Heebo';
+    font-size: 0.95em; font-weight: 700; cursor: pointer; transition: all 0.3s;
+  }
+  .mode-btn:hover { transform: translateY(-1px); }
+  .mode-btn.dfs-active { border-color: var(--dfs); color: var(--dfs); background: var(--dfs-glow); box-shadow: 0 0 20px rgba(239,68,68,0.15); }
+  .mode-btn.bfs-active { border-color: var(--bfs); color: var(--bfs); background: var(--bfs-glow); box-shadow: 0 0 20px rgba(59,130,246,0.15); }
+
+  .layout { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; }
+  .left { flex: 1 1 500px; min-width: 320px; }
+  .right { flex: 0 1 340px; min-width: 280px; display: flex; flex-direction: column; gap: 12px; }
+
+  /* Tree */
+  .tree-wrap {
+    background: var(--bg2); border-radius: 16px; padding: 8px; margin-bottom: 12px;
+    border: 1px solid #1e293b; transition: border-color 0.3s;
+  }
+  .tree-wrap svg { width: 100%; height: auto; display: block; }
+
+  /* Output bar */
+  .output-bar {
+    background: rgba(16,185,129,0.08); border: 1px solid rgba(16,185,129,0.2);
+    border-radius: 10px; padding: 8px 14px; margin-bottom: 12px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .output-label { color: var(--green); font-size: 0.8em; font-weight: 700; }
+  .output-vals { font-family: 'Fira Code', monospace; font-size: 1em; font-weight: 700; color: #d1fae5; direction: ltr; }
+
+  /* Controls */
+  .controls { display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 8px; flex-wrap: wrap; }
+  .controls button {
+    padding: 6px 14px; border-radius: 8px; font-family: 'Heebo'; font-size: 0.85em;
+    font-weight: 600; cursor: pointer; transition: all 0.2s; border: 1px solid;
+  }
+  .controls button:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn-reset { border-color: var(--dfs); background: #7f1d1d; color: var(--text); }
+  .btn-back { border-color: var(--gold); background: #78350f; color: var(--text); }
+  .btn-play { border-color: var(--green); background: #14532d; color: var(--text); }
+  .btn-play.playing { border-color: var(--dfs); background: #7f1d1d; }
+  .btn-fwd { border-color: var(--bfs); background: #1e3a5f; color: var(--text); }
+  .step-counter { text-align: center; color: var(--muted); font-size: 0.8em; margin-bottom: 4px; }
+
+  /* Message */
+  .message {
+    border-radius: 10px; padding: 10px 14px; text-align: center; min-height: 44px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.95em; font-weight: 500; transition: all 0.3s;
+  }
+  .message.dfs { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); color: #fecaca; }
+  .message.bfs { background: rgba(59,130,246,0.08); border: 1px solid rgba(59,130,246,0.2); color: #bfdbfe; }
+
+  /* Data structure */
+  .ds-panel {
+    background: var(--bg2); border-radius: 12px; padding: 10px 14px;
+    min-height: 100px; transition: border-color 0.3s;
+  }
+  .ds-panel.dfs-border { border: 1px solid rgba(239,68,68,0.25); }
+  .ds-panel.bfs-border { border: 1px solid rgba(59,130,246,0.25); }
+  .ds-label { font-size: 0.7em; font-weight: 700; letter-spacing: 1.5px; margin-bottom: 6px; transition: color 0.3s; }
+  .ds-label.dfs-text { color: var(--dfs); }
+  .ds-label.bfs-text { color: var(--bfs); }
+
+  /* Stack items (vertical) */
+  .stack-col { display: flex; flex-direction: column-reverse; gap: 3px; align-items: center; }
+  .stack-item {
+    background: #16213e; border: 1px solid #2c3e6b; border-radius: 6px;
+    padding: 4px 18px; font-family: 'Fira Code', monospace; font-size: 0.9em;
+    font-weight: 700; color: var(--text); text-align: center; min-width: 44px;
+    transition: all 0.3s;
+  }
+  .stack-item.top { background: #7f1d1d; border-color: var(--dfs); }
+  .ds-arrows { font-size: 0.7em; text-align: center; margin-bottom: 4px; }
+
+  /* Queue items (horizontal) */
+  .queue-row { display: flex; gap: 3px; align-items: center; min-height: 36px; flex-wrap: wrap; }
+  .queue-item {
+    background: #16213e; border: 1px solid #2c3e6b; border-radius: 6px;
+    padding: 4px 14px; font-family: 'Fira Code', monospace; font-size: 0.9em;
+    font-weight: 700; color: var(--text); transition: all 0.3s;
+  }
+  .queue-item.front { background: #1e3a5f; border-color: var(--bfs); }
+  .queue-arrows { display: flex; justify-content: space-between; font-size: 0.7em; margin-bottom: 4px; }
+
+  .ds-empty { color: #3a4a5a; font-size: 0.8em; font-style: italic; }
+
+  /* Insight box */
+  .insight { border-radius: 10px; padding: 10px 14px; transition: all 0.3s; }
+  .insight.dfs-style { background: rgba(239,68,68,0.06); border: 1px solid rgba(239,68,68,0.15); }
+  .insight.bfs-style { background: rgba(59,130,246,0.06); border: 1px solid rgba(59,130,246,0.15); }
+  .insight-title { font-size: 0.8em; font-weight: 700; margin-bottom: 3px; }
+  .insight-text { font-size: 0.82em; color: #94a3b8; line-height: 1.6; }
+
+  /* Code */
+  .code-panel { background: var(--code-bg); border-radius: 12px; border: 1px solid #1e293b; padding: 10px 0; }
+  .code-panel .label { padding: 0 12px; margin-bottom: 6px; font-size: 0.7em; font-weight: 700; letter-spacing: 1.5px; }
+  .code-line {
+    padding: 1px 12px; font-family: 'Fira Code', monospace; font-size: 0.75em;
+    color: #5a6a7a; white-space: pre; direction: ltr; text-align: left;
+  }
+
+  /* Comparison */
+  .compare {
+    background: rgba(139,92,246,0.06); border: 1px solid rgba(139,92,246,0.2);
+    border-radius: 10px; padding: 10px 14px;
+  }
+  .compare .label { font-size: 0.7em; font-weight: 700; letter-spacing: 1px; color: #c4b5fd; margin-bottom: 4px; }
+  .compare-row { font-family: 'Fira Code', monospace; font-size: 0.78em; color: #a78bfa; direction: ltr; text-align: left; line-height: 1.8; }
+
+  .speed-wrap { display: flex; align-items: center; gap: 5px; }
+  .speed-wrap label { color: var(--muted); font-size: 0.8em; }
+  input[type=range] { width: 70px; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1 id="title" class="dfs">🔴 סריקת עומק איטרטיבית — DFS עם מחסנית</h1>
+
+  <div class="mode-toggle">
+    <button class="mode-btn dfs-active" id="btnDFS" onclick="switchMode('dfs')">🔴 DFS — מחסנית</button>
+    <button class="mode-btn" id="btnBFS" onclick="switchMode('bfs')">🔵 BFS — תור</button>
+  </div>
+
+  <div class="layout">
+    <div class="left">
+      <div class="tree-wrap"><svg id="treeSvg" viewBox="0 0 500 320"></svg></div>
+      <div class="output-bar">
+        <span class="output-label">פלט:</span>
+        <span class="output-vals" id="outputVals">—</span>
+      </div>
+      <div class="controls">
+        <button class="btn-reset" onclick="reset()">⏮ התחלה</button>
+        <button class="btn-back" id="btnBack" onclick="stepBack()">◀ אחורה</button>
+        <button class="btn-play" id="btnPlay" onclick="togglePlay()">▶ הפעל</button>
+        <button class="btn-fwd" id="btnFwd" onclick="stepForward()">קדימה ▶</button>
+        <div class="speed-wrap">
+          <label>מהירות:</label>
+          <input type="range" min="200" max="2000" step="100" value="1000" oninput="speed=2200-this.value">
+        </div>
+      </div>
+      <div class="step-counter" id="stepCounter"></div>
+    </div>
+    <div class="right">
+      <div class="message dfs" id="message">לחצו ▶ או קדימה כדי להתחיל</div>
+      <div class="ds-panel dfs-border" id="dsPanel">
+        <div class="ds-label dfs-text" id="dsLabel">STACK (מחסנית)</div>
+        <div id="dsContent"></div>
+      </div>
+      <div class="insight dfs-style" id="insightBox">
+        <div class="insight-title" id="insightTitle" style="color:var(--dfs)">💡 למה מחסנית = עומק?</div>
+        <div class="insight-text" id="insightText">מחסנית = LIFO: האחרון שנכנס יוצא ראשון. לכן תמיד נמשיך לעומק לפני שנחזור הצידה.</div>
+      </div>
+      <div class="code-panel">
+        <div class="label" id="codeLabel" style="color:var(--dfs)">DFS — ITERATIVE</div>
+        <div id="codeLines"></div>
+      </div>
+      <div class="compare">
+        <div class="label">📊 השוואה</div>
+        <div class="compare-row">
+          <div><span style="color:var(--dfs)">DFS:</span> Stack → LIFO → עומק</div>
+          <div><span style="color:var(--bfs)">BFS:</span> Queue → FIFO → רוחב</div>
+          <div style="color:#4b5563;margin-top:4px">ההבדל היחיד: מבנה הנתונים!</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===== TREE =====
+const TREE = {
+  val:10, id:"A",
+  left:{ val:5, id:"B", left:{val:2,id:"D",left:null,right:null}, right:{val:7,id:"E",left:null,right:null} },
+  right:{ val:15, id:"C", left:{val:12,id:"F",left:null,right:null}, right:{val:20,id:"G",left:null,right:null} }
+};
+const NMAP = {};
+(function buildMap(n){ if(!n)return; NMAP[n.id]=n; buildMap(n.left); buildMap(n.right); })(TREE);
+
+const positions = {};
+(function assignPos(n,x,y,dx){ if(!n)return; positions[n.id]={x,y,val:n.val,id:n.id}; assignPos(n.left,x-dx,y+80,dx*0.55); assignPos(n.right,x+dx,y+80,dx*0.55); })(TREE,250,50,120);
+
+// ===== DFS STEPS =====
+function genDFS() {
+  const steps = [];
+  steps.push({type:"init",msg:"מאתחלים מחסנית ודוחפים את השורש",stack:["A"],visited:[],cur:null,output:[]});
+  const stack=["A"], visited=[], output=[];
+  while(stack.length>0){
+    const nid=stack[stack.length-1]; const node=NMAP[nid];
+    stack.pop(); const sc=[...stack];
+    steps.push({type:"pop",msg:`שולפים ${node.val} מהמחסנית (pop)`,stack:[...sc],visited:[...visited],cur:nid,output:[...output]});
+    visited.push(nid); output.push(node.val);
+    steps.push({type:"process",msg:`מעבדים את ${node.val} — מוסיפים לפלט`,stack:[...sc],visited:[...visited],cur:nid,output:[...output]});
+    const tp=[];
+    if(node.right) tp.push(node.right.id);
+    if(node.left) tp.push(node.left.id);
+    if(tp.length>0){
+      for(const id of tp) sc.push(id);
+      const names=tp.map(id=>NMAP[id].val);
+      const pushMsg = node.right&&node.left
+        ? `דוחפים: ימין (${NMAP[node.right.id].val}) ואז שמאל (${NMAP[node.left.id].val}) — שמאל יישלף קודם!`
+        : `דוחפים ${names.join(", ")}`;
+      steps.push({type:"push",msg:pushMsg,stack:[...sc],visited:[...visited],cur:nid,output:[...output],pushed:tp});
+    }
+    stack.length=0; stack.push(...sc);
+  }
+  steps.push({type:"done",msg:"המחסנית ריקה — סיימנו! 🎉",stack:[],visited:[...visited],cur:null,output:[...output]});
+  return steps;
+}
+
+// ===== BFS STEPS =====
+function genBFS() {
+  const steps = [];
+  steps.push({type:"init",msg:"מאתחלים תור ומכניסים את השורש",queue:["A"],visited:[],cur:null,output:[]});
+  const queue=["A"], visited=[], output=[];
+  while(queue.length>0){
+    const nid=queue[0]; const node=NMAP[nid];
+    queue.shift(); const qc=[...queue];
+    steps.push({type:"dequeue",msg:`מוציאים ${node.val} מהתור (dequeue — מהתחלה!)`,queue:[...qc],visited:[...visited],cur:nid,output:[...output]});
+    visited.push(nid); output.push(node.val);
+    steps.push({type:"process",msg:`מעבדים את ${node.val} — מוסיפים לפלט`,queue:[...qc],visited:[...visited],cur:nid,output:[...output]});
+    const te=[];
+    if(node.left) te.push(node.left.id);
+    if(node.right) te.push(node.right.id);
+    if(te.length>0){
+      for(const id of te) qc.push(id);
+      steps.push({type:"enqueue",msg:`מכניסים לתור: ${te.map(id=>NMAP[id].val).join(", ")} (לסוף!)`,queue:[...qc],visited:[...visited],cur:nid,output:[...output],pushed:te});
+    }
+    queue.length=0; queue.push(...qc);
+  }
+  steps.push({type:"done",msg:"התור ריק — סיימנו! 🎉",queue:[],visited:[...visited],cur:null,output:[...output]});
+  return steps;
+}
+
+const DFS_CODE = [
+  "Stack<Node> s = new Stack<>();",
+  "s.push(root);",
+  "while (!s.isEmpty()) {",
+  "  Node curr = s.pop();",
+  "  process(curr);",
+  "  if (curr.right != null)",
+  "    s.push(curr.right);",
+  "  if (curr.left != null)",
+  "    s.push(curr.left);",
+  "}"
+];
+const BFS_CODE = [
+  "Queue<Node> q = new LinkedList<>();",
+  "q.add(root);",
+  "while (!q.isEmpty()) {",
+  "  Node curr = q.remove();",
+  "  process(curr);",
+  "  if (curr.left != null)",
+  "    q.add(curr.left);",
+  "  if (curr.right != null)",
+  "    q.add(curr.right);",
+  "}"
+];
+
+let mode = "dfs";
+let stepIndex = -1;
+let steps = [];
+let playing = false;
+let speed = 1200;
+let timer = null;
+
+function getNodeStatus(nid) {
+  const s = stepIndex>=0 && stepIndex<steps.length ? steps[stepIndex] : null;
+  if (!s) return "idle";
+  if (s.cur === nid) return "current";
+  if (s.visited?.includes(nid)) return "visited";
+  const struct = mode==="dfs" ? s.stack : s.queue;
+  if (struct?.includes(nid)) return "inStruct";
+  return "idle";
+}
+
+const NODE_COLORS = {
+  idle: {fill:"#2c3e50",stroke:"#4a6785",text:"#ecf0f1"},
+  current: {fill:"#c2410c",stroke:"#f97316",text:"#fff"},
+  visited: {fill:"#065f46",stroke:"#10b981",text:"#fff"},
+  inStruct: {fill:"#1e3a5f",stroke:"#3b82f6",text:"#e0f2fe"},
+};
+
+function renderTree() {
+  const svg = document.getElementById("treeSvg");
+  let html = '';
+  // Edges
+  Object.entries(positions).forEach(([id,pos]) => {
+    const node = NMAP[id]; if(!node) return;
+    [node.left, node.right].forEach(child => {
+      if (!child || !positions[child.id]) return;
+      const cp = positions[child.id];
+      html += `<line x1="${pos.x}" y1="${pos.y+24}" x2="${cp.x}" y2="${cp.y-24}" stroke="#1e293b" stroke-width="2"/>`;
+    });
+  });
+  // Nodes
+  Object.entries(positions).forEach(([id,pos]) => {
+    const st = getNodeStatus(id);
+    const c = NODE_COLORS[st];
+    const glow = st==="current" ? "filter:drop-shadow(0 0 12px rgba(249,115,22,0.5))" : "";
+    html += `<circle cx="${pos.x}" cy="${pos.y}" r="24" fill="${c.fill}" stroke="${c.stroke}" stroke-width="3" style="transition:all 0.4s;${glow}"/>`;
+    html += `<text x="${pos.x}" y="${pos.y+1}" text-anchor="middle" dominant-baseline="middle" fill="${c.text}" font-size="16" font-weight="700" font-family="'Fira Code',monospace">${pos.val}</text>`;
+  });
+  // Legend
+  const legend = [{c:"#c2410c",l:"נוכחי"},{c:"#1e3a5f",l:mode==="dfs"?"במחסנית":"בתור"},{c:"#065f46",l:"סיים"}];
+  legend.forEach((item,i) => {
+    html += `<circle cx="${15+i*110}" cy="295" r="6" fill="${item.c}"/>`;
+    html += `<text x="${27+i*110}" y="299" fill="#64748b" font-size="11" font-family="'Heebo',sans-serif">${item.l}</text>`;
+  });
+  svg.innerHTML = html;
+}
+
+function renderDS() {
+  const cur = stepIndex>=0 && stepIndex<steps.length ? steps[stepIndex] : null;
+  const items = cur ? (mode==="dfs" ? cur.stack||[] : cur.queue||[]) : [];
+  const el = document.getElementById("dsContent");
+
+  if (items.length === 0) {
+    el.innerHTML = '<div class="ds-empty">(ריק)</div>';
+    return;
+  }
+
+  if (mode === "dfs") {
+    // Stack: vertical
+    el.innerHTML = `<div class="ds-arrows" style="color:var(--dfs)">pop ↑ / push ↓</div>` +
+      '<div class="stack-col">' +
+      items.map((id,i) => `<div class="stack-item${i===items.length-1?' top':''}">${NMAP[id]?.val}</div>`).join('') +
+      '</div>';
+  } else {
+    // Queue: horizontal
+    el.innerHTML = `<div class="queue-arrows"><span style="color:var(--bfs)">← dequeue</span><span style="color:var(--bfs)">enqueue →</span></div>` +
+      '<div class="queue-row">' +
+      items.map((id,i) => `<div class="queue-item${i===0?' front':''}">${NMAP[id]?.val}</div>`).join('') +
+      '</div>';
+  }
+}
+
+function renderOutput() {
+  const cur = stepIndex>=0 && stepIndex<steps.length ? steps[stepIndex] : null;
+  const vals = cur?.output || [];
+  document.getElementById("outputVals").textContent = vals.length > 0 ? vals.join(" → ") : "—";
+}
+
+function renderCode() {
+  const lines = mode==="dfs" ? DFS_CODE : BFS_CODE;
+  document.getElementById("codeLines").innerHTML = lines.map(l =>
+    `<div class="code-line">${l}</div>`
+  ).join('');
+}
+
+function renderMessage() {
+  const el = document.getElementById("message");
+  const cur = stepIndex>=0 && stepIndex<steps.length ? steps[stepIndex] : null;
+  el.textContent = cur ? cur.msg : "לחצו ▶ או קדימה כדי להתחיל";
+}
+
+function renderAll() {
+  renderTree(); renderDS(); renderOutput(); renderMessage();
+  document.getElementById("stepCounter").textContent = `צעד ${Math.max(0,stepIndex+1)} מתוך ${steps.length}`;
+  document.getElementById("btnBack").disabled = stepIndex <= -1;
+  document.getElementById("btnFwd").disabled = stepIndex >= steps.length-1;
+  const bp = document.getElementById("btnPlay");
+  bp.textContent = playing ? "⏸ עצור" : "▶ הפעל";
+  bp.className = playing ? "btn-play playing" : "btn-play";
+}
+
+function switchMode(m) {
+  playing = false; clearTimeout(timer);
+  mode = m; stepIndex = -1;
+  steps = m==="dfs" ? genDFS() : genBFS();
+
+  const accent = m==="dfs" ? "var(--dfs)" : "var(--bfs)";
+  document.body.className = m==="bfs" ? "bfs-mode" : "";
+  document.getElementById("title").className = m;
+  document.getElementById("title").textContent = m==="dfs"
+    ? "🔴 סריקת עומק איטרטיבית — DFS עם מחסנית"
+    : "🔵 סריקת רוחב — BFS עם תור";
+  document.getElementById("btnDFS").className = m==="dfs" ? "mode-btn dfs-active" : "mode-btn";
+  document.getElementById("btnBFS").className = m==="bfs" ? "mode-btn bfs-active" : "mode-btn";
+  document.getElementById("message").className = `message ${m}`;
+  document.getElementById("dsPanel").className = `ds-panel ${m}-border`;
+  document.getElementById("dsLabel").className = `ds-label ${m}-text`;
+  document.getElementById("dsLabel").textContent = m==="dfs" ? "STACK (מחסנית)" : "QUEUE (תור)";
+  document.getElementById("insightBox").className = `insight ${m}-style`;
+  document.getElementById("insightTitle").style.color = accent;
+  document.getElementById("insightTitle").textContent = m==="dfs" ? "💡 למה מחסנית = עומק?" : "💡 למה תור = רוחב?";
+  document.getElementById("insightText").textContent = m==="dfs"
+    ? "מחסנית = LIFO: האחרון שנכנס יוצא ראשון. לכן תמיד נמשיך לעומק לפני שנחזור הצידה."
+    : "תור = FIFO: הראשון שנכנס יוצא ראשון. לכן נסיים כל שכבה (רמה) לפני שנתחיל את הבאה.";
+  document.getElementById("codeLabel").style.color = accent;
+  document.getElementById("codeLabel").textContent = m==="dfs" ? "DFS — ITERATIVE" : "BFS — ITERATIVE";
+  document.querySelector('input[type=range]').style.accentColor = accent;
+
+  renderCode();
+  renderAll();
+}
+
+function reset() { playing=false; clearTimeout(timer); stepIndex=-1; renderAll(); }
+function stepBack() { if(stepIndex>-1){stepIndex--;renderAll();} }
+function stepForward() { if(stepIndex<steps.length-1){stepIndex++;renderAll();} }
+function togglePlay() {
+  playing=!playing;
+  if(playing) playTick();
+  else clearTimeout(timer);
+  renderAll();
+}
+function playTick() {
+  if(!playing) return;
+  if(stepIndex>=steps.length-1){playing=false;renderAll();return;}
+  stepIndex++;renderAll();
+  timer=setTimeout(playTick,speed);
+}
+
+// Keyboard
+document.addEventListener("keydown",e=>{
+  if(e.key==="ArrowRight") stepBack();
+  else if(e.key==="ArrowLeft") stepForward();
+  else if(e.key===" "){e.preventDefault();togglePlay();}
+});
+
+// Init
+switchMode("dfs");
+</script>
+</body>
+</html>
