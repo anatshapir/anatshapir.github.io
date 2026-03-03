@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🔴🔵 ויזואליזציה — DFS ו-BFS איטרטיבי</title>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;600;800&family=Fira+Code:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0e1a;
+    --bg2: #111827;
+    --card: #1a2332;
+    --dfs: #ef4444;
+    --dfs-glow: rgba(239,68,68,0.15);
+    --bfs: #3b82f6;
+    --bfs-glow: rgba(59,130,246,0.15);
+    --gold: #f59e0b;
+    --green: #10b981;
+    --text: #e2e8f0;
+    --muted: #64748b;
+    --code-bg: #0c1322;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Heebo', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+  body::before {
+    content: '';
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: radial-gradient(ellipse at 30% 60%, var(--dfs-glow) 0%, transparent 50%),
+                radial-gradient(ellipse at 70% 30%, var(--bfs-glow) 0%, transparent 50%);
+    pointer-events: none; z-index: 0;
+    transition: background 0.5s;
+  }
+  body.bfs-mode::before {
+    background: radial-gradient(ellipse at 70% 60%, var(--bfs-glow) 0%, transparent 50%),
+                radial-gradient(ellipse at 30% 30%, rgba(6,182,212,0.05) 0%, transparent 50%);
+  }
+  .container { position: relative; z-index: 1; max-width: 1150px; margin: 0 auto; padding: 20px; }
+
+  h1 {
+    text-align: center; font-size: 1.5em; font-weight: 800; margin-bottom: 12px;
+    transition: all 0.4s;
+  }
+  h1.dfs { background: linear-gradient(135deg, #ef4444, #f97316); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  h1.bfs { background: linear-gradient(135deg, #3b82f6, #06b6d4); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+
+  /* Mode toggle */
+  .mode-toggle { display: flex; justify-content: center; gap: 10px; margin-bottom: 16px; }
+  .mode-btn {
+    padding: 9px 28px; border-radius: 24px; border: 2px solid #2a2a4a;
+    background: rgba(20,20,40,0.6); color: var(--muted); font-family: 'Heebo';
+    font-size: 0.95em; font-weight: 700; cursor: pointer; transition: all 0.3s;
+  }
+  .mode-btn:hover { transform: translateY(-1px); }
+  .mode-btn.dfs-active { border-color: var(--dfs); color: var(--dfs); background: var(--dfs-glow); box-shadow: 0 0 20px rgba(239,68,68,0.15); }
+  .mode-btn.bfs-active { border-color: var(--bfs); color: var(--bfs); background: var(--bfs-glow); box-shadow: 0 0 20px rgba(59,130,246,0.15); }
+
+  .layout { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; }
+  .left { flex: 1 1 500px; min-width: 320px; }
+  .right { flex: 0 1 340px; min-width: 280px; display: flex; flex-direction: column; gap: 12px; }
+
+  /* Tree */
+  .tree-wrap {
+    background: var(--bg2); border-radius: 16px; padding: 8px; margin-bottom: 12px;
+    border: 1px solid #1e293b; transition: border-color 0.3s;
+  }
+  .tree-wrap svg { width: 100%; height: auto; display: block; }
+
+  /* Output bar */
+  .output-bar {
+    background: rgba(16,185,129,0.08); border: 1px solid rgba(16,185,129,0.2);
+    border-radius: 10px; padding: 8px 14px; margin-bottom: 12px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .output-label { color: var(--green); font-size: 0.8em; font-weight: 700; }
+  .output-vals { font-family: 'Fira Code', monospace; font-size: 1em; font-weight: 700; color: #d1fae5; direction: ltr; }
+
+  /* Controls */
+  .controls { display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 8px; flex-wrap: wrap; }
+  .controls button {
+    padding: 6px 14px; border-radius: 8px; font-family: 'Heebo'; font-size: 0.85em;
+    font-weight: 600; cursor: pointer; transition: all 0.2s; border: 1px solid;
+  }
+  .controls button:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn-reset { border-color: var(--dfs); background: #7f1d1d; color: var(--text); }
+  .btn-back { border-color: var(--gold); background: #78350f; color: var(--text); }
+  .btn-play { border-color: var(--green); background: #14532d; color: var(--text); }
+  .btn-play.playing { border-color: var(--dfs); background: #7f1d1d; }
+  .btn-fwd { border-color: var(--bfs); background: #1e3a5f; color: var(--text); }
+  .step-counter { text-align: center; color: var(--muted); font-size: 0.8em; margin-bottom: 4px; }
+
+  /* Message */
+  .message {
+    border-radius: 10px; padding: 10px 14px; text-align: center; min-height: 44px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.95em; font-weight: 500; transition: all 0.3s;
+  }
+  .message.dfs { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); color: #fecaca; }
+  .message.bfs { background: rgba(59,130,246,0.08); border: 1px solid rgba(59,130,246,0.2); color: #bfdbfe; }
+
+  /* Data structure */
+  .ds-panel {
+    background: var(--bg2); border-radius: 12px; padding: 10px 14px;
+    min-height: 100px; transition: border-color 0.3s;
+  }
+  .ds-panel.dfs-border { border: 1px solid rgba(239,68,68,0.25); }
+  .ds-panel.bfs-border { border: 1px solid rgba(59,130,246,0.25); }
+  .ds-label { font-size: 0.7em; font-weight: 700; letter-spacing: 1.5px; margin-bottom: 6px; transition: color 0.3s; }
+  .ds-label.dfs-text { color: var(--dfs); }
+  .ds-label.bfs-text { color: var(--bfs); }
+
+  /* Stack items (vertical) */
+  .stack-col { display: flex; flex-direction: column-reverse; gap: 3px; align-items: center; }
+  .stack-item {
+    background: #16213e; border: 1px solid #2c3e6b; border-radius: 6px;
+    padding: 4px 18px; font-family: 'Fira Code', monospace; font-size: 0.9em;
+    font-weight: 700; color: var(--text); text-align: center; min-width: 44px;
+    transition: all 0.3s;
+  }
+  .stack-item.top { background: #7f1d1d; border-color: var(--dfs); }
+  .ds-arrows { font-size: 0.7em; text-align: center; margin-bottom: 4px; }
+
+  /* Queue items (horizontal) */
+  .queue-row { display: flex; gap: 3px; align-items: center; min-height: 36px; flex-wrap: wrap; }
+  .queue-item {
+    background: #16213e; border: 1px solid #2c3e6b; border-radius: 6px;
+    padding: 4px 14px; font-family: 'Fira Code', monospace; font-size: 0.9em;
+    font-weight: 700; color: var(--text); transition: all 0.3s;
+  }
+  .queue-item.front { background: #1e3a5f; border-color: var(--bfs); }
+  .queue-arrows { display: flex; justify-content: space-between; font-size: 0.7em; margin-bottom: 4px; }
+
+  .ds-empty { color: #3a4a5a; font-size: 0.8em; font-style: italic; }
+
+  /* Insight box */
+  .insight { border-radius: 10px; padding: 10px 14px; transition: all 0.3s; }
+  .insight.dfs-style { background: rgba(239,68,68,0.06); border: 1px solid rgba(239,68,68,0.15); }
+  .insight.bfs-style { background: rgba(59,130,246,0.06); border: 1px solid rgba(59,130,246,0.15); }
+  .insight-title { font-size: 0.8em; font-weight: 700; margin-bottom: 3px; }
+  .insight-text { font-size: 0.82em; color: #94a3b8; line-height: 1.6; }
+
+  /* Code */
+  .code-panel { background: var(--code-bg); border-radius: 12px; border: 1px solid #1e293b; padding: 10px 0; }
+  .code-panel .label { padding: 0 12px; margin-bottom: 6px; font-size: 0.7em; font-weight: 700; letter-spacing: 1.5px; }
+  .code-line {
+    padding: 1px 12px; font-family: 'Fira Code', monospace; font-size: 0.75em;
+    color: #5a6a7a; white-space: pre; direction: ltr; text-align: left;
+  }
+
+  /* Comparison */
+  .compare {
+    background: rgba(139,92,246,0.06); border: 1px solid rgba(139,92,246,0.2);
+    border-radius: 10px; padding: 10px 14px;
+  }
+  .compare .label { font-size: 0.7em; font-weight: 700; letter-spacing: 1px; color: #c4b5fd; margin-bottom: 4px; }
+  .compare-row { font-family: 'Fira Code', monospace; font-size: 0.78em; color: #a78bfa; direction: ltr; text-align: left; line-height: 1.8; }
+
+  .speed-wrap { display: flex; align-items: center; gap: 5px; }
+  .speed-wrap label { color: var(--muted); font-size: 0.8em; }
+  input[type=range] { width: 70px; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1 id="title" class="dfs">🔴 מדעי הנתונים - פרוייקט</h1>
+</div>
+</body>
+</html>
