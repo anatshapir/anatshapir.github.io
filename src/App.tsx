@@ -3,6 +3,7 @@ import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
 import { Hero } from '@/components/sections/Hero';
 import { Categories } from '@/components/sections/Categories';
+import { MaterialsPage } from '@/components/sections/MaterialsPage';
 import { AdminPanel } from '@/components/Admin';
 import { Toaster } from 'react-hot-toast';
 import { blink, Material } from '@/blink/client';
@@ -83,6 +84,15 @@ export default function App() {
       const hash = window.location.hash.slice(1)
       if (hash === 'admin') {
         setPage('admin')
+      } else if (hash === 'teaching') {
+        setPage('teaching')
+      } else if (hash === 'general') {
+        setPage('general')
+      } else if (hash === 'about') {
+        setPage('home')
+        setTimeout(() => {
+          document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' })
+        }, 100)
       } else {
         setPage('home')
       }
@@ -107,9 +117,7 @@ export default function App() {
       }
     }
     
-    if (page === 'home') {
-      loadMaterials()
-    }
+    loadMaterials()
   }, [page])
 
   // Pass materials to Categories
@@ -122,14 +130,19 @@ export default function App() {
       <Navbar />
       
       <main className="relative z-10">
-        {page === 'home' ? (
+        {page === 'home' && (
           <HomePage teachingMaterials={teachingMaterials} generalMaterials={generalMaterials} />
-        ) : (
-          <AdminPanel />
         )}
+        {page === 'teaching' && (
+          <MaterialsPage category="teaching" dbMaterials={materials} />
+        )}
+        {page === 'general' && (
+          <MaterialsPage category="general" dbMaterials={materials} />
+        )}
+        {page === 'admin' && <AdminPanel />}
       </main>
-      
-      {page === 'home' && <Footer />}
+
+      {page !== 'admin' && <Footer />}
     </div>
   );
 }

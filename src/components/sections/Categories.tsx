@@ -126,9 +126,9 @@ export function Categories({ teachingMaterials = [], generalMaterials = [] }: Ca
                   </div>
                 )}
                 
-                <button className="w-full py-4 rounded-xl bg-background border-2 border-primary/20 text-primary font-bold text-lg hover:bg-primary hover:text-white transition-all">
+                <a href={`#${section.id}`} className="block w-full py-4 rounded-xl bg-background border-2 border-primary/20 text-primary font-bold text-lg hover:bg-primary hover:text-white transition-all text-center">
                   צפו בכל התכנים
-                </button>
+                </a>
               </CardContent>
             </Card>
           ))}
