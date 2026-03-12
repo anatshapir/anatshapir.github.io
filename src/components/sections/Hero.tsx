@@ -27,14 +27,18 @@ export function Hero() {
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-end animate-slide-up delay-200">
-            <Button size="lg" className="text-xl px-8 h-16 rounded-2xl group shadow-lg hover:shadow-primary/20 transition-all duration-300">
-              <BookOpen className="ml-2 group-hover:rotate-6 transition-transform" />
-              חומרי למידה
-            </Button>
-            <Button variant="outline" size="lg" className="text-xl px-8 h-16 rounded-2xl border-2 hover:bg-secondary/10 transition-all duration-300">
-              <Star className="ml-2" />
-              דברים מעניינים
-            </Button>
+            <a href="#materials">
+              <Button size="lg" className="text-xl px-8 h-16 rounded-2xl group shadow-lg hover:shadow-primary/20 transition-all duration-300 w-full">
+                <BookOpen className="ml-2 group-hover:rotate-6 transition-transform" />
+                חומרי למידה
+              </Button>
+            </a>
+            <a href="#interesting">
+              <Button variant="outline" size="lg" className="text-xl px-8 h-16 rounded-2xl border-2 hover:bg-secondary/10 transition-all duration-300 w-full">
+                <Star className="ml-2" />
+                דברים מעניינים
+              </Button>
+            </a>
           </div>
         </div>
 
