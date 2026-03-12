@@ -1,0 +1,986 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>מדריך פרקטי ליישום פרויקט ASP.NET - חלק השרת</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-color: #f8f9fa;
+            color: #333;
+        }
+        header {
+            background-color: #4a6da7;
+            color: white;
+            text-align: center;
+            padding: 2rem 1rem;
+            margin-bottom: 0;
+        }
+        .project-nav {
+            background-color: #375a8e;
+            padding: 1rem 0;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+        .project-nav ul {
+            display: flex;
+            justify-content: center;
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+            flex-wrap: wrap;
+        }
+        .project-nav li {
+            margin: 0.3rem 0.6rem;
+        }
+        .project-nav a {
+            color: white;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            font-weight: 500;
+            transition: background-color 0.3s;
+        }
+        .project-nav a:hover {
+            background-color: #2a4572;
+            text-decoration: none;
+        }
+        .project-nav a.active {
+            background-color: #2a4572;
+        }
+        main {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            background-color: white;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        section {
+            margin-bottom: 2.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid #eee;
+        }
+        h1, h2, h3, h4 {
+            color: #2a4572;
+            margin-top: 1.5rem;
+        }
+        h1 {
+            font-size: 2.5rem;
+        }
+        h2 {
+            font-size: 2rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #eaeaea;
+            margin-bottom: 1rem;
+        }
+        h3 {
+            font-size: 1.5rem;
+            margin-top: 1.8rem;
+        }
+        h4 {
+            font-size: 1.2rem;
+        }
+        code {
+            background-color: #f5f5f5;
+            padding: 0.2rem 0.4rem;
+            border-radius: 3px;
+            font-family: Consolas, Monaco, 'Andale Mono', monospace;
+            direction: ltr;
+            text-align: left;
+        }
+        pre {
+            background-color: #f5f5f5;
+            padding: 1rem;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-family: Consolas, Monaco, 'Andale Mono', monospace;
+            border: 1px solid #e0e0e0;
+            max-height: 400px;
+            direction: ltr;
+            text-align: left;
+        }
+        .note {
+            background-color: #e8f4f8;
+            border-right: 4px solid #4a6da7;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 4px;
+        }
+        .warning {
+            background-color: #fff3cd;
+            border-right: 4px solid #ffc107;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 4px;
+        }
+        .highlight {
+            background-color: #fffde7;
+            padding: 1rem;
+            border-radius: 5px;
+            margin: 1rem 0;
+            border: 1px solid #fff9c4;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+            border: 1px solid #ddd;
+        }
+        th, td {
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+        }
+        th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 1rem auto;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .step {
+            background-color: #f0f7ff;
+            border-radius: 5px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border: 1px solid #d1e7ff;
+        }
+        .step h4 {
+            margin-top: 0;
+            color: #0056b3;
+            border-bottom: 1px solid #d1e7ff;
+            padding-bottom: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        .top-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #4a6da7;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            font-size: 20px;
+            cursor: pointer;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            z-index: 1000;
+        }
+        .top-btn:hover {
+            background-color: #375a8e;
+        }
+        footer {
+            background-color: #375a8e;
+            color: white;
+            text-align: center;
+            padding: 1.5rem 1rem;
+            margin-top: 2rem;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>מדריך פרקטי ליישום פרויקט ASP.NET</h1>
+            <p class="lead">יישום פונקציונליות שרת מתקדמת בסביבת ASP.NET Web Forms</p>
+        </div>
+    </header>
+    
+    <nav class="project-nav">
+        <div class="container">
+            <ul>
+                <li><a href="#intro">הקדמה</a></li>
+                <li><a href="#db-updates">עדכוני בסיס נתונים</a></li>
+                <li><a href="#visitor-counter">מונה מבקרים</a></li>
+                <li><a href="#survey">סקר</a></li>
+                <li><a href="#admin-page">דף מנהל</a></li>
+                <li><a href="#login-registration">התחברות והרשמה</a></li>
+                <li><a href="#security">אבטחה</a></li>
+                <li><a href="#summary">סיכום</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="container">
+        <section id="intro">
+            <h2>מבוא</h2>
+            <p>ברוכים הבאים למדריך המעשי ליישום פונקציונליות מתקדמת בצד השרת בפרויקט ASP.NET Web Forms. 
+               מדריך זה יסייע לכם ליישם את הדרישות הבאות בפרויקט:</p>
+            
+            <ul>
+                <li><strong>מונה מבקרים</strong> - לספירת מספר המבקרים באתר</li>
+                <li><strong>מערכת סקרים</strong> - לאיסוף דעות מהמשתמשים</li>
+                <li><strong>דף מנהל</strong> - עם אפשרויות לאיפוס מונים וניהול משתמשים</li>
+                <li><strong>מערכת התחברות והרשמה</strong> - כולל אבטחה ובדיקות תקינות</li>
+                <li><strong>אמצעי אבטחה</strong> - למניעת גישה לא מורשית</li>
+            </ul>
+            
+            <div class="note">
+                <strong>הערה:</strong> המדריך מניח שכבר יצרתם את מבנה האתר הבסיסי עם Master Page וכן טבלאות בסיסיות בבסיס הנתונים.
+            </div>
+        </section>
+
+        <section id="db-updates">
+            <h2>הרחבת בסיס הנתונים</h2>
+            <p>ראשית, נרחיב את בסיס הנתונים כדי לתמוך בפונקציונליות החדשה:</p>
+            
+            <pre>
+-- טבלת נתוני אתר לשמירת מידע כמו מונה מבקרים
+CREATE TABLE SiteStats (
+    StatID INT PRIMARY KEY IDENTITY(1,1),
+    StatName NVARCHAR(50) NOT NULL,
+    StatValue INT DEFAULT 0,
+    LastReset DATETIME
+);
+GO
+
+-- הוספת ערכים התחלתיים
+INSERT INTO SiteStats (StatName, StatValue, LastReset)
+VALUES ('VisitorCount', 0, GETDATE());
+GO
+
+-- טבלת סקרים
+CREATE TABLE Surveys (
+    SurveyID INT PRIMARY KEY IDENTITY(1,1),
+    Question NVARCHAR(200) NOT NULL,
+    IsActive BIT DEFAULT 1,
+    CreateDate DATETIME DEFAULT GETDATE()
+);
+GO
+
+-- טבלת אפשרויות לסקרים
+CREATE TABLE SurveyOptions (
+    OptionID INT PRIMARY KEY IDENTITY(1,1),
+    SurveyID INT FOREIGN KEY REFERENCES Surveys(SurveyID),
+    OptionText NVARCHAR(100) NOT NULL,
+    VoteCount INT DEFAULT 0
+);
+GO
+
+-- הוספת סקר לדוגמה
+INSERT INTO Surveys (Question) 
+VALUES ('מה דעתך על האתר החדש שלנו?');
+
+INSERT INTO SurveyOptions (SurveyID, OptionText) 
+VALUES 
+(1, 'מצוין'), 
+(1, 'טוב'), 
+(1, 'סביר'), 
+(1, 'צריך שיפור');
+GO
+
+-- הרחבת טבלת המשתמשים עם שדות לניהול הרשאות
+ALTER TABLE Users ADD 
+    IsAdmin BIT DEFAULT 0,
+    LastLogin DATETIME,
+    RegistrationIP NVARCHAR(50);
+GO
+
+-- הפיכת המשתמש הראשון למנהל
+UPDATE Users SET IsAdmin = 1 WHERE UserID = 1;
+GO</pre>
+        </section>
+
+        <section id="visitor-counter">
+            <h2>1. מונה מבקרים</h2>
+            <p>מונה המבקרים יציג את מספר הביקורים באתר ויאפשר למנהל לאפס אותו.</p>
+            
+            <div class="step">
+                <h4>יצירת קלאס לניהול סטטיסטיקות האתר</h4>
+                <pre>
+// קובץ App_Code/SiteStatistics.cs
+using System;
+using System.Data;
+using System.Data.SqlClient;
+using System.Configuration;
+
+public class SiteStatistics
+{
+    // קבלת מונה המבקרים מבסיס הנתונים
+    public static int GetVisitorCount()
+    {
+        int count = 0;
+        string connectionString = ConfigurationManager.ConnectionStrings["WebAppDBConnection"].ConnectionString;
+        
+        using (SqlConnection conn = new SqlConnection(connectionString))
+        {
+            string query = "SELECT StatValue FROM SiteStats WHERE StatName = 'VisitorCount'";
+            SqlCommand cmd = new SqlCommand(query, conn);
+            
+            try
+            {
+                conn.Open();
+                object result = cmd.ExecuteScalar();
+                
+                if (result != null && result != DBNull.Value)
+                {
+                    count = Convert.ToInt32(result);
+                }
+            }
+            catch (Exception)
+            {
+                // טיפול בשגיאות לפי הצורך
+            }
+        }
+        
+        return count;
+    }
+    
+    // הגדלת מונה המבקרים ב-1
+    public static void IncrementVisitorCount()
+    {
+        string connectionString = ConfigurationManager.ConnectionStrings["WebAppDBConnection"].ConnectionString;
+        
+        using (SqlConnection conn = new SqlConnection(connectionString))
+        {
+            string query = "UPDATE SiteStats SET StatValue = StatValue + 1 WHERE StatName = 'VisitorCount'";
+            SqlCommand cmd = new SqlCommand(query, conn);
+            
+            try
+            {
+                conn.Open();
+                cmd.ExecuteNonQuery();
+            }
+            catch (Exception)
+            {
+                // טיפול בשגיאות לפי הצורך
+            }
+        }
+    }
+    
+    // איפוס מונה המבקרים
+    public static void ResetVisitorCount()
+    {
+        string connectionString = ConfigurationManager.ConnectionStrings["WebAppDBConnection"].ConnectionString;
+        
+        using (SqlConnection conn = new SqlConnection(connectionString))
+        {
+            string query = "UPDATE SiteStats SET StatValue = 0, LastReset = GETDATE() WHERE StatName = 'VisitorCount'";
+            SqlCommand cmd = new SqlCommand(query, conn);
+            
+            try
+            {
+                conn.Open();
+                cmd.ExecuteNonQuery();
+            }
+            catch (Exception)
+            {
+                // טיפול בשגיאות לפי הצורך
+            }
+        }
+    }
+}</pre>
+            </div>
+            
+            <div class="step">
+                <h4>הוספת מונה המבקרים ל-Master Page</h4>
+                <pre>
+&lt;!-- בתוך Site.master, בתוך תגית footer --&gt;
+&lt;div class="footer-counter"&gt;
+    מספר מבקרים: &lt;asp:Label ID="lblVisitorCount" runat="server"&gt;&lt;/asp:Label&gt;
+&lt;/div&gt;</pre>
+
+                <p>ובקובץ Site.master.cs:</p>
+                <pre>
+protected void Page_Load(object sender, EventArgs e)
+{
+    // טעינת מונה המבקרים
+    lblVisitorCount.Text = SiteStatistics.GetVisitorCount().ToString();
+    
+    // בדיקה אם זו גישה חדשה ולא postback
+    if (!IsPostBack)
+    {
+        // הגדלת מונה המבקרים רק בגישה ראשונית לדף
+        SiteStatistics.IncrementVisitorCount();
+        
+        // טעינה מחדש של המונה לאחר העדכון
+        lblVisitorCount.Text = SiteStatistics.GetVisitorCount().ToString();
+    }
+    
+    // קוד נוסף לפי הצורך...
+}</pre>
+            </div>
+        </section>
+        
+        <section id="survey">
+            <h2>2. סקר</h2>
+            <p>מערכת הסקרים תאפשר למבקרים להצביע ולראות את התוצאות:</p>
+            
+            <div class="step">
+                <h4>יצירת בקר משתמש (Survey.ascx)</h4>
+                <pre>
+&lt;%@ Control Language="C#" AutoEventWireup="true" CodeBehind="Survey.ascx.cs" Inherits="MyWebApp.UserControls.Survey" %&gt;
+
+&lt;div class="panel panel-primary"&gt;
+    &lt;div class="panel-heading"&gt;
+        &lt;h3 class="panel-title"&gt;סקר&lt;/h3&gt;
+    &lt;/div&gt;
+    &lt;div class="panel-body"&gt;
+        &lt;asp:Panel ID="surveyPanel" runat="server"&gt;
+            &lt;asp:Label ID="lblQuestion" runat="server" CssClass="survey-question"&gt;&lt;/asp:Label&gt;
+            
+            &lt;div class="survey-options"&gt;
+                &lt;asp:RadioButtonList ID="rblOptions" runat="server" CssClass="survey-options-list"&gt;
+                &lt;/asp:RadioButtonList&gt;
+            &lt;/div&gt;
+            
+            &lt;asp:Button ID="btnVote" runat="server" Text="הצבע" CssClass="btn btn-primary btn-sm" 
+                OnClick="btnVote_Click" /&gt;
+            
+            &lt;asp:Label ID="lblMessage" runat="server" CssClass="survey-message" Visible="false"&gt;&lt;/asp:Label&gt;
+        &lt;/asp:Panel&gt;
+        
+        &lt;asp:Panel ID="resultsPanel" runat="server" Visible="false"&gt;
+            &lt;h4&gt;&lt;asp:Label ID="lblResultQuestion" runat="server"&gt;&lt;/asp:Label&gt;&lt;/h4&gt;
+            
+            &lt;asp:Repeater ID="rptResults" runat="server"&gt;
+                &lt;ItemTemplate&gt;
+                    &lt;div class="survey-result-item"&gt;
+                        &lt;div class="option-text"&gt;
+                            &lt;%# Eval("OptionText") %&gt; (&lt;%# Eval("VoteCount") %&gt; הצבעות)
+                        &lt;/div&gt;
+                        &lt;div class="progress"&gt;
+                            &lt;div class="progress-bar" role="progressbar" 
+                                style="width: &lt;%# Eval("Percentage") %&gt;%;"&gt;
+                                &lt;%# Eval("Percentage") %&gt;%
+                            &lt;/div&gt;
+                        &lt;/div&gt;
+                    &lt;/div&gt;
+                &lt;/ItemTemplate&gt;
+            &lt;/asp:Repeater&gt;
+            
+            &lt;asp:Label ID="lblTotalVotes" runat="server" CssClass="total-votes"&gt;&lt;/asp:Label&gt;
+        &lt;/asp:Panel&gt;
+    &lt;/div&gt;
+&lt;/div&gt;</pre>
+
+                <p>קוד ה-C# העיקרי בקובץ Survey.ascx.cs:</p>
+                <pre>
+// בתוך קובץ Survey.ascx.cs
+using System;
+using System.Data;
+using System.Data.SqlClient;
+using System.Configuration;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using System.Collections.Generic;
+
+namespace MyWebApp.UserControls
+{
+    public partial class Survey : UserControl
+    {
+        protected void Page_Load(object sender, EventArgs e)
+        {
+            if (!IsPostBack)
+            {
+                // בדיקה אם המשתמש כבר הצביע בסקר זה
+                if (HasUserVoted())
+                {
+                    // הצגת תוצאות הסקר
+                    ShowResults();
+                }
+                else
+                {
+                    // טעינת הסקר הפעיל
+                    LoadActiveSurvey();
+                }
+            }
+        }
+
+        private bool HasUserVoted()
+        {
+            // בדיקה האם המשתמש כבר הצביע באמצעות עוגייה
+            HttpCookie cookie = Request.Cookies["Survey_Voted"];
+            return cookie != null;
+        }
+
+        protected void btnVote_Click(object sender, EventArgs e)
+        {
+            // בדיקה שנבחרה אפשרות
+            if (rblOptions.SelectedItem == null)
+            {
+                lblMessage.Text = "יש לבחור אפשרות כדי להצביע.";
+                lblMessage.Visible = true;
+                return;
+            }
+            
+            int optionId = Convert.ToInt32(rblOptions.SelectedValue);
+            
+            // שמירת ההצבעה בבסיס הנתונים
+            if (SaveVote(optionId))
+            {
+                // הוספת עוגייה כדי לסמן שהמשתמש הצביע
+                HttpCookie cookie = new HttpCookie("Survey_Voted", "true");
+                cookie.Expires = DateTime.Now.AddDays(30);
+                Response.Cookies.Add(cookie);
+                
+                // הצגת תוצאות הסקר
+                ShowResults();
+            }
+            else
+            {
+                lblMessage.Text = "אירעה שגיאה בשמירת ההצבעה. נסה שנית מאוחר יותר.";
+                lblMessage.Visible = true;
+            }
+        }
+        
+        // יתר הקוד הכולל LoadActiveSurvey(), SaveVote() ו-ShowResults()
+    }
+}</pre>
+                
+                <p>הוספת הסקר לדף הבית:</p>
+                <pre>
+&lt;!-- בתוך Default.aspx --&gt;
+&lt;div class="col-md-4"&gt;
+    &lt;%@ Register Src="~/UserControls/Survey.ascx" TagPrefix="uc" TagName="Survey" %&gt;
+    &lt;uc:Survey runat="server" ID="surveyCotrol" /&gt;
+&lt;/div&gt;</pre>
+            </div>
+        </section>
+
+        <section id="admin-page">
+            <h2>3. דף המנהל</h2>
+            <p>דף המנהל יאפשר פעולות ניהול כמו איפוס מונים, צפייה וניהול משתמשים:</p>
+            
+            <div class="step">
+                <h4>הגדרת אבטחה לתיקיית Admin</h4>
+                <p>יצירת קובץ web.config בתיקיית Admin:</p>
+                <pre>
+&lt;?xml version="1.0"?&gt;
+&lt;configuration&gt;
+  &lt;system.web&gt;
+    &lt;authorization&gt;
+      &lt;deny users="?"/&gt; &lt;!-- מונע גישה ממשתמשים לא מאומתים --&gt;
+    &lt;/authorization&gt;
+  &lt;/system.web&gt;
+&lt;/configuration&gt;</pre>
+            </div>
+            
+            <div class="step">
+                <h4>יצירת דף ראשי למנהל (Default.aspx)</h4>
+                <pre>
+&lt;%@ Page Title="דף המנהל" Language="C#" MasterPageFile="~/Site.Master" 
+    AutoEventWireup="true" CodeBehind="Default.aspx.cs" Inherits="MyWebApp.Admin.Default" %&gt;
+
+&lt;asp:Content ID="BodyContent" ContentPlaceHolderID="MainContent" runat="server"&gt;
+    &lt;div class="row"&gt;
+        &lt;div class="col-md-3"&gt;
+            &lt;div class="panel panel-primary"&gt;
+                &lt;div class="panel-heading"&gt;
+                    &lt;h3 class="panel-title"&gt;תפריט מנהל&lt;/h3&gt;
+                &lt;/div&gt;
+                &lt;div class="panel-body"&gt;
+                    &lt;ul class="nav nav-pills nav-stacked"&gt;
+                        &lt;li&gt;&lt;a href="Default.aspx"&gt;לוח בקרה&lt;/a&gt;&lt;/li&gt;
+                        &lt;li&gt;&lt;a href="ResetCounters.aspx"&gt;איפוס מונים&lt;/a&gt;&lt;/li&gt;
+                        &lt;li&gt;&lt;a href="ManageUsers.aspx"&gt;ניהול משתמשים&lt;/a&gt;&lt;/li&gt;
+                        &lt;li&gt;&lt;a href="SearchUsers.aspx"&gt;חיפוש משתמשים&lt;/a&gt;&lt;/li&gt;
+                    &lt;/ul&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+        
+        &lt;div class="col-md-9"&gt;
+            &lt;div class="panel panel-default"&gt;
+                &lt;div class="panel-heading"&gt;
+                    &lt;h3 class="panel-title"&gt;לוח בקרה&lt;/h3&gt;
+                &lt;/div&gt;
+                &lt;div class="panel-body"&gt;
+                    &lt;h4&gt;ברוך הבא, &lt;asp:Label ID="lblAdminName" runat="server"&gt;&lt;/asp:Label&gt;!&lt;/h4&gt;
+                    
+                    &lt;div class="row"&gt;
+                        &lt;div class="col-md-4"&gt;
+                            &lt;div class="panel panel-info"&gt;
+                                &lt;div class="panel-heading"&gt;
+                                    &lt;h3 class="panel-title"&gt;מבקרים באתר&lt;/h3&gt;
+                                &lt;/div&gt;
+                                &lt;div class="panel-body text-center"&gt;
+                                    &lt;h2&gt;&lt;asp:Label ID="lblVisitorCount" runat="server"&gt;&lt;/asp:Label&gt;&lt;/h2&gt;
+                                    &lt;p&gt;מספר כולל של ביקורים באתר&lt;/p&gt;
+                                &lt;/div&gt;
+                            &lt;/div&gt;
+                        &lt;/div&gt;
+                        
+                        &lt;div class="col-md-4"&gt;
+                            &lt;div class="panel panel-info"&gt;
+                                &lt;div class="panel-heading"&gt;
+                                    &lt;h3 class="panel-title"&gt;משתמשים רשומים&lt;/h3&gt;
+                                &lt;/div&gt;
+                                &lt;div class="panel-body text-center"&gt;
+                                    &lt;h2&gt;&lt;asp:Label ID="lblUserCount" runat="server"&gt;&lt;/asp:Label&gt;&lt;/h2&gt;
+                                &lt;/div&gt;
+                            &lt;/div&gt;
+                        &lt;/div&gt;
+                        
+                        &lt;div class="col-md-4"&gt;
+                            &lt;div class="panel panel-info"&gt;
+                                &lt;div class="panel-heading"&gt;
+                                    &lt;h3 class="panel-title"&gt;הצבעות בסקר&lt;/h3&gt;
+                                &lt;/div&gt;
+                                &lt;div class="panel-body text-center"&gt;
+                                    &lt;h2&gt;&lt;asp:Label ID="lblSurveyVotes" runat="server"&gt;&lt;/asp:Label&gt;&lt;/h2&gt;
+                                &lt;/div&gt;
+                            &lt;/div&gt;
+                        &lt;/div&gt;
+                    &lt;/div&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+&lt;/asp:Content&gt;</pre>
+            </div>
+            
+            <div class="step">
+                <h4>יצירת דף לניהול משתמשים</h4>
+                <pre>
+&lt;%@ Page Title="ניהול משתמשים" Language="C#" MasterPageFile="~/Site.Master" 
+    AutoEventWireup="true" CodeBehind="ManageUsers.aspx.cs" Inherits="MyWebApp.Admin.ManageUsers" %&gt;
+
+&lt;asp:Content ID="BodyContent" ContentPlaceHolderID="MainContent" runat="server"&gt;
+    &lt;div class="row"&gt;
+        &lt;div class="col-md-3"&gt;
+            &lt;!-- תפריט מנהל כמו בדף הראשי --&gt;
+        &lt;/div&gt;
+        
+        &lt;div class="col-md-9"&gt;
+            &lt;div class="panel panel-default"&gt;
+                &lt;div class="panel-heading"&gt
+&lt;div class="row"&gt;
+        &lt;div class="col-md-8 col-md-offset-2"&gt;
+            &lt;div class="panel panel-primary"&gt;
+                &lt;div class="panel-heading"&gt;
+                    &lt;h3 class="panel-title"&gt;התנתקות&lt;/h3&gt;
+                &lt;/div&gt;
+                &lt;div class="panel-body"&gt;
+                    &lt;div class="text-center"&gt;
+                        &lt;h4&gt;התנתקת בהצלחה!&lt;/h4&gt;
+                        &lt;p&gt;תודה שביקרת באתר שלנו.&lt;/p&gt;
+                        &lt;a href="~/Default.aspx" runat="server" class="btn btn-primary"&gt;חזרה לדף הבית&lt;/a&gt;
+                    &lt;/div&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+&lt;/asp:Content&gt;</pre>
+
+                <p>קוד ה-C# לדף התנתקות:</p>
+                <pre>
+using System;
+using System.Web;
+using System.Web.UI;
+
+namespace MyWebApp.Account
+{
+    public partial class Logout : Page
+    {
+        protected void Page_Load(object sender, EventArgs e)
+        {
+            // ניקוי ה-Session
+            Session.Clear();
+            Session.Abandon();
+            
+            // מחיקת עוגיות אם יש
+            if (Request.Cookies["ASP.NET_SessionId"] != null)
+            {
+                Response.Cookies["ASP.NET_SessionId"].Expires = DateTime.Now.AddDays(-1);
+            }
+            
+            if (Request.Cookies["Survey_Voted"] != null)
+            {
+                Response.Cookies["Survey_Voted"].Expires = DateTime.Now.AddDays(-1);
+            }
+        }
+    }
+}</pre>
+            </div>
+            
+            <div class="step">
+                <h4>עדכון התפריט ב-Master Page לפי מצב התחברות</h4>
+                <pre>
+&lt;!-- בתוך Site.master בחלק של התפריט --&gt;
+&lt;div class="navbar-left"&gt;
+    &lt;asp:Panel ID="pnlAnonymous" runat="server" Visible="true"&gt;
+        &lt;ul class="nav navbar-nav navbar-right"&gt;
+            &lt;li&gt;&lt;a runat="server" href="~/Account/Register"&gt;הרשמה&lt;/a&gt;&lt;/li&gt;
+            &lt;li&gt;&lt;a runat="server" href="~/Account/Login"&gt;התחברות&lt;/a&gt;&lt;/li&gt;
+        &lt;/ul&gt;
+    &lt;/asp:Panel&gt;
+    
+    &lt;asp:Panel ID="pnlLoggedIn" runat="server" Visible="false"&gt;
+        &lt;ul class="nav navbar-nav navbar-right"&gt;
+            &lt;li&gt;
+                &lt;a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" 
+                   aria-haspopup="true" aria-expanded="false"&gt;
+                    שלום, &lt;asp:Label ID="lblUsername" runat="server"&gt;&lt;/asp:Label&gt;
+                    &lt;span class="caret"&gt;&lt;/span&gt;
+                &lt;/a&gt;
+                &lt;ul class="dropdown-menu"&gt;
+                    &lt;li&gt;&lt;a runat="server" href="~/Account/Profile"&gt;הפרופיל שלי&lt;/a&gt;&lt;/li&gt;
+                    &lt;asp:Panel ID="pnlAdminMenu" runat="server" Visible="false"&gt;
+                        &lt;li role="separator" class="divider"&gt;&lt;/li&gt;
+                        &lt;li&gt;&lt;a runat="server" href="~/Admin/Default"&gt;ניהול האתר&lt;/a&gt;&lt;/li&gt;
+                    &lt;/asp:Panel&gt;
+                    &lt;li role="separator" class="divider"&gt;&lt;/li&gt;
+                    &lt;li&gt;&lt;a runat="server" href="~/Account/Logout"&gt;התנתק&lt;/a&gt;&lt;/li&gt;
+                &lt;/ul&gt;
+            &lt;/li&gt;
+        &lt;/ul&gt;
+    &lt;/asp:Panel&gt;
+&lt;/div&gt;</pre>
+
+                <p>קוד ה-C# בקובץ Site.master.cs:</p>
+                <pre>
+protected void Page_Load(object sender, EventArgs e)
+{
+    // בדיקת מצב התחברות
+    if (Session["UserID"] != null)
+    {
+        // המשתמש מחובר
+        pnlAnonymous.Visible = false;
+        pnlLoggedIn.Visible = true;
+        lblUsername.Text = Session["Username"].ToString();
+        
+        // בדיקה אם המשתמש הוא מנהל
+        if (Session["IsAdmin"] != null && (bool)Session["IsAdmin"])
+        {
+            pnlAdminMenu.Visible = true;
+        }
+    }
+    else
+    {
+        // המשתמש לא מחובר
+        pnlAnonymous.Visible = true;
+        pnlLoggedIn.Visible = false;
+    }
+}</pre>
+            </div>
+        </section>
+
+        <section id="security">
+            <h2>6. אבטחה ובדיקות תקינות</h2>
+            <p>
+                לפני שנסיים, חשוב לוודא שהאתר שלנו מאובטח ושהוא מבצע בדיקות תקינות לכל קלט המשתמש.
+                נוסיף מנגנון בסיסי למניעת גישה לדפים מאובטחים ללא התחברות.
+            </p>
+            
+            <div class="step">
+                <h4>יצירת Base Page למבקרי גישה</h4>
+                <p>נתחיל ביצירת קובץ בתיקיית App_Code בשם SecurePage.cs:</p>
+                <pre>
+// קובץ App_Code/SecurePage.cs
+using System;
+using System.Web.UI;
+
+public class SecurePage : Page
+{
+    protected override void OnInit(EventArgs e)
+    {
+        base.OnInit(e);
+        
+        // וידוא שהמשתמש מחובר
+        if (Session["UserID"] == null)
+        {
+            Response.Redirect("~/Account/Login.aspx?ReturnUrl=" + Request.RawUrl);
+        }
+    }
+}
+
+public class AdminPage : Page
+{
+    protected override void OnInit(EventArgs e)
+    {
+        base.OnInit(e);
+        
+        // וידוא שהמשתמש מחובר והוא מנהל
+        if (Session["UserID"] == null || Session["IsAdmin"] == null || !(bool)Session["IsAdmin"])
+        {
+            Response.Redirect("~/Account/Login.aspx?ReturnUrl=" + Request.RawUrl);
+        }
+    }
+}</pre>
+
+                <p>עכשיו, במקום לרשת מ-Page, נוכל לרשת מ-SecurePage או AdminPage לכל דף שדורש אימות:</p>
+                <pre>
+// דוגמה לשימוש ב-SecurePage עבור דף שדורש התחברות
+namespace MyWebApp.Account
+{
+    public partial class Profile : SecurePage
+    {
+        protected void Page_Load(object sender, EventArgs e)
+        {
+            // המשתמש מחובר מוודא
+            // ...
+        }
+    }
+}
+
+// דוגמה לשימוש ב-AdminPage עבור דף מנהל
+namespace MyWebApp.Admin
+{
+    public partial class Default : AdminPage
+    {
+        protected void Page_Load(object sender, EventArgs e)
+        {
+            // המשתמש הוא מנהל מוודא
+            // ...
+        }
+    }
+}</pre>
+            </div>
+            
+            <div class="step">
+                <h4>הגדרת אבטחה בקובץ Web.config</h4>
+                <p>הוסף את הקוד הבא לקובץ Web.config בתיקיית Admin:</p>
+                <pre>
+&lt;?xml version="1.0"?&gt;
+&lt;configuration&gt;
+  &lt;system.web&gt;
+    &lt;authorization&gt;
+      &lt;deny users="?"/&gt; &lt;!-- מניעת גישה ממשתמשים לא מאומתים --&gt;
+    &lt;/authorization&gt;
+  &lt;/system.web&gt;
+&lt;/configuration&gt;</pre>
+
+                <p>וכן, מומלץ להוסיף את הקוד הבא לקובץ Web.config הראשי עבור אבטחת האתר:</p>
+                <pre>
+&lt;configuration&gt;
+  &lt;system.web&gt;
+    &lt;!-- הגדרות אבטחה כלליות --&gt;
+    &lt;httpRuntime enableVersionHeader="false" requestValidationMode="2.0" /&gt;
+    &lt;pages validateRequest="true" /&gt;
+    &lt;machineKey validation="SHA1" /&gt;
+    
+    &lt;!-- הגדרת Session --&gt;
+    &lt;sessionState mode="InProc" cookieless="false" timeout="20" /&gt;
+  &lt;/system.web&gt;
+  
+  &lt;system.webServer&gt;
+    &lt;!-- הסרת מידע רגיש מהכותרות --&gt;
+    &lt;httpProtocol&gt;
+      &lt;customHeaders&gt;
+        &lt;remove name="X-Powered-By" /&gt;
+        &lt;add name="X-Frame-Options" value="SAMEORIGIN" /&gt;
+        &lt;add name="X-XSS-Protection" value="1; mode=block" /&gt;
+        &lt;add name="X-Content-Type-Options" value="nosniff" /&gt;
+      &lt;/customHeaders&gt;
+    &lt;/httpProtocol&gt;
+  &lt;/system.webServer&gt;
+&lt;/configuration&gt;</pre>
+            </div>
+        </section>
+
+        <section id="summary">
+            <h2>סיכום</h2>
+            <p>
+                בפרק זה יצרנו את המרכיבים הבאים בצד השרת של אתר ASP.NET:
+            </p>
+            <ol>
+                <li><strong>מונה מבקרים</strong> - שסופר את מספר הביקורים באתר ומאפשר למנהל לאפס אותו.</li>
+                <li><strong>סקר</strong> - שמאפשר למשתמשים להצביע ולראות את תוצאות ההצבעה.</li>
+                <li><strong>דף מנהל</strong> - עם תפריט המאפשר למנהל לבצע פעולות ניהול שונות:
+                    <ul>
+                        <li>איפוס מונה המבקרים</li>
+                        <li>איפוס מוני הסקר</li>
+                        <li>תצוגת פרטי הנרשמים לאתר</li>
+                        <li>מחיקת משתמשים</li>
+                        <li>חיפוש משתמשים (פשוט ומתקדם)</li>
+                    </ul>
+                </li>
+                <li><strong>מערכת התחברות</strong> - שמאפשרת למשתמשים להתחבר לאתר ולגשת לדפים מאובטחים.</li>
+                <li><strong>מערכת הרשמה</strong> - שמאפשרת למשתמשים חדשים להירשם לאתר, עם בדיקות תקינות.</li>
+                <li><strong>מערכת התנתקות</strong> - שמאפשרת למשתמשים להתנתק מהאתר.</li>
+                <li><strong>אבטחה</strong> - מנגנוני אבטחה בסיסיים למניעת גישה לדפים מאובטחים ללא התחברות.</li>
+            </ol>
+            
+            <div class="note">
+                <strong>הערה חשובה:</strong> הקוד במדריך זה נועד למטרות לימוד בלבד. בסביבת ייצור יש להתייחס לנושאי אבטחה נוספים:
+                <ul>
+                    <li>הצפנת סיסמאות בבסיס הנתונים (למשל, באמצעות bcrypt או משהו דומה)</li>
+                    <li>מניעת SQL Injection על ידי שימוש תמיד בפרמטרים (כפי שהודגם במדריך)</li>
+                    <li>הגנה מפני Cross-Site Scripting (XSS) על ידי סינון תוכן המשתמש</li>
+                    <li>שימוש ב-HTTPS להצפנת התקשורת</li>
+                    <li>טיפול בשגיאות באופן בטוח</li>
+                </ul>
+            </div>
+
+            <h3>צעדים הבאים</h3>
+            <p>כעת משהשלמתם את יצירת הפונקציונליות הבסיסית בצד השרת, תוכלו להמשיך לשפר את הפרויקט ב:</p>
+            <ul>
+                <li>עיצוב מתקדם וחווית משתמש משופרת</li>
+                <li>תמיכה בשפות נוספות</li>
+                <li>דוחות וסטטיסטיקות מתקדמות</li>
+                <li>שילוב תשלומים מקוונים</li>
+                <li>אינטגרציה עם רשתות חברתיות</li>
+            </ul>
+        </section>
+    </main>
+
+    <button class="top-btn" id="topBtn" title="חזרה לראש הדף">&#8679;</button>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 מדריך פיתוח אתרים ASP.NET. כל הזכויות שמורות.</p>
+            <p>נבנה במיוחד עבור תלמידי פיתוח אתרים</p>
+        </div>
+    </footer>
+
+    <script>
+        // כפתור חזרה לראש העמוד
+        const topButton = document.getElementById("topBtn");
+        
+        // הצגת הכפתור כאשר המשתמש גולל למטה
+        window.onscroll = function() {
+            if (document.body.scrollTop > 300 || document.documentElement.scrollTop > 300) {
+                topButton.style.display = "flex";
+            } else {
+                topButton.style.display = "none";
+            }
+        };
+        
+        // חזרה לראש העמוד בלחיצה על הכפתור
+        topButton.addEventListener("click", function() {
+            document.body.scrollTop = 0; // Safari
+            document.documentElement.scrollTop = 0; // Chrome, Firefox, IE, Opera
+        });
+        
+        // הוספת סימון פעיל לקישור בתפריט בעת גלילה
+        document.addEventListener("DOMContentLoaded", function() {
+            const sections = document.querySelectorAll("section");
+            const navLinks = document.querySelectorAll(".project-nav a");
+            
+            window.addEventListener("scroll", function() {
+                let current = "";
+                
+                sections.forEach(section => {
+                    const sectionTop = section.offsetTop;
+                    const sectionHeight = section.clientHeight;
+                    
+                    if (pageYOffset >= (sectionTop - 150)) {
+                        current = section.getAttribute("id");
+                    }
+                });
+                
+                navLinks.forEach(link => {
+                    link.classList.remove("active");
+                    if (link.getAttribute("href").substring(1) === current) {
+                        link.classList.add("active");
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

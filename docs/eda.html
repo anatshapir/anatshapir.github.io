@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>חקר נתונים EDA - מדעי הנתונים</title>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#120a14;--card:#1f1525;--code:#0d1117;--rose:#f43f5e;--pink:#ec4899;--fuchsia:#d946ef;--violet:#8b5cf6;--blue:#3b82f6;--cyan:#06b6d4;--green:#10b981;--orange:#f59e0b;--red:#ef4444;--text:#f1f5f9;--text2:#94a3b8;--muted:#64748b;--border:#2e1f35}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Heebo',sans-serif;background:var(--bg);color:var(--text);overflow:hidden;height:100vh;width:100vw}
+.bgr{position:fixed;inset:0;background-image:linear-gradient(rgba(244,63,94,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(244,63,94,.03) 1px,transparent 1px);background-size:60px 60px;z-index:0}
+.gw{position:fixed;width:600px;height:600px;border-radius:50%;filter:blur(120px);opacity:.12;z-index:0;pointer-events:none}
+.g1{background:var(--rose);top:-200px;right:-200px}.g2{background:var(--fuchsia);bottom:-200px;left:-200px}
+.tb{position:fixed;top:0;left:0;right:0;height:50px;background:rgba(18,10,20,.9);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 24px;z-index:100}
+.tbt{font-size:14px;font-weight:500;color:var(--text2);display:flex;align-items:center;gap:8px}
+.pc{display:flex;align-items:center;gap:12px}
+.pb{width:200px;height:3px;background:var(--border);border-radius:2px;overflow:hidden}
+.pfl{height:100%;background:linear-gradient(90deg,var(--rose),var(--fuchsia));border-radius:2px;transition:width .5s}
+.pt{font-size:12px;color:var(--muted);font-family:'Fira Code',monospace;min-width:55px;text-align:left;direction:ltr}
+.sb{position:fixed;top:50px;right:0;width:255px;height:calc(100vh - 50px);background:rgba(25,15,30,.7);backdrop-filter:blur(10px);border-left:1px solid var(--border);z-index:90;overflow-y:auto;padding:12px 0;transition:transform .3s}
+.sb.col{transform:translateX(255px)}
+.sbt{position:fixed;top:60px;right:255px;width:26px;height:26px;background:var(--card);border:1px solid var(--border);border-radius:6px 0 0 6px;color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:91;transition:all .3s;font-size:11px}
+.sb.col+.sbt{right:0}
+.stn{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);padding:8px 18px 4px;margin-top:6px}
+.ni{padding:6px 18px;font-size:12px;color:var(--text2);cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:8px;border-right:2px solid transparent}
+.ni:hover{background:rgba(244,63,94,.05);color:var(--text)}
+.ni.a{background:rgba(244,63,94,.08);color:var(--rose);border-right-color:var(--rose)}
+.ni .n{font-family:'Fira Code',monospace;font-size:10px;color:var(--muted);min-width:18px}
+.mc{position:fixed;top:50px;left:0;right:255px;height:calc(100vh - 50px);overflow:hidden;z-index:1;transition:right .3s}
+.sb.col~.mc{right:0}
+.sl{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:22px 46px 68px;overflow-y:auto;opacity:0;transform:translateX(-30px);transition:all .45s cubic-bezier(.4,0,.2,1);pointer-events:none}
+.sl.ac{opacity:1;transform:translateX(0);pointer-events:all}
+.sl.ex{opacity:0;transform:translateX(30px)}
+.si{max-width:900px;width:100%}
+.ts{text-align:center;margin-top:8vh}
+.ts .eb{font-size:56px;margin-bottom:12px;animation:fl 3s ease-in-out infinite}
+@keyframes fl{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.ts h1{font-size:42px;font-weight:900;background:linear-gradient(135deg,var(--rose),var(--fuchsia));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:10px}
+.ts .su{font-size:17px;color:var(--text2);font-weight:300}
+.sh{text-align:center;margin-top:4vh}
+.sh .sn{font-family:'Fira Code',monospace;font-size:13px;color:var(--cyan);margin-bottom:6px;letter-spacing:2px}
+.sh h2{font-size:32px;font-weight:800;margin-bottom:8px}
+.sh .sd{font-size:15px;color:var(--text2);max-width:620px;margin:0 auto;line-height:1.6}
+.hd{margin-bottom:12px}
+.hd h3{font-size:22px;font-weight:700;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.hd .d{font-size:13.5px;color:var(--text2);margin-top:4px;line-height:1.5}
+.badge{font-family:'Fira Code',monospace;font-size:10px;padding:2px 9px;border-radius:10px;font-weight:500}
+.b-r{background:rgba(244,63,94,.15);color:var(--rose)}.b-p{background:rgba(236,72,153,.15);color:var(--pink)}.b-f{background:rgba(217,70,239,.15);color:var(--fuchsia)}.b-v{background:rgba(139,92,246,.15);color:var(--violet)}.b-b{background:rgba(59,130,246,.15);color:var(--blue)}.b-c{background:rgba(6,182,212,.15);color:var(--cyan)}.b-g{background:rgba(16,185,129,.15);color:var(--green)}.b-o{background:rgba(245,158,11,.15);color:var(--orange)}
+.cb{background:var(--code);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin:7px 0;direction:ltr;text-align:left}
+.ch{display:flex;align-items:center;justify-content:space-between;padding:7px 14px;background:rgba(46,31,53,.5);border-bottom:1px solid var(--border)}
+.cd{display:flex;gap:5px}.cd span{width:9px;height:9px;border-radius:50%}.cd span:nth-child(1){background:#ef4444}.cd span:nth-child(2){background:#f59e0b}.cd span:nth-child(3){background:#10b981}
+.cl{font-family:'Fira Code',monospace;font-size:10px;color:var(--muted)}
+.cc{padding:10px 15px;font-family:'Fira Code',monospace;font-size:12px;line-height:1.6;overflow-x:auto;white-space:pre}
+.kw{color:#c678dd}.fn{color:#61afef}.str{color:#98c379}.num{color:#d19a66}.cm{color:#5c6370;font-style:italic}.op{color:#56b6c2}.vr{color:#e06c75}
+.ob{background:rgba(244,63,94,.04);border:1px solid rgba(244,63,94,.15);border-radius:8px;padding:9px 14px;margin:5px 0;direction:ltr;text-align:left;font-family:'Fira Code',monospace;font-size:11px;line-height:1.5;color:var(--rose);white-space:pre;overflow-x:auto}
+.ol{font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:3px;display:block}
+.ad{text-align:center;color:var(--muted);font-size:16px;margin:1px 0;opacity:.5}
+.ig{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:9px;margin:10px 0}
+.ic{background:var(--card);border:1px solid var(--border);border-radius:9px;padding:11px;transition:all .3s}
+.ic:hover{border-color:var(--rose);transform:translateY(-2px)}
+.ic .ci{font-size:20px;margin-bottom:4px}.ic h4{font-size:12.5px;font-weight:600;margin-bottom:3px;color:var(--text)}.ic p{font-size:11.5px;color:var(--text2);line-height:1.4}
+.tp{background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.15);border-radius:8px;padding:9px 13px;margin:7px 0;display:flex;gap:8px;align-items:flex-start}
+.tp .ti{font-size:15px;flex-shrink:0;margin-top:1px}.tp p{font-size:12px;color:var(--text2);line-height:1.5}
+.cr{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:8px 0}
+.cx{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:13px;position:relative;overflow:hidden}
+.cx::before{content:'';position:absolute;top:0;right:0;width:4px;height:100%}
+.cx.rose::before{background:var(--rose)}.cx.pink::before{background:var(--pink)}.cx.fuchsia::before{background:var(--fuchsia)}.cx.violet::before{background:var(--violet)}.cx.blue::before{background:var(--blue)}.cx.cyan::before{background:var(--cyan)}.cx.green::before{background:var(--green)}.cx.orange::before{background:var(--orange)}
+.cx h4{font-size:14px;margin-bottom:5px}.cx p{font-size:12.5px;color:var(--text2);line-height:1.5}
+.dt{width:100%;border-collapse:collapse;margin:5px 0;font-size:10.5px;direction:ltr;text-align:left}
+.dt th{background:rgba(244,63,94,.08);padding:5px 9px;font-weight:600;color:var(--rose);border-bottom:1px solid var(--border);font-family:'Fira Code',monospace}
+.dt td{padding:4px 9px;border-bottom:1px solid rgba(46,31,53,.5);font-family:'Fira Code',monospace;color:var(--text2)}
+.bn{position:fixed;bottom:0;left:0;right:255px;height:52px;background:rgba(18,10,20,.9);backdrop-filter:blur(20px);border-top:1px solid var(--border);display:flex;align-items:center;justify-content:center;gap:14px;z-index:100;transition:right .3s}
+.sb.col~.bn{right:0}
+.nb{padding:7px 18px;border-radius:7px;border:1px solid var(--border);background:var(--card);color:var(--text);font-family:'Heebo',sans-serif;font-size:13px;cursor:pointer;transition:all .2s}
+.nb:hover{border-color:var(--rose);background:rgba(244,63,94,.1)}
+.nb.pr{background:var(--rose);border-color:var(--rose);color:#fff}
+.nb.pr:hover{background:#e11d48}
+.sc{font-family:'Fira Code',monospace;font-size:11px;color:var(--muted);min-width:55px;text-align:center}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+@media(max-width:768px){.sb,.sbt{display:none}.mc,.bn{right:0!important}.sl{padding:18px 14px 62px}.ts h1{font-size:28px}.sh h2{font-size:24px}.hd h3{font-size:18px}.cc{font-size:10px}.cr{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="bgr"></div><div class="gw g1"></div><div class="gw g2"></div>
+
+<div class="tb"><div class="tbt"><span>🔍</span> חקר נתונים EDA – מדעי הנתונים</div><div class="pc"><div class="pt" id="pT">0%</div><div class="pb"><div class="pfl" id="pF" style="width:0%"></div></div></div></div>
+
+<div class="sb" id="sb">
+  <div class="stn">📌 תוכן עניינים</div>
+  <div class="ni" data-s="0"><span class="n">00</span> פתיחה</div>
+  <div class="stn" style="color:var(--rose)">01 · סטטיסטיקה בסיסית</div>
+  <div class="ni" data-s="1"><span class="n">01</span> מדדי מרכז</div>
+  <div class="ni" data-s="2"><span class="n">02</span> מדדי פיזור ורבעונים</div>
+  <div class="stn" style="color:var(--pink)">02 · מהו EDA?</div>
+  <div class="ni" data-s="3"><span class="n">03</span> תהליך EDA + הנתונים</div>
+  <div class="ni" data-s="4"><span class="n">04</span> סקירה ראשונית</div>
+  <div class="stn" style="color:var(--fuchsia)">03 · גרפי משתנה בודד</div>
+  <div class="ni" data-s="5"><span class="n">05</span> היסטוגרמה</div>
+  <div class="ni" data-s="6"><span class="n">06</span> Box Plot</div>
+  <div class="ni" data-s="7"><span class="n">07</span> Count/Pie (קטגוריאלי)</div>
+  <div class="stn" style="color:var(--violet)">04 · גרפי רב-משתנים</div>
+  <div class="ni" data-s="8"><span class="n">08</span> Scatter Plot</div>
+  <div class="ni" data-s="9"><span class="n">09</span> Scatter + hue</div>
+  <div class="stn" style="color:var(--blue)">05 · קורלציה וחריגים</div>
+  <div class="ni" data-s="10"><span class="n">10</span> קורלציה</div>
+  <div class="ni" data-s="11"><span class="n">11</span> חריגים (Outliers)</div>
+  <div class="stn" style="color:var(--green)">06 · הכנת נתונים</div>
+  <div class="ni" data-s="12"><span class="n">12</span> הכנה למודלים</div>
+  <div class="ni" data-s="13"><span class="n">13</span> מדריך בחירת גרף</div>
+  <div class="ni" data-s="14"><span class="n">14</span> סיכום 🎉</div>
+</div>
+<button class="sbt" id="sbT" onclick="tSB()">◀</button>
+
+<div class="mc" id="mc">
+
+<!-- S0: TITLE -->
+<div class="sl ac" id="s-0"><div class="ts">
+  <div class="eb">🔍</div>
+  <h1>חקר נתונים – EDA</h1>
+  <div class="su">Exploratory Data Analysis · מדעי הנתונים · תיכון</div>
+  <div style="margin-top:24px;color:var(--muted);font-size:14px;">← / → לניווט &nbsp;|&nbsp; 15 שקפים &nbsp;|&nbsp; נתוני דירות + כל סוגי הגרפים</div>
+</div></div>
+
+<!-- S1: Center Measures -->
+<div class="sl" id="s-1"><div class="si">
+  <div class="sh"><div class="sn">SECTION 01</div><h2><span style="color:var(--rose)">סטטיסטיקה</span> בסיסית</h2><div class="sd">מדדי מרכז – איפה ה"אמצע"?</div></div>
+  <div class="cb" style="margin-top:16px;"><div class="ch"><div class="cd"><span></span><span></span><span></span></div><div class="cl">center.py</div></div>
+    <div class="cc">grades = [<span class="num">72</span>,<span class="num">85</span>,<span class="num">90</span>,<span class="num">65</span>,<span class="num">78</span>,<span class="num">92</span>,<span class="num">88</span>,<span class="num">75</span>,<span class="num">80</span>,<span class="num">95</span>,
+          <span class="num">70</span>,<span class="num">82</span>,<span class="num">87</span>,<span class="num">73</span>,<span class="num">91</span>,<span class="num">68</span>,<span class="num">84</span>,<span class="num">79</span>,<span class="num">86</span>,<span class="num">77</span>]
+
+<span class="fn">print</span>(<span class="str">f'Min:    </span>{<span class="fn">min</span>(grades)}<span class="str">'</span>)
+<span class="fn">print</span>(<span class="str">f'Max:    </span>{<span class="fn">max</span>(grades)}<span class="str">'</span>)
+<span class="fn">print</span>(<span class="str">f'Mean:   </span>{np.<span class="fn">mean</span>(grades):.1f}<span class="str">'</span>)
+<span class="fn">print</span>(<span class="str">f'Median: </span>{np.<span class="fn">median</span>(grades)}<span class="str">'</span>)</div></div>
+  <div class="ad">▼</div>
+  <div class="ob"><span class="ol">OUTPUT ▾</span>
+Min:    65       ← הנמוך ביותר
+Max:    95       ← הגבוה ביותר
+Mean:   80.9     ← סכום / כמות = 1617/20
+Median: 81.0     ← הערך האמצעי (אחרי מיון)</div>
+  <div class="ig">
+    <div class="ic" style="border-top:3px solid var(--rose)"><div class="ci">📊</div><h4>Mean (ממוצע)</h4><p>סכום / כמות. רגיש לחריגים!</p></div>
+    <div class="ic" style="border-top:3px solid var(--pink)"><div class="ci">📍</div><h4>Median (חציון)</h4><p>הערך האמצעי. <strong>עמיד</strong> לחריגים!</p></div>
+    <div class="ic" style="border-top:3px solid var(--fuchsia)"><div class="ci">🏷️</div><h4>Mode (שכיח)</h4><p>הערך שמופיע הכי הרבה</p></div>
+  </div>
+  <div class="tp"><span class="ti">💡</span><p>כשיש <strong>חריג</strong> (למשל ציון 20): הממוצע צונח ← <strong>החציון עדיף!</strong> לכן בנתוני שכר תמיד מציגים חציון.</p></div>
+</div></div>
+
+<!-- S2: Spread & Quartiles -->
+<div class="sl" id="s-2"><div class="si">
+  <div class="hd"><h3>מדדי פיזור ורבעונים <span class="badge b-r">Spread</span></h3>
+    <div class="d">כמה הנתונים "מפוזרים" סביב המרכז?</div></div>
+  <div class="cb"><div class="ch"><div class="cd"><span></span><span></span><span></span></div><div class="cl">spread.py</div></div>
+    <div class="cc"><span class="fn">print</span>(<span class="str">f'Range: </span>{np.<span class="fn">max</span>(grades) - np.<span class="fn">min</span>(grades)}<span class="str">'</span>)
+<span class="fn">print</span>(<span class="str">f'Std:   </span>{np.<span class="fn">std</span>(grades):.2f}<span class="str">'</span>)
+<span class="fn">print</span>(<span class="str">f'Q1:    </span>{np.<span class="fn">percentile</span>(grades, <span class="num">25</span>)}<span class="str">'</span>)
+<span class="fn">print</span>(<span class="str">f'Q2:    </span>{np.<span class="fn">percentile</span>(grades, <span class="num">50</span>)}<span class="str">'</span>)
+<span class="fn">print</span>(<span class="str">f'Q3:    </span>{np.<span class="fn">percentile</span>(grades, <span class="num">75</span>)}<span class="str">'</span>)
+<span class="fn">print</span>(<span class="str">f'IQR:   </span>{np.<span class="fn">percentile</span>(grades,<span class="num">75</span>)-np.<span class="fn">percentile</span>(grades,<span class="num">25</span>)}<span class="str">'</span>)</div></div>
+  <div class="ad">▼</div>
+  <div class="ob"><span class="ol">OUTPUT ▾</span>
+Range: 30        ← 95 - 65
+Std:   8.06      ← סטיית תקן (פיזור סביב הממוצע)
+Q1:    74.25     ← 25% מתחת לערך הזה
+Q2:    81.0      ← 50% = החציון
+Q3:    88.25     ← 75% מתחת לערך הזה
+IQR:   14.0      ← Q3 - Q1 (טווח בין-רבעוני)</div>
+  <div class="cr">
+    <div class="cx rose"><h4>📏 סטיית תקן (Std)</h4><p>Std <strong>קטן</strong> = ציונים מרוכזים סביב הממוצע<br/>Std <strong>גדול</strong> = ציונים מפוזרים רחוק מהממוצע<br/><span style="font-size:11px;color:var(--muted)">שתי כיתות עם ממוצע 80 יכולות להיות שונות לחלוטין!</span></p></div>
+    <div class="cx pink"><h4>📦 IQR (טווח בין-רבעוני)</h4><p>Q3 - Q1 = הטווח שבו נמצאים <strong>50% האמצעיים</strong><br/>חשוב לזיהוי <strong>חריגים</strong>:<br/><span style="font-size:11px;color:var(--muted)">חריג = מתחת Q1-1.5×IQR או מעל Q3+1.5×IQR</span></p></div>
+  </div>
+</div></div>
+
+<!-- S3: What is EDA + Dataset -->
+<div class="sl" id="s-3"><div class="si">
+  <div class="sh"><div class="sn">SECTION 02</div><h2>מהו <span style="color:var(--pink)">EDA</span>?</h2><div class="sd">Exploratory Data Analysis – חקר נתונים לפני בניית מודלים</div></div>
+  <div class="cx rose" style="margin-top:16px;"><h4>🔑 הכלל הזהב: "Garbage In, Garbage Out"</h4><p>אם הנתונים לא טובים – גם המודל לא יהיה טוב. <strong>EDA</strong> = להכיר את הנתונים לעומק לפני שמתחילים!</p></div>
+  <div style="display:flex;justify-content:center;gap:8px;margin:12px 0;flex-wrap:wrap;font-size:12px;">
+    <span style="background:rgba(244,63,94,.1);padding:5px 12px;border-radius:6px;color:var(--rose)">📊 סטטיסטיקות בסיסיות</span>
+    <span style="color:var(--muted)">→</span>
+    <span style="background:rgba(236,72,153,.1);padding:5px 12px;border-radius:6px;color:var(--pink)">📈 ויזואליזציה</span>
+    <span style="color:var(--muted)">→</span>
+    <span style="background:rgba(217,70,239,.1);padding:5px 12px;border-radius:6px;color:var(--fuchsia)">🔗 קשרים בין משתנים</span>
+    <span style="color:var(--muted)">→</span>
+    <span style="background:rgba(16,185,129,.1);padding:5px 12px;border-radius:6px;color:var(--green)">🧹 ניקוי והכנה</span>
+  </div>
+  <div class="cx blue" style="margin-top:10px;"><h4>🏠 הדאטהסט שלנו: דירות למכירה</h4><p>200 דירות עם: <strong>גודל (מ"ר)</strong>, <strong>חדרים</strong>, <strong>גיל בניין</strong>, <strong>עיר</strong> (ת"א/י-ם/חיפה/ב"ש), <strong>מצב</strong> (חדש/משופץ/ישן), <strong>קומה</strong>, <strong>מחיר</strong><br/>
+  <strong>המטרה:</strong> להבין מה משפיע על <strong>מחיר הדירה</strong> כדי לבנות מודל חיזוי.</p></div>
+</div></div>
+
+<!-- S4: Initial Exploration -->
+<div class="sl" id="s-4"><div class="si">
+  <div class="hd"><h3>📋 סקירה ראשונית <span class="badge b-p">First Look</span></h3></div>
+  <div class="cb"><div class="ch"><div class="cd"><span></span><span></span><span></span></div><div class="cl">explore.py</div></div>
+    <div class="cc"><span class="fn">print</span>(<span class="str">f'Shape: </span>{df.<span class="vr">shape</span>}<span class="str">'</span>)
+<span class="fn">print</span>(df.<span class="fn">dtypes</span>)
+<span class="fn">print</span>(df.<span class="fn">isna</span>().<span class="fn">sum</span>())
+df.<span class="fn">describe</span>()</div></div>
+  <div class="ad">▼</div>
+  <div class="ob"><span class="ol">shape & dtypes ▾</span>
+Shape: (200, 7) ← 200 דירות × 7 עמודות
+
+Size_sqm       float64    Rooms          int64
+Building_Age   float64    Floor          int64
+City           object     Condition      object
+Price          float64</div>
+  <div class="ob"><span class="ol">isna().sum() ▾</span>
+Building_Age    8      ← 8 ערכים חסרים!
+(שאר העמודות: 0)</div>
+  <div class="ob"><span class="ol">describe() ▾</span>
+         Size_sqm   Rooms  Building_Age  Floor    Price
+count   200.0      200.0   192.0        200.0   200.0
+mean     88.5       3.4     16.2         4.8     2.1M
+std      31.2       1.1      9.8         2.9     0.9M
+min      35.0       2.0      0.5         1.0     0.7M
+25%      63.0       3.0      8.2         2.0     1.4M
+50%      86.5       3.0     15.0         5.0     1.9M  ← חציון
+75%     112.0       4.0     23.5         7.0     2.6M
+max     180.0       6.0     40.0        12.0     5.2M</div>
+  <div class="tp"><span class="ti">📌</span><p>מ-describe רואים: דירה ממוצעת ~89 מ"ר, 3.4 חדרים, מחיר חציוני 1.9M ₪. Building_Age חסר 8 ערכים!</p></div>
+</div></div>
+
+<!-- S5: Histogram -->
+<div class="sl" id="s-5"><div class="si">
+  <div class="sh"><div class="sn">SECTION 03</div><h2>גרפי <span style="color:var(--fuchsia)">משתנה בודד</span></h2><div class="sd">Univariate – הבנת כל משתנה בנפרד</div></div>
+  <div class="hd" style="margin-top:14px;"><h3>📊 היסטוגרמה (Histogram) <span class="badge b-f">מספרי</span></h3>
+    <div class="d">מראה <strong>התפלגות</strong> – איך הערכים מתפזרים?</div></div>
+  <div class="cb"><div class="ch"><div class="cd"><span></span><span></span><span></span></div><div class="cl">histogram.py</div></div>
+    <div class="cc">plt.<span class="fn">hist</span>(df[<span class="str">'Price'</span>] / <span class="num">1e6</span>, <span class="vr">bins</span>=<span class="num">20</span>,
+         <span class="vr">color</span>=<span class="str">'#e74c3c'</span>, <span class="vr">edgecolor</span>=<span class="str">'white'</span>)
+plt.<span class="fn">xlabel</span>(<span class="str">'Price (Millions ₪)'</span>)
+plt.<span class="fn">ylabel</span>(<span class="str">'Count'</span>)
+
+<span class="cm"># אפשר גם עם Seaborn:</span>
+sns.<span class="fn">histplot</span>(df[<span class="str">'Size_sqm'</span>], <span class="vr">bins</span>=<span class="num">20</span>, <span class="vr">kde</span>=<span class="kw">True</span>)</div></div>
+  <div class="ob"><span class="ol">מה רואים בהיסטוגרמת מחיר? ▾</span>
+📊 רוב הדירות: 1.0-2.5 מיליון ₪
+📈 התפלגות מוטה ימינה (Right Skewed)
+   = יש כמה דירות יקרות מאוד שמושכות את הממוצע
+📌 הממוצע (2.1M) > החציון (1.9M) ← סימן להטיה!</div>
+  <div class="ob"><span class="ol">kde=True מוסיף קו חלק ▾</span>
+📈 KDE (Kernel Density Estimate) = היסטוגרמה "מוחלקת"
+   שימושי להשוואת התפלגויות בין קבוצות:
+   sns.kdeplot(data=df, x='Price_M', hue='City')</div>
+  <div class="tp"><span class="ti">📌</span><p><strong>מתי?</strong> למשתנים <strong>מספריים</strong> (גיל, מחיר, גודל). <strong>מה לומדים?</strong> צורת התפלגות, טווח ערכים, שכיחות.</p></div>
+</div></div>
+
+<!-- S6: Box Plot -->
+<div class="sl" id="s-6"><div class="si">
+  <div class="hd"><h3>📦 Box Plot (תרשים קופסה) <span class="badge b-f">5 סיכומים + חריגים</span></h3>
+    <div class="d">מראה Min, Q1, Median, Q3, Max + נקודות חריגות</div></div>
+  <div class="cb"><div class="ch"><div class="cd"><span></span><span></span><span></span></div><div class="cl">boxplot.py</div></div>
+    <div class="cc"><span class="cm"># Box Plot – השוואת מחיר לפי עיר</span>
+sns.<span class="fn">boxplot</span>(<span class="vr">data</span>=df, <span class="vr">x</span>=<span class="str">'City'</span>, <span class="vr">y</span>=<span class="str">'Price_M'</span>,
+            <span class="vr">hue</span>=<span class="str">'City'</span>)</div></div>
+  <div class="ob"><span class="ol">מה רואים בגרף? ▾</span>
+📊 תל אביב – הקופסה הכי גבוהה → המחירים הגבוהים ביותר
+📊 באר שבע – הקופסה הכי נמוכה → הזולה ביותר
+◆ נקודות מעל השפם = חריגים (דירות יקרות במיוחד)
+📏 קופסה רחבה = פיזור גדול, צרה = פיזור קטן</div>
+  <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px 16px;margin:8px 0;direction:ltr;text-align:center;font-family:'Fira Code',monospace;font-size:11px;color:var(--text2);">
+    <div style="margin-bottom:4px;color:var(--muted);font-size:10px;">ANATOMY OF A BOX PLOT</div>
+    <pre style="color:var(--text2);font-size:11px;line-height:1.7;">
+  ◆ outlier
+  ┬ Max (or upper whisker)
+  │
+┌─┤─┐ Q3 (75%)
+│   │
+│ ─ │ Median (Q2, 50%)
+│   │
+└─┤─┘ Q1 (25%)
+  │
+  ┴ Min (or lower whisker)
+  ◆ outlier</pre>
+  </div>
+</div></div>
+
+<!-- S7: Count/Pie -->
+<div class="sl" id="s-7"><div class="si">
+  <div class="hd"><h3>📊 גרפים קטגוריאליים <span class="badge b-f">Count Plot & Pie</span></h3></div>
+  <div class="cr">
+    <div>
+      <h4 style="font-size:12px;color:var(--fuchsia);margin-bottom:4px;">Count Plot – ספירה</h4>
+      <div class="cb"><div class="ch"><div class="cd"><span></span><span></span><span></span></div><div class="cl">countplot.py</div></div>
+        <div class="cc">sns.<span class="fn">countplot</span>(<span class="vr">data</span>=df,
+    <span class="vr">x</span>=<span class="str">'City'</span>, <span class="vr">hue</span>=<span class="str">'City'</span>,
+    <span class="vr">order</span>=df[<span class="str">'City'</span>].<span class="fn">value_counts</span>().<span class="vr">index</span>)</div></div>
+      <div class="ob"><span class="ol">OUTPUT ▾</span>
+Tel Aviv     60  ████████████
+Jerusalem    50  ██████████
+Haifa        50  ██████████
+Beer Sheva   40  ████████</div>
+    </div>
+    <div>
+      <h4 style="font-size:12px;color:var(--pink);margin-bottom:4px;">Pie Chart – אחוזים</h4>
+      <div class="cb"><div class="ch"><div class="cd"><span></span><span></span><span></span></div><div class="cl">pie.py</div></div>
+        <div class="cc">df[<span class="str">'Condition'</span>].<span class="fn">value_counts</span>().<span class="fn">plot</span>(
+    <span class="vr">kind</span>=<span class="str">'pie'</span>,
+    <span class="vr">autopct</span>=<span class="str">'%1.0f%%'</span>)</div></div>
+      <div class="ob"><span class="ol">OUTPUT ▾</span>
+🥧 Good      40%
+🥧 Excellent 35%
+🥧 Fair      25%</div>
+    </div>
+  </div>
+  <div class="tp"><span class="ti">🎯</span><p><strong>Count Plot</strong> – כשחשוב <strong>כמה</strong> בכל קטגוריה. <strong>Pie</strong> – כשחשוב <strong>אחוז יחסי</strong> (רק ל-2-6 קטגוריות, אחרת מבלבל!).</p></div>
+</div></div>
+
+<!-- S8: Scatter Plot -->
+<div class="sl" id="s-8"><div class="si">
+  <div class="sh"><div class="sn">SECTION 04</div><h2>גרפי <span style="color:var(--violet)">רב-משתנים</span></h2><div class="sd">קשרים בין משתנים – החלק הכי חשוב!</div></div>
+  <div class="hd" style="margin-top:12px;"><h3>📍 Scatter Plot (פיזור) <span class="badge b-v">שני משתנים מספריים</span></h3></div>
+  <div class="cb"><div class="ch"><div class="cd"><span></span><span></span><span></span></div><div class="cl">scatter.py</div></div>
+    <div class="cc">plt.<span class="fn">scatter</span>(df[<span class="str">'Size_sqm'</span>], df[<span class="str">'Price_M'</span>],
+            <span class="vr">alpha</span>=<span class="num">0.5</span>)
+plt.<span class="fn">xlabel</span>(<span class="str">'Size (sqm)'</span>)
+plt.<span class="fn">ylabel</span>(<span class="str">'Price (Millions ₪)'</span>)</div></div>
+  <div class="ad">▼</div>
+  <div class="ob"><span class="ol">מה רואים? ▾</span>
+📈 גודל ↔ מחיר: קשר חיובי חזק!
+   כל עוד הנקודות עולות "ימינה-למעלה" = חיובי
+   
+📊 חדרים ↔ מחיר: קשר חיובי מתון
+   (יותר מפוזר כי חדרים = ערכים בדידים)
+   
+📉 גיל בניין ↔ מחיר: קשר שלילי חלש
+   (ישן = קצת זול, אבל לא חד-משמעי)</div>
+  <div class="tp"><span class="ti">🔑</span><p><strong>Scatter Plot</strong> הוא הגרף הכי שימושי ב-EDA! מראה קשר, כיוון (חיובי/שלילי), עוצמה, וחריגים – הכל בגרף אחד.</p></div>
+</div></div>
+
+<!-- S9: Scatter + hue -->
+<div class="sl" id="s-9"><div class="si">
+  <div class="hd"><h3>🎨 Scatter + hue (משתנה שלישי) <span class="badge b-v">צבע = קבוצות</span></h3>
+    <div class="d">צובעים את הנקודות לפי משתנה נוסף – רואים אם הקשר שונה בין קבוצות!</div></div>
+  <div class="cb"><div class="ch"><div class="cd"><span></span><span></span><span></span></div><div class="cl">scatter_hue.py</div></div>
+    <div class="cc">sns.<span class="fn">scatterplot</span>(<span class="vr">data</span>=df, <span class="vr">x</span>=<span class="str">'Size_sqm'</span>, <span class="vr">y</span>=<span class="str">'Price_M'</span>,
+                 <span class="vr">hue</span>=<span class="str">'City'</span>,         <span class="cm"># צבע = עיר</span>
+                 <span class="vr">size</span>=<span class="str">'Rooms'</span>,       <span class="cm"># גודל = חדרים</span>
+                 <span class="vr">style</span>=<span class="str">'Condition'</span>,  <span class="cm"># צורה = מצב</span>
+                 <span class="vr">alpha</span>=<span class="num">0.7</span>)</div></div>
+  <div class="ad">▼</div>
+  <div class="ob"><span class="ol">עכשיו רואים 5 משתנים בבת אחת! ▾</span>
+📍 X = גודל (מ"ר)
+📍 Y = מחיר (מיליון ₪)
+🎨 צבע = עיר  →  ת"א (כתום) מעל כולם!
+⚫ גודל נקודה = חדרים  →  נקודות גדולות = יותר חדרים
+◆▲● צורה = מצב  →  Excellent, Good, Fair
+
+💡 תובנה: לאותו גודל, דירות בת"א יקרות ב-30-50% מב"ש!</div>
+  <div class="tp"><span class="ti">📌</span><p><strong>hue</strong> = צבע לפי קטגוריה. <strong>size</strong> = גודל לפי מספר. <strong>style</strong> = צורת נקודה. אפשר לשלב הכל ב-<code>sns.scatterplot</code>!</p></div>
+</div></div>
+
+<!-- S10: Correlation -->
+<div class="sl" id="s-10"><div class="si">
+  <div class="sh"><div class="sn">SECTION 05</div><h2><span style="color:var(--blue)">קורלציה</span></h2><div class="sd">מדידת עוצמת הקשר הלינארי בין משתנים</div></div>
+  <div class="cb" style="margin-top:14px;"><div class="ch"><div class="cd"><span></span><span></span><span></span></div><div class="cl">correlation.py</div></div>
+    <div class="cc"><span class="cm"># מטריצת קורלציה</span>
+corr = df.<span class="fn">select_dtypes</span>(<span class="vr">include</span>=[np.<span class="vr">number</span>]).<span class="fn">corr</span>()
+
+<span class="cm"># Heatmap ויזואלי</span>
+sns.<span class="fn">heatmap</span>(corr, <span class="vr">annot</span>=<span class="kw">True</span>, <span class="vr">cmap</span>=<span class="str">'RdBu_r'</span>,
+            <span class="vr">center</span>=<span class="num">0</span>, <span class="vr">fmt</span>=<span class="str">'.2f'</span>)
+
+<span class="cm"># קורלציות עם Price</span>
+<span class="fn">print</span>(corr[<span class="str">'Price'</span>].<span class="fn">sort_values</span>(<span class="vr">ascending</span>=<span class="kw">False</span>))</div></div>
+  <div class="ad">▼</div>
+  <div class="ob"><span class="ol">קורלציות עם Price ▾</span>
+Size_sqm      0.85  ← 🟢 חזק מאוד! גודל = המנבא הטוב ביותר
+Rooms         0.72  ← 🟢 חזק – יותר חדרים = יקר
+Floor         0.15  ← 🟡 חלש – קומה משפיעה מעט
+Building_Age -0.25  ← 🔴 שלילי – ישן = זול קצת</div>
+  <div class="ig" style="grid-template-columns:repeat(4,1fr);">
+    <div class="ic" style="text-align:center;border-top:2px solid var(--green)"><p style="font-size:18px;font-weight:700;color:var(--green);">+0.7 עד +1</p><p>חיובי <strong>חזק</strong></p></div>
+    <div class="ic" style="text-align:center;border-top:2px solid var(--cyan)"><p style="font-size:18px;font-weight:700;color:var(--cyan);">+0.3 עד +0.7</p><p>חיובי <strong>מתון</strong></p></div>
+    <div class="ic" style="text-align:center;border-top:2px solid var(--orange)"><p style="font-size:18px;font-weight:700;color:var(--orange);">-0.3 עד +0.3</p><p><strong>חלש</strong></p></div>
+    <div class="ic" style="text-align:center;border-top:2px solid var(--red)"><p style="font-size:18px;font-weight:700;color:var(--red);">-0.7 עד -1</p><p>שלילי <strong>חזק</strong></p></div>
+  </div>
+  <div class="tp"><span class="ti">⚠️</span><p><strong>קורלציה ≠ סיבתיות!</strong> (Correlation ≠ Causation) – גלידה ↔ טביעות? שניהם עולים בקיץ, אבל אחד לא גורם לשני!</p></div>
+</div></div>
+
+<!-- S11: Outliers -->
+<div class="sl" id="s-11"><div class="si">
+  <div class="hd"><h3>🎯 זיהוי חריגים (Outliers) <span class="badge b-b">IQR Method</span></h3>
+    <div class="d">ערכים קיצוניים שיכולים להשפיע על המודל</div></div>
+  <div class="cb"><div class="ch"><div class="cd"><span></span><span></span><span></span></div><div class="cl">outliers.py</div></div>
+    <div class="cc"><span class="kw">def</span> <span class="fn">find_outliers</span>(data, col):
+    Q1 = data[col].<span class="fn">quantile</span>(<span class="num">0.25</span>)
+    Q3 = data[col].<span class="fn">quantile</span>(<span class="num">0.75</span>)
+    IQR = Q3 - Q1
+    lower = Q1 - <span class="num">1.5</span> * IQR
+    upper = Q3 + <span class="num">1.5</span> * IQR
+    outliers = data[(data[col] < lower) | (data[col] > upper)]
+    <span class="kw">return</span> outliers, lower, upper
+
+out, lo, hi = <span class="fn">find_outliers</span>(df, <span class="str">'Price_M'</span>)
+<span class="fn">print</span>(<span class="str">f'Bounds: [</span>{lo:.2f}<span class="str">, </span>{hi:.2f}<span class="str">]'</span>)
+<span class="fn">print</span>(<span class="str">f'Outliers: </span>{<span class="fn">len</span>(out)}<span class="str">'</span>)</div></div>
+  <div class="ad">▼</div>
+  <div class="ob"><span class="ol">OUTPUT ▾</span>
+Bounds: [-0.40, 4.40]    ← מתחת / מעל = חריג
+Outliers: 7               ← 7 דירות עם מחיר חריג
+
+💡 מה לעשות?
+  ✂️ הסרה – כשחריגים הם שגיאות
+  📏 גבול – np.clip(lower, upper)
+  🔍 חקירה – לפעמים חריגים מעניינים!</div>
+</div></div>
+
+<!-- S12: Data Prep -->
+<div class="sl" id="s-12"><div class="si">
+  <div class="sh"><div class="sn">SECTION 06</div><h2><span style="color:var(--green)">הכנת</span> נתונים למודלים</h2><div class="sd">שני שלבים חשובים לפני בניית מודל</div></div>
+  <div class="cr" style="margin-top:16px;">
+    <div>
+      <h4 style="font-size:12px;color:var(--orange);margin-bottom:4px;">🕳️ ערכים חסרים</h4>
+      <div class="cb"><div class="ch"><div class="cd"><span></span><span></span><span></span></div><div class="cl">fill_missing.py</div></div>
+        <div class="cc"><span class="cm"># מילוי בחציון (עמיד לחריגים)</span>
+med = df[<span class="str">'Building_Age'</span>].<span class="fn">median</span>()
+df[<span class="str">'Building_Age'</span>].<span class="fn">fillna</span>(med)</div></div>
+      <div class="ob"><span class="ol">OUTPUT ▾</span>
+Before: 8 missing
+After:  0 missing
+Filled with median: 15.0</div>
+    </div>
+    <div>
+      <h4 style="font-size:12px;color:var(--green);margin-bottom:4px;">🔢 One-Hot Encoding</h4>
+      <div class="cb"><div class="ch"><div class="cd"><span></span><span></span><span></span></div><div class="cl">encoding.py</div></div>
+        <div class="cc"><span class="cm"># המרת קטגוריות למספרים</span>
+df_enc = pd.<span class="fn">get_dummies</span>(df,
+    <span class="vr">columns</span>=[<span class="str">'City'</span>,<span class="str">'Condition'</span>])</div></div>
+      <div class="ob"><span class="ol">OUTPUT ▾</span>
+City → City_TelAviv (0/1)
+       City_Jerusalem (0/1)
+       City_Haifa (0/1)
+       City_BeerSheva (0/1)
+
+7 columns → 13 columns</div>
+    </div>
+  </div>
+  <div class="tp"><span class="ti">🔑</span><p><strong>למה One-Hot?</strong> מודלים לא מבינים "Tel Aviv" – רק מספרים! כל קטגוריה הופכת לעמודה בינארית (0/1).</p></div>
+</div></div>
+
+<!-- S13: Chart Selection Guide -->
+<div class="sl" id="s-13"><div class="si">
+  <div class="hd"><h3>📋 מדריך בחירת גרף <span class="badge b-r">Cheat Sheet</span></h3></div>
+  <table class="dt" style="font-size:10px;">
+    <tr><th>גרף</th><th>סוג משתנים</th><th>מתי להשתמש</th><th>קוד</th></tr>
+    <tr><td><strong>Histogram</strong></td><td>1 מספרי</td><td>התפלגות</td><td style="color:var(--rose)">plt.hist()</td></tr>
+    <tr><td><strong>Box Plot</strong></td><td>1 מספרי (+ קבוצות)</td><td>סיכום + חריגים</td><td style="color:var(--rose)">sns.boxplot()</td></tr>
+    <tr><td><strong>Count Plot</strong></td><td>1 קטגוריאלי</td><td>ספירה</td><td style="color:var(--rose)">sns.countplot()</td></tr>
+    <tr><td><strong>Pie Chart</strong></td><td>1 קטגוריאלי</td><td>אחוזים (2-6 קטגוריות)</td><td style="color:var(--rose)">.plot(kind='pie')</td></tr>
+    <tr><td><strong>Scatter</strong></td><td>2 מספריים</td><td>קשר בין משתנים</td><td style="color:var(--rose)">plt.scatter()</td></tr>
+    <tr><td><strong>Scatter+hue</strong></td><td>2 מספריים + קטגוריה</td><td>קשר לפי קבוצות</td><td style="color:var(--rose)">sns.scatterplot(hue=)</td></tr>
+    <tr><td><strong>Heatmap</strong></td><td>מטריצה מספרית</td><td>קורלציות</td><td style="color:var(--rose)">sns.heatmap()</td></tr>
+    <tr><td><strong>Violin</strong></td><td>מספרי + קטגוריה</td><td>התפלגות + סיכום</td><td style="color:var(--rose)">sns.violinplot()</td></tr>
+  </table>
+  <div class="cx rose" style="margin-top:8px;"><h4>🎯 כלל האצבע</h4>
+    <p style="font-size:12px;">
+      <strong>רוצה לדעת "איך מתפלג?"</strong> → Histogram / Box<br/>
+      <strong>רוצה לדעת "יש קשר?"</strong> → Scatter / Heatmap<br/>
+      <strong>רוצה לדעת "כמה?"</strong> → Count / Bar<br/>
+      <strong>רוצה להשוות קבוצות?</strong> → Box / Violin + hue
+    </p>
+  </div>
+</div></div>
+
+<!-- S14: Summary -->
+<div class="sl" id="s-14"><div class="si">
+  <div class="ts" style="margin-top:3vh;">
+    <div class="eb">🎉</div>
+    <h1 style="font-size:32px;">סיכום – חקר נתונים EDA</h1>
+  </div>
+  <div class="ig" style="max-width:750px;margin:14px auto 0;">
+    <div class="ic" style="border-right:3px solid var(--rose)"><h4 style="color:var(--rose)">סטטיסטיקה</h4><p>Mean, Median, Std, Q1-Q3, IQR</p></div>
+    <div class="ic" style="border-right:3px solid var(--pink)"><h4 style="color:var(--pink)">סקירה ראשונית</h4><p>shape, dtypes, describe, isna</p></div>
+    <div class="ic" style="border-right:3px solid var(--fuchsia)"><h4 style="color:var(--fuchsia)">משתנה בודד</h4><p>Histogram, Box, Count, Pie</p></div>
+    <div class="ic" style="border-right:3px solid var(--violet)"><h4 style="color:var(--violet)">רב-משתנים</h4><p>Scatter, Scatter+hue, Violin</p></div>
+    <div class="ic" style="border-right:3px solid var(--blue)"><h4 style="color:var(--blue)">קורלציה</h4><p>corr(), Heatmap, ≠ סיבתיות!</p></div>
+    <div class="ic" style="border-right:3px solid var(--orange)"><h4 style="color:var(--orange)">חריגים</h4><p>IQR: Q1-1.5×IQR, Q3+1.5×IQR</p></div>
+    <div class="ic" style="border-right:3px solid var(--green)"><h4 style="color:var(--green)">הכנה למודל</h4><p>fillna, get_dummies (One-Hot)</p></div>
+  </div>
+  <div class="cx rose" style="max-width:750px;margin:10px auto 0;"><h4>🔑 תהליך EDA בארבעה שלבים</h4>
+    <p style="font-size:12.5px;">1️⃣ <strong>סקירה</strong> – shape, dtypes, describe, isna &nbsp;→&nbsp; 2️⃣ <strong>ויזואליזציה</strong> – hist, box, scatter &nbsp;→&nbsp; 3️⃣ <strong>קשרים</strong> – corr, heatmap &nbsp;→&nbsp; 4️⃣ <strong>הכנה</strong> – fill, encode, outliers</p></div>
+</div></div>
+
+</div><!-- mc -->
+
+<div class="bn" id="bn">
+  <button class="nb" id="pB" onclick="go(-1)">הקודם ←</button>
+  <span class="sc" id="sC">1 / 15</span>
+  <button class="nb pr" id="nB" onclick="go(1)">→ הבא</button>
+</div>
+
+<script>
+let c=0;const T=15;
+function go(d){const n=c+d;if(n<0||n>=T)return;gs(n)}
+function gs(i){if(i===c)return;const o=document.getElementById(`s-${c}`),n=document.getElementById(`s-${i}`);o.classList.remove('ac');if(i>c)o.classList.add('ex');setTimeout(()=>o.classList.remove('ex'),450);n.classList.add('ac');n.scrollTop=0;c=i;u()}
+function u(){document.getElementById('sC').textContent=`${c+1} / ${T}`;const p=(c/(T-1))*100;document.getElementById('pF').style.width=`${p}%`;document.getElementById('pT').textContent=`${Math.round(p)}%`;document.getElementById('pB').style.opacity=c===0?'.3':'1';document.getElementById('pB').style.pointerEvents=c===0?'none':'all';document.getElementById('nB').style.opacity=c===T-1?'.3':'1';document.getElementById('nB').style.pointerEvents=c===T-1?'none':'all';document.querySelectorAll('.ni').forEach(e=>{e.classList.toggle('a',parseInt(e.dataset.s)===c);if(parseInt(e.dataset.s)===c)e.scrollIntoView({block:'nearest',behavior:'smooth'})})}
+document.querySelectorAll('.ni').forEach(e=>{e.addEventListener('click',()=>gs(parseInt(e.dataset.s)))});
+document.addEventListener('keydown',e=>{if(e.key==='ArrowLeft'||e.key==='ArrowUp'){e.preventDefault();go(1)}else if(e.key==='ArrowRight'||e.key==='ArrowDown'){e.preventDefault();go(-1)}});
+function tSB(){const s=document.getElementById('sb');s.classList.toggle('col');document.getElementById('sbT').textContent=s.classList.contains('col')?'▶':'◀'}
+let tx=0;document.addEventListener('touchstart',e=>{tx=e.touches[0].clientX});document.addEventListener('touchend',e=>{const d=tx-e.changedTouches[0].clientX;if(Math.abs(d)>50)go(d>0?1:-1)});
+u();
+</script>
+</body>
+</html>

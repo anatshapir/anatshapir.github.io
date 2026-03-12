@@ -9,6 +9,9 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
+  build: {
+    outDir: 'docs',
+  },
   server: {
     port: 3000,
     strictPort: true,

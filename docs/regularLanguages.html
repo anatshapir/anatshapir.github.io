@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>תרגול מודלים חישוביים</title>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #e0e7ff 0%, #f3e8ff 100%); min-height: 100vh; padding: 16px; }
+        .container { max-width: 900px; margin: 0 auto; }
+        .card { background: white; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); padding: 24px; margin-bottom: 20px; }
+        h1 { text-align: center; color: #312e81; font-size: 28px; margin-bottom: 8px; }
+        .subtitle { text-align: center; color: #6b7280; margin-bottom: 16px; }
+        .stats { display: flex; justify-content: center; gap: 24px; flex-wrap: wrap; margin: 16px 0; }
+        .stat { padding: 8px 20px; border-radius: 50px; font-weight: 500; }
+        .stat-green { background: #dcfce7; color: #166534; }
+        .stat-blue { background: #dbeafe; color: #1e40af; }
+        .filters { display: flex; justify-content: center; gap: 16px; flex-wrap: wrap; margin-top: 16px; }
+        select { padding: 10px 16px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 14px; background: white; cursor: pointer; }
+        .question-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 8px; }
+        .badge { padding: 6px 14px; border-radius: 50px; font-size: 13px; font-weight: 500; }
+        .level-1 { background: #dcfce7; color: #166534; }
+        .level-2 { background: #dbeafe; color: #1e40af; }
+        .level-3 { background: #fef9c3; color: #854d0e; }
+        .level-4 { background: #ffedd5; color: #9a3412; }
+        .level-5 { background: #fee2e2; color: #991b1b; }
+        .badge-topic { background: #f3e8ff; color: #7c3aed; }
+        .question-text { font-size: 18px; font-weight: 600; color: #1f2937; margin-bottom: 16px; line-height: 1.6; }
+        .automaton-container { background: #f9fafb; padding: 16px; border-radius: 12px; margin-bottom: 20px; }
+        .options { display: flex; flex-direction: column; gap: 12px; }
+        .option-btn { width: 100%; text-align: right; padding: 16px; border-radius: 10px; border: 2px solid #e5e7eb; background: #f9fafb; cursor: pointer; font-size: 15px; transition: all 0.2s; }
+        .option-btn:hover:not(:disabled) { background: #eef2ff; border-color: #a5b4fc; }
+        .option-btn.selected { background: #e0e7ff; border-color: #6366f1; }
+        .option-btn.correct { background: #dcfce7; border-color: #22c55e; color: #166534; }
+        .option-btn.wrong { background: #fee2e2; border-color: #ef4444; color: #991b1b; }
+        .option-btn:disabled { cursor: default; }
+        .hint-box { margin-top: 16px; padding: 16px; background: #fefce8; border: 1px solid #fde047; border-radius: 10px; }
+        .hint-label { font-weight: 600; color: #854d0e; }
+        .hint-text { color: #a16207; }
+        .result-box { margin-top: 16px; padding: 16px; border-radius: 10px; }
+        .result-correct { background: #f0fdf4; border: 1px solid #bbf7d0; }
+        .result-wrong { background: #fef2f2; border: 1px solid #fecaca; }
+        .result-title { font-weight: 600; margin-bottom: 8px; }
+        .result-title.correct { color: #166534; }
+        .result-title.wrong { color: #991b1b; }
+        .explanation { color: #4b5563; line-height: 1.6; }
+        .buttons { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; margin-top: 20px; }
+        .btn { padding: 10px 24px; border-radius: 8px; font-size: 15px; font-weight: 500; cursor: pointer; border: none; transition: all 0.2s; }
+        .btn-yellow { background: #eab308; color: white; }
+        .btn-yellow:hover { background: #ca8a04; }
+        .btn-indigo { background: #6366f1; color: white; }
+        .btn-indigo:hover { background: #4f46e5; }
+        .btn-green { background: #22c55e; color: white; }
+        .btn-green:hover { background: #16a34a; }
+        .nav { display: flex; justify-content: space-between; margin-top: 16px; }
+        .nav-btn { background: none; border: none; color: #6b7280; cursor: pointer; font-size: 14px; padding: 8px; }
+        .nav-btn:hover { color: #6366f1; }
+        .nav-btn.reset { color: #dc2626; }
+        .nav-btn.reset:hover { color: #b91c1c; }
+        .reference-title { font-weight: 600; font-size: 17px; color: #374151; margin-bottom: 12px; }
+        .reference-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 10px; }
+        .ref-item { background: #f0fdf4; padding: 12px; border-radius: 8px; text-align: center; }
+        .ref-op { font-weight: 600; color: #166534; }
+        .ref-status { color: #22c55e; font-size: 13px; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+    <script type="text/babel">
+const { useState } = React;
+
+const AutomatonSVG = ({ states, transitions, accepting, initial, width = 500, height = 200 }) => {
+  return (
+    <svg viewBox={`0 0 ${width} ${height}`} style={{width: '100%', maxWidth: '500px', margin: '0 auto', display: 'block', background: 'white', borderRadius: '8px', border: '1px solid #e5e7eb'}}>
+      <defs>
+        <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+          <polygon points="0 0, 10 3.5, 0 7" fill="#4B5563" />
+        </marker>
+        <marker id="arrowhead-initial" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+          <polygon points="0 0, 10 3.5, 0 7" fill="#059669" />
+        </marker>
+      </defs>
+      
+      {initial && states[initial] && (
+        <g>
+          <line x1={states[initial].x - 55} y1={states[initial].y} x2={states[initial].x - 25} y2={states[initial].y}
+            stroke="#059669" strokeWidth="2.5" markerEnd="url(#arrowhead-initial)" />
+          <text x={states[initial].x - 55} y={states[initial].y - 8} fontSize="11" fill="#059669" fontWeight="bold">התחלה</text>
+        </g>
+      )}
+      
+      {transitions.map((t, i) => {
+        const from = states[t.from];
+        const to = states[t.to];
+        if (!from || !to) return null;
+        
+        if (t.from === t.to) {
+          const loopY = from.y - 45;
+          return (
+            <g key={i}>
+              <path d={`M ${from.x - 15} ${from.y - 20} C ${from.x - 30} ${loopY - 20}, ${from.x + 30} ${loopY - 20}, ${from.x + 15} ${from.y - 20}`}
+                fill="none" stroke="#4B5563" strokeWidth="2" markerEnd="url(#arrowhead)" />
+              <rect x={from.x - 15} y={loopY - 30} width="30" height="18" fill="white" rx="3" />
+              <text x={from.x} y={loopY - 16} textAnchor="middle" fontSize="15" fill="#DC2626" fontWeight="bold">{t.label}</text>
+            </g>
+          );
+        } else {
+          const dx = to.x - from.x;
+          const dy = to.y - from.y;
+          const len = Math.sqrt(dx * dx + dy * dy);
+          const offsetX = (dx / len) * 22;
+          const offsetY = (dy / len) * 22;
+          const hasReverse = transitions.some(tr => tr.from === t.to && tr.to === t.from);
+          const isForward = from.x < to.x || (from.x === to.x && from.y < to.y);
+          const curve = hasReverse ? (isForward ? -25 : 25) : 0;
+          const midX = (from.x + to.x) / 2;
+          const midY = (from.y + to.y) / 2 + curve;
+          const ctrlY = midY + (isForward ? -25 : 25);
+          
+          return (
+            <g key={i}>
+              {hasReverse ? (
+                <path d={`M ${from.x + offsetX} ${from.y + offsetY} Q ${midX} ${ctrlY} ${to.x - offsetX} ${to.y - offsetY}`}
+                  fill="none" stroke="#4B5563" strokeWidth="2" markerEnd="url(#arrowhead)" />
+              ) : (
+                <line x1={from.x + offsetX} y1={from.y + offsetY} x2={to.x - offsetX} y2={to.y - offsetY}
+                  stroke="#4B5563" strokeWidth="2" markerEnd="url(#arrowhead)" />
+              )}
+              <rect x={midX - 15} y={midY + (hasReverse ? (isForward ? -34 : 6) : -16)} width="30" height="20" fill="white" rx="3" />
+              <text x={midX} y={midY + (hasReverse ? (isForward ? -18 : 22) : 0)} textAnchor="middle" fontSize="15" fill="#DC2626" fontWeight="bold">{t.label}</text>
+            </g>
+          );
+        }
+      })}
+      
+      {Object.entries(states).map(([name, pos]) => {
+        const isAccepting = accepting.includes(name);
+        return (
+          <g key={name}>
+            <circle cx={pos.x} cy={pos.y} r="20" fill={isAccepting ? "#D1FAE5" : "white"} stroke={isAccepting ? "#059669" : "#4B5563"} strokeWidth="2" />
+            {isAccepting && <circle cx={pos.x} cy={pos.y} r="15" fill="none" stroke="#059669" strokeWidth="2" />}
+            <text x={pos.x} y={pos.y + 5} textAnchor="middle" fontSize="14" fill="#1F2937" fontWeight="bold">{name}</text>
+          </g>
+        );
+      })}
+    </svg>
+  );
+};
+
+const automata = {
+  dfa_even_a: { states: { q0: { x: 100, y: 100 }, q1: { x: 250, y: 100 } }, transitions: [ { from: 'q0', to: 'q1', label: 'a' }, { from: 'q1', to: 'q0', label: 'a' }, { from: 'q0', to: 'q0', label: 'b' }, { from: 'q1', to: 'q1', label: 'b' } ], accepting: ['q0'], initial: 'q0', width: 350, height: 200 },
+  dfa_contains_aa: { states: { q0: { x: 80, y: 100 }, q1: { x: 200, y: 100 }, q2: { x: 320, y: 100 } }, transitions: [ { from: 'q0', to: 'q1', label: 'a' }, { from: 'q0', to: 'q0', label: 'b' }, { from: 'q1', to: 'q2', label: 'a' }, { from: 'q1', to: 'q0', label: 'b' }, { from: 'q2', to: 'q2', label: 'a,b' } ], accepting: ['q2'], initial: 'q0', width: 400, height: 200 },
+  dfa_starts_a: { states: { q0: { x: 100, y: 80 }, q1: { x: 250, y: 80 }, q2: { x: 250, y: 180 } }, transitions: [ { from: 'q0', to: 'q1', label: 'a' }, { from: 'q0', to: 'q2', label: 'b' }, { from: 'q1', to: 'q1', label: 'a,b' }, { from: 'q2', to: 'q2', label: 'a,b' } ], accepting: ['q1'], initial: 'q0', width: 350, height: 260 },
+  dfa_ends_ab: { states: { q0: { x: 80, y: 100 }, q1: { x: 200, y: 100 }, q2: { x: 320, y: 100 } }, transitions: [ { from: 'q0', to: 'q1', label: 'a' }, { from: 'q0', to: 'q0', label: 'b' }, { from: 'q1', to: 'q2', label: 'b' }, { from: 'q1', to: 'q1', label: 'a' }, { from: 'q2', to: 'q1', label: 'a' }, { from: 'q2', to: 'q0', label: 'b' } ], accepting: ['q2'], initial: 'q0', width: 400, height: 200 },
+  dfa_bstar_astar: { states: { q0: { x: 80, y: 100 }, q1: { x: 200, y: 100 }, q2: { x: 320, y: 100 } }, transitions: [ { from: 'q0', to: 'q0', label: 'b' }, { from: 'q0', to: 'q1', label: 'a' }, { from: 'q1', to: 'q1', label: 'a' }, { from: 'q1', to: 'q2', label: 'b' }, { from: 'q2', to: 'q2', label: 'a,b' } ], accepting: ['q0', 'q1'], initial: 'q0', width: 400, height: 200 },
+  dfa_contains_010: { states: { q0: { x: 70, y: 100 }, q1: { x: 170, y: 100 }, q2: { x: 270, y: 100 }, q3: { x: 370, y: 100 } }, transitions: [ { from: 'q0', to: 'q1', label: '0' }, { from: 'q0', to: 'q0', label: '1' }, { from: 'q1', to: 'q2', label: '1' }, { from: 'q1', to: 'q1', label: '0' }, { from: 'q2', to: 'q3', label: '0' }, { from: 'q2', to: 'q0', label: '1' }, { from: 'q3', to: 'q3', label: '0,1' } ], accepting: ['q3'], initial: 'q0', width: 450, height: 200 },
+  dfa_mod3: { states: { q0: { x: 100, y: 120 }, q1: { x: 220, y: 50 }, q2: { x: 220, y: 190 } }, transitions: [ { from: 'q0', to: 'q1', label: 'a' }, { from: 'q1', to: 'q2', label: 'a' }, { from: 'q2', to: 'q0', label: 'a' }, { from: 'q0', to: 'q0', label: 'b' }, { from: 'q1', to: 'q1', label: 'b' }, { from: 'q2', to: 'q2', label: 'b' } ], accepting: ['q0'], initial: 'q0', width: 320, height: 240 },
+  nfa_ab_ba: { states: { q0: { x: 70, y: 100 }, q1: { x: 170, y: 50 }, q2: { x: 270, y: 50 }, q3: { x: 170, y: 150 }, q4: { x: 270, y: 150 } }, transitions: [ { from: 'q0', to: 'q1', label: 'a' }, { from: 'q0', to: 'q3', label: 'b' }, { from: 'q1', to: 'q2', label: 'b' }, { from: 'q2', to: 'q2', label: 'b' }, { from: 'q3', to: 'q4', label: 'a' }, { from: 'q4', to: 'q4', label: 'a' } ], accepting: ['q1', 'q2', 'q3', 'q4'], initial: 'q0', width: 350, height: 200 },
+  nfa_aba_suffix: { states: { q0: { x: 70, y: 100 }, q1: { x: 170, y: 100 }, q2: { x: 270, y: 100 }, q3: { x: 370, y: 100 } }, transitions: [ { from: 'q0', to: 'q0', label: 'a,b' }, { from: 'q0', to: 'q1', label: 'a' }, { from: 'q1', to: 'q2', label: 'b' }, { from: 'q2', to: 'q3', label: 'a' } ], accepting: ['q3'], initial: 'q0', width: 450, height: 200 },
+  dfa_no_consecutive: { states: { q0: { x: 100, y: 100 }, q1: { x: 220, y: 50 }, q2: { x: 220, y: 150 }, q3: { x: 340, y: 100 } }, transitions: [ { from: 'q0', to: 'q1', label: 'a' }, { from: 'q0', to: 'q2', label: 'b' }, { from: 'q1', to: 'q3', label: 'a' }, { from: 'q1', to: 'q2', label: 'b' }, { from: 'q2', to: 'q1', label: 'a' }, { from: 'q2', to: 'q3', label: 'b' }, { from: 'q3', to: 'q3', label: 'a,b' } ], accepting: ['q0', 'q1', 'q2'], initial: 'q0', width: 420, height: 200 },
+  nfa_bagrut2010: { states: { q0: { x: 70, y: 100 }, q1: { x: 150, y: 50 }, q2: { x: 230, y: 50 }, q3: { x: 310, y: 50 }, q4: { x: 150, y: 150 }, q5: { x: 230, y: 150 }, q6: { x: 310, y: 150 }, q7: { x: 390, y: 100 } }, transitions: [ { from: 'q0', to: 'q1', label: 'a' }, { from: 'q0', to: 'q4', label: 'b' }, { from: 'q1', to: 'q2', label: 'a' }, { from: 'q1', to: 'q1', label: 'b' }, { from: 'q2', to: 'q3', label: 'a' }, { from: 'q2', to: 'q2', label: 'b' }, { from: 'q3', to: 'q7', label: 'a,b' }, { from: 'q4', to: 'q5', label: 'b' }, { from: 'q4', to: 'q4', label: 'a' }, { from: 'q5', to: 'q6', label: 'b' }, { from: 'q5', to: 'q5', label: 'a' }, { from: 'q6', to: 'q7', label: 'a,b' }, { from: 'q7', to: 'q7', label: 'a,b' } ], accepting: ['q7'], initial: 'q0', width: 470, height: 200 }
+};
+
+const exercises = [
+  { id: 1, level: 1, topic: 'זיהוי שפה', question: 'מהי השפה שהאוטומט הבא מקבל?', automaton: 'dfa_even_a', type: 'multiple', options: ['כל המילים שמסתיימות ב-a', 'כל המילים עם מספר זוגי של a (כולל 0)', 'כל המילים עם מספר אי-זוגי של a', 'כל המילים שמתחילות ב-a'], correctAnswer: 1, hint: 'שימו לב למצב ההתחלתי - האם הוא גם מקבל?', explanation: 'המצב q0 הוא גם התחלתי וגם מקבל, כך שהמילה הריקה מתקבלת. כל a מעביר בין q0 ל-q1 ובחזרה. מילה מתקבלת רק אם מסיימים ב-q0, כלומר מספר זוגי של a.' },
+  { id: 2, level: 1, topic: 'זיהוי שפה', question: 'מהי השפה שהאוטומט הבא מקבל?', automaton: 'dfa_contains_aa', type: 'multiple', options: ['כל המילים שמסתיימות ב-aa', 'כל המילים שמתחילות ב-aa', 'כל המילים שמכילות את התת-מילה aa', 'כל המילים עם בדיוק שני a רצופים'], correctAnswer: 2, hint: 'מה קורה אחרי שמגיעים ל-q2?', explanation: 'האוטומט עובר ל-q1 אחרי a ראשון, ול-q2 (מקבל) אחרי aa. מ-q2 יש לולאה על כל אות, כך שכל מילה שמכילה aa בכל מקום מתקבלת.' },
+  { id: 3, level: 1, topic: 'זיהוי שפה', question: 'מהי השפה שהאוטומט הבא מקבל?', automaton: 'dfa_starts_a', type: 'multiple', options: ['כל המילים שמסתיימות באות a', 'כל המילים שמכילות לפחות a אחד', 'כל המילים עם מספר אי-זוגי של a', 'כל המילים שמתחילות באות a'], correctAnswer: 3, hint: 'מה קורה למצב q2? האם אפשר לצאת ממנו למצב מקבל?', explanation: 'אם האות הראשונה היא a, עוברים ל-q1 (מקבל) ונשארים שם. אם האות הראשונה היא b, עוברים ל-q2 (בור) ונשארים שם לנצח.' },
+  { id: 4, level: 1, topic: 'זיהוי שפה', question: 'מהי השפה שהאוטומט הבא מקבל?', automaton: 'dfa_ends_ab', type: 'multiple', options: ['כל המילים שמסתיימות ב-ab', 'כל המילים שמכילות ab', 'כל המילים שמתחילות ב-ab', 'כל המילים עם אורך זוגי'], correctAnswer: 0, hint: 'עקבו אחר המסלולים - מתי מגיעים למצב המקבל q2?', explanation: 'המצב q2 מקבל ומגיעים אליו רק מ-q1 עם b. ל-q1 מגיעים עם a.' },
+  { id: 5, level: 1, topic: 'זיהוי שפה', question: 'מהי השפה שהאוטומט הבא מקבל?', automaton: 'dfa_bstar_astar', type: 'multiple', options: ['כל המילים מעל {a,b}', '(ab)* - זוגות של ab', 'a*b* - כל ה-a בהתחלה ואחריהם כל ה-b', 'b*a* - כל ה-b בהתחלה ואחריהם כל ה-a'], correctAnswer: 3, hint: 'מה קורה אם קוראים a ואז b?', explanation: 'מ-q0 אפשר לקרוא כמה b שרוצים, ואז לעבור ל-q1 עם a. אבל אם קוראים b אחרי a, עוברים לבור.' },
+  { id: 6, level: 1, topic: 'מעקב מסלול', question: 'באוטומט הבא, מהו רצף המצבים שהמילה "aabba" עוברת?', automaton: 'dfa_even_a', type: 'multiple', options: ['q0 → q1 → q0 → q1 → q1 → q0', 'q0 → q1 → q0 → q0 → q0 → q1', 'q0 → q0 → q1 → q1 → q0 → q1', 'q0 → q1 → q1 → q0 → q0 → q1'], correctAnswer: 1, hint: 'עקבו צעד אחר צעד: a מ-q0, a מ-q1, b מ-q0, b מ-q0, a מ-q0', explanation: 'a: q0→q1, a: q1→q0, b: q0→q0, b: q0→q0, a: q0→q1. המילה לא מתקבלת.' },
+  { id: 7, level: 1, topic: 'מעקב מסלול', question: 'באוטומט הבא, האם המילה "abab" מתקבלת?', automaton: 'dfa_ends_ab', type: 'multiple', options: ['לא, כי יש מספר אי-זוגי של אותיות', 'כן, כי המילה מסתיימת ב-ab', 'לא, כי אין מספיק a', 'כן, כי יש שני a ושני b'], correctAnswer: 1, hint: 'האוטומט מזהה מילים שמסתיימות ב-ab', explanation: 'המילה abab מסתיימת ב-ab, ולכן מתקבלת. המסלול: q0→q1→q2→q1→q2 (מקבל).' },
+  { id: 8, level: 1, topic: 'NFA', question: 'באוטומט ה-NFA הבא, כמה מסלולים אפשריים קיימים למילה "ab"?', automaton: 'nfa_ab_ba', type: 'multiple', options: ['מסלול אחד', '3 מסלולים', 'אין מסלול מקבל', '2 מסלולים'], correctAnswer: 0, hint: 'עקבו: מ-q0 עם a מגיעים ל...?', explanation: 'מסלול יחיד: q0→q1 (עם a), q1→q2 (עם b). q2 מקבל.' },
+  { id: 9, level: 1, topic: 'פעולות על שפות', question: 'נתונה L = {a, ab, ba}. מהי L ∪ {ε, b}?', type: 'multiple', options: ['{ε, a, b, ab, ba}', '{a, ab, ba, b}', '{ε, ab, ba}', '{a, ab, ba}'], correctAnswer: 0, hint: 'איחוד שפות = כל המילים שנמצאות בשפה אחת או בשנייה', explanation: 'L ∪ {ε, b} = {a, ab, ba} ∪ {ε, b} = {ε, a, b, ab, ba}' },
+  { id: 10, level: 1, topic: 'פעולות על שפות', question: 'נתונות L₁ = {a, aa} ו-L₂ = {b, bb}. מהי L₁ · L₂?', type: 'multiple', options: ['{ab, abb, aab, aabb}', '{ab, ba, aabb}', '{ab, bb, aa, aab}', '{a, aa, b, bb}'], correctAnswer: 0, hint: 'שרשור = לכל מילה מ-L₁ משרשרים כל מילה מ-L₂', explanation: 'L₁ · L₂ = {a·b, a·bb, aa·b, aa·bb} = {ab, abb, aab, aabb}' },
+  { id: 11, level: 1, topic: 'פעולות על שפות', question: 'נתונה L = {ab, ba}. מהי Lᴿ (היפוך)?', type: 'multiple', options: ['{ba, ab}', '{a, b}', '{baba, abab}', '{aabb, bbaa}'], correctAnswer: 0, hint: 'היפוך שפה = היפוך כל מילה בשפה', explanation: '(ab)ᴿ = ba, (ba)ᴿ = ab. לכן Lᴿ = {ba, ab}' },
+  { id: 12, level: 1, topic: 'פעולות על שפות', question: 'נתונה L = {a, b}. מהי L²?', type: 'multiple', options: ['{aa, ab, ba, bb}', '{a, b, aa, bb}', '{aa, bb}', '{ab, ba}'], correctAnswer: 0, hint: 'L² = L · L = שרשור של L עם עצמה', explanation: 'L² = L · L = {a,b} · {a,b} = {aa, ab, ba, bb}' },
+  { id: 13, level: 2, topic: 'בניית אוטומט', question: 'רוצים לבנות DFA לשפה "כל המילים באורך זוגי". מה המספר המינימלי של מצבים?', type: 'multiple', options: ['3 מצבים', '4 מצבים', '2 מצבים', 'מצב אחד'], correctAnswer: 2, hint: 'צריך לעקוב רק אחר הזוגיות של האורך', explanation: 'מספיק 2 מצבים: q0 (אורך זוגי, מקבל) ו-q1 (אורך אי-זוגי). כל אות מחליפה בין המצבים.' },
+  { id: 14, level: 2, topic: 'בניית אוטומט', question: 'רוצים לבנות DFA לשפה "מילים שלא מכילות את התת-מילה bb". מה המספר המינימלי של מצבים?', type: 'multiple', options: ['2 מצבים', '3 מצבים', '4 מצבים', '5 מצבים'], correctAnswer: 1, hint: 'צריך לזכור: לא ראיתי b, ראיתי b אחד, ראיתי bb', explanation: '3 מצבים: q0 (לא ראיתי b לאחרונה), q1 (ראיתי b אחד), q2 (בור - ראיתי bb).' },
+  { id: 15, level: 2, topic: 'בניית אוטומט', question: 'רוצים לבנות DFA לשפה "מספר ה-a מתחלק ב-3". מה המספר המינימלי של מצבים?', type: 'multiple', options: ['4 מצבים', '2 מצבים', '6 מצבים', '3 מצבים'], correctAnswer: 3, hint: 'צריך לעקוב אחר השארית של מספר ה-a בחלוקה ב-3', explanation: '3 מצבים לשאריות 0, 1, 2. a מעביר בין המצבים במעגל, b נשאר באותו מצב.' },
+  { id: 16, level: 2, topic: 'פעולות על שפות', question: 'נתונות L₁ = {a}* ו-L₂ = {b}*. מהי L₁ ∩ L₂?', type: 'multiple', options: ['{ε}', 'Ø (השפה הריקה)', '{a, b}', '{a}* ∪ {b}*'], correctAnswer: 0, hint: 'מה משותף לשתי השפות?', explanation: 'L₁ = {ε, a, aa, ...}, L₂ = {ε, b, bb, ...}. המילה היחידה שנמצאת בשתיהן היא ε.' },
+  { id: 17, level: 2, topic: 'פעולות על שפות', question: 'נתונה L = {ab, b}. מהי L²?', type: 'multiple', options: ['{abab, abb, bab, bb}', '{ab, b, abab, bb}', '{aabb, bb}', '{ab, abb, b, bb}'], correctAnswer: 0, hint: 'L² = L·L, כלומר כל זוג אפשרי של שרשור', explanation: 'L² = {ab·ab, ab·b, b·ab, b·b} = {abab, abb, bab, bb}' },
+  { id: 18, level: 2, topic: 'פעולות על שפות', question: 'נתונות L₁ = {ε, a} ו-L₂ = {a, b}. מהי L₁ · L₂?', type: 'multiple', options: ['{a, b, aa, ab}', '{a, b, ε}', '{aa, ab}', '{εa, εb, aa, ab}'], correctAnswer: 0, hint: 'ε·w = w לכל מילה w', explanation: 'L₁ · L₂ = {ε·a, ε·b, a·a, a·b} = {a, b, aa, ab}' },
+  { id: 19, level: 2, topic: 'פעולות על שפות', question: 'נתונה L = {a, bb}. מהי (Lᴿ)²?', type: 'multiple', options: ['{aa, abb, bba, bbbb}', '{a, bb, aa, bbbb}', '{aa, bbbb}', '{a, bb}'], correctAnswer: 0, hint: 'קודם הפוך את L, ואז חשב את הריבוע', explanation: 'Lᴿ = {a, bb}. אז (Lᴿ)² = {aa, abb, bba, bbbb}' },
+  { id: 20, level: 2, topic: 'NFA מול DFA', question: 'נתון NFA עם 3 מצבים. מה המספר המקסימלי של מצבים ב-DFA שקול?', type: 'multiple', options: ['6 מצבים', '9 מצבים', '8 מצבים (2³)', '3 מצבים'], correctAnswer: 2, hint: 'כל תת-קבוצה של מצבי ה-NFA יכולה להיות מצב ב-DFA', explanation: 'ב-DFA שקול, כל מצב הוא תת-קבוצה של מצבי ה-NFA. עבור n מצבים, יש 2ⁿ תת-קבוצות.' },
+  { id: 21, level: 2, topic: 'משלים', question: 'נתון DFA לשפה L. איך בונים DFA לשפה המשלימה L̄?', type: 'multiple', options: ['מוסיפים מצב התחלתי חדש', 'הופכים את כיוון כל המעברים', 'מוחקים את כל המצבים המקבלים', 'הופכים את כל המצבים המקבלים ללא-מקבלים ולהפך'], correctAnswer: 3, hint: 'מילה ב-L̄ אם ורק אם היא לא ב-L', explanation: 'כדי לבנות את המשלים, פשוט הופכים את סטטוס הקבלה של כל מצב.' },
+  { id: 22, level: 2, topic: 'מעקב מסלול', question: 'באוטומט הבא, מהי המילה הקצרה ביותר שמתקבלת?', automaton: 'dfa_contains_010', type: 'multiple', options: ['0010 (אורך 4)', '010 (אורך 3)', '0100 (אורך 4)', '01 (אורך 2)'], correctAnswer: 1, hint: 'האוטומט מזהה מילים שמכילות 010', explanation: 'המילה הקצרה שמכילה את 010 היא 010 עצמה באורך 3.' },
+  { id: 23, level: 2, topic: 'NFA', question: 'באוטומט ה-NFA הבא, האם המילה "aba" מתקבלת?', automaton: 'nfa_aba_suffix', type: 'multiple', options: ['לא, אין מסלול מקבל', 'לא ניתן לקבוע', 'כן, קיים מסלול מקבל', 'רק אם מוסיפים מעבר'], correctAnswer: 2, hint: 'חפשו מסלול שמגיע ל-q3', explanation: 'המסלול: q0→q1 (a), q1→q2 (b), q2→q3 (a). q3 מקבל.' },
+  { id: 24, level: 2, topic: 'זיהוי שפה', question: 'מהי השפה שהאוטומט הבא מקבל?', automaton: 'dfa_mod3', type: 'multiple', options: ['מילים באורך המתחלק ב-3', 'מילים עם מספר a המתחלק ב-3', 'מילים עם מספר b המתחלק ב-3', 'מילים עם בדיוק 3 אותיות a'], correctAnswer: 1, hint: 'שימו לב: רק a משנה מצב, b נשאר באותו מצב', explanation: 'האוטומט סופר a מודולו 3. b לא משפיע. q0 (שארית 0) הוא מקבל.' },
+  { id: 25, level: 3, topic: 'המרת NFA ל-DFA', question: 'בהמרת NFA עם 2 מצבים ל-DFA, אם מ-{q0} על a מגיעים ל-{q0,q1} ומ-{q0,q1} על a מגיעים ל-{q1}, כמה מצבים נגישים ב-DFA?', type: 'multiple', options: ['4 מצבים', '2 מצבים בלבד', '3 מצבים: {q0}, {q0,q1}, {q1}', '5 מצבים'], correctAnswer: 2, hint: 'ספרו רק מצבים נגישים ממצב ההתחלה', explanation: 'מתחילים מ-{q0}, מגיעים ל-{q0,q1}, ומשם ל-{q1}. רק 3 מצבים נגישים.' },
+  { id: 26, level: 3, topic: 'בניית איחוד', question: 'לבניית אוטומט לאיחוד L₁ ∪ L₂ בשיטת המכפלה, אם ל-L₁ יש 3 מצבים ול-L₂ יש 4 מצבים, כמה מצבים באוטומט המכפלה?', type: 'multiple', options: ['7 מצבים', '12 מצבים', '10 מצבים', '16 מצבים'], correctAnswer: 1, hint: 'בשיטת המכפלה, כל מצב הוא זוג (qi, pj)', explanation: 'אוטומט מכפלה: כל מצב הוא זוג ממצבי שני האוטומטים. 3 × 4 = 12 מצבים.' },
+  { id: 27, level: 3, topic: 'בניית חיתוך', question: 'באוטומט מכפלה לחיתוך L₁ ∩ L₂, מתי מצב (qi, pj) הוא מקבל?', type: 'multiple', options: ['כאשר qi מקבל או pj מקבל', 'כאשר qi = pj', 'כאשר qi מקבל וגם pj מקבל', 'כאשר אחד מהם מצב התחלתי'], correctAnswer: 2, hint: 'חיתוך = מילה צריכה להתקבל בשני האוטומטים', explanation: 'לחיתוך, מצב מקבל במכפלה הוא כזה ששני רכיביו מקבלים.' },
+  { id: 28, level: 3, topic: 'תכונות סגירות', question: 'אם L₁ ו-L₂ שפות רגולריות, מה מבין הבאים בהכרח רגולרי?', type: 'multiple', options: ['כל התשובות נכונות - איחוד, חיתוך והפרש כולם רגולריים', 'L₁ ∪ L₂ בלבד', 'L₁ ∩ L₂ בלבד', 'L₁ \\ L₂ בלבד'], correctAnswer: 0, hint: 'שפות רגולריות סגורות תחת הרבה פעולות', explanation: 'שפות רגולריות סגורות תחת איחוד, חיתוך, הפרש, משלים, שרשור, כוכב קלין, והיפוך.' },
+  { id: 29, level: 3, topic: 'פעולות על שפות', question: 'נתונה L = {w ∈ {a,b}* | |w| ≤ 2}. מהי |L| (מספר המילים)?', type: 'multiple', options: ['7 מילים', '6 מילים', '8 מילים', '4 מילים'], correctAnswer: 0, hint: 'ספרו מילים באורך 0, 1, ו-2', explanation: 'אורך 0: 1. אורך 1: 2. אורך 2: 4. סה"כ 1+2+4=7.' },
+  { id: 30, level: 3, topic: 'פעולות על שפות', question: 'נתונות L₁ = {a}* ו-L₂ = {aa, aaa}. מהי L₁ \\ L₂?', type: 'multiple', options: ['{ε, a, aaaa, aaaaa, ...} = {aⁿ | n ≠ 2 ∧ n ≠ 3}', '{a}*', '{ε, a}', 'Ø'], correctAnswer: 0, hint: 'הפרש = מילים ב-L₁ שלא ב-L₂', explanation: 'L₁ \\ L₂ = כל החזקות של a חוץ מ-aa ו-aaa' },
+  { id: 31, level: 3, topic: 'פעולות על שפות', question: 'נתונה L = {ab, ba}. מהי (L²)ᴿ?', type: 'multiple', options: ['{baba, abba, baab, abab}', '{ab, ba}', '{aabb, bbaa}', '{abab, baba}'], correctAnswer: 0, hint: 'קודם חשבו L², ואז הפכו כל מילה', explanation: 'L² = {abab, abba, baab, baba}. (L²)ᴿ = {baba, abba, baab, abab}' },
+  { id: 32, level: 3, topic: 'NFA', question: 'באוטומט הבגרות 2010, מה מאפיין מילים שמתקבלות דרך המסלול העליון?', automaton: 'nfa_bagrut2010', type: 'multiple', options: ['מילים שמתחילות ב-aaa', 'מילים שמכילות לפחות 3 אותיות a', 'מילים עם בדיוק 3 אותיות a', 'מילים שמסתיימות ב-aaa'], correctAnswer: 1, hint: 'עקבו אחר המעברים q0→q1→q2→q3 עם a', explanation: 'המסלול העליון דורש לפחות 3 a-ים (עם אפשרות ל-b בין לבין).' },
+  { id: 33, level: 3, topic: 'זיהוי שפה', question: 'מהי השפה שהאוטומט הבא מקבל?', automaton: 'dfa_no_consecutive', type: 'multiple', options: ['מילים באורך לא יותר מ-3', 'מילים שמתחילות ומסתיימות באותה אות', 'מילים ללא שתי אותיות זהות רצופות', 'מילים עם מספר זוגי של אותיות'], correctAnswer: 2, hint: 'מה קורה כשקוראים שתי אותיות זהות ברצף?', explanation: 'האוטומט עוקב אחר האות האחרונה. אם קוראים אות זהה פעמיים, עוברים לבור.' },
+  { id: 34, level: 3, topic: 'בניית אוטומט', question: 'רוצים לבנות DFA לשפה L = {w | w מכילה aa וגם bb}. מה הגישה הנכונה?', type: 'multiple', options: ['בונים אוטומט לשרשור', 'בונים אוטומט מכפלה של "מכילה aa" עם "מכילה bb"', 'בונים אוטומט ל-"מכילה aabb"', 'משתמשים ב-NFA עם ε-מעברים'], correctAnswer: 1, hint: 'L היא חיתוך של שתי שפות', explanation: 'L = {מכילה aa} ∩ {מכילה bb}. לכן בונים אוטומט מכפלה.' },
+  { id: 35, level: 3, topic: 'פעולות על שפות', question: 'נתונה L = {ab}. מהי L*?', type: 'multiple', options: ['{ε, ab, abab, ababab, ...} = {(ab)ⁿ | n ≥ 0}', '{a, b, ab, ba, ...}', '{ab, aabb, aaabbb, ...}', '{ε, a, b, ab}'], correctAnswer: 0, hint: 'כוכב קלין = שרשור של 0 או יותר מילים מהשפה', explanation: 'L* = {ε} ∪ {ab} ∪ {abab} ∪ ... = {(ab)ⁿ | n ≥ 0}' },
+  { id: 36, level: 3, topic: 'פעולות על שפות', question: 'נתונה L = {a, b}. האם (L*)ᴿ = (Lᴿ)*?', type: 'multiple', options: ['כן, זה תמיד נכון לכל שפה', 'לא, זה נכון רק לשפות ספציפיות', 'כן, אבל רק אם L סופית', 'לא, לעולם לא שווה'], correctAnswer: 0, hint: 'היפוך של שרשור הופך את הסדר', explanation: '(L*)ᴿ = (Lᴿ)* תמיד נכון.' },
+  { id: 37, level: 4, topic: 'תכונות סגירות', question: 'אם L₁ רגולרית ו-L₂ לא רגולרית, מה אפשר לומר על L₁ ∪ L₂?', type: 'multiple', options: ['בהכרח לא רגולרית', 'יכולה להיות רגולרית או לא - תלוי בשפות', 'בהכרח רגולרית', 'אי אפשר לקבוע'], correctAnswer: 1, hint: 'חשבו על מקרה קצה: מה אם L₁ = Σ*?', explanation: 'אם L₁ = Σ*, אז L₁ ∪ L₂ = Σ* שרגולרית. אבל במקרים אחרים יכולה להיות לא רגולרית.' },
+  { id: 38, level: 4, topic: 'תכונות סגירות', question: 'נתונה L רגולרית. איך מוכיחים ש-Prefix(L) רגולרית?', type: 'multiple', options: ['נשתמש בהמרת NFA ל-DFA', 'נבנה אוטומט חדש עם מעברי ε', 'ניקח את ה-DFA של L ונהפוך את כל המצבים שמהם יש מסלול למצב מקבל להיות מקבלים', 'נשתמש בלמת הניפוח'], correctAnswer: 2, hint: 'קידומת של מילה ב-L מגיעה למצב שממנו אפשר להמשיך למצב מקבל', explanation: 'נסמן את כל המצבים שמהם יש מסלול למצב מקבל כמקבלים.' },
+  { id: 39, level: 4, topic: 'פעולות על שפות', question: 'נתונות L₁ = {aⁿbⁿ | n ≥ 0} ו-L₂ = {a}*·{b}*. מהי L₁ ∩ L₂?', type: 'multiple', options: ['L₁ (כי L₁ ⊆ L₂)', 'L₂', 'Ø', '{ε}'], correctAnswer: 0, hint: 'האם כל מילה ב-L₁ גם ב-L₂?', explanation: 'L₁ ⊆ L₂. לכן L₁ ∩ L₂ = L₁.' },
+  { id: 40, level: 4, topic: 'פעולות על שפות', question: 'נתונה L רגולרית. מה ניתן לומר על Half(L) = {w | קיימת u עם |u|=|w| כך ש-wu ∈ L}?', type: 'multiple', options: ['Half(L) רגולרית - שפות רגולריות סגורות תחת פעולה זו', 'Half(L) לא בהכרח רגולרית', 'Half(L) רגולרית רק אם L סופית', 'Half(L) = Prefix(L)'], correctAnswer: 0, hint: 'אפשר לבנות אוטומט', explanation: 'שפות רגולריות סגורות תחת Half.' }
+];
+
+function App() {
+  const [currentExercise, setCurrentExercise] = useState(0);
+  const [selectedAnswer, setSelectedAnswer] = useState(null);
+  const [showResult, setShowResult] = useState(false);
+  const [showHint, setShowHint] = useState(false);
+  const [score, setScore] = useState(0);
+  const [answeredQuestions, setAnsweredQuestions] = useState([]);
+  const [filterLevel, setFilterLevel] = useState(0);
+
+  const filteredExercises = exercises.filter(e => filterLevel === 0 || e.level === filterLevel);
+  const exercise = filteredExercises[currentExercise] || exercises[0];
+
+  const handleSubmit = () => {
+    if (selectedAnswer === null) return;
+    setShowResult(true);
+    if (selectedAnswer === exercise.correctAnswer && !answeredQuestions.includes(exercise.id)) {
+      setScore(score + 1);
+      setAnsweredQuestions([...answeredQuestions, exercise.id]);
+    }
+  };
+
+  const nextExercise = () => {
+    setCurrentExercise((currentExercise + 1) % filteredExercises.length);
+    setSelectedAnswer(null);
+    setShowResult(false);
+    setShowHint(false);
+  };
+
+  const getLevelClass = (level) => 'level-' + level;
+
+  return (
+    <div className="container">
+      <div className="card">
+        <h1>🎯 תרגול מודלים חישוביים</h1>
+        <p className="subtitle">אוטומטים, שפות רגולריות ותכונות סגירות</p>
+        <div className="stats">
+          <span className="stat stat-green">ניקוד: {score}/{answeredQuestions.length}</span>
+          <span className="stat stat-blue">שאלה {currentExercise + 1} מתוך {filteredExercises.length}</span>
+        </div>
+        <div className="filters">
+          <select value={filterLevel} onChange={(e) => {setFilterLevel(Number(e.target.value)); setCurrentExercise(0);}}>
+            <option value={0}>כל הרמות</option>
+            <option value={1}>רמה 1</option>
+            <option value={2}>רמה 2</option>
+            <option value={3}>רמה 3</option>
+            <option value={4}>רמה 4</option>
+          </select>
+        </div>
+      </div>
+
+      <div className="card">
+        <div className="question-header">
+          <span className={`badge ${getLevelClass(exercise.level)}`}>רמה {exercise.level}</span>
+          <span className="badge badge-topic">{exercise.topic}</span>
+        </div>
+        <h2 className="question-text">{exercise.question}</h2>
+        
+        {exercise.automaton && automata[exercise.automaton] && (
+          <div className="automaton-container">
+            <AutomatonSVG {...automata[exercise.automaton]} />
+          </div>
+        )}
+
+        <div className="options">
+          {exercise.options.map((option, index) => (
+            <button key={index} onClick={() => !showResult && setSelectedAnswer(index)} disabled={showResult}
+              className={`option-btn ${showResult ? (index === exercise.correctAnswer ? 'correct' : index === selectedAnswer ? 'wrong' : '') : selectedAnswer === index ? 'selected' : ''}`}>
+              <span style={{fontWeight: 'bold', marginLeft: '8px'}}>{String.fromCharCode(1488 + index)}.</span>{option}
+            </button>
+          ))}
+        </div>
+
+        {showHint && !showResult && (
+          <div className="hint-box">
+            <span className="hint-label">💡 רמז: </span><span className="hint-text">{exercise.hint}</span>
+          </div>
+        )}
+
+        {showResult && (
+          <div className={`result-box ${selectedAnswer === exercise.correctAnswer ? 'result-correct' : 'result-wrong'}`}>
+            <p className={`result-title ${selectedAnswer === exercise.correctAnswer ? 'correct' : 'wrong'}`}>
+              {selectedAnswer === exercise.correctAnswer ? '✓ תשובה נכונה!' : '✗ תשובה שגויה'}
+            </p>
+            <p className="explanation"><strong>הסבר:</strong> {exercise.explanation}</p>
+          </div>
+        )}
+
+        <div className="buttons">
+          {!showResult && (
+            <>
+              <button onClick={() => setShowHint(!showHint)} className="btn btn-yellow">{showHint ? 'הסתר רמז' : '💡 רמז'}</button>
+              <button onClick={handleSubmit} className="btn btn-indigo">בדוק תשובה</button>
+            </>
+          )}
+          {showResult && <button onClick={nextExercise} className="btn btn-green">שאלה הבאה →</button>}
+        </div>
+      </div>
+
+      <div className="card">
+        <h3 className="reference-title">📋 תכונות סגירות:</h3>
+        <div className="reference-grid">
+          {['איחוד ∪', 'חיתוך ∩', 'משלים ¬', 'שרשור ·', 'כוכב *', 'היפוך ᴿ', 'הפרש \\', 'XOR ⊕'].map(op => (
+            <div key={op} className="ref-item">
+              <div className="ref-op">{op}</div>
+              <div className="ref-status">✓ סגור</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+    </script>
+</body>
+</html>

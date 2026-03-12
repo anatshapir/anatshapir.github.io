@@ -1,0 +1,971 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>סיכום Pandas - מדעי הנתונים</title>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-primary: #0a0e1a;
+  --bg-secondary: #111827;
+  --bg-card: #1a2234;
+  --bg-code: #0d1117;
+  --accent-blue: #3b82f6;
+  --accent-cyan: #06b6d4;
+  --accent-green: #10b981;
+  --accent-purple: #8b5cf6;
+  --accent-orange: #f59e0b;
+  --accent-pink: #ec4899;
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --border-color: #1e293b;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Heebo', sans-serif; background: var(--bg-primary); color: var(--text-primary); overflow: hidden; height: 100vh; width: 100vw; }
+.bg-grid { position: fixed; inset: 0; background-image: linear-gradient(rgba(59,130,246,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(59,130,246,0.03) 1px, transparent 1px); background-size: 60px 60px; z-index: 0; }
+.bg-glow { position: fixed; width: 600px; height: 600px; border-radius: 50%; filter: blur(120px); opacity: 0.15; z-index: 0; pointer-events: none; }
+.bg-glow-1 { background: var(--accent-blue); top: -200px; right: -200px; }
+.bg-glow-2 { background: var(--accent-purple); bottom: -200px; left: -200px; }
+.top-bar { position: fixed; top: 0; left: 0; right: 0; height: 50px; background: rgba(10,14,26,0.9); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between; padding: 0 24px; z-index: 100; }
+.top-bar-title { font-size: 14px; font-weight: 500; color: var(--text-secondary); display: flex; align-items: center; gap: 8px; }
+.progress-container { display: flex; align-items: center; gap: 12px; }
+.progress-bar { width: 200px; height: 3px; background: var(--border-color); border-radius: 2px; overflow: hidden; }
+.progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent-blue), var(--accent-cyan)); border-radius: 2px; transition: width 0.5s ease; }
+.progress-text { font-size: 12px; color: var(--text-muted); font-family: 'Fira Code', monospace; min-width: 55px; text-align: left; direction: ltr; }
+.sidebar { position: fixed; top: 50px; right: 0; width: 250px; height: calc(100vh - 50px); background: rgba(17,24,39,0.7); backdrop-filter: blur(10px); border-left: 1px solid var(--border-color); z-index: 90; overflow-y: auto; padding: 12px 0; transition: transform 0.3s ease; }
+.sidebar.collapsed { transform: translateX(250px); }
+.sidebar-toggle { position: fixed; top: 60px; right: 250px; width: 26px; height: 26px; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 6px 0 0 6px; color: var(--text-muted); cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 91; transition: all 0.3s ease; font-size: 11px; }
+.sidebar.collapsed + .sidebar-toggle { right: 0; }
+.section-title-nav { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); padding: 8px 18px 4px; margin-top: 6px; }
+.nav-item { padding: 6px 18px; font-size: 12.5px; color: var(--text-secondary); cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; gap: 8px; border-right: 2px solid transparent; }
+.nav-item:hover { background: rgba(59,130,246,0.05); color: var(--text-primary); }
+.nav-item.active { background: rgba(59,130,246,0.08); color: var(--accent-blue); border-right-color: var(--accent-blue); }
+.nav-item .num { font-family: 'Fira Code', monospace; font-size: 10px; color: var(--text-muted); min-width: 18px; }
+.main-content { position: fixed; top: 50px; left: 0; right: 250px; height: calc(100vh - 50px); overflow: hidden; z-index: 1; transition: right 0.3s ease; }
+.sidebar.collapsed ~ .main-content { right: 0; }
+.slide { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding: 24px 50px 70px; overflow-y: auto; opacity: 0; transform: translateX(-30px); transition: all 0.45s cubic-bezier(0.4,0,0.2,1); pointer-events: none; }
+.slide.active { opacity: 1; transform: translateX(0); pointer-events: all; }
+.slide.exit-left { opacity: 0; transform: translateX(30px); }
+.slide-inner { max-width: 880px; width: 100%; }
+.title-slide { text-align: center; margin-top: 10vh; }
+.title-slide .emoji-big { font-size: 56px; margin-bottom: 12px; animation: float 3s ease-in-out infinite; }
+@keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+.title-slide h1 { font-size: 44px; font-weight: 900; background: linear-gradient(135deg, var(--accent-blue), var(--accent-cyan)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 10px; }
+.title-slide .subtitle { font-size: 18px; color: var(--text-secondary); font-weight: 300; }
+.title-slide .tag { display: inline-block; margin-top: 16px; padding: 5px 14px; background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.2); border-radius: 20px; font-size: 13px; color: var(--accent-blue); font-family: 'Fira Code', monospace; }
+.section-header { text-align: center; margin-top: 6vh; }
+.section-header .section-num { font-family: 'Fira Code', monospace; font-size: 13px; color: var(--accent-cyan); margin-bottom: 6px; letter-spacing: 2px; }
+.section-header h2 { font-size: 36px; font-weight: 800; margin-bottom: 10px; }
+.section-header .section-desc { font-size: 17px; color: var(--text-secondary); max-width: 550px; margin: 0 auto; }
+.slide-header { margin-bottom: 16px; }
+.slide-header h3 { font-size: 24px; font-weight: 700; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.slide-header .desc { font-size: 15px; color: var(--text-secondary); margin-top: 6px; line-height: 1.6; }
+.badge { font-family: 'Fira Code', monospace; font-size: 10px; padding: 2px 9px; border-radius: 10px; font-weight: 500; }
+.badge-blue { background: rgba(59,130,246,0.15); color: var(--accent-blue); }
+.badge-green { background: rgba(16,185,129,0.15); color: var(--accent-green); }
+.badge-purple { background: rgba(139,92,246,0.15); color: var(--accent-purple); }
+.badge-orange { background: rgba(245,158,11,0.15); color: var(--accent-orange); }
+.code-block { background: var(--bg-code); border: 1px solid var(--border-color); border-radius: 10px; overflow: hidden; margin: 10px 0; direction: ltr; text-align: left; }
+.code-header { display: flex; align-items: center; justify-content: space-between; padding: 8px 14px; background: rgba(30,41,59,0.5); border-bottom: 1px solid var(--border-color); }
+.code-dots { display: flex; gap: 5px; }
+.code-dots span { width: 9px; height: 9px; border-radius: 50%; }
+.code-dots span:nth-child(1) { background: #ef4444; }
+.code-dots span:nth-child(2) { background: #f59e0b; }
+.code-dots span:nth-child(3) { background: #10b981; }
+.code-label { font-family: 'Fira Code', monospace; font-size: 10px; color: var(--text-muted); }
+.code-body { padding: 12px 16px; font-family: 'Fira Code', monospace; font-size: 12.5px; line-height: 1.65; overflow-x: auto; white-space: pre; }
+.kw { color: #c678dd; } .fn { color: #61afef; } .str { color: #98c379; } .num { color: #d19a66; } .cm { color: #5c6370; font-style: italic; } .op { color: #56b6c2; } .var { color: #e06c75; }
+.output-block { background: rgba(16,185,129,0.05); border: 1px solid rgba(16,185,129,0.15); border-radius: 8px; padding: 10px 14px; margin: 8px 0; direction: ltr; text-align: left; font-family: 'Fira Code', monospace; font-size: 11.5px; line-height: 1.55; color: var(--accent-green); white-space: pre; overflow-x: auto; }
+.output-label { font-size: 9px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 4px; display: block; }
+.arrow-down { text-align: center; color: var(--text-muted); font-size: 16px; margin: 2px 0; opacity: 0.5; }
+.info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; margin: 12px 0; }
+.info-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 9px; padding: 12px; transition: all 0.3s ease; }
+.info-card:hover { border-color: var(--accent-blue); transform: translateY(-2px); }
+.info-card .card-icon { font-size: 20px; margin-bottom: 6px; }
+.info-card h4 { font-size: 13px; font-weight: 600; margin-bottom: 4px; color: var(--text-primary); direction: ltr; text-align: left; font-family: 'Fira Code', monospace; }
+.info-card p { font-size: 12px; color: var(--text-secondary); line-height: 1.4; }
+.tip-box { background: rgba(245,158,11,0.06); border: 1px solid rgba(245,158,11,0.15); border-radius: 8px; padding: 10px 14px; margin: 10px 0; display: flex; gap: 8px; align-items: flex-start; }
+.tip-box .tip-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+.tip-box p { font-size: 13px; color: var(--text-secondary); line-height: 1.5; }
+.compare-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 10px 0; }
+.compare-col h4 { font-size: 12px; font-weight: 600; margin-bottom: 6px; color: var(--accent-cyan); }
+.bottom-nav { position: fixed; bottom: 0; left: 0; right: 250px; height: 54px; background: rgba(10,14,26,0.9); backdrop-filter: blur(20px); border-top: 1px solid var(--border-color); display: flex; align-items: center; justify-content: center; gap: 14px; z-index: 100; transition: right 0.3s ease; }
+.sidebar.collapsed ~ .bottom-nav { right: 0; }
+.nav-btn { padding: 7px 18px; border-radius: 7px; border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-primary); font-family: 'Heebo', sans-serif; font-size: 13px; cursor: pointer; transition: all 0.2s ease; }
+.nav-btn:hover { border-color: var(--accent-blue); background: rgba(59,130,246,0.1); }
+.nav-btn.primary { background: var(--accent-blue); border-color: var(--accent-blue); color: white; }
+.nav-btn.primary:hover { background: #2563eb; }
+.slide-counter { font-family: 'Fira Code', monospace; font-size: 11px; color: var(--text-muted); min-width: 55px; text-align: center; }
+::-webkit-scrollbar { width: 4px; } ::-webkit-scrollbar-track { background: transparent; } ::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 2px; }
+@media (max-width: 768px) { .sidebar,.sidebar-toggle{display:none} .main-content,.bottom-nav{right:0!important} .slide{padding:20px 16px 65px} .title-slide h1{font-size:30px} .section-header h2{font-size:26px} .slide-header h3{font-size:20px} .code-body{font-size:11px} .compare-row{grid-template-columns:1fr} }
+</style>
+</head>
+<body>
+<div class="bg-grid"></div>
+<div class="bg-glow bg-glow-1"></div>
+<div class="bg-glow bg-glow-2"></div>
+
+<div class="top-bar">
+  <div class="top-bar-title"><span>🐼</span> Pandas – סיכום מדעי הנתונים</div>
+  <div class="progress-container">
+    <div class="progress-text" id="progressText">0%</div>
+    <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+  </div>
+</div>
+
+<div class="sidebar" id="sidebar">
+  <div class="section-title-nav">📌 תוכן עניינים</div>
+  <div class="nav-item" data-slide="0"><span class="num">00</span> פתיחה</div>
+  <div class="section-title-nav" style="color:var(--accent-blue)">01 · יצירה וקריאה</div>
+  <div class="nav-item" data-slide="1"><span class="num">01</span> מה זה Pandas?</div>
+  <div class="nav-item" data-slide="2"><span class="num">02</span> הנתונים לדוגמה</div>
+  <div class="nav-item" data-slide="3"><span class="num">03</span> יצירת DataFrame</div>
+  <div class="nav-item" data-slide="4"><span class="num">04</span> קריאת קבצים</div>
+  <div class="nav-item" data-slide="5"><span class="num">05</span> head / tail / shape</div>
+  <div class="nav-item" data-slide="6"><span class="num">06</span> describe</div>
+  <div class="nav-item" data-slide="7"><span class="num">07</span> גישה לעמודות</div>
+  <div class="section-title-nav" style="color:var(--accent-green)">02 · סינון ובחירה</div>
+  <div class="nav-item" data-slide="8"><span class="num">08</span> loc ו-iloc</div>
+  <div class="nav-item" data-slide="9"><span class="num">09</span> סינון לפי תנאי</div>
+  <div class="nav-item" data-slide="10"><span class="num">10</span> תנאים מרובים</div>
+  <div class="nav-item" data-slide="11"><span class="num">11</span> isin ו-query</div>
+  <div class="section-title-nav" style="color:var(--accent-purple)">03 · Groupby ואגרגציה</div>
+  <div class="nav-item" data-slide="12"><span class="num">12</span> מהו groupby?</div>
+  <div class="nav-item" data-slide="13"><span class="num">13</span> פונקציות אגרגציה</div>
+  <div class="nav-item" data-slide="14"><span class="num">14</span> agg מרובה</div>
+  <div class="nav-item" data-slide="15"><span class="num">15</span> value_counts</div>
+  <div class="nav-item" data-slide="16"><span class="num">16</span> pivot_table</div>
+  <div class="section-title-nav" style="color:var(--accent-orange)">04 · ניקוי נתונים</div>
+  <div class="nav-item" data-slide="17"><span class="num">17</span> ערכים חסרים</div>
+  <div class="nav-item" data-slide="18"><span class="num">18</span> dropna ו-fillna</div>
+  <div class="nav-item" data-slide="19"><span class="num">19</span> כפילויות</div>
+  <div class="nav-item" data-slide="20"><span class="num">20</span> שינוי טיפוסים</div>
+  <div class="nav-item" data-slide="21"><span class="num">21</span> סיכום 🎉</div>
+</div>
+<button class="sidebar-toggle" id="sidebarToggle" onclick="toggleSidebar()">◀</button>
+
+<div class="main-content" id="mainContent">
+
+<!-- SLIDE 0: TITLE -->
+<div class="slide active" id="slide-0">
+  <div class="title-slide">
+    <div class="emoji-big">🐼</div>
+    <h1>ספריית Pandas</h1>
+    <div class="subtitle">סיכום מקיף · מדעי הנתונים · תיכון</div>
+    <div class="tag">import pandas as pd</div>
+    <div style="margin-top:30px; color:var(--text-muted); font-size:14px;">← / → לניווט &nbsp;|&nbsp; 22 שקפים &nbsp;|&nbsp; כל דוגמה עם תוצאה בפועל</div>
+  </div>
+</div>
+
+<!-- SLIDE 1: What is Pandas -->
+<div class="slide" id="slide-1">
+  <div class="slide-inner">
+    <div class="section-header">
+      <div class="section-num">SECTION 01</div>
+      <h2>מה זה <span style="color:var(--accent-blue)">Pandas</span>?</h2>
+      <div class="section-desc">ספרייה לעבודה עם נתונים טבלאיים ב-Python</div>
+    </div>
+    <div class="info-grid" style="margin-top:24px;">
+      <div class="info-card"><div class="card-icon">📊</div><h4>DataFrame</h4><p>טבלה – שורות ועמודות, כמו Excel</p></div>
+      <div class="info-card"><div class="card-icon">📋</div><h4>Series</h4><p>עמודה בודדת עם אינדקס</p></div>
+      <div class="info-card"><div class="card-icon">🔧</div><h4>כלים מובנים</h4><p>סינון, מיון, אגרגציה, ניקוי</p></div>
+      <div class="info-card"><div class="card-icon">📁</div><h4>קריאת קבצים</h4><p>CSV, Excel, JSON ועוד</p></div>
+    </div>
+    <div class="code-block" style="margin-top:14px;">
+      <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><div class="code-label">python</div></div>
+      <div class="code-body"><span class="kw">import</span> pandas <span class="kw">as</span> pd  <span class="cm"># ייבוא הספרייה – תמיד השורה הראשונה!</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 2: Sample Data -->
+<div class="slide" id="slide-2">
+  <div class="slide-inner">
+    <div class="slide-header">
+      <h3>📋 הנתונים לדוגמה <span class="badge badge-blue">בסיס לכל השקפים</span></h3>
+      <div class="desc">נעבוד עם טבלת תלמידים – כל הדוגמאות בהמשך מתבססות עליה</div>
+    </div>
+    <div class="code-block">
+      <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><div class="code-label">our_data.py</div></div>
+      <div class="code-body"><span class="kw">import</span> pandas <span class="kw">as</span> pd
+
+data = {
+    <span class="str">'name'</span>:   [<span class="str">'Alice'</span>, <span class="str">'Bob'</span>, <span class="str">'Charlie'</span>, <span class="str">'Dana'</span>, <span class="str">'Eve'</span>, <span class="str">'Frank'</span>],
+    <span class="str">'class'</span>:  [<span class="str">'A'</span>, <span class="str">'B'</span>, <span class="str">'A'</span>, <span class="str">'B'</span>, <span class="str">'A'</span>, <span class="str">'B'</span>],
+    <span class="str">'grade'</span>:  [<span class="num">85</span>, <span class="num">92</span>, <span class="num">78</span>, <span class="num">95</span>, <span class="num">88</span>, <span class="num">None</span>],
+    <span class="str">'age'</span>:    [<span class="num">17</span>, <span class="num">18</span>, <span class="num">17</span>, <span class="num">18</span>, <span class="num">17</span>, <span class="num">18</span>],
+    <span class="str">'gender'</span>: [<span class="str">'F'</span>, <span class="str">'M'</span>, <span class="str">'M'</span>, <span class="str">'F'</span>, <span class="str">'F'</span>, <span class="str">'M'</span>]
+}
+df = pd.<span class="fn">DataFrame</span>(data)
+<span class="fn">print</span>(df)</div>
+    </div>
+    <div class="arrow-down">▼</div>
+    <div class="output-block">
+<span class="output-label">OUTPUT ▾</span>
+      name class  grade  age gender
+0    Alice     A   85.0   17      F
+1      Bob     B   92.0   18      M
+2  Charlie     A   78.0   17      M
+3     Dana     B   95.0   18      F
+4      Eve     A   88.0   17      F
+5    Frank     B    NaN   18      M</div>
+    <div class="tip-box">
+      <span class="tip-icon">👆</span>
+      <p>שימו לב: ל-Frank אין ציון (<strong>NaN</strong> = Not a Number = ערך חסר). נטפל בזה בחלק 4!</p>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 3: Creating DataFrame -->
+<div class="slide" id="slide-3">
+  <div class="slide-inner">
+    <div class="slide-header">
+      <h3>יצירת DataFrame <span class="badge badge-blue">בסיסי</span></h3>
+      <div class="desc">ניתן ליצור DataFrame בכמה דרכים – הנפוצה ביותר: ממילון</div>
+    </div>
+    <div class="code-block">
+      <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><div class="code-label">from_dict.py</div></div>
+      <div class="code-body"><span class="cm"># דרך 1: ממילון (כל מפתח = עמודה)</span>
+df = pd.<span class="fn">DataFrame</span>({<span class="str">'x'</span>: [<span class="num">1</span>, <span class="num">2</span>], <span class="str">'y'</span>: [<span class="num">3</span>, <span class="num">4</span>]})
+<span class="fn">print</span>(df)</div>
+    </div>
+    <div class="arrow-down">▼</div>
+    <div class="output-block">
+<span class="output-label">OUTPUT ▾</span>
+   x  y
+0  1  3
+1  2  4</div>
+    <div class="code-block">
+      <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><div class="code-label">from_list.py</div></div>
+      <div class="code-body"><span class="cm"># דרך 2: מרשימת מילונים (כל מילון = שורה)</span>
+df = pd.<span class="fn">DataFrame</span>([
+    {<span class="str">'name'</span>: <span class="str">'Alice'</span>, <span class="str">'age'</span>: <span class="num">17</span>},
+    {<span class="str">'name'</span>: <span class="str">'Bob'</span>,   <span class="str">'age'</span>: <span class="num">18</span>}
+])
+<span class="fn">print</span>(df)</div>
+    </div>
+    <div class="arrow-down">▼</div>
+    <div class="output-block">
+<span class="output-label">OUTPUT ▾</span>
+    name  age
+0  Alice   17
+1    Bob   18</div>
+    <div class="tip-box"><span class="tip-icon">💡</span><p>כל רשימה במילון חייבת להיות <strong>באותו אורך</strong> – אחרת ValueError!</p></div>
+  </div>
+</div>
+
+<!-- SLIDE 4: Reading Files -->
+<div class="slide" id="slide-4">
+  <div class="slide-inner">
+    <div class="slide-header">
+      <h3>קריאת קבצים <span class="badge badge-blue">I/O</span></h3>
+      <div class="desc">Pandas יודע לקרוא קבצים בפורמטים שונים ולהפוך אותם ל-DataFrame</div>
+    </div>
+    <div class="code-block">
+      <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><div class="code-label">read_files.py</div></div>
+      <div class="code-body"><span class="cm"># קריאת CSV</span>
+df = pd.<span class="fn">read_csv</span>(<span class="str">'students.csv'</span>)
+
+<span class="cm"># קריאת Excel</span>
+df = pd.<span class="fn">read_excel</span>(<span class="str">'students.xlsx'</span>)
+
+<span class="cm"># פרמטרים שימושיים:</span>
+df = pd.<span class="fn">read_csv</span>(
+    <span class="str">'students.csv'</span>,
+    <span class="var">encoding</span>=<span class="str">'utf-8'</span>,       <span class="cm"># קידוד (חשוב לעברית!)</span>
+    <span class="var">index_col</span>=<span class="num">0</span>,            <span class="cm"># עמודה שתהיה אינדקס</span>
+    <span class="var">header</span>=<span class="num">0</span>               <span class="cm"># שורת כותרות (0 = ראשונה)</span>
+)</div>
+    </div>
+    <div class="arrow-down">▼</div>
+    <div class="output-block">
+<span class="output-label">נניח students.csv מכיל: name,class,grade → ▾</span>
+      name class  grade
+0    Alice     A     85
+1      Bob     B     92
+2  Charlie     A     78</div>
+    <div class="info-grid">
+      <div class="info-card"><h4>read_csv()</h4><p>CSV – הנפוץ ביותר</p></div>
+      <div class="info-card"><h4>read_excel()</h4><p>Excel (xlsx, xls)</p></div>
+      <div class="info-card"><h4>read_json()</h4><p>קבצי JSON</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 5: head/tail/shape -->
+<div class="slide" id="slide-5">
+  <div class="slide-inner">
+    <div class="slide-header">
+      <h3>סריקה ראשונית <span class="badge badge-blue">הכרת הנתונים</span></h3>
+      <div class="desc">הצעד הראשון: להבין מה יש בטבלה</div>
+    </div>
+    <div class="code-block">
+      <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><div class="code-label">explore.py</div></div>
+      <div class="code-body">df.<span class="fn">head</span>(<span class="num">3</span>)   <span class="cm"># 3 שורות ראשונות</span></div>
+    </div>
+    <div class="arrow-down">▼</div>
+    <div class="output-block">
+<span class="output-label">OUTPUT ▾</span>
+      name class  grade  age gender
+0    Alice     A   85.0   17      F
+1      Bob     B   92.0   18      M
+2  Charlie     A   78.0   17      M</div>
+    <div class="code-block">
+      <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><div class="code-label">explore2.py</div></div>
+      <div class="code-body">df.<span class="fn">tail</span>(<span class="num">2</span>)   <span class="cm"># 2 שורות אחרונות</span></div>
+    </div>
+    <div class="arrow-down">▼</div>
+    <div class="output-block">
+<span class="output-label">OUTPUT ▾</span>
+    name class  grade  age gender
+4    Eve     A   88.0   17      F
+5  Frank     B    NaN   18      M</div>
+    <div class="code-block">
+      <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><div class="code-label">explore3.py</div></div>
+      <div class="code-body"><span class="fn">print</span>(df.<span class="var">shape</span>)     <span class="cm"># (שורות, עמודות)</span>
+<span class="fn">print</span>(df.<span class="var">columns</span>)   <span class="cm"># שמות העמודות</span>
+<span class="fn">print</span>(df.<span class="var">dtypes</span>)    <span class="cm"># טיפוסים</span></div>
+    </div>
+    <div class="arrow-down">▼</div>
+    <div class="output-block">
+<span class="output-label">OUTPUT ▾</span>
+(6, 5)
+
+Index(['name', 'class', 'grade', 'age', 'gender'], dtype='object')
+
+name       object       ← טקסט
+class      object       ← טקסט
+grade     float64       ← עשרוני (בגלל NaN)
+age         int64       ← שלם
+gender     object       ← טקסט</div>
+    <div class="tip-box"><span class="tip-icon">⚡</span><p><strong>shape, columns, dtypes</strong> – בלי סוגריים (תכונות). <strong>head(), tail()</strong> – עם סוגריים (מתודות).</p></div>
+  </div>
+</div>
+
+<!-- SLIDE 6: describe -->
+<div class="slide" id="slide-6">
+  <div class="slide-inner">
+    <div class="slide-header">
+      <h3>describe() <span class="badge badge-blue">סטטיסטיקה</span></h3>
+      <div class="desc">סיכום סטטיסטי אוטומטי של כל העמודות המספריות</div>
+    </div>
+    <div class="code-block">
+      <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><div class="code-label">describe.py</div></div>
+      <div class="code-body">df.<span class="fn">describe</span>()</div>
+    </div>
+    <div class="arrow-down">▼</div>
+    <div class="output-block">
+<span class="output-label">OUTPUT ▾</span>
+          grade    age
+count   5.000   6.000   ← כמה ערכים (grade: רק 5, Frank=NaN)
+mean   87.600  17.500   ← ממוצע
+std     6.693   0.548   ← סטיית תקן
+min    78.000  17.000   ← מינימום
+25%    85.000  17.000   ← רבעון תחתון (Q1)
+50%    88.000  17.500   ← חציון (median)
+75%    92.000  18.000   ← רבעון עליון (Q3)
+max    95.000  18.000   ← מקסימום</div>
+    <div class="info-grid">
+      <div class="info-card"><h4>count</h4><p>ספירה (מתעלם מ-NaN!)</p></div>
+      <div class="info-card"><h4>mean / std</h4><p>ממוצע / סטיית תקן</p></div>
+      <div class="info-card"><h4>50% (median)</h4><p>חציון</p></div>
+      <div class="info-card"><h4>25%, 75%</h4><p>רבעונים (Q1, Q3)</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 7: Column Access -->
+<div class="slide" id="slide-7">
+  <div class="slide-inner">
+    <div class="slide-header">
+      <h3>גישה לעמודות <span class="badge badge-blue">Series vs DataFrame</span></h3>
+      <div class="desc">ההבדל: סוגריים בודדים [ ] = Series, סוגריים כפולים [[ ]] = DataFrame</div>
+    </div>
+    <div class="compare-row">
+      <div class="compare-col">
+        <h4 style="color:var(--accent-blue)">עמודה אחת → Series</h4>
+        <div class="code-block"><div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><div class="code-label">python</div></div>
+          <div class="code-body">df[<span class="str">'name'</span>]</div>
+        </div>
+        <div class="output-block" style="font-size:11px;">
+<span class="output-label">OUTPUT – Series ▾</span>
+0      Alice
+1        Bob
+2    Charlie
+3       Dana
+4        Eve
+5      Frank
+Name: name, dtype: object</div>
+      </div>
+      <div class="compare-col">
+        <h4 style="color:var(--accent-cyan)">מספר עמודות → DataFrame</h4>
+        <div class="code-block"><div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><div class="code-label">python</div></div>
+          <div class="code-body">df[[<span class="str">'name'</span>, <span class="str">'grade'</span>]]</div>
+        </div>
+        <div class="output-block" style="font-size:11px;">
+<span class="output-label">OUTPUT – DataFrame ▾</span>
+      name  grade
+0    Alice   85.0
+1      Bob   92.0
+2  Charlie   78.0
+3     Dana   95.0
+4      Eve   88.0
+5    Frank    NaN</div>
+      </div>
+    </div>
+    <div class="tip-box"><span class="tip-icon">⚠️</span><p><code>df['name']</code> = <strong>Series</strong> (סוגריים בודדים) &nbsp;|&nbsp; <code>df[['name','grade']]</code> = <strong>DataFrame</strong> (סוגריים כפולים)</p></div>
+  </div>
+</div>
+
+<!-- SLIDE 8: loc & iloc -->
+<div class="slide" id="slide-8">
+  <div class="slide-inner">
+    <div class="slide-header">
+      <h3>loc ו-iloc <span class="badge badge-green">חשוב מאוד!</span></h3>
+      <div class="desc">גישה לשורות ועמודות ספציפיות</div>
+    </div>
+    <div class="compare-row">
+      <div class="compare-col">
+        <h4 style="color:var(--accent-green)">loc – לפי שם (label)</h4>
+        <div class="code-block"><div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><div class="code-label">loc.py</div></div>
+          <div class="code-body">df.<span class="fn">loc</span>[<span class="num">0</span>:<span class="num">2</span>, <span class="str">'name'</span>:<span class="str">'grade'</span>]</div>
+        </div>
+        <div class="output-block" style="font-size:11px;">
+<span class="output-label">⚠️ כולל את שורה 2! ▾</span>
+      name class  grade
+0    Alice     A   85.0
+1      Bob     B   92.0
+2  Charlie     A   78.0</div>
+      </div>
+      <div class="compare-col">
+        <h4 style="color:var(--accent-purple)">iloc – לפי מיקום (index)</h4>
+        <div class="code-block"><div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><div class="code-label">iloc.py</div></div>
+          <div class="code-body">df.<span class="fn">iloc</span>[<span class="num">0</span>:<span class="num">2</span>, <span class="num">0</span>:<span class="num">3</span>]</div>
+        </div>
+        <div class="output-block" style="font-size:11px;">
+<span class="output-label">⚠️ לא כולל שורה 2! ▾</span>
+    name class  grade
+0  Alice     A   85.0
+1    Bob     B   92.0</div>
+      </div>
+    </div>
+    <div class="code-block">
+      <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><div class="code-label">single_row.py</div></div>
+      <div class="code-body">df.<span class="fn">loc</span>[<span class="num">3</span>]   <span class="cm"># שורה בודדת → Series</span></div>
+    </div>
+    <div class="arrow-down">▼</div>
+    <div class="output-block">
+<span class="output-label">OUTPUT ▾</span>
+name       Dana
+class         B
+grade      95.0
+age          18
+gender        F
+Name: 3, dtype: object</div>
+    <div class="tip-box"><span class="tip-icon">🎯</span><p><strong>loc</strong> = Label → כולל 2 קצוות &nbsp;|&nbsp; <strong>iloc</strong> = integer → לא כולל קצה עליון (כמו range)</p></div>
+  </div>
+</div>
+
+<!-- SLIDE 9: Boolean Filtering -->
+<div class="slide" id="slide-9">
+  <div class="slide-inner">
+    <div class="slide-header">
+      <h3>סינון לפי תנאי <span class="badge badge-green">Boolean Indexing</span></h3>
+      <div class="desc">הבסיס של עבודה עם נתונים – סינון שורות לפי תנאי</div>
+    </div>
+    <div class="code-block">
+      <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><div class="code-label">step1_mask.py</div></div>
+      <div class="code-body"><span class="cm"># שלב 1: יצירת מסכה – Series של True/False</span>
+mask = df[<span class="str">'grade'</span>] >= <span class="num">90</span>
+<span class="fn">print</span>(mask)</div>
+    </div>
+    <div class="arrow-down">▼</div>
+    <div class="output-block">
+<span class="output-label">OUTPUT – המסכה ▾</span>
+0    False     ← Alice:  85 >= 90? ✗
+1     True     ← Bob:    92 >= 90? ✓
+2    False     ← Charlie:78 >= 90? ✗
+3     True     ← Dana:   95 >= 90? ✓
+4    False     ← Eve:    88 >= 90? ✗
+5    False     ← Frank:  NaN >= 90? ✗
+Name: grade, dtype: bool</div>
+    <div class="code-block">
+      <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><div class="code-label">step2_apply.py</div></div>
+      <div class="code-body"><span class="cm"># שלב 2: מפעילים את המסכה → רק True נשמרים</span>
+high_grades = df[df[<span class="str">'grade'</span>] >= <span class="num">90</span>]
+<span class="fn">print</span>(high_grades)</div>
+    </div>
+    <div class="arrow-down">▼</div>
+    <div class="output-block">
+<span class="output-label">OUTPUT – רק ציון ≥ 90 ▾</span>
+   name class  grade  age gender
+1   Bob     B   92.0   18      M
+3  Dana     B   95.0   18      F</div>
+  </div>
+</div>
+
+<!-- SLIDE 10: Multiple Conditions -->
+<div class="slide" id="slide-10">
+  <div class="slide-inner">
+    <div class="slide-header">
+      <h3>תנאים מרובים <span class="badge badge-green">& | ~</span></h3>
+      <div class="desc">שילוב מספר תנאים עם אופרטורים לוגיים</div>
+    </div>
+    <div class="code-block">
+      <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><div class="code-label">and_filter.py</div></div>
+      <div class="code-body"><span class="cm"># AND – ציון מעל 80 וגם כיתה A</span>
+result = df[(df[<span class="str">'grade'</span>] > <span class="num">80</span>) <span class="op">&</span> (df[<span class="str">'class'</span>] == <span class="str">'A'</span>)]
+<span class="fn">print</span>(result)</div>
+    </div>
+    <div class="arrow-down">▼</div>
+    <div class="output-block">
+<span class="output-label">OUTPUT – grade>80 AND class=='A' ▾</span>
+    name class  grade  age gender
+0  Alice     A   85.0   17      F
+4    Eve     A   88.0   17      F</div>
+    <div class="code-block">
+      <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><div class="code-label">or_filter.py</div></div>
+      <div class="code-body"><span class="cm"># OR – ציון מעל 90 או גיל 17</span>
+result = df[(df[<span class="str">'grade'</span>] > <span class="num">90</span>) <span class="op">|</span> (df[<span class="str">'age'</span>] == <span class="num">17</span>)]
+<span class="fn">print</span>(result)</div>
+    </div>
+    <div class="arrow-down">▼</div>
+    <div class="output-block">
+<span class="output-label">OUTPUT – grade>90 OR age==17 ▾</span>
+      name class  grade  age gender
+0    Alice     A   85.0   17      F
+1      Bob     B   92.0   18      M
+2  Charlie     A   78.0   17      M
+3     Dana     B   95.0   18      F
+4      Eve     A   88.0   17      F</div>
+    <div class="info-grid">
+      <div class="info-card"><h4>& (AND)</h4><p>שניהם חייבים</p></div>
+      <div class="info-card"><h4>| (OR)</h4><p>לפחות אחד</p></div>
+      <div class="info-card"><h4>~ (NOT)</h4><p>שלילה</p></div>
+    </div>
+    <div class="tip-box"><span class="tip-icon">⚠️</span><p><strong>חובה סוגריים עגולים</strong> סביב כל תנאי! בלי זה – שגיאה.</p></div>
+  </div>
+</div>
+
+<!-- SLIDE 11: isin & query -->
+<div class="slide" id="slide-11">
+  <div class="slide-inner">
+    <div class="slide-header">
+      <h3>isin() ו-query() <span class="badge badge-green">דרכים נוספות</span></h3>
+      <div class="desc">דרכים נוחות יותר לסינון</div>
+    </div>
+    <div class="code-block">
+      <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><div class="code-label">isin.py</div></div>
+      <div class="code-body"><span class="cm"># isin – האם הערך נמצא ברשימה?</span>
+result = df[df[<span class="str">'name'</span>].<span class="fn">isin</span>([<span class="str">'Alice'</span>, <span class="str">'Dana'</span>, <span class="str">'Eve'</span>])]
+<span class="fn">print</span>(result)</div>
+    </div>
+    <div class="arrow-down">▼</div>
+    <div class="output-block">
+<span class="output-label">OUTPUT ▾</span>
+    name class  grade  age gender
+0  Alice     A   85.0   17      F
+3   Dana     B   95.0   18      F
+4    Eve     A   88.0   17      F</div>
+    <div class="code-block">
+      <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><div class="code-label">query.py</div></div>
+      <div class="code-body"><span class="cm"># query – סינון בטקסט (כמו SQL!)</span>
+result = df.<span class="fn">query</span>(<span class="str">'grade > 80 and age == 17'</span>)
+<span class="fn">print</span>(result)</div>
+    </div>
+    <div class="arrow-down">▼</div>
+    <div class="output-block">
+<span class="output-label">OUTPUT ▾</span>
+    name class  grade  age gender
+0  Alice     A   85.0   17      F
+4    Eve     A   88.0   17      F</div>
+    <div class="tip-box"><span class="tip-icon">💡</span><p><strong>query()</strong> – נוח כשיש הרבה תנאים, בלי <code>df[...]</code> וסוגריים מיותרים!</p></div>
+  </div>
+</div>
+
+<!-- SLIDE 12: Groupby Concept -->
+<div class="slide" id="slide-12">
+  <div class="slide-inner">
+    <div class="section-header">
+      <div class="section-num">SECTION 03</div>
+      <h2><span style="color:var(--accent-purple)">Groupby</span> ואגרגציה</h2>
+      <div class="section-desc">פיצול → חישוב → איחוד</div>
+    </div>
+    <div class="info-grid" style="margin-top:24px; max-width:650px; margin-left:auto; margin-right:auto;">
+      <div class="info-card"><div class="card-icon">✂️</div><h4>1. Split</h4><p>מחלקים לקבוצות</p></div>
+      <div class="info-card"><div class="card-icon">⚙️</div><h4>2. Apply</h4><p>מחשבים על כל קבוצה</p></div>
+      <div class="info-card"><div class="card-icon">🔗</div><h4>3. Combine</h4><p>מאחדים תוצאות</p></div>
+    </div>
+    <div class="code-block" style="margin-top:16px;">
+      <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><div class="code-label">pattern.py</div></div>
+      <div class="code-body"><span class="cm"># התבנית הכללית:</span>
+df.<span class="fn">groupby</span>(<span class="str">'column'</span>)[<span class="str">'values'</span>].<span class="fn">function</span>()
+<span class="cm">#         ▲ לפי מה?   ▲ על מה?     ▲ איזה חישוב?</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 13: Aggregation -->
+<div class="slide" id="slide-13">
+  <div class="slide-inner">
+    <div class="slide-header">
+      <h3>פונקציות אגרגציה <span class="badge badge-purple">groupby בפעולה</span></h3>
+      <div class="desc">נראה כל פונקציה עם התוצאה שלה</div>
+    </div>
+    <div class="code-block">
+      <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><div class="code-label">groupby_mean.py</div></div>
+      <div class="code-body"><span class="cm"># ממוצע ציונים לפי כיתה</span>
+df.<span class="fn">groupby</span>(<span class="str">'class'</span>)[<span class="str">'grade'</span>].<span class="fn">mean</span>()</div>
+    </div>
+    <div class="arrow-down">▼</div>
+    <div class="output-block">
+<span class="output-label">OUTPUT ▾</span>
+class
+A    83.666667   ← (85+78+88)/3
+B    93.500000   ← (92+95)/2  (Frank=NaN לא נספר!)
+Name: grade, dtype: float64</div>
+    <div class="code-block">
+      <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><div class="code-label">groupby_max.py</div></div>
+      <div class="code-body"><span class="cm"># ציון מקסימלי + ספירה</span>
+<span class="fn">print</span>(df.<span class="fn">groupby</span>(<span class="str">'class'</span>)[<span class="str">'grade'</span>].<span class="fn">max</span>())
+<span class="fn">print</span>(df.<span class="fn">groupby</span>(<span class="str">'class'</span>)[<span class="str">'grade'</span>].<span class="fn">count</span>())</div>
+    </div>
+    <div class="arrow-down">▼</div>
+    <div class="output-block">
+<span class="output-label">OUTPUT – max() ▾</span>
+class
+A    88.0
+B    95.0</div>
+    <div class="output-block" style="border-color:rgba(139,92,246,0.15); color:var(--accent-purple);">
+<span class="output-label">OUTPUT – count() ▾</span>
+class
+A    3   ← Alice, Charlie, Eve
+B    2   ← Bob, Dana (Frank=NaN לא נספר!)
+Name: grade, dtype: int64</div>
+  </div>
+</div>
+
+<!-- SLIDE 14: agg -->
+<div class="slide" id="slide-14">
+  <div class="slide-inner">
+    <div class="slide-header">
+      <h3>agg() – אגרגציה מרובה <span class="badge badge-purple">מתקדם</span></h3>
+      <div class="desc">מספר חישובים בפקודה אחת</div>
+    </div>
+    <div class="code-block">
+      <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><div class="code-label">agg_multi.py</div></div>
+      <div class="code-body"><span class="cm"># מספר פונקציות על אותה עמודה</span>
+df.<span class="fn">groupby</span>(<span class="str">'class'</span>)[<span class="str">'grade'</span>].<span class="fn">agg</span>([<span class="str">'mean'</span>, <span class="str">'max'</span>, <span class="str">'min'</span>, <span class="str">'count'</span>])</div>
+    </div>
+    <div class="arrow-down">▼</div>
+    <div class="output-block">
+<span class="output-label">OUTPUT ▾</span>
+            mean   max   min  count
+class
+A      83.666667  88.0  78.0      3
+B      93.500000  95.0  92.0      2</div>
+    <div class="code-block">
+      <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><div class="code-label">agg_dict.py</div></div>
+      <div class="code-body"><span class="cm"># פונקציות שונות לעמודות שונות</span>
+df.<span class="fn">groupby</span>(<span class="str">'class'</span>).<span class="fn">agg</span>({
+    <span class="str">'grade'</span>: <span class="str">'mean'</span>,    <span class="cm"># ממוצע ציונים</span>
+    <span class="str">'age'</span>:   <span class="str">'max'</span>,     <span class="cm"># גיל מקסימלי</span>
+    <span class="str">'name'</span>:  <span class="str">'count'</span>    <span class="cm"># כמה תלמידים</span>
+})</div>
+    </div>
+    <div class="arrow-down">▼</div>
+    <div class="output-block">
+<span class="output-label">OUTPUT ▾</span>
+            grade  age  name
+class
+A      83.666667   17     3
+B      93.500000   18     3</div>
+    <div class="tip-box"><span class="tip-icon">💡</span><p>למיון: <code dir="ltr">.sort_values(ascending=False)</code> – מהגדול לקטן.</p></div>
+  </div>
+</div>
+
+<!-- SLIDE 15: value_counts -->
+<div class="slide" id="slide-15">
+  <div class="slide-inner">
+    <div class="slide-header">
+      <h3>value_counts() <span class="badge badge-purple">ספירת ערכים</span></h3>
+      <div class="desc">כמה פעמים מופיע כל ערך? ממוין מהנפוץ ביותר</div>
+    </div>
+    <div class="code-block">
+      <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><div class="code-label">vc.py</div></div>
+      <div class="code-body">df[<span class="str">'class'</span>].<span class="fn">value_counts</span>()</div>
+    </div>
+    <div class="arrow-down">▼</div>
+    <div class="output-block">
+<span class="output-label">OUTPUT ▾</span>
+class
+A    3   ← Alice, Charlie, Eve
+B    3   ← Bob, Dana, Frank
+Name: count, dtype: int64</div>
+    <div class="code-block">
+      <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><div class="code-label">vc_pct.py</div></div>
+      <div class="code-body"><span class="cm"># באחוזים (normalize)</span>
+df[<span class="str">'gender'</span>].<span class="fn">value_counts</span>(<span class="var">normalize</span>=<span class="kw">True</span>)</div>
+    </div>
+    <div class="arrow-down">▼</div>
+    <div class="output-block" style="border-color:rgba(139,92,246,0.15); color:var(--accent-purple);">
+<span class="output-label">OUTPUT – באחוזים ▾</span>
+gender
+F    0.5   ← 50% (Alice, Dana, Eve)
+M    0.5   ← 50% (Bob, Charlie, Frank)
+Name: proportion, dtype: float64</div>
+  </div>
+</div>
+
+<!-- SLIDE 16: pivot_table -->
+<div class="slide" id="slide-16">
+  <div class="slide-inner">
+    <div class="slide-header">
+      <h3>pivot_table <span class="badge badge-purple">טבלת ציר</span></h3>
+      <div class="desc">חיתוך לפי 2 צירים – כמו Pivot Table ב-Excel</div>
+    </div>
+    <div class="code-block">
+      <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><div class="code-label">pivot.py</div></div>
+      <div class="code-body"><span class="cm"># ממוצע ציונים: שורות=כיתה, עמודות=מגדר</span>
+pd.<span class="fn">pivot_table</span>(
+    df,
+    <span class="var">values</span>=<span class="str">'grade'</span>,     <span class="cm"># מה לחשב</span>
+    <span class="var">index</span>=<span class="str">'class'</span>,      <span class="cm"># שורות</span>
+    <span class="var">columns</span>=<span class="str">'gender'</span>,   <span class="cm"># עמודות</span>
+    <span class="var">aggfunc</span>=<span class="str">'mean'</span>      <span class="cm"># איזה חישוב</span>
+)</div>
+    </div>
+    <div class="arrow-down">▼</div>
+    <div class="output-block">
+<span class="output-label">OUTPUT ▾</span>
+gender     F     M
+class
+A       86.5  78.0   ← A+F: (85+88)/2=86.5  |  A+M: 78
+B       95.0  92.0   ← B+F: 95  |  B+M: 92 (Frank=NaN)</div>
+    <div class="tip-box"><span class="tip-icon">💡</span><p><strong>aggfunc</strong>: <code>'mean'</code>, <code>'sum'</code>, <code>'count'</code>, <code>'max'</code>, <code>'min'</code> ועוד.</p></div>
+  </div>
+</div>
+
+<!-- SLIDE 17: Missing Values -->
+<div class="slide" id="slide-17">
+  <div class="slide-inner">
+    <div class="section-header">
+      <div class="section-num">SECTION 04</div>
+      <h2><span style="color:var(--accent-orange)">ניקוי</span> נתונים</h2>
+      <div class="section-desc">ערכים חסרים, כפילויות ושינוי טיפוסים</div>
+    </div>
+    <div class="code-block" style="margin-top:20px;">
+      <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><div class="code-label">missing.py</div></div>
+      <div class="code-body">df.<span class="fn">isnull</span>().<span class="fn">sum</span>()   <span class="cm"># כמה חסרים בכל עמודה</span></div>
+    </div>
+    <div class="arrow-down">▼</div>
+    <div class="output-block">
+<span class="output-label">OUTPUT ▾</span>
+name      0
+class     0
+grade     1   ← Frank חסר ציון!
+age       0
+gender    0
+dtype: int64</div>
+    <div class="code-block">
+      <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><div class="code-label">missing2.py</div></div>
+      <div class="code-body">df.<span class="fn">isnull</span>().<span class="fn">sum</span>().<span class="fn">sum</span>()   <span class="cm"># סה"כ חסרים</span></div>
+    </div>
+    <div class="arrow-down">▼</div>
+    <div class="output-block"><span class="output-label">OUTPUT ▾</span>
+1</div>
+    <div class="info-grid">
+      <div class="info-card"><div class="card-icon">🔍</div><h4>isnull()</h4><p>True = חסר</p></div>
+      <div class="info-card"><div class="card-icon">✅</div><h4>notnull()</h4><p>True = קיים</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 18: dropna & fillna -->
+<div class="slide" id="slide-18">
+  <div class="slide-inner">
+    <div class="slide-header">
+      <h3>dropna ו-fillna <span class="badge badge-orange">טיפול בחסרים</span></h3>
+      <div class="desc">מחיקה או מילוי – שתי אסטרטגיות</div>
+    </div>
+    <div class="compare-row">
+      <div class="compare-col">
+        <h4 style="color:var(--accent-pink)">🗑️ dropna – מחיקה</h4>
+        <div class="code-block"><div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><div class="code-label">dropna.py</div></div>
+          <div class="code-body">df.<span class="fn">dropna</span>()</div>
+        </div>
+        <div class="output-block" style="font-size:11px;">
+<span class="output-label">Frank נמחק! ▾</span>
+      name class  grade  age gender
+0    Alice     A   85.0   17      F
+1      Bob     B   92.0   18      M
+2  Charlie     A   78.0   17      M
+3     Dana     B   95.0   18      F
+4      Eve     A   88.0   17      F</div>
+      </div>
+      <div class="compare-col">
+        <h4 style="color:var(--accent-green)">✏️ fillna – מילוי</h4>
+        <div class="code-block"><div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><div class="code-label">fillna.py</div></div>
+          <div class="code-body">df[<span class="str">'grade'</span>].<span class="fn">fillna</span>(
+  df[<span class="str">'grade'</span>].<span class="fn">mean</span>()
+)</div>
+        </div>
+        <div class="output-block" style="font-size:11px;">
+<span class="output-label">NaN → ממוצע (87.6) ▾</span>
+0    85.0
+1    92.0
+2    78.0
+3    95.0
+4    88.0
+5    87.6   ← היה NaN!
+Name: grade, dtype: float64</div>
+      </div>
+    </div>
+    <div class="code-block">
+      <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><div class="code-label">options.py</div></div>
+      <div class="code-body">df.<span class="fn">dropna</span>(<span class="var">how</span>=<span class="str">'all'</span>)                  <span class="cm"># רק אם כל השורה NaN</span>
+df.<span class="fn">dropna</span>(<span class="var">subset</span>=[<span class="str">'grade'</span>])             <span class="cm"># לפי עמודה ספציפית</span>
+df[<span class="str">'grade'</span>].<span class="fn">fillna</span>(<span class="num">0</span>)                  <span class="cm"># מילוי ב-0</span>
+df[<span class="str">'grade'</span>].<span class="fn">fillna</span>(df[<span class="str">'grade'</span>].<span class="fn">median</span>()) <span class="cm"># מילוי בחציון</span></div>
+    </div>
+    <div class="tip-box"><span class="tip-icon">⚠️</span><p>מחזירות <strong>DataFrame חדש</strong>! חובה לשמור: <code dir="ltr">df = df.dropna()</code></p></div>
+  </div>
+</div>
+
+<!-- SLIDE 19: Duplicates -->
+<div class="slide" id="slide-19">
+  <div class="slide-inner">
+    <div class="slide-header">
+      <h3>כפילויות <span class="badge badge-orange">Duplicates</span></h3>
+      <div class="desc">זיהוי והסרת שורות כפולות</div>
+    </div>
+    <div class="code-block">
+      <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><div class="code-label">dup.py</div></div>
+      <div class="code-body"><span class="cm"># נוסיף שורה כפולה לדוגמה</span>
+df2 = pd.<span class="fn">concat</span>([df, df.<span class="fn">iloc</span>[[<span class="num">0</span>]]])
+<span class="fn">print</span>(df2.<span class="fn">duplicated</span>())</div>
+    </div>
+    <div class="arrow-down">▼</div>
+    <div class="output-block">
+<span class="output-label">OUTPUT ▾</span>
+0    False
+1    False
+2    False
+3    False
+4    False
+5    False
+0     True   ← Alice הכפולה!
+dtype: bool</div>
+    <div class="code-block">
+      <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><div class="code-label">dup2.py</div></div>
+      <div class="code-body">df2.<span class="fn">duplicated</span>().<span class="fn">sum</span>()     <span class="cm"># כמה כפולות?</span></div>
+    </div>
+    <div class="arrow-down">▼</div>
+    <div class="output-block"><span class="output-label">OUTPUT ▾</span>
+1</div>
+    <div class="code-block">
+      <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><div class="code-label">dup3.py</div></div>
+      <div class="code-body">df2 = df2.<span class="fn">drop_duplicates</span>()               <span class="cm"># שומר ראשון</span>
+df2 = df2.<span class="fn">drop_duplicates</span>(<span class="var">keep</span>=<span class="str">'last'</span>)  <span class="cm"># שומר אחרון</span>
+df2 = df2.<span class="fn">drop_duplicates</span>(<span class="var">subset</span>=[<span class="str">'name'</span>]) <span class="cm"># לפי עמודה</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 20: Data Types -->
+<div class="slide" id="slide-20">
+  <div class="slide-inner">
+    <div class="slide-header">
+      <h3>שינוי טיפוסים <span class="badge badge-orange">astype</span></h3>
+      <div class="desc">המרת סוג נתונים – מטקסט למספר ולהפך</div>
+    </div>
+    <div class="code-block">
+      <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><div class="code-label">dtypes.py</div></div>
+      <div class="code-body">df.<span class="var">dtypes</span></div>
+    </div>
+    <div class="arrow-down">▼</div>
+    <div class="output-block">
+<span class="output-label">OUTPUT ▾</span>
+name       object    ← טקסט
+class      object    ← טקסט
+grade     float64    ← עשרוני (בגלל NaN)
+age         int64    ← שלם
+gender     object    ← טקסט</div>
+    <div class="code-block">
+      <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><div class="code-label">convert.py</div></div>
+      <div class="code-body"><span class="cm"># המרה ל-int (רק אחרי טיפול ב-NaN!)</span>
+clean = df.<span class="fn">dropna</span>()
+clean[<span class="str">'grade'</span>] = clean[<span class="str">'grade'</span>].<span class="fn">astype</span>(<span class="var">int</span>)
+<span class="fn">print</span>(clean[[<span class="str">'name'</span>, <span class="str">'grade'</span>]])</div>
+    </div>
+    <div class="arrow-down">▼</div>
+    <div class="output-block">
+<span class="output-label">OUTPUT – grade עכשיו int! ▾</span>
+      name  grade
+0    Alice     85
+1      Bob     92
+2  Charlie     78
+3     Dana     95
+4      Eve     88</div>
+    <div class="code-block">
+      <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><div class="code-label">to_numeric.py</div></div>
+      <div class="code-body"><span class="cm"># המרה בטוחה – טקסט לא-מספרי → NaN</span>
+s = pd.<span class="fn">Series</span>([<span class="str">'10'</span>, <span class="str">'20'</span>, <span class="str">'abc'</span>, <span class="str">'40'</span>])
+<span class="fn">print</span>(pd.<span class="fn">to_numeric</span>(s, <span class="var">errors</span>=<span class="str">'coerce'</span>))</div>
+    </div>
+    <div class="arrow-down">▼</div>
+    <div class="output-block">
+<span class="output-label">OUTPUT ▾</span>
+0    10.0
+1    20.0
+2     NaN   ← 'abc' הפך ל-NaN!
+3    40.0
+dtype: float64</div>
+  </div>
+</div>
+
+<!-- SLIDE 21: Summary -->
+<div class="slide" id="slide-21">
+  <div class="slide-inner">
+    <div class="title-slide" style="margin-top:4vh;">
+      <div class="emoji-big">🎉</div>
+      <h1 style="font-size:34px;">סיכום – Pandas</h1>
+      <div class="subtitle" style="margin-bottom:20px;">כל מה שצריך לזכור</div>
+    </div>
+    <div class="info-grid" style="max-width:700px; margin:0 auto;">
+      <div class="info-card" style="border-right:3px solid var(--accent-blue);"><div class="card-icon">📊</div><h4 style="color:var(--accent-blue); font-family:'Heebo'; font-size:14px;">יצירה וקריאה</h4><p>DataFrame, read_csv, head, tail, shape, describe, dtypes</p></div>
+      <div class="info-card" style="border-right:3px solid var(--accent-green);"><div class="card-icon">🔍</div><h4 style="color:var(--accent-green); font-family:'Heebo'; font-size:14px;">סינון ובחירה</h4><p>loc/iloc, Boolean indexing (&amp; | ~), query, isin</p></div>
+      <div class="info-card" style="border-right:3px solid var(--accent-purple);"><div class="card-icon">📈</div><h4 style="color:var(--accent-purple); font-family:'Heebo'; font-size:14px;">Groupby ואגרגציה</h4><p>groupby, agg, value_counts, pivot_table, sort_values</p></div>
+      <div class="info-card" style="border-right:3px solid var(--accent-orange);"><div class="card-icon">🧹</div><h4 style="color:var(--accent-orange); font-family:'Heebo'; font-size:14px;">ניקוי נתונים</h4><p>isnull, dropna, fillna, drop_duplicates, astype, to_numeric</p></div>
+    </div>
+    <div class="tip-box" style="max-width:700px; margin:16px auto 0;">
+      <span class="tip-icon">🔑</span>
+      <p><strong>כלל הזהב:</strong> כל הפונקציות מחזירות תוצאה חדשה ולא משנות את המקור!<br/>
+      <code dir="ltr">df = df.dropna()</code> ✓ &nbsp;|&nbsp; <code dir="ltr">df.dropna()</code> ✗ (לא נשמר!)</p>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<div class="bottom-nav" id="bottomNav">
+  <button class="nav-btn" id="prevBtn" onclick="navigate(-1)">הקודם ←</button>
+  <span class="slide-counter" id="slideCounter">1 / 22</span>
+  <button class="nav-btn primary" id="nextBtn" onclick="navigate(1)">→ הבא</button>
+</div>
+
+<script>
+let currentSlide=0;const totalSlides=22;
+function navigate(d){const n=currentSlide+d;if(n<0||n>=totalSlides)return;goToSlide(n)}
+function goToSlide(i){if(i===currentSlide)return;const o=document.getElementById(`slide-${currentSlide}`),n=document.getElementById(`slide-${i}`);o.classList.remove('active');if(i>currentSlide)o.classList.add('exit-left');setTimeout(()=>o.classList.remove('exit-left'),450);n.classList.add('active');n.scrollTop=0;currentSlide=i;updateUI()}
+function updateUI(){document.getElementById('slideCounter').textContent=`${currentSlide+1} / ${totalSlides}`;const p=(currentSlide/(totalSlides-1))*100;document.getElementById('progressFill').style.width=`${p}%`;document.getElementById('progressText').textContent=`${Math.round(p)}%`;document.getElementById('prevBtn').style.opacity=currentSlide===0?'0.3':'1';document.getElementById('prevBtn').style.pointerEvents=currentSlide===0?'none':'all';document.getElementById('nextBtn').style.opacity=currentSlide===totalSlides-1?'0.3':'1';document.getElementById('nextBtn').style.pointerEvents=currentSlide===totalSlides-1?'none':'all';document.querySelectorAll('.nav-item').forEach(item=>{item.classList.toggle('active',parseInt(item.dataset.slide)===currentSlide);if(parseInt(item.dataset.slide)===currentSlide)item.scrollIntoView({block:'nearest',behavior:'smooth'})})}
+document.querySelectorAll('.nav-item').forEach(item=>{item.addEventListener('click',()=>goToSlide(parseInt(item.dataset.slide)))});
+document.addEventListener('keydown',e=>{if(e.key==='ArrowLeft'||e.key==='ArrowUp'){e.preventDefault();navigate(1)}else if(e.key==='ArrowRight'||e.key==='ArrowDown'){e.preventDefault();navigate(-1)}});
+function toggleSidebar(){const s=document.getElementById('sidebar');s.classList.toggle('collapsed');document.getElementById('sidebarToggle').textContent=s.classList.contains('collapsed')?'▶':'◀'}
+let tx=0;document.addEventListener('touchstart',e=>{tx=e.touches[0].clientX});document.addEventListener('touchend',e=>{const d=tx-e.changedTouches[0].clientX;if(Math.abs(d)>50)navigate(d>0?1:-1)});
+updateUI();
+</script>
+</body>
+</html>
