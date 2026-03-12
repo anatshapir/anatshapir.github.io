@@ -1,6 +1,6 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
-import { BookOpen, Star, Menu, X, Settings } from 'lucide-react';
+import { Menu, X } from 'lucide-react';
 
 export function Navbar() {
   const [isOpen, setIsOpen] = React.useState(false);
@@ -40,24 +40,10 @@ export function Navbar() {
                 {item.name}
               </a>
             ))}
-            <a
-              href="#admin"
-              className="p-2 rounded-lg bg-primary/10 text-primary hover:bg-primary hover:text-white transition-all"
-              title="ניהול תוכן"
-            >
-              <Settings size={20} />
-            </a>
           </div>
 
           {/* Mobile Menu Button */}
           <div className="md:hidden flex items-center gap-2">
-            <a
-              href="#admin"
-              className="p-2 rounded-lg bg-primary/10 text-primary"
-              title="ניהול"
-            >
-              <Settings size={20} />
-            </a>
             <button
               onClick={() => setIsOpen(!isOpen)}
               className="p-2 text-foreground/80 hover:text-primary transition-colors"

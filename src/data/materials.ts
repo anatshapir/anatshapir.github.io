@@ -1,0 +1,192 @@
+// ============================================================
+// חומרי למידה והמלצות
+// כדי להוסיף חומר חדש: העתיקי בלוק ושני את הפרטים
+// כדי להוסיף נושא חדש: הוסיפי ערך ב-subcategoryMeta
+// ============================================================
+
+export interface StaticMaterial {
+  id: string
+  title: string
+  description: string
+  category: 'teaching' | 'general'
+  subcategory: string
+  linkUrl: string
+  icon: string
+}
+
+// מטא-דאטה לכל נושא - אייקון וצבע לכרטיס
+export const subcategoryMeta: Record<string, { icon: string; color: string }> = {
+  'רקורסיה':        { icon: '🔄', color: 'from-orange-50 to-amber-50 border-orange-200' },
+  'מדעי המחשב':     { icon: '💻', color: 'from-blue-50 to-indigo-50 border-blue-200' },
+  'מדעי הנתונים':   { icon: '📊', color: 'from-purple-50 to-fuchsia-50 border-purple-200' },
+  'פיתוח ווב':      { icon: '🌐', color: 'from-emerald-50 to-teal-50 border-emerald-200' },
+  'ספרים':          { icon: '📚', color: 'from-amber-50 to-yellow-50 border-amber-200' },
+  'השראה':          { icon: '✨', color: 'from-rose-50 to-pink-50 border-rose-200' },
+  'שירים':          { icon: '🎵', color: 'from-violet-50 to-purple-50 border-violet-200' },
+  'המלצות':         { icon: '⭐', color: 'from-sky-50 to-cyan-50 border-sky-200' },
+}
+
+export const staticMaterials: StaticMaterial[] = [
+  // ===== רקורסיה =====
+  {
+    id: 'recursive-thinking',
+    title: 'חשיבה רקורסיבית',
+    description: 'מדריך מקיף לחשיבה רקורסיבית - מהבסיס ועד לפתרון בעיות מורכבות.',
+    category: 'teaching',
+    subcategory: 'רקורסיה',
+    linkUrl: '/recursiveThinking.html',
+    icon: '🧠',
+  },
+  {
+    id: 'recursion-visualization',
+    title: 'הדמיית זמן ריצה של רקורסיה',
+    description: 'כלי אינטראקטיבי להמחשת זמן ריצה של פונקציות רקורסיביות.',
+    category: 'teaching',
+    subcategory: 'רקורסיה',
+    linkUrl: '/recursionVisualization.html',
+    icon: '📊',
+  },
+  {
+    id: 'bintree-recursion',
+    title: 'רקורסיה על עצים בינאריים',
+    description: 'מדריך לרקורסיה על עצים בינאריים עם הדמיות והסברים מפורטים.',
+    category: 'teaching',
+    subcategory: 'רקורסיה',
+    linkUrl: '/bintree_recursion.html',
+    icon: '🌳',
+  },
+  {
+    id: 'recursion-escape-advanced',
+    title: 'חדר בריחה - רקורסיה מתקדם',
+    description: 'תרגיל אינטראקטיבי בסגנון חדר בריחה לתרגול רקורסיה ברמה מתקדמת.',
+    category: 'teaching',
+    subcategory: 'רקורסיה',
+    linkUrl: '/recursionEscapeRoom.html',
+    icon: '🔑',
+  },
+  {
+    id: 'recursion-escape',
+    title: 'חדר בריחה - רקורסיה',
+    description: 'משחק חדר בריחה ללימוד רקורסיה בצורה חווייתית ומהנה.',
+    category: 'teaching',
+    subcategory: 'רקורסיה',
+    linkUrl: '/recursive_labyrinth.html',
+    icon: '🏰',
+  },
+
+  // ===== מדעי המחשב =====
+  {
+    id: 'bfs-dfs',
+    title: 'BFS & DFS',
+    description: 'הדמיה אינטראקטיבית של אלגוריתמי חיפוש BFS ו-DFS בגרפים.',
+    category: 'teaching',
+    subcategory: 'מדעי המחשב',
+    linkUrl: '/bfs_dfs.html',
+    icon: '🔍',
+  },
+  {
+    id: 'regular-languages',
+    title: 'שפות רגולריות',
+    description: 'מדריך מקיף לשפות רגולריות, אוטומטים וביטויים רגולריים.',
+    category: 'teaching',
+    subcategory: 'מדעי המחשב',
+    linkUrl: '/regularLanguages.html',
+    icon: '📜',
+  },
+  {
+    id: 'java-exercise',
+    title: 'פותר תרגילי Java',
+    description: 'כלי אינטראקטיבי לפתרון תרגילים בשפת Java.',
+    category: 'teaching',
+    subcategory: 'מדעי המחשב',
+    linkUrl: '/javaExercise.html',
+    icon: '☕',
+  },
+  {
+    id: 'track-table',
+    title: 'טבלת מעקב',
+    description: 'כלי לבניית טבלאות מעקב (Trace Table) לתרגילי תכנות.',
+    category: 'teaching',
+    subcategory: 'מדעי המחשב',
+    linkUrl: '/trackTable.html',
+    icon: '📋',
+  },
+
+  // ===== מדעי הנתונים =====
+  {
+    id: 'datascience-project',
+    title: 'פרויקט Data Science',
+    description: 'מרכז פרויקט מדעי הנתונים - מהגדרת הבעיה ועד הצגת תוצאות.',
+    category: 'teaching',
+    subcategory: 'מדעי הנתונים',
+    linkUrl: '/datascience-project.html',
+    icon: '📈',
+  },
+  {
+    id: 'eda',
+    title: 'ניתוח נתונים חקירתי (EDA)',
+    description: 'מדריך מקיף ל-Exploratory Data Analysis עם דוגמאות וכלים.',
+    category: 'teaching',
+    subcategory: 'מדעי הנתונים',
+    linkUrl: '/eda.html',
+    icon: '📉',
+  },
+  {
+    id: 'pandas',
+    title: 'מדריך Pandas',
+    description: 'מדריך מקיף לספריית Pandas - עיבוד וניתוח נתונים ב-Python.',
+    category: 'teaching',
+    subcategory: 'מדעי הנתונים',
+    linkUrl: '/pandas.html',
+    icon: '🐼',
+  },
+
+  // ===== פיתוח ווב =====
+  {
+    id: 'html-guide',
+    title: 'מדריך HTML & VS Code',
+    description: 'מדריך מקיף ל-HTML ולסביבת העבודה Visual Studio Code.',
+    category: 'teaching',
+    subcategory: 'פיתוח ווב',
+    linkUrl: '/htmlGuide.html',
+    icon: '🌐',
+  },
+  {
+    id: 'asp-dev',
+    title: 'מדריך ASP.NET',
+    description: 'מדריך לפיתוח שרת עם ASP.NET - מהבסיס ועד ליישומים מתקדמים.',
+    category: 'teaching',
+    subcategory: 'פיתוח ווב',
+    linkUrl: '/aspDev.html',
+    icon: '⚙️',
+  },
+  {
+    id: 'server-impl',
+    title: 'מדריך Server Implementation',
+    description: 'מדריך מקיף למימוש שרת - ארכיטקטורה, API ותקשורת.',
+    category: 'teaching',
+    subcategory: 'פיתוח ווב',
+    linkUrl: '/serverImpl.html',
+    icon: '🖥️',
+  },
+
+  // ===== דברים מעניינים =====
+  {
+    id: 'little-prince',
+    title: 'הנסיך הקטן - אנטואן דה סנט-אכזופרי',
+    description: 'ספר שמלווה אותי מגיל צעיר. כל קריאה מחדש חושפת שכבה חדשה של משמעות.',
+    category: 'general',
+    subcategory: 'ספרים',
+    linkUrl: '',
+    icon: '📚',
+  },
+  {
+    id: 'favorite-quote',
+    title: 'ציטוט שאני אוהבת',
+    description: '"העולם מלא בדברים קטנים ומיוחדים, צריך רק לדעת איפה לחפש אותם."',
+    category: 'general',
+    subcategory: 'השראה',
+    linkUrl: '',
+    icon: '💡',
+  },
+]
