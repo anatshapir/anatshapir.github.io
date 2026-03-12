@@ -1,10 +1,18 @@
 import React from 'react';
 import { staticMaterials, subcategoryMeta } from '@/data/materials';
 
-export function TopicGrid() {
-  // Build unique topics with counts
+interface TopicGridProps {
+  category?: 'teaching' | 'general';
+  title?: string;
+}
+
+export function TopicGrid({ category, title = 'מה תמצאו כאן?' }: TopicGridProps) {
+  const filtered = category
+    ? staticMaterials.filter(m => m.category === category)
+    : staticMaterials;
+
   const topics = Object.entries(
-    staticMaterials.reduce((acc, m) => {
+    filtered.reduce((acc, m) => {
       if (!acc[m.subcategory]) acc[m.subcategory] = 0;
       acc[m.subcategory]++;
       return acc;
@@ -14,12 +22,14 @@ export function TopicGrid() {
   return (
     <section id="topics" className="py-24 bg-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-16 space-y-4">
-          <h2 className="text-4xl sm:text-5xl font-serif font-bold text-foreground">
-            מה תמצאו כאן?
-          </h2>
-          <div className="w-24 h-1.5 bg-primary mx-auto rounded-full" />
-        </div>
+        {title && (
+          <div className="text-center mb-16 space-y-4">
+            <h2 className="text-4xl sm:text-5xl font-serif font-bold text-foreground">
+              {title}
+            </h2>
+            <div className="w-24 h-1.5 bg-primary mx-auto rounded-full" />
+          </div>
+        )}
 
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
           {topics.map(([name, count]) => {

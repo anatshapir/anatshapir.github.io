@@ -4,6 +4,7 @@ import { Footer } from '@/components/layout/Footer';
 import { Hero } from '@/components/sections/Hero';
 import { TopicGrid } from '@/components/sections/TopicGrid';
 import { TopicPage } from '@/components/sections/TopicPage';
+import { ArrowRight } from 'lucide-react';
 
 function HomePage() {
   return (
@@ -43,8 +44,6 @@ function HomePage() {
         </div>
       </section>
 
-      <TopicGrid />
-
       {/* Contact/CTA */}
       <section className="py-24 bg-primary text-primary-foreground relative overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.1),transparent)]" />
@@ -66,6 +65,24 @@ function HomePage() {
   );
 }
 
+function CategoryPage({ category, title, subtitle }: { category: 'teaching' | 'general'; title: string; subtitle: string }) {
+  return (
+    <div className="pt-24">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <a href="#" className="inline-flex items-center gap-2 text-primary hover:text-primary/80 transition-colors text-lg mb-8">
+          <ArrowRight size={20} />
+          חזרה לדף הבית
+        </a>
+        <div className="text-center mb-4 space-y-4">
+          <h1 className="text-4xl sm:text-5xl font-serif font-bold text-foreground">{title}</h1>
+          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">{subtitle}</p>
+        </div>
+      </div>
+      <TopicGrid category={category} title="" />
+    </div>
+  );
+}
+
 export default function App() {
   const [page, setPage] = useState('home')
   const [selectedTopic, setSelectedTopic] = useState('')
@@ -83,12 +100,14 @@ export default function App() {
           document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' })
         }, 100)
       } else if (hash === 'materials') {
-        setPage('home')
-        setTimeout(() => {
-          document.getElementById('topics')?.scrollIntoView({ behavior: 'smooth' })
-        }, 100)
+        setPage('materials')
+        window.scrollTo(0, 0)
+      } else if (hash === 'interesting') {
+        setPage('interesting')
+        window.scrollTo(0, 0)
       } else {
         setPage('home')
+        window.scrollTo(0, 0)
       }
     }
 
@@ -103,6 +122,20 @@ export default function App() {
 
       <main className="relative z-10">
         {page === 'home' && <HomePage />}
+        {page === 'materials' && (
+          <CategoryPage
+            category="teaching"
+            title="חומרי למידה"
+            subtitle="חומרי למידה יצירתיים ואינטראקטיביים במגוון נושאים"
+          />
+        )}
+        {page === 'interesting' && (
+          <CategoryPage
+            category="general"
+            title="דברים מעניינים"
+            subtitle="דברים שפשוט עושים טוב על הלב - ספרים, השראה, שירים והמלצות"
+          />
+        )}
         {page === 'topic' && <TopicPage topic={selectedTopic} />}
       </main>
 
