@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>דברים מעניינים | דברים שענת אוהבת במיוחד</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- Navigation -->
+  <nav class="navbar">
+    <div class="container">
+      <a href="index.html" class="nav-brand">
+        <img src="images/avatar.svg" alt="ענת" onerror="this.style.background='#F0943A';this.style.display='flex'">
+        <span>דברים שענת אוהבת במיוחד</span>
+      </a>
+      <ul class="nav-links">
+        <li><a href="index.html">דף הבית</a></li>
+        <li><a href="study-materials.html">חומרי למידה</a></li>
+        <li><a href="interesting-things.html" class="active">דברים מעניינים</a></li>
+        <li><a href="about.html">אודות</a></li>
+      </ul>
+      <button class="nav-toggle" aria-label="תפריט" aria-expanded="false">&#9776;</button>
+    </div>
+  </nav>
+
+  <!-- Page Header -->
+  <section class="page-header">
+    <div class="container">
+      <h1>&#10024; דברים מעניינים</h1>
+      <p>פינה של השראה - ספרים, שירים, וסתם דברים שעושים לי טוב ומעוררים מחשבה.</p>
+    </div>
+  </section>
+
+  <!-- Filter & Content -->
+  <section class="section">
+    <div class="container">
+
+      <!-- Filter Tags -->
+      <div class="filter-tags">
+        <button class="filter-tag active" data-category="all">הכל</button>
+        <button class="filter-tag" data-category="books">ספרים</button>
+        <button class="filter-tag" data-category="songs">שירים</button>
+        <button class="filter-tag" data-category="inspiration">השראה</button>
+        <button class="filter-tag" data-category="recommendations">המלצות</button>
+      </div>
+
+      <!-- Content Items -->
+      <!--
+        ============================================================
+        כדי להוסיף פריט חדש, העתיקו את הבלוק הבא והחליפו:
+        - href: קישור (או # אם אין קישור)
+        - data-category: קטגוריה (books / songs / inspiration / recommendations)
+        - אימוג'י באייקון
+        - כותרת (h3)
+        - תיאור (p)
+        - טקסט התגית (span.content-item-tag)
+        ============================================================
+      -->
+
+      <div class="content-item" data-category="books">
+        <div class="content-item-icon">&#128218;</div>
+        <div class="content-item-body">
+          <h3>הנסיך הקטן - אנטואן דה סנט-אכזופרי</h3>
+          <p>ספר שמלווה אותי מגיל צעיר. כל קריאה מחדש חושפת שכבה חדשה של משמעות.</p>
+        </div>
+        <span class="content-item-tag">ספרים</span>
+      </div>
+
+      <div class="content-item" data-category="inspiration">
+        <div class="content-item-icon">&#128161;</div>
+        <div class="content-item-body">
+          <h3>ציטוט שאני אוהבת</h3>
+          <p>"העולם מלא בדברים קטנים ומיוחדים, צריך רק לדעת איפה לחפש אותם."</p>
+        </div>
+        <span class="content-item-tag">השראה</span>
+      </div>
+
+      <!-- Add more items here! -->
+
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="cta-section">
+    <div class="container">
+      <h2>יש לכם המלצה?</h2>
+      <p>אני תמיד שמחה לגלות דברים חדשים. שתפו אותי בדברים שאתם אוהבים!</p>
+      <a href="mailto:anat@example.com" class="btn btn-white">שלחו לי המלצה</a>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-brand">
+          <img src="images/avatar.svg" alt="ענת" onerror="this.style.background='#F0943A';this.style.borderRadius='50%';this.style.width='56px';this.style.height='56px'">
+          <span>דברים שענת אוהבת במיוחד</span>
+        </div>
+        <p class="footer-quote">"העולם מלא בדברים קטנים ומיוחדים, צריך רק לדעת איפה לחפש אותם."</p>
+        <hr class="footer-divider">
+        <p class="footer-copy">נבנה באהבה עבור ענת &#10084; 2026</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/main.js"></script>
+</body>
+</html>
