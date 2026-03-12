@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🌳 ויזואליזציה — רקורסיה על עץ בינארי</title>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;600;800&family=Fira+Code:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0e1a;
+    --bg2: #111827;
+    --card: #1a2332;
+    --accent: #06b6d4;
+    --accent2: #8b5cf6;
+    --gold: #f59e0b;
+    --green: #10b981;
+    --red: #ef4444;
+    --text: #e2e8f0;
+    --muted: #64748b;
+    --code-bg: #0c1322;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Heebo', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+  body::before {
+    content: '';
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: radial-gradient(ellipse at 20% 50%, rgba(6,182,212,0.06) 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 20%, rgba(139,92,246,0.05) 0%, transparent 50%);
+    pointer-events: none; z-index: 0;
+  }
+  .container { position: relative; z-index: 1; max-width: 1150px; margin: 0 auto; padding: 20px; }
+
+  h1 {
+    text-align: center; font-size: 1.7em; font-weight: 800; margin-bottom: 4px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .subtitle { text-align: center; color: var(--muted); font-size: 0.85em; margin-bottom: 18px; }
+
+  /* Operation buttons */
+  .ops { display: flex; justify-content: center; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+  .ops button {
+    padding: 7px 20px; border-radius: 20px; border: 2px solid #2a2a4a;
+    background: rgba(30,30,60,0.5); color: var(--muted); font-family: 'Heebo'; font-size: 0.9em;
+    font-weight: 600; cursor: pointer; transition: all 0.25s;
+  }
+  .ops button:hover { border-color: var(--accent); color: var(--accent); }
+  .ops button.active {
+    border-color: var(--accent); color: var(--accent);
+    background: rgba(6,182,212,0.15); box-shadow: 0 0 16px rgba(6,182,212,0.1);
+  }
+
+  .layout { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; }
+  .left { flex: 1 1 520px; min-width: 320px; }
+  .right { flex: 0 1 340px; min-width: 280px; display: flex; flex-direction: column; gap: 12px; }
+
+  /* Tree canvas */
+  .tree-wrap {
+    background: var(--bg2); border-radius: 16px; border: 1px solid #1e293b;
+    padding: 8px; margin-bottom: 12px; position: relative;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.03);
+  }
+  .tree-wrap svg { width: 100%; height: auto; display: block; }
+
+  /* Controls */
+  .controls {
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    margin-bottom: 8px; flex-wrap: wrap;
+  }
+  .controls button {
+    padding: 6px 14px; border-radius: 8px; font-family: 'Heebo'; font-size: 0.85em;
+    font-weight: 600; cursor: pointer; transition: all 0.2s; border: 1px solid;
+  }
+  .controls button:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn-reset { border-color: var(--red); background: #7f1d1d; color: var(--text); }
+  .btn-back { border-color: var(--gold); background: #78350f; color: var(--text); }
+  .btn-play { border-color: var(--green); background: #14532d; color: var(--text); }
+  .btn-play.playing { border-color: var(--red); background: #7f1d1d; }
+  .btn-fwd { border-color: #3b82f6; background: #1e3a5f; color: var(--text); }
+  .step-counter { text-align: center; color: var(--muted); font-size: 0.8em; margin-bottom: 8px; }
+
+  /* Message bar */
+  .message {
+    background: rgba(6,182,212,0.08); border: 1px solid rgba(6,182,212,0.2);
+    border-radius: 10px; padding: 10px 16px; text-align: center; min-height: 44px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.95em; color: #c8dce8; font-weight: 500;
+  }
+
+  /* Code panel */
+  .code-panel {
+    background: var(--code-bg); border-radius: 12px; border: 1px solid #1e293b;
+    padding: 10px 0; overflow: hidden;
+  }
+  .code-panel .label {
+    padding: 0 14px; margin-bottom: 6px; font-size: 0.7em; font-weight: 700;
+    letter-spacing: 1.5px; color: var(--accent);
+  }
+  .code-line {
+    padding: 1px 14px; font-family: 'Fira Code', monospace; font-size: 0.78em;
+    color: #5a6a7a; white-space: pre; direction: ltr; text-align: left;
+    transition: all 0.3s; border-right: 3px solid transparent;
+  }
+  .code-line.active {
+    background: rgba(6,182,212,0.15); color: #e0f2fe;
+    border-right-color: var(--accent);
+  }
+
+  /* Call Stack */
+  .callstack {
+    background: var(--bg2); border-radius: 12px; border: 1px solid #1e293b;
+    padding: 10px 14px; min-height: 90px;
+  }
+  .callstack .label { font-size: 0.7em; font-weight: 700; letter-spacing: 1.5px; color: var(--accent); margin-bottom: 6px; }
+  .callstack-items { display: flex; flex-direction: column-reverse; gap: 3px; }
+  .stack-frame {
+    background: #16213e; border: 1px solid #2c3e6b; border-radius: 6px;
+    padding: 3px 12px; font-family: 'Fira Code', monospace; font-size: 0.8em;
+    color: #8eacc4; transition: all 0.3s;
+  }
+  .stack-frame.top { background: #2d4a7a; border-color: var(--accent); color: #e8f4fd; }
+  .stack-empty { color: #3a4a5a; font-size: 0.8em; font-style: italic; }
+
+  /* Template box */
+  .template {
+    background: rgba(139,92,246,0.08); border: 1px solid rgba(139,92,246,0.25);
+    border-radius: 12px; padding: 10px 14px;
+  }
+  .template .label { font-size: 0.7em; font-weight: 700; letter-spacing: 1px; color: #c4b5fd; margin-bottom: 5px; }
+  .template-row { font-family: 'Fira Code', monospace; font-size: 0.78em; color: #a78bfa; direction: ltr; text-align: left; }
+  .template-row .k { color: var(--muted); }
+  .template-row .base { color: var(--gold); }
+  .template-row .combine { color: var(--green); }
+
+  /* Speed */
+  .speed-wrap { display: flex; align-items: center; gap: 5px; }
+  .speed-wrap label { color: var(--muted); font-size: 0.8em; }
+  input[type=range] { width: 70px; accent-color: var(--accent); }
+
+  /* Animations */
+  @keyframes pulse { 0%,100% { filter: drop-shadow(0 0 6px rgba(6,182,212,0.4)); } 50% { filter: drop-shadow(0 0 14px rgba(6,182,212,0.7)); } }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+  .message { animation: fadeIn 0.3s ease; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>🌳 ויזואליזציה של רקורסיה על עץ בינארי</h1>
+  <p class="subtitle">צפו צעד אחר צעד כיצד הרקורסיה עוברת על העץ</p>
+
+  <div class="ops" id="ops"></div>
+
+  <div class="layout">
+    <div class="left">
+      <div class="tree-wrap"><svg id="treeSvg" viewBox="0 0 500 380"></svg></div>
+      <div class="controls">
+        <button class="btn-reset" onclick="reset()">⏮ התחלה</button>
+        <button class="btn-back" id="btnBack" onclick="stepBack()">◀ אחורה</button>
+        <button class="btn-play" id="btnPlay" onclick="togglePlay()">▶ הפעל</button>
+        <button class="btn-fwd" id="btnFwd" onclick="stepForward()">קדימה ▶</button>
+        <div class="speed-wrap">
+          <label>מהירות:</label>
+          <input type="range" min="200" max="2000" step="100" value="1000" oninput="speed=2200-this.value">
+        </div>
+      </div>
+      <div class="step-counter" id="stepCounter">צעד 0 מתוך 0</div>
+      <div class="message" id="message">לחצו ▶ או קדימה כדי להתחיל</div>
+    </div>
+    <div class="right">
+      <div class="code-panel">
+        <div class="label">CODE</div>
+        <div id="codeLines"></div>
+      </div>
+      <div class="callstack">
+        <div class="label">CALL STACK</div>
+        <div class="callstack-items" id="callStack"></div>
+      </div>
+      <div class="template">
+        <div class="label">📋 התבנית</div>
+        <div class="template-row"><span class="k">מקרה בסיס:</span> <span class="base" id="tplBase"></span></div>
+        <div class="template-row"><span class="k">שילוב:</span> <span class="combine" id="tplCombine"></span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===== TREE DATA =====
+const TREE = {val:5,left:{val:3,left:{val:1,left:null,right:null},right:{val:4,left:null,right:null}},right:{val:8,left:{val:7,left:null,right:null},right:{val:9,left:null,right:null}}};
+
+// ===== OPERATIONS =====
+const OPS = {
+  count: {
+    name:"ספירת צמתים", nameEn:"count", baseCase:"0", combine:"1 + שמאל + ימין",
+    code:["int count(Node root) {","  if (root == null)","    return 0;","  int left = count(root.left);","  int right = count(root.right);","  return 1 + left + right;","}"],
+    compute:(n,l,r)=>1+l+r, baseValue:0, fmt:v=>String(v)
+  },
+  sum: {
+    name:"סכום ערכים", nameEn:"sum", baseCase:"0", combine:"ערך + שמאל + ימין",
+    code:["int sum(Node root) {","  if (root == null)","    return 0;","  int left = sum(root.left);","  int right = sum(root.right);","  return root.val + left + right;","}"],
+    compute:(n,l,r)=>n.val+l+r, baseValue:0, fmt:v=>String(v)
+  },
+  height: {
+    name:"גובה העץ", nameEn:"height", baseCase:"-1", combine:"1 + max(שמאל, ימין)",
+    code:["int height(Node root) {","  if (root == null)","    return -1;","  int left = height(root.left);","  int right = height(root.right);","  return 1 + Math.max(left, right);","}"],
+    compute:(n,l,r)=>1+Math.max(l,r), baseValue:-1, fmt:v=>String(v)
+  },
+  max: {
+    name:"ערך מקסימלי", nameEn:"max", baseCase:"MIN_VALUE", combine:"max(ערך, שמאל, ימין)",
+    code:["int findMax(Node root) {","  if (root == null)","    return Integer.MIN_VALUE;","  int left = findMax(root.left);","  int right = findMax(root.right);","  return Math.max(root.val,","    Math.max(left, right));","}"],
+    compute:(n,l,r)=>Math.max(n.val,Math.max(l,r)), baseValue:-Infinity, fmt:v=>v===-Infinity?"MIN":String(v)
+  }
+};
+
+let currentOp = "count";
+let stepIndex = -1;
+let steps = [];
+let playing = false;
+let speed = 1200;
+let timer = null;
+
+// ===== POSITIONS =====
+const positions = {};
+const nullPositions = {};
+function assignPos(node, x, y, dx, id="root") {
+  if (!node) return;
+  positions[id] = {x, y, val: node.val, node};
+  assignPos(node.left, x-dx, y+80, dx*0.55, id+"L");
+  assignPos(node.right, x+dx, y+80, dx*0.55, id+"R");
+}
+assignPos(TREE, 250, 55, 120);
+Object.keys(positions).forEach(id => {
+  if (!positions[id+"L"]) {
+    const p = positions[id];
+    const depth = id.length - 3;
+    nullPositions[id+"L"] = {x: p.x - 120*Math.pow(0.55, depth), y: p.y+80};
+  }
+  if (!positions[id+"R"]) {
+    const p = positions[id];
+    const depth = id.length - 3;
+    nullPositions[id+"R"] = {x: p.x + 120*Math.pow(0.55, depth), y: p.y+80};
+  }
+});
+
+// ===== GENERATE STEPS =====
+function genSteps(node, op, id="root", depth=0) {
+  const s = [];
+  if (!node) {
+    s.push({type:"base",id,depth,msg:`null → מחזירים ${op.baseCase}`,ret:op.baseValue});
+    return s;
+  }
+  s.push({type:"visit",id,depth,msg:`נכנסים לצומת ${node.val}`});
+  s.push({type:"go_left",id,depth,msg:`צומת ${node.val}: קוראים רקורסיבית לשמאל`,child:id+"L"});
+  const ls = genSteps(node.left,op,id+"L",depth+1);
+  s.push(...ls);
+  const lv = ls[ls.length-1].ret;
+  s.push({type:"left_ret",id,depth,msg:`חזרנו לצומת ${node.val}: שמאל החזיר ${op.fmt(lv)}`,lv});
+  s.push({type:"go_right",id,depth,msg:`צומת ${node.val}: קוראים רקורסיבית לימין`,child:id+"R"});
+  const rs = genSteps(node.right,op,id+"R",depth+1);
+  s.push(...rs);
+  const rv = rs[rs.length-1].ret;
+  s.push({type:"right_ret",id,depth,msg:`חזרנו לצומת ${node.val}: ימין החזיר ${op.fmt(rv)}`,rv,lv});
+  const result = op.compute(node,lv,rv);
+  s.push({type:"compute",id,depth,msg:`צומת ${node.val}: מחשבים ומחזירים ${op.fmt(result)}`,ret:result,lv,rv});
+  return s;
+}
+
+// ===== RENDERING =====
+function getNodeStates() {
+  const states = {}, retVals = {};
+  if (stepIndex < 0) return {states, retVals};
+  for (let i = 0; i <= stepIndex && i < steps.length; i++) {
+    const st = steps[i];
+    if (st.type==="visit") states[st.id]="active";
+    if (st.type==="go_left"||st.type==="go_right") states[st.id]="waiting";
+    if (st.type==="left_ret"||st.type==="right_ret") states[st.id]="active";
+    if (st.type==="compute") { states[st.id]="done"; retVals[st.id]=st.ret; }
+    if (st.type==="base") { states[st.id]="base"; retVals[st.id]=st.ret; }
+  }
+  const cur = steps[stepIndex];
+  if (cur) {
+    if (cur.type==="visit") states[cur.id]="active";
+    if (cur.type==="compute") states[cur.id]="computing";
+    if (cur.type==="base") states[cur.id]="base";
+  }
+  return {states, retVals};
+}
+
+function getCallStack() {
+  const active = new Set();
+  if (stepIndex < 0) return [];
+  for (let i=0; i<=stepIndex && i<steps.length; i++) {
+    const st = steps[i];
+    if (st.type==="visit") active.add(st.id);
+    if (st.type==="base"||st.type==="compute") active.delete(st.id);
+  }
+  const frames = [];
+  for (let i=0; i<=stepIndex; i++) {
+    if (steps[i].type==="visit" && active.has(steps[i].id)) {
+      frames.push({id:steps[i].id, depth:steps[i].depth, val:positions[steps[i].id]?.val});
+    }
+  }
+  frames.sort((a,b)=>a.depth-b.depth);
+  return frames.map(f=>`${OPS[currentOp].nameEn}(${f.val})`);
+}
+
+function getHighlightLine() {
+  if (stepIndex<0||stepIndex>=steps.length) return -1;
+  const t = steps[stepIndex].type;
+  if (t==="visit") return 0;
+  if (t==="base") return 2;
+  if (t==="go_left"||t==="left_ret") return 3;
+  if (t==="go_right"||t==="right_ret") return 4;
+  if (t==="compute") return 5;
+  return -1;
+}
+
+const COLORS = {
+  idle:{fill:"#2c3e50",stroke:"#4a6785",text:"#ecf0f1"},
+  active:{fill:"#0e7490",stroke:"#06b6d4",text:"#fff"},
+  computing:{fill:"#7c3aed",stroke:"#a78bfa",text:"#fff"},
+  done:{fill:"#065f46",stroke:"#10b981",text:"#fff"},
+  waiting:{fill:"#92400e",stroke:"#f59e0b",text:"#fff"},
+  base:{fill:"#7f1d1d",stroke:"#ef4444",text:"#fca5a5"},
+};
+
+function renderTree() {
+  const svg = document.getElementById("treeSvg");
+  const {states, retVals} = getNodeStates();
+  const op = OPS[currentOp];
+  let html = '';
+
+  // Edges
+  Object.entries(positions).forEach(([id, pos]) => {
+    [id+"L", id+"R"].forEach(childId => {
+      const cp = positions[childId] || nullPositions[childId];
+      if (!cp) return;
+      const isNode = !!positions[childId];
+      const lit = states[childId] ? "#06b6d4" : "#1e293b";
+      html += `<line x1="${pos.x}" y1="${pos.y+24}" x2="${cp.x}" y2="${cp.y-(isNode?24:10)}" stroke="${lit}" stroke-width="2" style="transition:stroke 0.3s"/>`;
+    });
+  });
+
+  // Null nodes
+  Object.entries(nullPositions).forEach(([id, pos]) => {
+    const isActive = states[id]==="base";
+    const fill = isActive ? "#7f1d1d" : "#111827";
+    const stroke = isActive ? "#ef4444" : "#374151";
+    const textColor = isActive ? "#fca5a5" : "#4b5563";
+    html += `<rect x="${pos.x-18}" y="${pos.y-10}" width="36" height="20" rx="4" fill="${fill}" stroke="${stroke}" stroke-width="1.5" style="transition:all 0.3s"/>`;
+    html += `<text x="${pos.x}" y="${pos.y+1}" text-anchor="middle" dominant-baseline="middle" fill="${textColor}" font-size="10" font-weight="600" font-family="'Fira Code',monospace">null</text>`;
+  });
+
+  // Nodes
+  Object.entries(positions).forEach(([id, pos]) => {
+    const st = states[id] || "idle";
+    const c = COLORS[st];
+    const glow = st==="active" ? "filter:drop-shadow(0 0 10px rgba(6,182,212,0.6))" : st==="computing" ? "filter:drop-shadow(0 0 10px rgba(167,139,250,0.6))" : "";
+    html += `<circle cx="${pos.x}" cy="${pos.y}" r="24" fill="${c.fill}" stroke="${c.stroke}" stroke-width="3" style="transition:all 0.4s;${glow}"/>`;
+    html += `<text x="${pos.x}" y="${pos.y+1}" text-anchor="middle" dominant-baseline="middle" fill="${c.text}" font-size="16" font-weight="700" font-family="'Fira Code',monospace">${pos.val}</text>`;
+    if (retVals[id] !== undefined) {
+      html += `<rect x="${pos.x-20}" y="${pos.y+28}" width="40" height="18" rx="4" fill="#065f46" stroke="#10b981" stroke-width="1.5" style="transition:all 0.3s"/>`;
+      html += `<text x="${pos.x}" y="${pos.y+38}" text-anchor="middle" dominant-baseline="middle" fill="#d1fae5" font-size="11" font-weight="700" font-family="'Fira Code',monospace">${op.fmt(retVals[id])}</text>`;
+    }
+  });
+
+  // Legend
+  const legend = [{c:"#0e7490",l:"פעיל"},{c:"#92400e",l:"ממתין"},{c:"#7c3aed",l:"מחשב"},{c:"#065f46",l:"סיים"}];
+  legend.forEach((item,i) => {
+    html += `<circle cx="${15+i*100}" cy="355" r="6" fill="${item.c}"/>`;
+    html += `<text x="${27+i*100}" y="359" fill="#64748b" font-size="11" font-family="'Heebo',sans-serif">${item.l}</text>`;
+  });
+
+  svg.innerHTML = html;
+}
+
+function renderCode() {
+  const op = OPS[currentOp];
+  const hl = getHighlightLine();
+  const el = document.getElementById("codeLines");
+  el.innerHTML = op.code.map((line, i) =>
+    `<div class="code-line${i===hl?' active':''}">${line}</div>`
+  ).join('');
+}
+
+function renderCallStack() {
+  const stack = getCallStack();
+  const el = document.getElementById("callStack");
+  if (stack.length === 0) {
+    el.innerHTML = '<div class="stack-empty">(empty)</div>';
+    return;
+  }
+  el.innerHTML = stack.map((f, i) =>
+    `<div class="stack-frame${i===stack.length-1?' top':''}">${f}</div>`
+  ).join('');
+}
+
+function renderMessage() {
+  const el = document.getElementById("message");
+  const cur = stepIndex >= 0 && stepIndex < steps.length ? steps[stepIndex] : null;
+  el.textContent = cur ? cur.msg : "לחצו ▶ או קדימה כדי להתחיל";
+}
+
+function renderAll() {
+  renderTree();
+  renderCode();
+  renderCallStack();
+  renderMessage();
+  document.getElementById("stepCounter").textContent = `צעד ${stepIndex+1} מתוך ${steps.length}`;
+  document.getElementById("btnBack").disabled = stepIndex <= -1;
+  document.getElementById("btnFwd").disabled = stepIndex >= steps.length - 1;
+  const bp = document.getElementById("btnPlay");
+  bp.textContent = playing ? "⏸ עצור" : "▶ הפעל";
+  bp.className = playing ? "btn-play playing" : "btn-play";
+}
+
+function renderTemplate() {
+  const op = OPS[currentOp];
+  document.getElementById("tplBase").textContent = op.baseCase;
+  document.getElementById("tplCombine").textContent = op.combine;
+}
+
+// ===== CONTROLS =====
+function setOp(key) {
+  playing = false; clearTimeout(timer);
+  currentOp = key;
+  stepIndex = -1;
+  steps = genSteps(TREE, OPS[key]);
+  document.querySelectorAll('.ops button').forEach(b => b.classList.toggle('active', b.dataset.op === key));
+  renderTemplate();
+  renderAll();
+}
+
+function reset() { playing = false; clearTimeout(timer); stepIndex = -1; renderAll(); }
+function stepBack() { if (stepIndex > -1) { stepIndex--; renderAll(); } }
+function stepForward() { if (stepIndex < steps.length - 1) { stepIndex++; renderAll(); } }
+function togglePlay() {
+  playing = !playing;
+  if (playing) playTick();
+  else clearTimeout(timer);
+  renderAll();
+}
+function playTick() {
+  if (!playing) return;
+  if (stepIndex >= steps.length - 1) { playing = false; renderAll(); return; }
+  stepIndex++;
+  renderAll();
+  timer = setTimeout(playTick, speed);
+}
+
+// ===== INIT =====
+const opsEl = document.getElementById("ops");
+Object.entries(OPS).forEach(([key, op]) => {
+  const btn = document.createElement("button");
+  btn.textContent = op.name;
+  btn.dataset.op = key;
+  btn.onclick = () => setOp(key);
+  opsEl.appendChild(btn);
+});
+setOp("count");
+
+// Keyboard shortcuts
+document.addEventListener("keydown", e => {
+  if (e.key === "ArrowRight" || e.key === "ArrowLeft") {
+    // RTL: right = back, left = forward
+    if (e.key === "ArrowRight") stepBack();
+    else stepForward();
+  }
+  if (e.key === " ") { e.preventDefault(); togglePlay(); }
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,1235 @@
+<!DOCTYPE html>
+<html dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>מדריך למתחילים: פיתוח אתר ב-ASP.NET - חלק 1</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f8f9fa;
+        }
+
+        h1, h2, h3, h4 {
+            color: #0066cc;
+            margin-top: 30px;
+        }
+
+        h1 {
+            border-bottom: 2px solid #0066cc;
+            padding-bottom: 10px;
+            text-align: center;
+        }
+
+        .step {
+            background-color: white;
+            border-radius: 5px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+            .step h2 {
+                background-color: #0066cc;
+                color: white;
+                padding: 10px;
+                border-radius: 5px;
+                margin-top: 0;
+            }
+
+        .note {
+            background-color: #fff9e6;
+            border-left: 4px solid #ffcc00;
+            padding: 15px;
+            margin: 20px 0;
+        }
+
+        .code-block {
+            background-color: #f4f4f4;
+            border-left: 4px solid #0066cc;
+            padding: 15px;
+            margin: 20px 0;
+            font-family: Consolas, monospace;
+            overflow-x: auto;
+            direction: ltr;
+            text-align: left;
+        }
+
+        .screenshot {
+            max-width: 100%;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 5px;
+            margin: 20px 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: right;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        .exercise {
+            background-color: #e6f3ff;
+            border-left: 4px solid #0066cc;
+            padding: 15px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>מדריך למתחילים: פיתוח אתר ב-ASP.NET</h1>
+    <h2>חלק 1: הכרת הסביבה ויצירת דף ראשון</h2>
+
+    <div class="note">
+        <p><strong>למי מיועד המדריך?</strong> המדריך מיועד לתלמידי מדעי המחשב שאין להם ניסיון קודם בפיתוח אתרים. נתחיל מאפס ונלמד צעד אחר צעד.</p>
+    </div>
+
+    <div class="step">
+        <h2>צעד 1: התקנת Visual Studio</h2>
+        <p>Visual Studio היא סביבת הפיתוח (IDE) שבה נשתמש לבניית האתר שלנו. היא מספקת לנו את כל הכלים הנדרשים לכתיבה, עריכה, ובדיקה של הקוד שלנו.</p>
+
+        <h3>איך מתקינים?</h3>
+        <ol>
+            <li>הורידו את Visual Studio Community (גרסה חינמית) מהאתר הרשמי של Microsoft</li>
+            <li>הפעילו את תוכנת ההתקנה</li>
+            <li>בחרו ב-"ASP.NET and web development" בין רכיבי ההתקנה</li>
+            <li>המשיכו בהתקנה עד לסיומה</li>
+        </ol>
+
+        <div class="note">
+            <p><strong>חשוב:</strong> וודאו שבחרתם ב-"ASP.NET and web development" אחרת לא יהיו לכם הכלים הנדרשים לפיתוח אתרים.</p>
+        </div>
+    </div>
+
+    <div class="step">
+        <h2>צעד 2: הכרת הממשק של Visual Studio</h2>
+        <p>כאשר פותחים את Visual Studio בפעם הראשונה, התוכנה עשויה להיראות מורכבת. בואו נכיר את החלקים העיקריים:</p>
+
+        <h3>חלקים חשובים בממשק:</h3>
+        <ul>
+            <li><strong>תפריט ראשי</strong> - נמצא בחלק העליון ומכיל אפשרויות שונות כמו File, Edit, View, וכו'.</li>
+            <li><strong>Solution Explorer</strong> - בצד ימין, מציג את כל הקבצים והתיקיות בפרויקט שלכם.</li>
+            <li><strong>Toolbox</strong> - בצד שמאל, מכיל כלים ופקדים שניתן לגרור לדפים שלכם.</li>
+            <li><strong>Properties</strong> - בדרך כלל בצד ימין התחתון, מציג ומאפשר לערוך מאפיינים של האלמנט הנבחר.</li>
+            <li><strong>שטח עבודה מרכזי</strong> - האזור הגדול במרכז שבו תערכו את הקוד שלכם.</li>
+        </ul>
+
+        <h3>טיפים לשימוש ב-Visual Studio:</h3>
+        <ul>
+            <li><strong>Ctrl+S</strong> - שומר את הקובץ הנוכחי.</li>
+            <li><strong>Ctrl+Shift+S</strong> - שומר את כל הקבצים.</li>
+            <li><strong>F5</strong> - מריץ את הפרויקט עם דיבוג (אפשר לעצור את התוכנית באמצע הריצה).</li>
+            <li><strong>Ctrl+F5</strong> - מריץ את הפרויקט ללא דיבוג (מהיר יותר).</li>
+            <li><strong>Ctrl+Space</strong> - מציג השלמה אוטומטית של קוד.</li>
+        </ul>
+    </div>
+
+    <div class="step">
+        <h2>צעד 3: יצירת פרויקט ASP.NET חדש</h2>
+        <p>עכשיו נלמד איך ליצור פרויקט חדש:</p>
+
+        <ol>
+            <li>פתחו את Visual Studio</li>
+            <li>לחצו על "Create a new project" בחלון ההתחלתי</li>
+            <li>בחלון שנפתח, חפשו וסננו לפי: "ASP.NET Web Application (.NET Framework)"</li>
+            <li>לחצו על "Next"</li>
+            <li>הזינו שם לפרויקט שלכם (לדוגמה: "MyFirstWebsite")</li>
+            <li>ודאו שמיקום הפרויקט (Location) הוא תיקייה שאתם זוכרים ויכולים לגשת אליה</li>
+            <li>לחצו על "Create"</li>
+            <li>בחלון הבא, בחרו בתבנית "Empty" (ריקה) וסמנו את התיבה "Web Forms"</li>
+            <li>לחצו על "Create"</li>
+        </ol>
+
+        <div class="note">
+            <p>חשוב לשים לב לבחירה ב"Empty" עם סימון "Web Forms". זה ייצור לנו פרויקט ASP.NET בסיסי שנוכל להרחיב בקלות.</p>
+        </div>
+
+        <p>אחרי יצירת הפרויקט, תוכלו לראות בחלון Solution Explorer את המבנה הבסיסי של הפרויקט:</p>
+        <ul>
+            <li><strong>Properties</strong> - הגדרות בסיסיות של הפרויקט</li>
+            <li><strong>References</strong> - הפניות לספריות שהפרויקט משתמש בהן</li>
+            <li><strong>Web.config</strong> - קובץ תצורה המכיל הגדרות שונות של האתר</li>
+        </ul>
+    </div>
+
+    <div class="step">
+        <h2>צעד 4: הוספת תיקיות בסיסיות</h2>
+        <p>לפני שנתחיל לבנות את האתר, כדאי להוסיף תיקיות שיעזרו לנו לארגן את הפרויקט בצורה נכונה:</p>
+
+        <ol>
+            <li>לחצו קליק ימני על שם הפרויקט (בחלון Solution Explorer)</li>
+            <li>בחרו Add > New Folder</li>
+            <li>
+                צרו את התיקיות הבאות:
+                <ul>
+                    <li><strong>CSS</strong> - לקבצי עיצוב</li>
+                    <li><strong>Images</strong> - לתמונות</li>
+                    <li><strong>Scripts</strong> - לקבצי JavaScript</li>
+                </ul>
+            </li>
+        </ol>
+
+        <p>וודאו גם שיש תיקייה בשם App_Data שתשמש אותנו לאחסון נתונים:</p>
+        <ol>
+            <li>אם אינה קיימת, לחצו קליק ימני על שם הפרויקט</li>
+            <li>בחרו Add > Add ASP.NET Folder > App_Data</li>
+        </ol>
+    </div>
+
+    <div class="step">
+        <h2>צעד 5: יצירת דף HTML ראשון</h2>
+        <p>ASP.NET Web Forms משתמש בקבצי .aspx, שהם סוג של דפי HTML עם יכולות נוספות. עכשיו נייצר את הדף הראשון שלנו:</p>
+
+        <ol>
+            <li>לחצו קליק ימני על שם הפרויקט</li>
+            <li>בחרו Add > New Item</li>
+            <li>בחרו Web Form ותנו לו את השם "Default.aspx" (זהו שם חשוב מכיוון שדפדפנים מחפשים דף בשם זה כברירת מחדל)</li>
+            <li>לחצו על "Add"</li>
+        </ol>
+
+        <p>עכשיו ייפתח חלון העריכה עם הקוד ההתחלתי של הדף:</p>
+
+        <div class="code-block"><pre>
+            &lt;%@ Page Language="C#" AutoEventWireup="true" CodeBehind="Default.aspx.cs" Inherits="MyFirstWebsite.Default" %&gt;
+
+            &lt;!DOCTYPE html&gt;
+
+            &lt;html xmlns="http://www.w3.org/1999/xhtml"&gt;
+            &lt;head runat="server"&gt;
+            &lt;title&gt;&lt;/title&gt;
+            &lt;/head&gt;
+            &lt;body&gt;
+            &lt;form id="form1" runat="server"&gt;
+            &lt;div&gt;
+            &lt;/div&gt;
+            &lt;/form&gt;
+            &lt;/body&gt;
+            &lt;/html&gt;
+        </pre></div>
+
+        <h3>בואו נבין את הקוד הזה:</h3>
+        <ul>
+            <li><strong>&lt;%@ Page ... %&gt;</strong> - זוהי הוראה מיוחדת לשרת שאומרת שזהו דף ASP.NET. היא מקשרת בין דף ה-HTML (default.aspx) ובין קובץ הקוד מאחורי הקלעים (default.aspx.cs) שמכיל קוד C#.</li>
+            <li><strong>&lt;!DOCTYPE html&gt;</strong> - מגדיר שזהו דף HTML5.</li>
+            <li><strong>&lt;html&gt;</strong> - אלמנט השורש שמכיל את כל דף ה-HTML.</li>
+            <li><strong>&lt;head&gt;</strong> - מכיל מידע על הדף (כמו כותרת, קישורים לקבצי CSS, וכו').</li>
+            <li><strong>&lt;title&gt;</strong> - הכותרת שתופיע בלשונית בדפדפן.</li>
+            <li><strong>&lt;body&gt;</strong> - מכיל את כל מה שיוצג בדפדפן.</li>
+            <li><strong>&lt;form runat="server"&gt;</strong> - זהו טופס ASP.NET שמאפשר לנו להשתמש בפקדי ASP.NET. ה-runat="server" אומר שהטופס ינוהל בצד השרת.</li>
+            <li><strong>&lt;div&gt;</strong> - אלמנט בסיסי שמשמש לקיבוץ של אלמנטים אחרים.</li>
+        </ul>
+    </div>
+
+    <div class="step">
+        <h2>צעד 6: עריכת דף HTML בסיסי</h2>
+        <p>עכשיו נערוך את הדף שלנו כדי שיכיל תוכן בסיסי. נוסיף כותרת, פסקה וכמה אלמנטים בסיסיים נוספים:</p>
+
+        <div class="code-block"><pre>
+            &lt;%@ Page Language="C#" AutoEventWireup="true" CodeBehind="Default.aspx.cs" Inherits="MyFirstWebsite.Default" %&gt;
+
+            &lt;!DOCTYPE html&gt;
+
+            &lt;html xmlns="http://www.w3.org/1999/xhtml"&gt;
+            &lt;head runat="server"&gt;
+            &lt;title&gt;האתר הראשון שלי&lt;/title&gt;
+            &lt;meta charset="utf-8" /&gt;
+            &lt;/head&gt;
+            &lt;body&gt;
+            &lt;form id="form1" runat="server"&gt;
+            &lt;div&gt;
+            &lt;h1&gt;ברוכים הבאים לאתר שלי!&lt;/h1&gt;
+            &lt;p&gt;זהו האתר הראשון שלי ב-ASP.NET&lt;/p&gt;
+
+            &lt;h2&gt;נושאים באתר:&lt;/h2&gt;
+            &lt;ul&gt;
+            &lt;li&gt;נושא ראשון&lt;/li&gt;
+            &lt;li&gt;נושא שני&lt;/li&gt;
+            &lt;li&gt;נושא שלישי&lt;/li&gt;
+            &lt;/ul&gt;
+
+            &lt;p&gt;לחצו &lt;a href="#"&gt;כאן&lt;/a&gt; לקריאה נוספת.&lt;/p&gt;
+            &lt;/div&gt;
+            &lt;/form&gt;
+            &lt;/body&gt;
+            &lt;/html&gt;
+        </pre></div>
+
+        <h3>השינויים שביצענו:</h3>
+        <ul>
+            <li>הוספנו כותרת בתג &lt;title&gt;</li>
+            <li>הוספנו &lt;meta charset="utf-8" /&gt; כדי שהדפדפן יוכל להציג עברית כראוי</li>
+            <li>הוספנו כותרת ראשית &lt;h1&gt;</li>
+            <li>הוספנו פסקת טקסט &lt;p&gt;</li>
+            <li>הוספנו כותרת משנית &lt;h2&gt;</li>
+            <li>הוספנו רשימה לא ממוספרת &lt;ul&gt; עם פריטים &lt;li&gt;</li>
+            <li>הוספנו קישור בתג &lt;a&gt;</li>
+        </ul>
+
+        <h3>הרצת האתר:</h3>
+        <p>כדי לראות את הדף שלנו בפעולה:</p>
+        <ol>
+            <li>שמרו את הקובץ (Ctrl+S)</li>
+            <li>לחצו על F5 או על הכפתור ▶️ (Start) בסרגל הכלים</li>
+            <li>הדפדפן ייפתח ויציג את האתר שלכם</li>
+        </ol>
+
+        <div class="note">
+            <p><strong>שימו לב:</strong> אם הטקסט בעברית לא מוצג כראוי, וודאו שהוספתם את השורה &lt;meta charset="utf-8" /&gt; בתוך תג ה-&lt;head&gt;.</p>
+        </div>
+    </div>
+
+    <div class="step">
+        <h2>צעד 7: למידה על HTML - תגיות בסיסיות</h2>
+        <p>כעת נלמד על התגיות הבסיסיות ב-HTML שכדאי להכיר:</p>
+
+        <table>
+            <tr>
+                <th>תגית</th>
+                <th>תיאור</th>
+                <th>דוגמה</th>
+            </tr>
+            <tr>
+                <td>&lt;h1&gt; עד &lt;h6&gt;</td>
+                <td>כותרות בגדלים שונים (h1 הגדולה ביותר, h6 הקטנה ביותר)</td>
+                <td>&lt;h1&gt;כותרת ראשית&lt;/h1&gt;</td>
+            </tr>
+            <tr>
+                <td>&lt;p&gt;</td>
+                <td>פסקה</td>
+                <td>&lt;p&gt;זוהי פסקת טקסט.&lt;/p&gt;</td>
+            </tr>
+            <tr>
+                <td>&lt;a&gt;</td>
+                <td>קישור (לינק)</td>
+                <td>&lt;a href="page2.aspx"&gt;לדף הבא&lt;/a&gt;</td>
+            </tr>
+            <tr>
+                <td>&lt;img&gt;</td>
+                <td>תמונה</td>
+                <td>&lt;img src="Images/pic.jpg" alt="תיאור התמונה" /&gt;</td>
+            </tr>
+            <tr>
+                <td>&lt;ul&gt; ו-&lt;li&gt;</td>
+                <td>רשימה לא ממוספרת ופריטי רשימה</td>
+                <td>&lt;ul&gt;<br>&nbsp;&nbsp;&lt;li&gt;פריט 1&lt;/li&gt;<br>&nbsp;&nbsp;&lt;li&gt;פריט 2&lt;/li&gt;<br>&lt;/ul&gt;</td>
+            </tr>
+            <tr>
+                <td>&lt;ol&gt; ו-&lt;li&gt;</td>
+                <td>רשימה ממוספרת ופריטי רשימה</td>
+                <td>&lt;ol&gt;<br>&nbsp;&nbsp;&lt;li&gt;פריט 1&lt;/li&gt;<br>&nbsp;&nbsp;&lt;li&gt;פריט 2&lt;/li&gt;<br>&lt;/ol&gt;</td>
+            </tr>
+            <tr>
+                <td>&lt;div&gt;</td>
+                <td>מיכל כללי לקיבוץ אלמנטים (בלוק)</td>
+                <td>&lt;div&gt;תוכן כלשהו&lt;/div&gt;</td>
+            </tr>
+            <tr>
+                <td>&lt;span&gt;</td>
+                <td>מיכל לטקסט (שורה)</td>
+                <td>&lt;span&gt;טקסט מודגש&lt;/span&gt;</td>
+            </tr>
+            <tr>
+                <td>&lt;br&gt;</td>
+                <td>שבירת שורה</td>
+                <td>שורה ראשונה&lt;br&gt;שורה שנייה</td>
+            </tr>
+            <tr>
+                <td>&lt;hr&gt;</td>
+                <td>קו אופקי</td>
+                <td>טקסט&lt;hr&gt;טקסט נוסף</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="step">
+        <h2>צעד 8: למידה על טבלאות בHTML</h2>
+        <p>טבלאות הן דרך נוחה להציג מידע מסודר בשורות ועמודות. בואו נלמד איך ליצור טבלה בסיסית:</p>
+
+        <div class="code-block"><pre>
+            &lt;table&gt;
+            &lt;caption&gt;כותרת הטבלה&lt;/caption&gt;
+            &lt;thead&gt;
+            &lt;tr&gt;
+            &lt;th&gt;כותרת עמודה 1&lt;/th&gt;
+            &lt;th&gt;כותרת עמודה 2&lt;/th&gt;
+            &lt;th&gt;כותרת עמודה 3&lt;/th&gt;
+            &lt;/tr&gt;
+            &lt;/thead&gt;
+            &lt;tbody&gt;
+            &lt;tr&gt;
+            &lt;td&gt;נתון 1,1&lt;/td&gt;
+            &lt;td&gt;נתון 1,2&lt;/td&gt;
+            &lt;td&gt;נתון 1,3&lt;/td&gt;
+            &lt;/tr&gt;
+            &lt;tr&gt;
+            &lt;td&gt;נתון 2,1&lt;/td&gt;
+            &lt;td&gt;נתון 2,2&lt;/td&gt;
+            &lt;td&gt;נתון 2,3&lt;/td&gt;
+            &lt;/tr&gt;
+            &lt;/tbody&gt;
+            &lt;/table&gt;
+        </pre></div>
+
+        <h3>הסבר על תגיות הטבלה:</h3>
+        <ul>
+            <li><strong>&lt;table&gt;</strong> - מגדיר טבלה</li>
+            <li><strong>&lt;caption&gt;</strong> - כותרת הטבלה (אופציונלי)</li>
+            <li><strong>&lt;thead&gt;</strong> - מכיל את הכותרות של העמודות</li>
+            <li><strong>&lt;tbody&gt;</strong> - מכיל את הנתונים העיקריים בטבלה</li>
+            <li><strong>&lt;tr&gt;</strong> - מגדיר שורה בטבלה (Table Row)</li>
+            <li><strong>&lt;th&gt;</strong> - מגדיר תא כותרת (Table Header), בדרך כלל מודגש ומיושר למרכז</li>
+            <li><strong>&lt;td&gt;</strong> - מגדיר תא נתונים רגיל (Table Data)</li>
+        </ul>
+
+        <h3>מיזוג תאים בטבלה:</h3>
+        <p>אפשר למזג תאים לרוחב או לגובה באמצעות המאפיינים colspan ו-rowspan:</p>
+
+        <div class="code-block"><pre>
+            &lt;table&gt;
+            &lt;tr&gt;
+            &lt;td colspan="2"&gt;תא שמתפרס על פני 2 עמודות&lt;/td&gt;
+            &lt;/tr&gt;
+            &lt;tr&gt;
+            &lt;td rowspan="2"&gt;תא שמתפרס על פני 2 שורות&lt;/td&gt;
+            &lt;td&gt;תא רגיל&lt;/td&gt;
+            &lt;/tr&gt;
+            &lt;tr&gt;
+            &lt;td&gt;תא רגיל נוסף&lt;/td&gt;
+            &lt;/tr&gt;
+            &lt;/table&gt;
+        </pre></div>
+
+        <h3>בואו נוסיף טבלה לדף שלנו:</h3>
+        <p>נוסיף טבלה פשוטה לדף שיצרנו:</p>
+
+        <div class="code-block"><pre>
+            &lt;h2&gt;מערכת שעות:&lt;/h2&gt;
+            &lt;table&gt;
+            &lt;tr&gt;
+            &lt;th&gt;יום&lt;/th&gt;
+            &lt;th&gt;8:00-10:00&lt;/th&gt;
+            &lt;th&gt;10:00-12:00&lt;/th&gt;
+            &lt;th&gt;12:00-14:00&lt;/th&gt;
+            &lt;/tr&gt;
+            &lt;tr&gt;
+            &lt;td&gt;ראשון&lt;/td&gt;
+            &lt;td&gt;מתמטיקה&lt;/td&gt;
+            &lt;td&gt;אנגלית&lt;/td&gt;
+            &lt;td&gt;מדעי המחשב&lt;/td&gt;
+            &lt;/tr&gt;
+            &lt;tr&gt;
+            &lt;td&gt;שני&lt;/td&gt;
+            &lt;td&gt;היסטוריה&lt;/td&gt;
+            &lt;td colspan="2"&gt;פרויקט מיוחד&lt;/td&gt;
+            &lt;/tr&gt;
+            &lt;tr&gt;
+            &lt;td&gt;שלישי&lt;/td&gt;
+            &lt;td&gt;ספרות&lt;/td&gt;
+            &lt;td&gt;פיזיקה&lt;/td&gt;
+            &lt;td&gt;כימיה&lt;/td&gt;
+            &lt;/tr&gt;
+            &lt;/table&gt;
+        </pre></div>
+
+        <p>הוסיפו את הקוד הזה לדף שלכם והריצו אותו כדי לראות את התוצאה. שימו לב שבשלב זה הטבלה תיראה בסיסית מאוד, ללא עיצוב.</p>
+    </div>
+
+    <div class="step">
+        <h2>צעד 9: למידה על טפסים בHTML</h2>
+                    <p>טפסים (forms) משמשים לאיסוף מידע מהמשתמשים. ב-ASP.NET, אנחנו כבר נמצאים בתוך טופס מובנה (&lt;form runat="server"&gt;), אבל חשוב להבין את המבנה הבסיסי של טפסים ואיך משתמשים בהם:</p>
+
+                    <h3>רכיבי טופס בסיסיים:</h3>
+                    <table>
+                        <tr>
+                            <th>סוג שדה</th>
+                            <th>תגית HTML</th>
+                            <th>תיאור</th>
+                            <th>דוגמה</th>
+                        </tr>
+                        <tr>
+                            <td>שדה טקסט</td>
+                            <td>&lt;input type="text"&gt;</td>
+                            <td>שדה להזנת טקסט בשורה אחת</td>
+                            <td>&lt;input type="text" name="username" /&gt;</td>
+                        </tr>
+                        <tr>
+                            <td>סיסמה</td>
+                            <td>&lt;input type="password"&gt;</td>
+                            <td>שדה להזנת סיסמה (הטקסט מוסתר)</td>
+                            <td>&lt;input type="password" name="password" /&gt;</td>
+                        </tr>
+                        <tr>
+                            <td>תיבת סימון</td>
+                            <td>&lt;input type="checkbox"&gt;</td>
+                            <td>תיבה שאפשר לסמן או לא</td>
+                            <td>&lt;input type="checkbox" name="agree" /&gt; אני מסכים</td>
+                        </tr>
+                        <tr>
+                            <td>כפתור רדיו</td>
+                            <td>&lt;input type="radio"&gt;</td>
+                            <td>כפתור בחירה (אפשר לבחור אחד מקבוצה)</td>
+                            <td>&lt;input type="radio" name="gender" value="male" /&gt; זכר<br>&lt;input type="radio" name="gender" value="female" /&gt; נקבה</td>
+                        </tr>
+                        <tr>
+                            <td>תיבת בחירה</td>
+                            <td>&lt;select&gt; ו-&lt;option&gt;</td>
+                            <td>רשימה נפתחת לבחירה</td>
+                            <td>&lt;select name="city"&gt;<br>&nbsp;&nbsp;&lt;option value="tlv"&gt;תל אביב&lt;/option&gt;<br>&nbsp;&nbsp;&lt;option value="jer"&gt;ירושלים&lt;/option&gt;<br>&lt;/select&gt;</td>
+                        </tr>
+                        <tr>
+                            <td>אזור טקסט</td>
+                            <td>&lt;textarea&gt;</td>
+                            <td>שדה להזנת טקסט במספר שורות</td>
+                            <td>&lt;textarea name="comments" rows="4" cols="50"&gt;&lt;/textarea&gt;</td>
+                        </tr>
+                        <tr>
+                            <td>כפתור שליחה</td>
+                            <td>&lt;input type="submit"&gt;</td>
+                            <td>כפתור לשליחת הטופס</td>
+                            <td>&lt;input type="submit" value="שלח" /&gt;</td>
+                        </tr>
+                        <tr>
+                            <td>כפתור איפוס</td>
+                            <td>&lt;input type="reset"&gt;</td>
+                            <td>כפתור לאיפוס הטופס</td>
+                            <td>&lt;input type="reset" value="נקה" /&gt;</td>
+                        </tr>
+                    </table>
+
+                    <div class="note">
+                        <p><strong>שימו לב:</strong> המאפיין <code>name</code> הוא חשוב מאוד בשדות טופס! הוא משמש כמזהה של השדה כאשר הטופס נשלח.</p>
+                    </div>
+
+                    <h3>דוגמה לטופס HTML בסיסי:</h3>
+
+                    <div class="code-block"><pre>
+                        &lt;form action="process.aspx" method="post"&gt;
+                        &lt;div&gt;
+                        &lt;label for="fullname"&gt;שם מלא:&lt;/label&gt;
+                        &lt;input type="text" id="fullname" name="fullname" /&gt;
+                        &lt;/div&gt;
+
+                        &lt;div&gt;
+                        &lt;label for="email"&gt;אימייל:&lt;/label&gt;
+                        &lt;input type="email" id="email" name="email" /&gt;
+                        &lt;/div&gt;
+
+                        &lt;div&gt;
+                        &lt;label for="age"&gt;גיל:&lt;/label&gt;
+                        &lt;input type="number" id="age" name="age" min="1" max="120" /&gt;
+                        &lt;/div&gt;
+
+                        &lt;div&gt;
+                        &lt;label&gt;מגדר:&lt;/label&gt;
+                        &lt;input type="radio" id="male" name="gender" value="male" /&gt;
+                        &lt;label for="male"&gt;זכר&lt;/label&gt;
+                        &lt;input type="radio" id="female" name="gender" value="female" /&gt;
+                        &lt;label for="female"&gt;נקבה&lt;/label&gt;
+                        &lt;/div&gt;
+
+                        &lt;div&gt;
+                        &lt;label for="city"&gt;עיר:&lt;/label&gt;
+                        &lt;select id="city" name="city"&gt;
+                        &lt;option value=""&gt;בחר עיר&lt;/option&gt;
+                        &lt;option value="tlv"&gt;תל אביב&lt;/option&gt;
+                        &lt;option value="jer"&gt;ירושלים&lt;/option&gt;
+                        &lt;option value="hfa"&gt;חיפה&lt;/option&gt;
+                        &lt;/select&gt;
+                        &lt;/div&gt;
+
+                        &lt;div&gt;
+                        &lt;label for="comments"&gt;הערות:&lt;/label&gt;
+                        &lt;textarea id="comments" name="comments" rows="4" cols="30"&gt;&lt;/textarea&gt;
+                        &lt;/div&gt;
+
+                        &lt;div&gt;
+                        &lt;input type="checkbox" id="agree" name="agree" value="yes" /&gt;
+                        &lt;label for="agree"&gt;אני מסכים לתנאי השימוש&lt;/label&gt;
+                        &lt;/div&gt;
+
+                        &lt;div&gt;
+                        &lt;input type="submit" value="שלח" /&gt;
+                        &lt;input type="reset" value="נקה" /&gt;
+                        &lt;/div&gt;
+                        &lt;/form&gt;
+                    </pre></div>
+
+                    <h3>הסבר על מאפייני טפסים חשובים:</h3>
+                    <ul>
+                        <li><strong>action</strong> - כתובת הדף שאליו יישלחו הנתונים כשהטופס מוגש</li>
+                        <li><strong>method</strong> - שיטת השליחה (get או post). בדרך כלל משתמשים ב-post לטפסים</li>
+                        <li><strong>id</strong> - מזהה ייחודי לאלמנט, משמש בעיקר ל-JavaScript וCSS</li>
+                        <li><strong>name</strong> - שם השדה כפי שיישלח לשרת</li>
+                        <li><strong>value</strong> - הערך ההתחלתי או הערך שיישלח לשרת</li>
+                        <li><strong>placeholder</strong> - טקסט שיוצג בשדה כהנחיה למשתמש ונעלם כשמתחילים להקליד</li>
+                        <li><strong>required</strong> - מסמן שהשדה הוא שדה חובה</li>
+                        <li><strong>disabled</strong> - מבטל את האפשרות לערוך את השדה</li>
+                        <li><strong>readonly</strong> - הופך את השדה לקריאה בלבד (לא ניתן לערוך)</li>
+                    </ul>
+
+                    <h3>טפסים ב-ASP.NET:</h3>
+                    <p>ב-ASP.NET Web Forms, אנחנו משתמשים בפקדי שרת (Server Controls) במקום אלמנטי HTML רגילים. הם נראים דומה, אבל יש להם תחילית <code>asp:</code> והם כוללים את המאפיין <code>runat="server"</code>. היתרון בשימוש בפקדים אלה הוא שאפשר לגשת אליהם ישירות מקוד C# שכותבים בקובץ code-behind.</p>
+
+                    <h3>פקדי ASP.NET נפוצים לטפסים:</h3>
+                    <table>
+                        <tr>
+                            <th>פקד ASP.NET</th>
+                            <th>מקביל ב-HTML</th>
+                            <th>תיאור</th>
+                            <th>דוגמה</th>
+                        </tr>
+                        <tr>
+                            <td>TextBox</td>
+                            <td>input type="text"</td>
+                            <td>שדה טקסט</td>
+                            <td>&lt;asp:TextBox ID="txtName" runat="server"&gt;&lt;/asp:TextBox&gt;</td>
+                        </tr>
+                        <tr>
+                            <td>DropDownList</td>
+                            <td>select</td>
+                            <td>רשימה נפתחת</td>
+                            <td>&lt;asp:DropDownList ID="ddlCity" runat="server"&gt;<br>&nbsp;&nbsp;&lt;asp:ListItem Text="בחר עיר" Value="" /&gt;<br>&nbsp;&nbsp;&lt;asp:ListItem Text="תל אביב" Value="tlv" /&gt;<br>&lt;/asp:DropDownList&gt;</td>
+                        </tr>
+                        <tr>
+                            <td>RadioButton</td>
+                            <td>input type="radio"</td>
+                            <td>כפתור רדיו</td>
+                            <td>&lt;asp:RadioButton ID="rbMale" runat="server" GroupName="Gender" Text="זכר" /&gt;</td>
+                        </tr>
+                        <tr>
+                            <td>CheckBox</td>
+                            <td>input type="checkbox"</td>
+                            <td>תיבת סימון</td>
+                            <td>&lt;asp:CheckBox ID="chkAgree" runat="server" Text="אני מסכים" /&gt;</td>
+                        </tr>
+                        <tr>
+                            <td>Button</td>
+                            <td>input type="button"</td>
+                            <td>כפתור</td>
+                            <td>&lt;asp:Button ID="btnSubmit" runat="server" Text="שלח" OnClick="btnSubmit_Click" /&gt;</td>
+                        </tr>
+                        <tr>
+                            <td>Label</td>
+                            <td>span</td>
+                            <td>תווית להצגת טקסט</td>
+                            <td>&lt;asp:Label ID="lblResult" runat="server" Text=""&gt;&lt;/asp:Label&gt;</td>
+                        </tr>
+                    </table>
+
+                    <p>דוגמה לשימוש בפקדי ASP.NET בטופס:</p>
+
+                    <div class="code-block"><pre>
+                        &lt;div&gt;
+                        &lt;asp:Label ID="lblName" runat="server" Text="שם מלא:"&gt;&lt;/asp:Label&gt;
+                        &lt;asp:TextBox ID="txtName" runat="server"&gt;&lt;/asp:TextBox&gt;
+                        &lt;/div&gt;
+
+                        &lt;div&gt;
+                        &lt;asp:Button ID="btnSubmit" runat="server" Text="שלח" OnClick="btnSubmit_Click" /&gt;
+                        &lt;/div&gt;
+                    </pre></div>
+
+                    <p>המאפיין <code>OnClick="btnSubmit_Click"</code> מקשר את הכפתור לפונקציה בשם <code>btnSubmit_Click</code> בקובץ ה-Code Behind (קובץ ה-C#) שתרוץ כאשר לוחצים על הכפתור.</p>
+                </div>
+
+                <div class="step">
+                    <h2>צעד 10: יצירת דף "צור קשר" בסיסי</h2>
+                    <p>עכשיו בואו ניישם את מה שלמדנו וניצור דף חדש עם טופס "צור קשר" בסיסי:</p>
+
+                    <ol>
+                        <li>לחצו קליק ימני על שם הפרויקט</li>
+                        <li>בחרו Add > New Item</li>
+                        <li>בחרו Web Form ותנו לו את השם "Contact.aspx"</li>
+                        <li>לחצו על "Add"</li>
+                    </ol>
+
+                    <p>עכשיו נערוך את הדף החדש כך שיכלול טופס צור קשר:</p>
+
+                    <div class="code-block"><pre>
+                        &lt;%@ Page Language="C#" AutoEventWireup="true" CodeBehind="Contact.aspx.cs" Inherits="MyFirstWebsite.Contact" %&gt;
+
+                        &lt;!DOCTYPE html&gt;
+
+                        &lt;html xmlns="http://www.w3.org/1999/xhtml"&gt;
+                        &lt;head runat="server"&gt;
+                        &lt;title&gt;צור קשר - האתר שלי&lt;/title&gt;
+                        &lt;meta charset="utf-8" /&gt;
+                        &lt;/head&gt;
+                        &lt;body&gt;
+                        &lt;form id="form1" runat="server"&gt;
+                        &lt;div&gt;
+                        &lt;h1&gt;צור קשר&lt;/h1&gt;
+                        &lt;p&gt;מלאו את הפרטים בטופס כדי ליצור איתנו קשר:&lt;/p&gt;
+
+                        &lt;div&gt;
+                        &lt;asp:Label ID="lblName" runat="server" Text="שם מלא:"&gt;&lt;/asp:Label&gt;
+                        &lt;asp:TextBox ID="txtName" runat="server"&gt;&lt;/asp:TextBox&gt;
+                        &lt;/div&gt;
+                        &lt;br /&gt;
+
+                        &lt;div&gt;
+                        &lt;asp:Label ID="lblEmail" runat="server" Text="אימייל:"&gt;&lt;/asp:Label&gt;
+                        &lt;asp:TextBox ID="txtEmail" runat="server" &gt;&lt;/asp:TextBox&gt;
+                        &lt;/div&gt;
+                        &lt;br /&gt;
+
+                        &lt;div&gt;
+                        &lt;asp:Label ID="lblSubject" runat="server" Text="נושא:"&gt;&lt;/asp:Label&gt;
+                        &lt;asp:DropDownList ID="ddlSubject" runat="server"&gt;
+                        &lt;asp:ListItem Text="בחר נושא" Value="" /&gt;
+                        &lt;asp:ListItem Text="שאלה כללית" Value="general" /&gt;
+                        &lt;asp:ListItem Text="תמיכה טכנית" Value="support" /&gt;
+                        &lt;asp:ListItem Text="הצעת שיפור" Value="suggestion" /&gt;
+                        &lt;asp:ListItem Text="אחר" Value="other" /&gt;
+                        &lt;/asp:DropDownList&gt;
+                        &lt;/div&gt;
+                        &lt;br /&gt;
+
+                        &lt;div&gt;
+                        &lt;asp:Label ID="lblMessage" runat="server" Text="הודעה:"&gt;&lt;/asp:Label&gt;
+                        &lt;asp:TextBox ID="txtMessage" runat="server" TextMode="MultiLine" Rows="5" Columns="40"&gt;&lt;/asp:TextBox&gt;
+                        &lt;/div&gt;
+                        &lt;br /&gt;
+
+                        &lt;div&gt;
+                        &lt;asp:CheckBox ID="chkSubscribe" runat="server" Text="אני מעוניין לקבל עדכונים במייל" /&gt;
+                        &lt;/div&gt;
+                        &lt;br /&gt;
+
+                        &lt;div&gt;
+                        &lt;asp:Button ID="btnSubmit" runat="server" Text="שלח" OnClick="btnSubmit_Click" /&gt;
+                        &lt;asp:Button ID="btnReset" runat="server" Text="נקה" OnClick="btnReset_Click" /&gt;
+                        &lt;/div&gt;
+                        &lt;br /&gt;
+
+                        &lt;asp:Label ID="lblResult" runat="server" Text="" ForeColor="Green"&gt;&lt;/asp:Label&gt;
+
+                        &lt;div&gt;
+                        &lt;a href="Default.aspx"&gt;חזרה לדף הבית&lt;/a&gt;
+                        &lt;/div&gt;
+                        &lt;/div&gt;
+                        &lt;/form&gt;
+                        &lt;/body&gt;
+                        &lt;/html&gt;
+                    </pre></div>
+
+                    <h3>ניתוח קוד הדף:</h3>
+                    <ul>
+                        <li>הוספנו פקדי ASP.NET במקום תגיות HTML רגילות</li>
+                        <li>לכל פקד יש <code>ID</code> ייחודי שנוכל להשתמש בו בקוד C#</li>
+                        <li>לכפתורים יש מאפיין <code>OnClick</code> שמקשר אותם לפונקציות בקוד C#</li>
+                        <li>הוספנו <code>TextMode="MultiLine"</code> לשדה ההודעה כדי לאפשר הזנת טקסט במספר שורות</li>
+                        <li>הוספנו תגית <code>Label</code> בשם <code>lblResult</code> להצגת הודעות למשתמש</li>
+                    </ul>
+
+                    <p>כעת נפתח את הקובץ Code Behind כדי לטפל באירועים. לחצו על "Contact.aspx.cs" ב-Solution Explorer (או לחצו קליק ימני על הדף ובחרו View Code).</p>
+
+                    <div class="code-block"><pre>
+                        using System;
+                        using System.Collections.Generic;
+                        using System.Linq;
+                        using System.Web;
+                        using System.Web.UI;
+                        using System.Web.UI.WebControls;
+
+                        namespace MyFirstWebsite
+                        {
+                        public partial class Contact : System.Web.UI.Page
+                        {
+                        protected void Page_Load(object sender, EventArgs e)
+                        {
+                        // קוד שירוץ בכל פעם שהדף נטען
+                        if (!IsPostBack)
+                        {
+                        // קוד שירוץ רק בטעינה הראשונה של הדף (לא בשליחת טופס)
+                        lblResult.Text = "";
+                        }
+                        }
+
+                        protected void btnSubmit_Click(object sender, EventArgs e)
+                        {
+                        // קוד שירוץ כאשר לוחצים על כפתור "שלח"
+
+                        // בדיקה שהשדות החשובים אינם ריקים
+                        if (string.IsNullOrEmpty(txtName.Text) || string.IsNullOrEmpty(txtEmail.Text) ||
+                        string.IsNullOrEmpty(ddlSubject.SelectedValue) || string.IsNullOrEmpty(txtMessage.Text))
+                        {
+                        lblResult.Text = "אנא מלא את כל השדות הנדרשים";
+                        lblResult.ForeColor = System.Drawing.Color.Red;
+                        return;
+                        }
+
+                        // אם הגענו לכאן, כל השדות מלאים ואפשר לטפל בנתונים
+                        // במקרה אמיתי, כאן היינו שולחים את הטופס במייל או שומרים במסד נתונים
+
+                        // מציגים הודעת הצלחה
+                        lblResult.Text = "ההודעה נשלחה בהצלחה! נחזור אליך בהקדם.";
+                        lblResult.ForeColor = System.Drawing.Color.Green;
+
+                        // מנקים את השדות
+                        ClearForm();
+                        }
+
+                        protected void btnReset_Click(object sender, EventArgs e)
+                        {
+                        // קוד שירוץ כאשר לוחצים על כפתור "נקה"
+                        ClearForm();
+                        lblResult.Text = "";
+                        }
+
+                        private void ClearForm()
+                        {
+                        // פונקציה לניקוי כל השדות בטופס
+                        txtName.Text = "";
+                        txtEmail.Text = "";
+                        ddlSubject.SelectedIndex = 0; // בחירת האפשרות הראשונה
+                        txtMessage.Text = "";
+                        chkSubscribe.Checked = false;
+                        }
+                        }
+                        }
+                    </pre></div>
+
+                    <h3>ניתוח קוד C#:</h3>
+                    <ul>
+                        <li><strong>Page_Load</strong> - מתבצע בכל טעינה של הדף. השימוש ב-<code>if (!IsPostBack)</code> מוודא שקוד מסוים ירוץ רק בטעינה הראשונה של הדף ולא בכל פעם שהטופס נשלח.</li>
+                        <li><strong>btnSubmit_Click</strong> - מתבצע כאשר לוחצים על כפתור השליחה. כאן אנחנו בודקים שכל השדות מלאים ומטפלים בנתונים.</li>
+                        <li><strong>btnReset_Click</strong> - מתבצע כאשר לוחצים על כפתור האיפוס. פשוט מנקה את כל השדות.</li>
+                        <li><strong>ClearForm</strong> - פונקציה פרטית שאנחנו יצרנו כדי לנקות את כל השדות בטופס. שימו לב איך אנחנו ניגשים ישירות לפקדים לפי ה-ID שלהם.</li>
+                    </ul>
+
+                    <p>עכשיו נעדכן את הדף הראשי שלנו (Default.aspx) כדי שיכלול קישור לדף צור הקשר. נוסיף את השורה הבאה בתוך ה-&lt;div&gt; הראשי:</p>
+
+                    <div class="code-block"><pre>
+                        &lt;p&gt;לחצו &lt;a href="Contact.aspx"&gt;כאן&lt;/a&gt; ליצירת קשר.&lt;/p&gt;
+                    </div></pre>
+
+                    <p>שמרו את כל הקבצים והריצו את האתר. נסו לעבור בין הדפים וגם למלא את טופס יצירת הקשר ולשלוח אותו.</p>
+
+                    <div class="note">
+                        <p><strong>הסבר:</strong> כשאתם לוחצים על "שלח", מתבצע Post-back - כלומר, הדף נשלח חזרה לשרת, שם מתבצעת הפונקציה <code>btnSubmit_Click</code>, ואז הדף מוחזר ללקוח עם תוצאות העיבוד (במקרה שלנו, ההודעה "ההודעה נשלחה בהצלחה"). זהו מחזור החיים הבסיסי של דף ASP.NET.</p>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <h2>צעד 11: הבנת מאפיינים מיוחדים בפקדי ASP.NET</h2>
+                    <p>פקדי ASP.NET מספקים פונקציונליות מתקדמת יותר מאשר תגיות HTML רגילות. הנה כמה מאפיינים מיוחדים:</p>
+
+                    <h3>מאפייני TextBox:</h3>
+                    <ul>
+                        <li><strong>TextMode</strong> - מגדיר את סוג התיבה: SingleLine (ברירת מחדל), MultiLine (מספר שורות), או Password (להסתרת הקלט)</li>
+                        <li><strong>MaxLength</strong> - המספר המקסימלי של תווים שאפשר להזין</li>
+                        <li><strong>Rows</strong> - מספר השורות (למצב MultiLine)</li>
+                        <li><strong>Columns</strong> - מספר העמודות (למצב MultiLine)</li>
+                        <li><strong>ReadOnly</strong> - האם השדה לקריאה בלבד</li>
+                    </ul>
+                </div>
+
+                    <div class="step">
+                        <h2>צעד 11: הבנת מאפיינים מיוחדים בפקדי ASP.NET</h2>
+
+                        <h3>מאפייני DropDownList:</h3>
+                        <ul>
+                            <li><strong>AutoPostBack</strong> - אם מוגדר כ-true, הדף יישלח לשרת אוטומטית כאשר משנים את הבחירה</li>
+                            <li><strong>SelectedIndex</strong> - האינדקס של הפריט הנבחר</li>
+                            <li><strong>SelectedValue</strong> - הערך של הפריט הנבחר</li>
+                            <li><strong>SelectedItem</strong> - אובייקט המייצג את הפריט הנבחר</li>
+                            <li><strong>Items</strong> - אוסף של כל הפריטים ברשימה</li>
+                        </ul>
+
+                        <h3>מאפייני Button:</h3>
+                        <ul>
+                            <li><strong>CommandName</strong> - שם הפקודה (משמש כאשר יש מספר כפתורים שמפעילים את אותה פונקציה)</li>
+                            <li><strong>CommandArgument</strong> - פרמטר שניתן להעביר לפונקציה</li>
+                            <li><strong>CausesValidation</strong> - האם הכפתור יגרום לבדיקת תקינות (validation) של הטופס בעת לחיצה</li>
+                            <li><strong>PostBackUrl</strong> - כתובת URL שהדף יועבר אליה בעת לחיצה</li>
+                        </ul>
+
+                        <h3>מאפייני Label:</h3>
+                        <ul>
+                            <li><strong>Text</strong> - הטקסט שיוצג</li>
+                            <li><strong>ForeColor</strong> - צבע הטקסט</li>
+                            <li><strong>BackColor</strong> - צבע הרקע</li>
+                            <li><strong>Font</strong> - מאפשר לשנות את הגופן, הגודל, וכו'</li>
+                        </ul>
+
+                        <div class="note">
+                            <p><strong>הערה חשובה:</strong> פקדי ASP.NET רבים תומכים במאפיינים דומים כמו <code>Enabled</code> (האם הפקד פעיל), <code>Visible</code> (האם הפקד מוצג), <code>CssClass</code> (מחלקת CSS), ועוד.</p>
+                        </div>
+                    </div>
+
+                    <div class="step">
+                        <h2>צעד 12: יסודות JavaScript</h2>
+                        <p>JavaScript היא שפת תכנות המאפשרת להוסיף אינטראקטיביות בצד הלקוח (בדפדפן). בואו נכיר את היסודות:</p>
+
+                        <h3>איך להוסיף JavaScript לדף:</h3>
+                        <p>ישנן שלוש דרכים להוסיף JavaScript לדף:</p>
+
+                        <h4>1. ישירות בתוך הדף:</h4>
+                        <div class="code-block"><pre>
+                            &lt;script type="text/javascript"&gt;
+                            // קוד JavaScript כאן
+                            function sayHello() {
+                            alert("שלום!");
+                            }
+                            &lt;/script&gt;
+                        </pre></div>
+
+                        <h4>2. בקובץ חיצוני:</h4>
+                        <div class="code-block"><pre>
+                            &lt;script type="text/javascript" src="Scripts/myScript.js"&gt;&lt;/script&gt;
+                        </pre></div>
+
+                        <h4>3. בתוך מאפיין אירוע:</h4>
+                        <div class="code-block"><pre>
+                            &lt;button onclick="sayHello()"&gt;לחץ עליי&lt;/button&gt;
+                        </pre></div>
+
+                        <h3>יצירת קובץ JavaScript:</h3>
+                        <ol>
+                            <li>לחצו קליק ימני על תיקיית Scripts</li>
+                            <li>בחרו Add > New Item</li>
+                            <li>בחרו JavaScript File ותנו לו את השם "basic.js"</li>
+                            <li>לחצו Add</li>
+                        </ol>
+
+                        <h3>יסודות JavaScript:</h3>
+                        <div class="code-block"><pre><code>
+						&lt;script&gt;
+                            &#47;&#47; הדפסה בקונסול (לדיבוג)
+                            console.log(&quot;זה מודפס בקונסול!&quot;);
+
+                            &#47;&#47; משתנים
+                            var name = &quot;יוסי  &quot;    // ;"מחרוזת
+                            var age = 25;            // מספר
+                            var isStudent = true;    // בוליאני (אמת/שקר)
+
+                            &#47;&#47; פעולות על מחרוזות
+                            var greeting = &quot;שלום, &quot; + name + &quot;!&quot;;  // חיבור מחרוזות
+
+                            &#47;&#47; פעולות מתמטיות
+                            var sum = 5 + 3;         // 8
+                            var diff = 10 - 3;       // 7
+                            var product = 4 * 2;     // 8
+                            var quotient = 9 / 3;    // 3
+                            var remainder = 10 % 3;  // 1 (שארית)
+
+                            &#47;&#47; תנאים
+                            if (age >= 18) {
+                            console.log(&quot;בגיר&quot;);
+                            } else {
+                            console.log(&quot;קטין&quot;);
+                            }
+
+                            &#47;&#47; לולאה
+                            for (var i = 0; i &lt; 5; i++) {
+                            console.log(&quot;מספר: &quot; + i);
+                            }
+
+                            &#47;&#47; פונקציה פשוטה
+                            function multiply(a, b) {
+                            return a * b;
+                            }
+
+                            var result = multiply(4, 3);  // 12
+                            console.log(&quot;התוצאה היא: &quot; + result);
+							&lt;/script&gt;
+                        </code></pre></div>
+
+                        <h3>גישה לאלמנטים בדף:</h3>
+                        <p>JavaScript מאפשרת לנו לגשת לאלמנטים בדף HTML ולשנות אותם:</p>
+
+                        
+
+                        <h3>טיפול באירועים:</h3>
+                        <p>JavaScript מאפשרת לנו להגיב לאירועים כמו לחיצה, מעבר עכבר, וכו':</p>
+
+                        <div class="code-block">
+                            <pre>
+                                <code>
+                                    &lt;script&gt;
+                                    &#47;&#47; הוספת מאזין אירועים דרך מומלצת
+                                    document.getElementById(&quot;myButton&quot;).addEventListener(&quot;click&quot;, function() {
+                                    alert(&quot;לחצת על הכפתור!&quot;);
+                                    });
+
+                                    &#47;&#47; פונקציה שמופעלת בטעינת הדף
+                                    window.onload = function() {
+                                    alert(&quot;הדף נטען!&quot;);
+                                    };
+
+                                    &#47;&#47; שינוי תמונה במעבר עכבר
+                                    function changeImage(imageId, newSrc) {
+                                    document.getElementById(imageId).src = newSrc;
+                                    }
+                                    &lt;/script&gt;
+                                </code>
+                            </pre>
+                        </div>
+
+                        <h3>אירועים נפוצים:</h3>
+                        <ul>
+                            <li><strong>click</strong> - לחיצה על אלמנט</li>
+                            <li><strong>dblclick</strong> - לחיצה כפולה</li>
+                            <li><strong>mouseover</strong> - העכבר מעל האלמנט</li>
+                            <li><strong>mouseout</strong> - העכבר יצא מהאלמנט</li>
+                            <li><strong>keydown</strong> - מקש נלחץ</li>
+                            <li><strong>keyup</strong> - מקש שוחרר</li>
+                            <li><strong>submit</strong> - טופס נשלח</li>
+                            <li><strong>change</strong> - ערך השתנה (לשדות קלט)</li>
+                            <li><strong>focus</strong> - אלמנט קיבל פוקוס</li>
+                            <li><strong>blur</strong> - אלמנט איבד פוקוס</li>
+                        </ul>
+                    </div>
+
+                    <div class="step">
+                        <h2>צעד 13: אימות טפסים עם JavaScript</h2>
+                        <p>אחד השימושים הנפוצים ביותר של JavaScript הוא אימות (validation) של טפסים בצד הלקוח. זה מאפשר לבדוק את הנתונים לפני שליחתם לשרת ולתת משוב מיידי למשתמש:</p>
+
+                        <h3>יצירת קובץ לבדיקת תקינות:</h3>
+                        <ol>
+                            <li>לחצו קליק ימני על תיקיית Scripts</li>
+                            <li>בחרו Add > New Item</li>
+                            <li>בחרו JavaScript File ותנו לו את השם "validation.js"</li>
+                            <li>לחצו Add</li>
+                        </ol>
+
+                        <p>הוסיפו את הקוד הבא לקובץ:</p>
+
+                        <div class="code-block">
+						<pre>
+                            // פונקציה ראשית לבדיקת תקינות הטופס
+                            function validateForm() {
+                            // איפוס הודעות שגיאה קודמות
+                            clearErrors();
+
+                            var isValid = true;
+
+                            // בדיקת שם
+                            if (!validateName()) {
+                            isValid = false;
+                            }
+
+                            // בדיקת אימייל
+                            if (!validateEmail()) {
+                            isValid = false;
+                            }
+
+                            // בדיקת נושא
+                            if (!validateSubject()) {
+                            isValid = false;
+                            }
+
+                            // החזרת התוצאה - האם הטופס תקין
+                            return isValid;
+                            }
+
+                            // בדיקת שם
+                            function validateName() {
+                            var nameField = document.getElementById("txtName");
+                            if (!nameField) return true;  // אם השדה לא קיים, המשך
+
+                            var name = nameField.value.trim();
+                            if (name === "") {
+                            showError(nameField, "אנא הזן שם");
+                            return false;
+                            }
+
+                            return true;
+                            }
+
+                            // בדיקת אימייל
+                            function validateEmail() {
+                            var emailField = document.getElementById("txtEmail");
+                            if (!emailField) return true;
+
+                            var email = emailField.value.trim();
+                            if (email === "") {
+                            showError(emailField, "אנא הזן כתובת אימייל");
+                            return false;
+                            }
+
+                            // בדיקת תבנית אימייל באמצעות ביטוי רגולרי
+                            var emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                            if (!emailPattern.test(email)) {
+                            showError(emailField, "אנא הזן כתובת אימייל תקינה");
+                            return false;
+                            }
+
+                            return true;
+                            }
+
+                            // בדיקת נושא
+                            function validateSubject() {
+                            var subjectField = document.getElementById("ddlSubject");
+                            if (!subjectField) return true;
+
+                            if (subjectField.value === "") {
+                            showError(subjectField, "אנא בחר נושא");
+                            return false;
+                            }
+
+                            return true;
+                            }
+
+                            // הצגת הודעת שגיאה
+                            function showError(field, message) {
+                            // יצירת אלמנט להודעת שגיאה
+                            var errorElement = document.createElement("div");
+                            errorElement.className = "error-message";
+                            errorElement.style.color = "red";
+                            errorElement.style.fontSize = "smaller";
+                            errorElement.innerHTML = message;
+
+                            // הוספה אחרי השדה
+                            field.parentNode.insertBefore(errorElement, field.nextSibling);
+
+                            // סימון השדה עם מסגרת אדומה
+                            field.style.borderColor = "red";
+                            }
+
+                            // מחיקת כל הודעות השגיאה
+                            function clearErrors() {
+                            // מחיקת הודעות שגיאה קיימות
+                            var errorMessages = document.getElementsByClassName("error-message");
+                            while (errorMessages.length > 0) {
+                            errorMessages[0].parentNode.removeChild(errorMessages[0]);
+                            }
+
+                            // איפוס סגנון השדות
+                            var formElements = document.getElementsByTagName("input");
+                            for (var i = 0; i &lt; formElements.length; i++) {
+                            formElements[i].style.borderColor = "";
+                            }
+
+                            var selectElements = document.getElementsByTagName("select");
+                            for (var i = 0; i &lt; selectElements.length; i++) {
+                            selectElements[i].style.borderColor = "";
+                            }
+                            }
+							</pre>
+                        </div>
+
+                        <h3>קישור הקובץ לדף Contact.aspx:</h3>
+                        <p>עכשיו נעדכן את דף "צור קשר" כדי לבצע אימות גם בצד הלקוח:</p>
+
+                        <ol>
+                            <li>
+                                <p>הוסיפו קישור לקובץ JavaScript ב-head:</p>
+                                <div class="code-block">
+								<pre>
+                                    &lt;head runat="server"&gt;
+                                    &lt;title&gt;צור קשר - האתר שלי&lt;/title&gt;
+                                    &lt;meta charset="utf-8" /&gt;
+                                    &lt;script type="text/javascript" src="Scripts/validation.js"&gt;&lt;/script&gt;
+                                    &lt;/head&gt;
+									</pre>
+                                </div>
+                            </li>
+                            <li>
+                                <p>שנו את תגית form כדי להפעיל את בדיקת התקינות:</p>
+                                <div class="code-block"><pre>
+                                    &lt;form id="form1" runat="server" onsubmit="return validateForm();"&gt;
+                                </pre></div>
+                            </li>
+                        </ol>
+
+                        <p>עכשיו כשהמשתמש ילחץ על כפתור השליחה, ייקרא קודם קוד JavaScript לבדיקת תקינות הטופס. רק אם כל השדות תקינים, הטופס יישלח לשרת.</p>
+
+                        <h3>יתרונות אימות בצד הלקוח:</h3>
+                        <ul>
+                            <li>משוב מיידי למשתמש ללא צורך לשלוח את הדף לשרת</li>
+                            <li>חיסכון בזמן ובתעבורת רשת</li>
+                            <li>חווית משתמש טובה יותר</li>
+                        </ul>
+
+                        <div class="note">
+                            <p><strong>חשוב:</strong> אימות בצד הלקוח אינו מספיק מבחינת אבטחה! תמיד יש לבצע אימות גם בצד השרת (כפי שעשינו בקוד C#), מכיוון שקוד JavaScript יכול להיות מנוטרל או עקוף.</p>
+                        </div>
+                    </div>
+
+                    <div class="step">
+                        <h2>צעד 14: תרגיל - יצירת דף "אודות"</h2>
+                        <p>עכשיו תורכם לתרגל! צרו דף חדש בשם "About.aspx" שיכיל מידע על הנושא שבחרתם לאתר שלכם.</p>
+
+                        <div class="exercise">
+                            <h3>משימה:</h3>
+                            <ol>
+                                <li>צרו דף חדש בשם "About.aspx"</li>
+                                <li>הוסיפו כותרת ראשית</li>
+                                <li>הוסיפו טקסט המתאר את הנושא שבחרתם לאתר</li>
+                                <li>הוסיפו לפחות רשימה אחת (ממוספרת או לא ממוספרת)</li>
+                                <li>הוסיפו טבלה עם מידע רלוונטי לנושא</li>
+                                <li>הוסיפו אלמנט JavaScript פשוט כמו כפתור שמציג הודעה</li>
+                                <li>הוסיפו קישור לדף הבית ולדף צור קשר</li>
+                                <li>עדכנו את הדף הראשי כך שיכלול קישור לדף "אודות"</li>
+                            </ol>
+
+                            <h3>רמז לשילוב JavaScript:</h3>
+                            <div class="code-block"><pre>
+                                &lt;script type="text/javascript"&gt;
+                                function showMoreInfo() {
+                                alert("מידע נוסף על הנושא יתווסף בקרוב!");
+                                }
+                                &lt;/script&gt;
+
+                                &lt;button type="button" onclick="showMoreInfo()"&gt;לחץ למידע נוסף&lt;/button&gt;
+                            </pre></div>
+                        </div>
+                    </div>
+
+                    <div class="step">
+                        <h2>סיכום חלק 1</h2>
+                        <p>ברכות! סיימתם את החלק הראשון של המדריך! הנה מה שלמדתם עד כה:</p>
+
+                        <ul>
+                            <li>התקנת והכרת סביבת הפיתוח Visual Studio</li>
+                            <li>יצירת פרויקט ASP.NET Web Forms חדש</li>
+                            <li>הכרת המבנה הבסיסי של דף HTML</li>
+                            <li>עבודה עם תגיות HTML בסיסיות: כותרות, פסקאות, קישורים, רשימות</li>
+                            <li>יצירת והבנת מבנה טבלאות</li>
+                            <li>יצירת טפסים והבנת השימוש בשדות שונים</li>
+                            <li>הכרת פקדי ASP.NET בסיסיים</li>
+                            <li>כתיבת קוד C# בסיסי לטיפול באירועים</li>
+                            <li>הכרת יסודות JavaScript</li>
+                            <li>שילוב JavaScript לבדיקת תקינות טפסים</li>
+                        </ul>
+
+                        <p>בחלק הבא של המדריך נלמד על:</p>
+                        <ul>
+                            <li>עיצוב האתר באמצעות CSS</li>
+                            <li>עבודה עם Master Pages ליצירת תבנית אחידה לכל דפי האתר</li>
+                            <li>יצירת מונה מבקרים</li>
+                            <li>בניית סקר דעת קהל</li>
+                            <li>יצירת דף מנהל</li>
+                            <li>שמירת נתונים וניהול מידע</li>
+                        </ul>
+
+                        <div class="note">
+                            <p><strong>טיפ:</strong> בזמן שממתינים לחלק הבא, נסו לשפר ולהרחיב את האתר שיצרתם. הוסיפו דפים נוספים, נסו לשנות את העיצוב, והתאימו את התוכן לנושא שבחרתם. ככל שתתרגלו יותר, כך תשתפרו!</p>
+                        </div>
+                    </div>
+</body>
+</html>
