@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build && cp *.html docs/ 2>/dev/null; cp exercise.jpg docs/ 2>/dev/null; cp public/favicon.png public/favicon.svg docs/ 2>/dev/null; echo 'Build complete'",
+    "build": "vite build && for f in *.html; do [ \"$f\" != \"index.html\" ] && cp \"$f\" docs/; done 2>/dev/null; cp exercise.jpg docs/ 2>/dev/null; cp public/favicon.png public/favicon.svg docs/ 2>/dev/null; echo 'Build complete'",
     "build:vite": "vite build",
     "preview": "vite preview",
     "lint:css": "stylelint \"src/**/*.css\" --fix --quiet",
