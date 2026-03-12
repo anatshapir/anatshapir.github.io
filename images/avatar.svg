@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <!-- Background circle -->
+  <circle cx="100" cy="100" r="96" fill="#FDF8F1" stroke="#D4710A" stroke-width="3"/>
+  <!-- Inner warm glow -->
+  <circle cx="100" cy="100" r="80" fill="#F5ECDF"/>
+  <!-- Girl silhouette - hair -->
+  <ellipse cx="100" cy="68" rx="28" ry="32" fill="#4A3728"/>
+  <!-- Face -->
+  <circle cx="100" cy="72" r="22" fill="#F5D0B0"/>
+  <!-- Hair bangs -->
+  <path d="M78 62 Q85 48 100 50 Q115 48 122 62 Q118 55 100 54 Q82 55 78 62Z" fill="#4A3728"/>
+  <!-- Hair sides -->
+  <ellipse cx="76" cy="75" rx="8" ry="20" fill="#4A3728"/>
+  <ellipse cx="124" cy="75" rx="8" ry="20" fill="#4A3728"/>
+  <!-- Eyes -->
+  <circle cx="91" cy="72" r="3" fill="#3D3D3D"/>
+  <circle cx="109" cy="72" r="3" fill="#3D3D3D"/>
+  <!-- Smile -->
+  <path d="M93 80 Q100 86 107 80" fill="none" stroke="#D4710A" stroke-width="2" stroke-linecap="round"/>
+  <!-- Dress -->
+  <path d="M82 95 L75 150 Q100 155 125 150 L118 95 Q100 100 82 95Z" fill="#D4710A"/>
+  <!-- Arms -->
+  <line x1="80" y1="100" x2="65" y2="125" stroke="#F5D0B0" stroke-width="6" stroke-linecap="round"/>
+  <line x1="120" y1="100" x2="135" y2="125" stroke="#F5D0B0" stroke-width="6" stroke-linecap="round"/>
+  <!-- Small flower in hand -->
+  <circle cx="135" cy="122" r="5" fill="#E8891E"/>
+  <circle cx="135" cy="122" r="2" fill="#FDF8F1"/>
+  <!-- Decorative leaves around -->
+  <ellipse cx="45" cy="140" rx="6" ry="12" fill="#7DB87D" transform="rotate(-20 45 140)"/>
+  <ellipse cx="155" cy="140" rx="6" ry="12" fill="#7DB87D" transform="rotate(20 155 140)"/>
+  <ellipse cx="50" cy="55" rx="5" ry="10" fill="#A8C99A" transform="rotate(-30 50 55)"/>
+  <ellipse cx="150" cy="55" rx="5" ry="10" fill="#A8C99A" transform="rotate(30 150 55)"/>
+</svg>

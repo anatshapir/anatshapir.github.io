@@ -1,0 +1,90 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="400" height="400">
+  <!-- Background circle -->
+  <circle cx="200" cy="200" r="190" fill="#FDF8F1"/>
+  <circle cx="200" cy="200" r="185" fill="#FAF3EA" stroke="#E8DDD0" stroke-width="2"/>
+
+  <!-- Tree trunk -->
+  <rect x="215" y="60" width="35" height="260" rx="8" fill="#B8956A"/>
+  <!-- Tree bark details -->
+  <ellipse cx="225" cy="120" rx="8" ry="12" fill="#A07850" opacity="0.5"/>
+  <ellipse cx="235" cy="180" rx="6" ry="10" fill="#A07850" opacity="0.5"/>
+  <ellipse cx="228" cy="250" rx="7" ry="9" fill="#A07850" opacity="0.5"/>
+  <circle cx="240" cy="150" r="5" fill="#A07850" opacity="0.4"/>
+  <circle cx="222" cy="210" r="4" fill="#A07850" opacity="0.4"/>
+
+  <!-- Tree branches -->
+  <path d="M230 80 Q260 60 280 50" fill="none" stroke="#B8956A" stroke-width="8" stroke-linecap="round"/>
+  <path d="M230 100 Q270 85 300 90" fill="none" stroke="#B8956A" stroke-width="6" stroke-linecap="round"/>
+  <path d="M230 70 Q210 40 195 35" fill="none" stroke="#B8956A" stroke-width="6" stroke-linecap="round"/>
+
+  <!-- Leaves -->
+  <ellipse cx="280" cy="45" rx="12" ry="20" fill="#7DB87D" transform="rotate(-15 280 45)"/>
+  <ellipse cx="295" cy="55" rx="10" ry="16" fill="#5A9E5A" transform="rotate(10 295 55)"/>
+  <ellipse cx="300" cy="85" rx="12" ry="18" fill="#8DC98D" transform="rotate(20 300 85)"/>
+  <ellipse cx="315" cy="90" rx="8" ry="14" fill="#6BB86B" transform="rotate(30 315 90)"/>
+  <ellipse cx="190" cy="30" rx="12" ry="18" fill="#A8C99A" transform="rotate(-25 190 30)"/>
+  <ellipse cx="175" cy="40" rx="8" ry="14" fill="#7DB87D" transform="rotate(-10 175 40)"/>
+  <ellipse cx="265" cy="38" rx="8" ry="14" fill="#C9B84A" transform="rotate(5 265 38)"/>
+
+  <!-- Falling leaves -->
+  <ellipse cx="160" cy="100" rx="6" ry="10" fill="#C9B84A" transform="rotate(-40 160 100)" opacity="0.7"/>
+  <ellipse cx="300" cy="140" rx="5" ry="9" fill="#D4A04A" transform="rotate(25 300 140)" opacity="0.6"/>
+  <ellipse cx="130" cy="180" rx="5" ry="8" fill="#8DC98D" transform="rotate(-15 130 180)" opacity="0.5"/>
+
+  <!-- Girl - hair -->
+  <ellipse cx="160" cy="138" rx="30" ry="38" fill="#4A3728"/>
+
+  <!-- Girl - face -->
+  <circle cx="162" cy="145" r="25" fill="#F5D0B0"/>
+
+  <!-- Hair bangs -->
+  <path d="M137 130 Q148 112 165 115 Q180 112 188 130 Q183 120 165 118 Q145 120 137 130Z" fill="#4A3728"/>
+
+  <!-- Hair flowing down -->
+  <path d="M135 145 Q128 170 130 210 Q132 215 138 210 Q136 175 142 150Z" fill="#4A3728"/>
+  <path d="M185 140 Q192 170 190 200 Q188 205 182 200 Q184 172 180 148Z" fill="#4A3728"/>
+
+  <!-- Eyes -->
+  <circle cx="152" cy="145" r="3.5" fill="#3D3D3D"/>
+  <circle cx="172" cy="145" r="3.5" fill="#3D3D3D"/>
+  <circle cx="153" cy="144" r="1.2" fill="white"/>
+  <circle cx="173" cy="144" r="1.2" fill="white"/>
+
+  <!-- Blush -->
+  <ellipse cx="147" cy="152" rx="5" ry="3" fill="#F0B0A0" opacity="0.4"/>
+  <ellipse cx="177" cy="152" rx="5" ry="3" fill="#F0B0A0" opacity="0.4"/>
+
+  <!-- Smile -->
+  <path d="M155 155 Q162 162 170 155" fill="none" stroke="#D4710A" stroke-width="2" stroke-linecap="round"/>
+
+  <!-- Dress body -->
+  <path d="M142 175 L120 320 Q160 335 200 320 L178 175 Q160 182 142 175Z" fill="#D4710A"/>
+
+  <!-- Dress details - fold lines -->
+  <path d="M145 200 L130 310" fill="none" stroke="#B85D00" stroke-width="1" opacity="0.3"/>
+  <path d="M165 185 L160 325" fill="none" stroke="#B85D00" stroke-width="1" opacity="0.3"/>
+  <path d="M175 195 L185 315" fill="none" stroke="#B85D00" stroke-width="1" opacity="0.3"/>
+
+  <!-- Arms -->
+  <path d="M145 185 Q130 200 125 220" fill="none" stroke="#F5D0B0" stroke-width="8" stroke-linecap="round"/>
+  <path d="M175 185 Q195 195 210 200" fill="none" stroke="#F5D0B0" stroke-width="8" stroke-linecap="round"/>
+
+  <!-- Hand touching tree -->
+  <circle cx="210" cy="200" r="6" fill="#F5D0B0"/>
+
+  <!-- Small flowers on ground -->
+  <circle cx="110" cy="335" r="4" fill="#E8891E"/>
+  <circle cx="110" cy="335" r="1.5" fill="#FDF8F1"/>
+  <circle cx="95" cy="340" r="3" fill="#D4710A"/>
+  <circle cx="95" cy="340" r="1" fill="#FDF8F1"/>
+
+  <!-- Ground flowers right -->
+  <circle cx="260" cy="340" r="4" fill="#7DB87D"/>
+  <circle cx="275" cy="335" r="3" fill="#E8891E"/>
+  <circle cx="275" cy="335" r="1" fill="#FDF8F1"/>
+
+  <!-- Small grass/plants -->
+  <path d="M100 345 Q105 330 108 345" fill="none" stroke="#7DB87D" stroke-width="2"/>
+  <path d="M250 345 Q255 328 258 345" fill="none" stroke="#7DB87D" stroke-width="2"/>
+  <path d="M265" fill="none" stroke="#A8C99A" stroke-width="1.5"/>
+</svg>
