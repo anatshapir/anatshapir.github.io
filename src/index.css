@@ -1,0 +1,125 @@
+@import url('https://fonts.googleapis.com/css2?family=Assistant:wght@200..800&family=Varela+Round&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Anat's Favorites Hub - Warm Nostalgic Palette */
+    --background: 54 100% 98%;
+    --foreground: 24 95% 10%;
+    --card: 0 0% 100%;
+    --card-foreground: 24 95% 10%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 24 95% 10%;
+    
+    --primary: 25 95% 44%;
+    --primary-foreground: 0 0% 100%;
+    
+    --secondary: 142 76% 36%;
+    --secondary-foreground: 54 100% 98%;
+    
+    --muted: 54 20% 90%;
+    --muted-foreground: 24 20% 40%;
+    
+    --accent: 25 95% 60%;
+    --accent-foreground: 24 95% 10%;
+    
+    --destructive: 0 84.2365% 60.1961%;
+    --destructive-foreground: 0 0% 100%;
+    
+    --border: 24 30% 85%;
+    --input: 24 30% 85%;
+    --ring: 25 95% 44%;
+
+    --radius: 1rem;
+
+    /* Fonts */
+    --font-sans: 'Assistant', sans-serif;
+    --font-serif: 'Varela Round', sans-serif;
+    --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+
+    /* Shadows */
+    --shadow-2xs: 0px 4px 8px -1px hsl(0 0% 0% / 0.05);
+    --shadow-xs: 0px 4px 8px -1px hsl(0 0% 0% / 0.05);
+    --shadow-sm: 0px 4px 8px -1px hsl(0 0% 0% / 0.10), 0px 1px 2px -2px hsl(0 0% 0% / 0.10);
+    --shadow: 0px 4px 8px -1px hsl(0 0% 0% / 0.10), 0px 1px 2px -2px hsl(0 0% 0% / 0.10);
+    --shadow-md: 0px 4px 8px -1px hsl(0 0% 0% / 0.10), 0px 2px 4px -2px hsl(0 0% 0% / 0.10);
+    --shadow-lg: 0px 4px 8px -1px hsl(0 0% 0% / 0.10), 0px 4px 6px -2px hsl(0 0% 0% / 0.10);
+    --shadow-xl: 0px 4px 8px -1px hsl(0 0% 0% / 0.10), 0px 8px 10px -2px hsl(0 0% 0% / 0.10);
+    --shadow-2xl: 0px 4px 8px -1px hsl(0 0% 0% / 0.25);
+
+    /* Misc */
+    --tracking-normal: 0em;
+    --spacing: 0.25rem;
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 24 95% 5%;
+    --foreground: 54 100% 98%;
+    --card: 24 95% 8%;
+    --card-foreground: 54 100% 98%;
+    --popover: 24 95% 8%;
+    --popover-foreground: 54 100% 98%;
+    --primary: 25 95% 50%;
+    --primary-foreground: 54 100% 98%;
+    --secondary: 142 60% 30%;
+    --secondary-foreground: 54 100% 98%;
+    --muted: 24 30% 15%;
+    --muted-foreground: 54 20% 70%;
+    --accent: 25 95% 40%;
+    --accent-foreground: 54 100% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 54 100% 98%;
+    --border: 24 30% 20%;
+    --input: 24 30% 20%;
+    --ring: 25 95% 50%;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-sans), 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    letter-spacing: var(--tracking-normal);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-pulse-slow {
+  animation: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.animate-bounce-slow {
+  animation: bounce 3s infinite;
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(-5%);
+    animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
+  }
+  50% {
+    transform: translateY(0);
+    animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
+  }
+}
