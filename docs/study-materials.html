@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>חומרי למידה | דברים שענת אוהבת במיוחד</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- Navigation -->
+  <nav class="navbar">
+    <div class="container">
+      <a href="index.html" class="nav-brand">
+        <img src="images/avatar.svg" alt="ענת" onerror="this.style.background='#F0943A';this.style.display='flex'">
+        <span>דברים שענת אוהבת במיוחד</span>
+      </a>
+      <ul class="nav-links">
+        <li><a href="index.html">דף הבית</a></li>
+        <li><a href="study-materials.html" class="active">חומרי למידה</a></li>
+        <li><a href="interesting-things.html">דברים מעניינים</a></li>
+        <li><a href="about.html">אודות</a></li>
+      </ul>
+      <button class="nav-toggle" aria-label="תפריט" aria-expanded="false">&#9776;</button>
+    </div>
+  </nav>
+
+  <!-- Page Header -->
+  <section class="page-header">
+    <div class="container">
+      <h1>&#128214; חומרי למידה</h1>
+      <p>מערכי שיעור, דפי עבודה ומשחקים לימודיים שיצרתי באהבה עבור תלמידים ומורים.</p>
+    </div>
+  </section>
+
+  <!-- Filter & Content -->
+  <section class="section">
+    <div class="container">
+
+      <!-- Filter Tags -->
+      <div class="filter-tags">
+        <button class="filter-tag active" data-category="all">הכל</button>
+        <button class="filter-tag" data-category="recursion">רקורסיה</button>
+        <button class="filter-tag" data-category="data-science">מדעי הנתונים</button>
+        <button class="filter-tag" data-category="web">פיתוח ווב</button>
+        <button class="filter-tag" data-category="cs">מדעי המחשב</button>
+      </div>
+
+      <!-- Content Items -->
+      <!--
+        ============================================================
+        כדי להוסיף חומר למידה חדש, העתיקו את הבלוק הבא והחליפו:
+        - href: קישור לקובץ/דף
+        - data-category: קטגוריה (recursion / data-science / web / cs)
+        - כותרת (h3)
+        - תיאור (p)
+        - טקסט התגית (span.content-item-tag)
+        ============================================================
+      -->
+
+      <a href="recursiveThinking.html" class="content-item" data-category="recursion">
+        <div class="content-item-icon">&#129504;</div>
+        <div class="content-item-body">
+          <h3>חשיבה רקורסיבית</h3>
+          <p>מדריך מקיף לחשיבה רקורסיבית - מהבסיס ועד לפתרון בעיות מורכבות.</p>
+        </div>
+        <span class="content-item-tag">רקורסיה</span>
+      </a>
+
+      <a href="recursionVisualization.html" class="content-item" data-category="recursion">
+        <div class="content-item-icon">&#128202;</div>
+        <div class="content-item-body">
+          <h3>הדמיית זמן ריצה של רקורסיה</h3>
+          <p>כלי אינטראקטיבי להמחשת זמן ריצה של פונקציות רקורסיביות.</p>
+        </div>
+        <span class="content-item-tag">רקורסיה</span>
+      </a>
+
+      <a href="bintree_recursion.html" class="content-item" data-category="recursion">
+        <div class="content-item-icon">&#127795;</div>
+        <div class="content-item-body">
+          <h3>רקורסיה על עצים בינאריים</h3>
+          <p>מדריך לרקורסיה על עצים בינאריים עם הדמיות והסברים מפורטים.</p>
+        </div>
+        <span class="content-item-tag">רקורסיה</span>
+      </a>
+
+      <a href="recursionEscapeRoom.html" class="content-item" data-category="recursion">
+        <div class="content-item-icon">&#128272;</div>
+        <div class="content-item-body">
+          <h3>חדר בריחה - רקורסיה מתקדם</h3>
+          <p>תרגיל אינטראקטיבי בסגנון חדר בריחה לתרגול רקורסיה ברמה מתקדמת.</p>
+        </div>
+        <span class="content-item-tag">רקורסיה</span>
+      </a>
+
+      <a href="recursive_labyrinth.html" class="content-item" data-category="recursion">
+        <div class="content-item-icon">&#127982;</div>
+        <div class="content-item-body">
+          <h3>חדר בריחה - רקורסיה</h3>
+          <p>משחק חדר בריחה ללימוד רקורסיה בצורה חווייתית ומהנה.</p>
+        </div>
+        <span class="content-item-tag">רקורסיה</span>
+      </a>
+
+      <a href="bfs_dfs.html" class="content-item" data-category="cs">
+        <div class="content-item-icon">&#128269;</div>
+        <div class="content-item-body">
+          <h3>BFS & DFS</h3>
+          <p>הדמיה אינטראקטיבית של אלגוריתמי חיפוש BFS ו-DFS בגרפים.</p>
+        </div>
+        <span class="content-item-tag">מדעי המחשב</span>
+      </a>
+
+      <a href="regularLanguages.html" class="content-item" data-category="cs">
+        <div class="content-item-icon">&#128220;</div>
+        <div class="content-item-body">
+          <h3>שפות רגולריות</h3>
+          <p>מדריך מקיף לשפות רגולריות, אוטומטים וביטויים רגולריים.</p>
+        </div>
+        <span class="content-item-tag">מדעי המחשב</span>
+      </a>
+
+      <a href="datascience-project.html" class="content-item" data-category="data-science">
+        <div class="content-item-icon">&#128200;</div>
+        <div class="content-item-body">
+          <h3>פרויקט Data Science</h3>
+          <p>מרכז פרויקט מדעי הנתונים - מהגדרת הבעיה ועד הצגת תוצאות.</p>
+        </div>
+        <span class="content-item-tag orange">מדעי הנתונים</span>
+      </a>
+
+      <a href="eda.html" class="content-item" data-category="data-science">
+        <div class="content-item-icon">&#128201;</div>
+        <div class="content-item-body">
+          <h3>ניתוח נתונים חקירתי (EDA)</h3>
+          <p>מדריך מקיף ל-Exploratory Data Analysis עם דוגמאות וכלים.</p>
+        </div>
+        <span class="content-item-tag orange">מדעי הנתונים</span>
+      </a>
+
+      <a href="pandas.html" class="content-item" data-category="data-science">
+        <div class="content-item-icon">&#128038;</div>
+        <div class="content-item-body">
+          <h3>מדריך Pandas</h3>
+          <p>מדריך מקיף לספריית Pandas - עיבוד וניתוח נתונים ב-Python.</p>
+        </div>
+        <span class="content-item-tag orange">מדעי הנתונים</span>
+      </a>
+
+      <a href="htmlGuide.html" class="content-item" data-category="web">
+        <div class="content-item-icon">&#127760;</div>
+        <div class="content-item-body">
+          <h3>מדריך HTML & VS Code</h3>
+          <p>מדריך מקיף ל-HTML ולסביבת העבודה Visual Studio Code.</p>
+        </div>
+        <span class="content-item-tag orange">פיתוח ווב</span>
+      </a>
+
+      <a href="aspDev.html" class="content-item" data-category="web">
+        <div class="content-item-icon">&#9881;</div>
+        <div class="content-item-body">
+          <h3>מדריך ASP.NET</h3>
+          <p>מדריך לפיתוח שרת עם ASP.NET - מהבסיס ועד ליישומים מתקדמים.</p>
+        </div>
+        <span class="content-item-tag orange">פיתוח ווב</span>
+      </a>
+
+      <a href="serverImpl.html" class="content-item" data-category="web">
+        <div class="content-item-icon">&#128421;</div>
+        <div class="content-item-body">
+          <h3>מדריך Server Implementation</h3>
+          <p>מדריך מקיף למימוש שרת - ארכיטקטורה, API ותקשורת.</p>
+        </div>
+        <span class="content-item-tag orange">פיתוח ווב</span>
+      </a>
+
+      <a href="javaExercise.html" class="content-item" data-category="cs">
+        <div class="content-item-icon">&#9749;</div>
+        <div class="content-item-body">
+          <h3>פותר תרגילי Java</h3>
+          <p>כלי אינטראקטיבי לפתרון תרגילים בשפת Java.</p>
+        </div>
+        <span class="content-item-tag">מדעי המחשב</span>
+      </a>
+
+      <a href="trackTable.html" class="content-item" data-category="cs">
+        <div class="content-item-icon">&#128203;</div>
+        <div class="content-item-body">
+          <h3>טבלת מעקב</h3>
+          <p>כלי לבניית טבלאות מעקב (Trace Table) לתרגילי תכנות.</p>
+        </div>
+        <span class="content-item-tag">מדעי המחשב</span>
+      </a>
+
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-brand">
+          <img src="images/avatar.svg" alt="ענת" onerror="this.style.background='#F0943A';this.style.borderRadius='50%';this.style.width='56px';this.style.height='56px'">
+          <span>דברים שענת אוהבת במיוחד</span>
+        </div>
+        <p class="footer-quote">"העולם מלא בדברים קטנים ומיוחדים, צריך רק לדעת איפה לחפש אותם."</p>
+        <hr class="footer-divider">
+        <p class="footer-copy">נבנה באהבה עבור ענת &#10084; 2026</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/main.js"></script>
+</body>
+</html>

@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
 import { Hero } from '@/components/sections/Hero';
-import { Categories } from '@/components/sections/Categories';
-import { MaterialsPage } from '@/components/sections/MaterialsPage';
+import { TopicGrid } from '@/components/sections/TopicGrid';
+import { TopicPage } from '@/components/sections/TopicPage';
 
 function HomePage() {
   return (
@@ -43,7 +43,7 @@ function HomePage() {
         </div>
       </section>
 
-      <Categories />
+      <TopicGrid />
 
       {/* Contact/CTA */}
       <section className="py-24 bg-primary text-primary-foreground relative overflow-hidden">
@@ -68,18 +68,24 @@ function HomePage() {
 
 export default function App() {
   const [page, setPage] = useState('home')
+  const [selectedTopic, setSelectedTopic] = useState('')
 
   useEffect(() => {
     const handleHash = () => {
       const hash = window.location.hash.slice(1)
-      if (hash === 'teaching') {
-        setPage('teaching')
-      } else if (hash === 'general') {
-        setPage('general')
+      if (hash.startsWith('topic/')) {
+        const topic = decodeURIComponent(hash.slice(6))
+        setSelectedTopic(topic)
+        setPage('topic')
       } else if (hash === 'about') {
         setPage('home')
         setTimeout(() => {
           document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' })
+        }, 100)
+      } else if (hash === 'materials') {
+        setPage('home')
+        setTimeout(() => {
+          document.getElementById('topics')?.scrollIntoView({ behavior: 'smooth' })
         }, 100)
       } else {
         setPage('home')
@@ -97,8 +103,7 @@ export default function App() {
 
       <main className="relative z-10">
         {page === 'home' && <HomePage />}
-        {page === 'teaching' && <MaterialsPage category="teaching" />}
-        {page === 'general' && <MaterialsPage category="general" />}
+        {page === 'topic' && <TopicPage topic={selectedTopic} />}
       </main>
 
       <Footer />
