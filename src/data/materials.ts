@@ -1,5 +1,8 @@
-// חומרי למידה קיימים - ניתן להוסיף בקלות פריטים חדשים כאן
+// ============================================================
+// חומרי למידה והמלצות
 // כדי להוסיף חומר חדש: העתיקי בלוק ושני את הפרטים
+// כדי להוסיף נושא חדש: הוסיפי ערך ב-subcategoryMeta
+// ============================================================
 
 export interface StaticMaterial {
   id: string
@@ -9,6 +12,18 @@ export interface StaticMaterial {
   subcategory: string
   linkUrl: string
   icon: string
+}
+
+// מטא-דאטה לכל נושא - אייקון וצבע לכרטיס
+export const subcategoryMeta: Record<string, { icon: string; color: string }> = {
+  'רקורסיה':        { icon: '🔄', color: 'from-orange-50 to-amber-50 border-orange-200' },
+  'מדעי המחשב':     { icon: '💻', color: 'from-blue-50 to-indigo-50 border-blue-200' },
+  'מדעי הנתונים':   { icon: '📊', color: 'from-purple-50 to-fuchsia-50 border-purple-200' },
+  'פיתוח ווב':      { icon: '🌐', color: 'from-emerald-50 to-teal-50 border-emerald-200' },
+  'ספרים':          { icon: '📚', color: 'from-amber-50 to-yellow-50 border-amber-200' },
+  'השראה':          { icon: '✨', color: 'from-rose-50 to-pink-50 border-rose-200' },
+  'שירים':          { icon: '🎵', color: 'from-violet-50 to-purple-50 border-violet-200' },
+  'המלצות':         { icon: '⭐', color: 'from-sky-50 to-cyan-50 border-sky-200' },
 }
 
 export const staticMaterials: StaticMaterial[] = [
@@ -156,7 +171,6 @@ export const staticMaterials: StaticMaterial[] = [
   },
 
   // ===== דברים מעניינים =====
-  // להוספת המלצה חדשה: העתיקי בלוק ושני category ל-'general'
   {
     id: 'little-prince',
     title: 'הנסיך הקטן - אנטואן דה סנט-אכזופרי',
