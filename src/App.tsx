@@ -4,6 +4,7 @@ import { Footer } from '@/components/layout/Footer';
 import { Hero } from '@/components/sections/Hero';
 import { TopicGrid } from '@/components/sections/TopicGrid';
 import { TopicPage } from '@/components/sections/TopicPage';
+import { AdminPanel } from '@/components/Admin';
 import { ArrowRight } from 'lucide-react';
 
 function HomePage() {
@@ -103,6 +104,9 @@ export default function App() {
         setTimeout(() => {
           document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' })
         }, 100)
+      } else if (hash === 'admin') {
+        setPage('admin')
+        window.scrollTo(0, 0)
       } else if (hash === 'materials') {
         setPage('materials')
         window.scrollTo(0, 0)
@@ -141,6 +145,7 @@ export default function App() {
           />
         )}
         {page === 'topic' && <TopicPage topic={selectedTopic} subTopic={selectedSubTopic} />}
+        {page === 'admin' && <AdminPanel />}
       </main>
 
       <Footer />

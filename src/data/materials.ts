@@ -119,8 +119,8 @@ export const staticMaterials: StaticMaterial[] = [
   // ===== מדעי הנתונים =====
   {
     id: 'datascience-project',
-    title: 'מבוא ללמידת מכונה',
-    description: 'מבוא ללמידת מכונה.',
+    title: 'מבוא למדעי הנתונים',
+    description: 'מבוא למדעי הנתונים - מושגי יסוד, כלים וטכניקות בסיסיות.',
     category: 'teaching',
     subcategory: 'מדעי הנתונים',
     linkUrl: '/datascience-project.html',
