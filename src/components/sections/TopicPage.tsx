@@ -3,146 +3,134 @@ import { ArrowRight, ArrowLeft } from 'lucide-react';
 import { staticMaterials, subcategoryMeta, StaticMaterial } from '@/data/materials';
 
 interface TopicPageProps {
-  topic: string;
-  subTopic?: string;
+  pathSegments: string[];
 }
 
-export function TopicPage({ topic, subTopic }: TopicPageProps) {
-  const topicItems = staticMaterials.filter(m => m.subcategory === topic);
-  const meta = subcategoryMeta[topic] || { icon: '📁', color: 'from-gray-50 to-slate-50 border-gray-200' };
+export function TopicPage({ pathSegments }: TopicPageProps) {
+  const currentName = pathSegments[pathSegments.length - 1];
+  const meta = subcategoryMeta[currentName] || { icon: '📁', color: 'from-gray-50 to-slate-50 border-gray-200' };
 
-  // Check if this topic has sub-subcategories
-  const hasSubTopics = topicItems.some(m => m.subSubcategory);
+  // Find materials whose path starts with current segments
+  const descendants = staticMaterials.filter(m =>
+    pathSegments.every((seg, i) => m.path[i] === seg)
+  );
 
-  // If we're viewing a specific sub-topic, show its materials
-  if (subTopic) {
-    const subItems = subTopic === 'כללי'
-      ? topicItems.filter(m => !m.subSubcategory)
-      : topicItems.filter(m => m.subSubcategory === subTopic);
-    const subMeta = subcategoryMeta[subTopic] || { icon: '📁', color: 'from-gray-50 to-slate-50 border-gray-200' };
+  // Materials at exactly this level (path matches exactly)
+  const directItems = descendants.filter(m => m.path.length === pathSegments.length);
 
-    return (
-      <div className="pt-24 pb-16 min-h-screen">
-        <section className={`py-16 bg-gradient-to-br ${subMeta.color} border-b-2`}>
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <a
-              href={`#topic/${encodeURIComponent(topic)}`}
-              className="inline-flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors mb-8 text-lg"
-            >
-              <ArrowRight className="w-5 h-5" />
-              חזרה ל{topic}
-            </a>
-            <div className="text-center space-y-4">
-              <span className="text-6xl">{subMeta.icon}</span>
-              <h1 className="text-4xl sm:text-5xl font-serif font-bold text-foreground">{subTopic}</h1>
-              <p className="text-xl text-muted-foreground">{subItems.length} {subItems.length === 1 ? 'פריט' : 'פריטים'}</p>
-            </div>
-          </div>
-        </section>
+  // Sub-folders: materials that go deeper, grouped by their next segment
+  const subFolders = Object.entries(
+    descendants.reduce((acc, m) => {
+      if (m.path.length > pathSegments.length) {
+        const nextSeg = m.path[pathSegments.length];
+        if (!acc[nextSeg]) acc[nextSeg] = 0;
+        acc[nextSeg]++;
+      }
+      return acc;
+    }, {} as Record<string, number>)
+  );
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {subItems.map(item => (
-              <MaterialCard key={item.id} item={item} />
-            ))}
-          </div>
-          {subItems.length === 0 && (
-            <div className="text-center py-20">
-              <p className="text-2xl text-muted-foreground">עוד לא הוספתי תוכן כאן</p>
-              <p className="text-lg text-muted-foreground mt-2">בקרוב!</p>
-            </div>
-          )}
-        </div>
-      </div>
-    );
-  }
+  // Back link
+  const backHref = pathSegments.length > 1
+    ? `#topic/${pathSegments.slice(0, -1).map(encodeURIComponent).join('/')}`
+    : '#';
+  const backLabel = pathSegments.length > 1
+    ? `חזרה ל${pathSegments[pathSegments.length - 2]}`
+    : 'חזרה לדף הבית';
 
-  // If topic has sub-subcategories, show them as a grid
-  if (hasSubTopics) {
-    const subTopics = Object.entries(
-      topicItems.reduce((acc, m) => {
-        const key = m.subSubcategory || 'כללי';
-        if (!acc[key]) acc[key] = 0;
-        acc[key]++;
-        return acc;
-      }, {} as Record<string, number>)
-    );
-
-    return (
-      <div className="pt-24 pb-16 min-h-screen">
-        <section className={`py-16 bg-gradient-to-br ${meta.color} border-b-2`}>
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <a
-              href="#"
-              className="inline-flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors mb-8 text-lg"
-            >
-              <ArrowRight className="w-5 h-5" />
-              חזרה לדף הבית
-            </a>
-            <div className="text-center space-y-4">
-              <span className="text-6xl">{meta.icon}</span>
-              <h1 className="text-4xl sm:text-5xl font-serif font-bold text-foreground">{topic}</h1>
-              <p className="text-xl text-muted-foreground">בחרו תת-נושא</p>
-            </div>
-          </div>
-        </section>
-
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
-            {subTopics.map(([name, count]) => {
-              const subMeta = subcategoryMeta[name] || { icon: '📁', color: 'from-gray-50 to-slate-50 border-gray-200' };
-              return (
-                <a
-                  key={name}
-                  href={`#topic/${encodeURIComponent(topic)}/${encodeURIComponent(name)}`}
-                  className={`group relative flex flex-col items-center justify-center gap-4 p-8 rounded-2xl border-2 bg-gradient-to-br ${subMeta.color}
-                    shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer aspect-square`}
-                >
-                  <span className="text-5xl sm:text-6xl group-hover:scale-110 transition-transform duration-300">
-                    {subMeta.icon}
-                  </span>
-                  <h3 className="text-xl sm:text-2xl font-serif font-bold text-foreground text-center">
-                    {name}
-                  </h3>
-                  <span className="text-sm text-muted-foreground">
-                    {count} {count === 1 ? 'פריט' : 'פריטים'}
-                  </span>
-                </a>
-              );
-            })}
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // Regular topic page - no sub-subcategories
   return (
     <div className="pt-24 pb-16 min-h-screen">
+      {/* Header */}
       <section className={`py-16 bg-gradient-to-br ${meta.color} border-b-2`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <a
-            href="#"
+            href={backHref}
             className="inline-flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors mb-8 text-lg"
           >
             <ArrowRight className="w-5 h-5" />
-            חזרה לדף הבית
+            {backLabel}
           </a>
+
+          {/* Breadcrumb */}
+          {pathSegments.length > 1 && (
+            <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4 flex-wrap">
+              {pathSegments.map((seg, i) => (
+                <React.Fragment key={i}>
+                  {i > 0 && <span className="opacity-50">/</span>}
+                  {i < pathSegments.length - 1 ? (
+                    <a
+                      href={`#topic/${pathSegments.slice(0, i + 1).map(encodeURIComponent).join('/')}`}
+                      className="hover:text-primary transition-colors"
+                    >
+                      {subcategoryMeta[seg]?.icon || '📁'} {seg}
+                    </a>
+                  ) : (
+                    <span className="font-medium text-foreground">{subcategoryMeta[seg]?.icon || '📁'} {seg}</span>
+                  )}
+                </React.Fragment>
+              ))}
+            </div>
+          )}
+
           <div className="text-center space-y-4">
             <span className="text-6xl">{meta.icon}</span>
-            <h1 className="text-4xl sm:text-5xl font-serif font-bold text-foreground">{topic}</h1>
-            <p className="text-xl text-muted-foreground">{topicItems.length} {topicItems.length === 1 ? 'פריט' : 'פריטים'}</p>
+            <h1 className="text-4xl sm:text-5xl font-serif font-bold text-foreground">{currentName}</h1>
+            <p className="text-xl text-muted-foreground">
+              {descendants.length} {descendants.length === 1 ? 'פריט' : 'פריטים'}
+            </p>
           </div>
         </div>
       </section>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {topicItems.map(item => (
-            <MaterialCard key={item.id} item={item} />
-          ))}
-        </div>
-        {topicItems.length === 0 && (
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-12">
+        {/* Sub-folder cards */}
+        {subFolders.length > 0 && (
+          <div>
+            {directItems.length > 0 && (
+              <h2 className="text-2xl font-serif font-bold text-foreground mb-6">תת-נושאים</h2>
+            )}
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
+              {subFolders.map(([name, count]) => {
+                const subMeta = subcategoryMeta[name] || { icon: '📁', color: 'from-gray-50 to-slate-50 border-gray-200' };
+                return (
+                  <a
+                    key={name}
+                    href={`#topic/${[...pathSegments, name].map(encodeURIComponent).join('/')}`}
+                    className={`group relative flex flex-col items-center justify-center gap-4 p-8 rounded-2xl border-2 bg-gradient-to-br ${subMeta.color}
+                      shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer aspect-square`}
+                  >
+                    <span className="text-5xl sm:text-6xl group-hover:scale-110 transition-transform duration-300">
+                      {subMeta.icon}
+                    </span>
+                    <h3 className="text-xl sm:text-2xl font-serif font-bold text-foreground text-center">
+                      {name}
+                    </h3>
+                    <span className="text-sm text-muted-foreground">
+                      {count} {count === 1 ? 'פריט' : 'פריטים'}
+                    </span>
+                  </a>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Direct materials at this level */}
+        {directItems.length > 0 && (
+          <div>
+            {subFolders.length > 0 && (
+              <h2 className="text-2xl font-serif font-bold text-foreground mb-6">חומרים</h2>
+            )}
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {directItems.map(item => (
+                <MaterialCard key={item.id} item={item} />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Empty state */}
+        {descendants.length === 0 && (
           <div className="text-center py-20">
             <p className="text-2xl text-muted-foreground">עוד לא הוספתי תוכן כאן</p>
             <p className="text-lg text-muted-foreground mt-2">בקרוב!</p>

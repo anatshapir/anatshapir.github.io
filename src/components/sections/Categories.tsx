@@ -10,14 +10,14 @@ export function Categories() {
   // Count by subcategory
   const teachingSubs = Object.entries(
     teachingMaterials.reduce((acc, m) => {
-      acc[m.subcategory] = (acc[m.subcategory] || 0) + 1;
+      acc[m.path[0]] = (acc[m.path[0]] || 0) + 1;
       return acc;
     }, {} as Record<string, number>)
   ).slice(0, 4);
 
   const generalSubs = Object.entries(
     generalMaterials.reduce((acc, m) => {
-      acc[m.subcategory] = (acc[m.subcategory] || 0) + 1;
+      acc[m.path[0]] = (acc[m.path[0]] || 0) + 1;
       return acc;
     }, {} as Record<string, number>)
   ).slice(0, 4);

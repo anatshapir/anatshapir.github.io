@@ -13,8 +13,9 @@ export function TopicGrid({ category, title = 'מה תמצאו כאן?' }: Topic
 
   const topics = Object.entries(
     filtered.reduce((acc, m) => {
-      if (!acc[m.subcategory]) acc[m.subcategory] = 0;
-      acc[m.subcategory]++;
+      const topLevel = m.path[0];
+      if (!acc[topLevel]) acc[topLevel] = 0;
+      acc[topLevel]++;
       return acc;
     }, {} as Record<string, number>)
   );
