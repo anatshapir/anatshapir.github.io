@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>סיכום NumPy - מדעי הנתונים</title>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-primary: #0a1a0e; --bg-card: #1a2e1f; --bg-code: #0d1117;
+  --accent-green: #10b981; --accent-lime: #84cc16; --accent-cyan: #06b6d4;
+  --accent-blue: #3b82f6; --accent-purple: #8b5cf6; --accent-orange: #f59e0b;
+  --accent-pink: #ec4899;
+  --text-primary: #f1f5f9; --text-secondary: #94a3b8; --text-muted: #64748b;
+  --border-color: #1e3a25;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Heebo',sans-serif;background:var(--bg-primary);color:var(--text-primary);overflow:hidden;height:100vh;width:100vw}
+.bg-grid{position:fixed;inset:0;background-image:linear-gradient(rgba(16,185,129,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(16,185,129,0.03) 1px,transparent 1px);background-size:60px 60px;z-index:0}
+.bg-glow{position:fixed;width:600px;height:600px;border-radius:50%;filter:blur(120px);opacity:0.12;z-index:0;pointer-events:none}
+.bg-glow-1{background:var(--accent-green);top:-200px;right:-200px}
+.bg-glow-2{background:var(--accent-cyan);bottom:-200px;left:-200px}
+.top-bar{position:fixed;top:0;left:0;right:0;height:50px;background:rgba(10,26,14,0.9);backdrop-filter:blur(20px);border-bottom:1px solid var(--border-color);display:flex;align-items:center;justify-content:space-between;padding:0 24px;z-index:100}
+.top-bar-title{font-size:14px;font-weight:500;color:var(--text-secondary);display:flex;align-items:center;gap:8px}
+.progress-container{display:flex;align-items:center;gap:12px}
+.progress-bar{width:200px;height:3px;background:var(--border-color);border-radius:2px;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent-green),var(--accent-lime));border-radius:2px;transition:width .5s ease}
+.progress-text{font-size:12px;color:var(--text-muted);font-family:'Fira Code',monospace;min-width:55px;text-align:left;direction:ltr}
+.sidebar{position:fixed;top:50px;right:0;width:250px;height:calc(100vh - 50px);background:rgba(17,30,20,0.7);backdrop-filter:blur(10px);border-left:1px solid var(--border-color);z-index:90;overflow-y:auto;padding:12px 0;transition:transform .3s ease}
+.sidebar.collapsed{transform:translateX(250px)}
+.sidebar-toggle{position:fixed;top:60px;right:250px;width:26px;height:26px;background:var(--bg-card);border:1px solid var(--border-color);border-radius:6px 0 0 6px;color:var(--text-muted);cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:91;transition:all .3s ease;font-size:11px}
+.sidebar.collapsed+.sidebar-toggle{right:0}
+.stn{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted);padding:8px 18px 4px;margin-top:6px}
+.nav-item{padding:6px 18px;font-size:12.5px;color:var(--text-secondary);cursor:pointer;transition:all .2s ease;display:flex;align-items:center;gap:8px;border-right:2px solid transparent}
+.nav-item:hover{background:rgba(16,185,129,0.05);color:var(--text-primary)}
+.nav-item.active{background:rgba(16,185,129,0.08);color:var(--accent-green);border-right-color:var(--accent-green)}
+.nav-item .num{font-family:'Fira Code',monospace;font-size:10px;color:var(--text-muted);min-width:18px}
+.main-content{position:fixed;top:50px;left:0;right:250px;height:calc(100vh - 50px);overflow:hidden;z-index:1;transition:right .3s ease}
+.sidebar.collapsed~.main-content{right:0}
+.slide{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:24px 50px 70px;overflow-y:auto;opacity:0;transform:translateX(-30px);transition:all .45s cubic-bezier(.4,0,.2,1);pointer-events:none}
+.slide.active{opacity:1;transform:translateX(0);pointer-events:all}
+.slide.exit-left{opacity:0;transform:translateX(30px)}
+.slide-inner{max-width:880px;width:100%}
+.title-slide{text-align:center;margin-top:10vh}
+.title-slide .emoji-big{font-size:56px;margin-bottom:12px;animation:float 3s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.title-slide h1{font-size:44px;font-weight:900;background:linear-gradient(135deg,var(--accent-green),var(--accent-lime));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:10px}
+.title-slide .subtitle{font-size:18px;color:var(--text-secondary);font-weight:300}
+.title-slide .tag{display:inline-block;margin-top:16px;padding:5px 14px;background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.2);border-radius:20px;font-size:13px;color:var(--accent-green);font-family:'Fira Code',monospace}
+.section-header{text-align:center;margin-top:6vh}
+.section-header .section-num{font-family:'Fira Code',monospace;font-size:13px;color:var(--accent-cyan);margin-bottom:6px;letter-spacing:2px}
+.section-header h2{font-size:36px;font-weight:800;margin-bottom:10px}
+.section-header .section-desc{font-size:17px;color:var(--text-secondary);max-width:600px;margin:0 auto}
+.slide-header{margin-bottom:16px}
+.slide-header h3{font-size:24px;font-weight:700;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.slide-header .desc{font-size:15px;color:var(--text-secondary);margin-top:6px;line-height:1.6}
+.badge{font-family:'Fira Code',monospace;font-size:10px;padding:2px 9px;border-radius:10px;font-weight:500}
+.badge-green{background:rgba(16,185,129,0.15);color:var(--accent-green)}
+.badge-blue{background:rgba(59,130,246,0.15);color:var(--accent-blue)}
+.badge-purple{background:rgba(139,92,246,0.15);color:var(--accent-purple)}
+.badge-orange{background:rgba(245,158,11,0.15);color:var(--accent-orange)}
+.badge-cyan{background:rgba(6,182,212,0.15);color:var(--accent-cyan)}
+.code-block{background:var(--bg-code);border:1px solid var(--border-color);border-radius:10px;overflow:hidden;margin:10px 0;direction:ltr;text-align:left}
+.code-header{display:flex;align-items:center;justify-content:space-between;padding:8px 14px;background:rgba(30,58,37,0.5);border-bottom:1px solid var(--border-color)}
+.code-dots{display:flex;gap:5px}
+.code-dots span{width:9px;height:9px;border-radius:50%}
+.code-dots span:nth-child(1){background:#ef4444}
+.code-dots span:nth-child(2){background:#f59e0b}
+.code-dots span:nth-child(3){background:#10b981}
+.code-label{font-family:'Fira Code',monospace;font-size:10px;color:var(--text-muted)}
+.code-body{padding:12px 16px;font-family:'Fira Code',monospace;font-size:12.5px;line-height:1.65;overflow-x:auto;white-space:pre}
+.kw{color:#c678dd}.fn{color:#61afef}.str{color:#98c379}.num{color:#d19a66}.cm{color:#5c6370;font-style:italic}.op{color:#56b6c2}.var{color:#e06c75}
+.output-block{background:rgba(16,185,129,0.05);border:1px solid rgba(16,185,129,0.15);border-radius:8px;padding:10px 14px;margin:8px 0;direction:ltr;text-align:left;font-family:'Fira Code',monospace;font-size:11.5px;line-height:1.55;color:var(--accent-green);white-space:pre;overflow-x:auto}
+.output-label{font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted);margin-bottom:4px;display:block}
+.arrow-down{text-align:center;color:var(--text-muted);font-size:16px;margin:2px 0;opacity:.5}
+.info-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin:12px 0}
+.info-card{background:var(--bg-card);border:1px solid var(--border-color);border-radius:9px;padding:12px;transition:all .3s ease}
+.info-card:hover{border-color:var(--accent-green);transform:translateY(-2px)}
+.info-card .card-icon{font-size:20px;margin-bottom:6px}
+.info-card h4{font-size:13px;font-weight:600;margin-bottom:4px;color:var(--text-primary);direction:ltr;text-align:left;font-family:'Fira Code',monospace}
+.info-card p{font-size:12px;color:var(--text-secondary);line-height:1.4}
+.tip-box{background:rgba(245,158,11,0.06);border:1px solid rgba(245,158,11,0.15);border-radius:8px;padding:10px 14px;margin:10px 0;display:flex;gap:8px;align-items:flex-start}
+.tip-box .tip-icon{font-size:16px;flex-shrink:0;margin-top:1px}
+.tip-box p{font-size:13px;color:var(--text-secondary);line-height:1.5}
+.compare-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:10px 0}
+.compare-col h4{font-size:12px;font-weight:600;margin-bottom:6px;color:var(--accent-cyan)}
+.err-block{background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.2);border-radius:8px;padding:10px 14px;margin:8px 0;direction:ltr;text-align:left;font-family:'Fira Code',monospace;font-size:11.5px;line-height:1.55;color:#ef4444;white-space:pre;overflow-x:auto}
+.bottom-nav{position:fixed;bottom:0;left:0;right:250px;height:54px;background:rgba(10,26,14,0.9);backdrop-filter:blur(20px);border-top:1px solid var(--border-color);display:flex;align-items:center;justify-content:center;gap:14px;z-index:100;transition:right .3s ease}
+.sidebar.collapsed~.bottom-nav{right:0}
+.nav-btn{padding:7px 18px;border-radius:7px;border:1px solid var(--border-color);background:var(--bg-card);color:var(--text-primary);font-family:'Heebo',sans-serif;font-size:13px;cursor:pointer;transition:all .2s ease}
+.nav-btn:hover{border-color:var(--accent-green);background:rgba(16,185,129,0.1)}
+.nav-btn.primary{background:var(--accent-green);border-color:var(--accent-green);color:white}
+.nav-btn.primary:hover{background:#059669}
+.slide-counter{font-family:'Fira Code',monospace;font-size:11px;color:var(--text-muted);min-width:55px;text-align:center}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border-color);border-radius:2px}
+@media(max-width:768px){.sidebar,.sidebar-toggle{display:none}.main-content,.bottom-nav{right:0!important}.slide{padding:20px 16px 65px}.title-slide h1{font-size:30px}.section-header h2{font-size:26px}.slide-header h3{font-size:20px}.code-body{font-size:11px}.compare-row{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="bg-grid"></div>
+<div class="bg-glow bg-glow-1"></div>
+<div class="bg-glow bg-glow-2"></div>
+
+<div class="top-bar">
+  <div class="top-bar-title"><span>🔢</span> NumPy – סיכום מדעי הנתונים</div>
+  <div class="progress-container">
+    <div class="progress-text" id="progressText">0%</div>
+    <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+  </div>
+</div>
+
+<div class="sidebar" id="sidebar">
+  <div class="stn">📌 תוכן עניינים</div>
+  <div class="nav-item" data-slide="0"><span class="num">00</span> פתיחה</div>
+  <div class="stn" style="color:var(--accent-green)">01 · למה NumPy?</div>
+  <div class="nav-item" data-slide="1"><span class="num">01</span> הבעיה עם רשימות</div>
+  <div class="nav-item" data-slide="2"><span class="num">02</span> הפתרון: NumPy!</div>
+  <div class="stn" style="color:var(--accent-blue)">02 · יצירת מערכים</div>
+  <div class="nav-item" data-slide="3"><span class="num">03</span> np.array</div>
+  <div class="nav-item" data-slide="4"><span class="num">04</span> zeros, ones, full</div>
+  <div class="nav-item" data-slide="5"><span class="num">05</span> arange ו-linspace</div>
+  <div class="nav-item" data-slide="6"><span class="num">06</span> מספרים אקראיים</div>
+  <div class="nav-item" data-slide="7"><span class="num">07</span> shape ו-dtype</div>
+  <div class="stn" style="color:var(--accent-purple)">03 · פעולות על מערכים</div>
+  <div class="nav-item" data-slide="8"><span class="num">08</span> פעולות סקלריות</div>
+  <div class="nav-item" data-slide="9"><span class="num">09</span> פעולות איבר-איבר</div>
+  <div class="stn" style="color:var(--accent-cyan)">04 · אינדקסים וחיתוכים</div>
+  <div class="nav-item" data-slide="10"><span class="num">10</span> אינדקסים 1D</div>
+  <div class="nav-item" data-slide="11"><span class="num">11</span> חיתוכים (Slicing)</div>
+  <div class="nav-item" data-slide="12"><span class="num">12</span> אינדקסים 2D</div>
+  <div class="stn" style="color:var(--accent-orange)">05 · סטטיסטיקה</div>
+  <div class="nav-item" data-slide="13"><span class="num">13</span> פונקציות סטטיסטיות</div>
+  <div class="nav-item" data-slide="14"><span class="num">14</span> פעולות על צירים</div>
+  <div class="nav-item" data-slide="15"><span class="num">15</span> סיכום 🎉</div>
+</div>
+<button class="sidebar-toggle" id="sidebarToggle" onclick="toggleSidebar()">◀</button>
+
+<div class="main-content" id="mainContent">
+
+<!-- SLIDE 0: TITLE -->
+<div class="slide active" id="slide-0">
+  <div class="title-slide">
+    <div class="emoji-big">🔢</div>
+    <h1>ספריית NumPy</h1>
+    <div class="subtitle">הבסיס לעבודה עם נתונים מספריים · מדעי הנתונים · תיכון</div>
+    <div class="tag">import numpy as np</div>
+    <div style="margin-top:30px;color:var(--text-muted);font-size:14px;">← / → לניווט &nbsp;|&nbsp; 16 שקפים &nbsp;|&nbsp; כל דוגמה עם תוצאה בפועל</div>
+  </div>
+</div>
+
+<!-- SLIDE 1: Problem with Lists -->
+<div class="slide" id="slide-1">
+  <div class="slide-inner">
+    <div class="section-header">
+      <div class="section-num">SECTION 01</div>
+      <h2>למה צריך <span style="color:var(--accent-green)">NumPy</span>?</h2>
+      <div class="section-desc">הבעיה עם רשימות רגילות ב-Python</div>
+    </div>
+    <div class="code-block" style="margin-top:24px;">
+      <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><div class="code-label">problem.py</div></div>
+      <div class="code-body"><span class="cm"># יש לנו ציונים ורוצים להוסיף 5 נקודות בונוס לכולם</span>
+grades = [<span class="num">85</span>, <span class="num">90</span>, <span class="num">78</span>, <span class="num">92</span>, <span class="num">88</span>]
+
+<span class="cm"># ננסה להוסיף 5:</span>
+new_grades = grades + <span class="num">5</span></div>
+    </div>
+    <div class="arrow-down">▼</div>
+    <div class="err-block">
+<span class="output-label">❌ ERROR ▾</span>
+TypeError: can only concatenate list (not "int") to list
+
+רשימות רגילות לא יודעות לבצע פעולות מתמטיות!</div>
+    <div class="code-block">
+      <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><div class="code-label">workaround.py</div></div>
+      <div class="code-body"><span class="cm"># עם רשימה רגילה – צריך לולאה 😫</span>
+grades = [<span class="num">85</span>, <span class="num">90</span>, <span class="num">78</span>, <span class="num">92</span>, <span class="num">88</span>]
+new_grades = []
+
+<span class="kw">for</span> grade <span class="kw">in</span> grades:
+    new_grades.<span class="fn">append</span>(grade + <span class="num">5</span>)
+
+<span class="fn">print</span>(new_grades)</div>
+    </div>
+    <div class="arrow-down">▼</div>
+    <div class="output-block">
+<span class="output-label">OUTPUT ▾</span>
+[90, 95, 83, 97, 93]
+
+😫 עובד, אבל איטי ודורש הרבה קוד!</div>
+  </div>
+</div>
+
+<!-- SLIDE 2: NumPy Solution -->
+<div class="slide" id="slide-2">
+  <div class="slide-inner">
+    <div class="slide-header">
+      <h3>✨ הפתרון: NumPy! <span class="badge badge-green">מהיר וקצר</span></h3>
+      <div class="desc">NumPy (Numerical Python) – ספרייה לפעולות מתמטיות מהירות על מערכים</div>
+    </div>
+    <div class="code-block">
+      <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><div class="code-label">solution.py</div></div>
+      <div class="code-body"><span class="kw">import</span> numpy <span class="kw">as</span> np
+
+grades = np.<span class="fn">array</span>([<span class="num">85</span>, <span class="num">90</span>, <span class="num">78</span>, <span class="num">92</span>, <span class="num">88</span>])
+
+<span class="cm"># הוספת 5 לכולם – שורה אחת!</span>
+new_grades = grades + <span class="num">5</span>
+<span class="fn">print</span>(new_grades)</div>
+    </div>
+    <div class="arrow-down">▼</div>
+    <div class="output-block">
+<span class="output-label">OUTPUT ▾</span>
+[90 95 83 97 93]
+
+✅ שורה אחת! בלי לולאות!</div>
+    <div class="info-grid" style="margin-top:16px;">
+      <div class="info-card"><div class="card-icon">⚡</div><h4>מהירות</h4><p>עד פי 100 מרשימות רגילות (כתובה ב-C)</p></div>
+      <div class="info-card"><div class="card-icon">✏️</div><h4>קוד קצר</h4><p>פעולות מתמטיות ישירות בלי לולאות</p></div>
+      <div class="info-card"><div class="card-icon">📊</div><h4>בסיס ל-Pandas</h4><p>Pandas בנויה על NumPy – זה הבסיס!</p></div>
+    </div>
+    <div class="tip-box">
+      <span class="tip-icon">🔑</span>
+      <p><code dir="ltr">import numpy as np</code> – תמיד השורה הראשונה! הקיצור <strong>np</strong> הוא מוסכמה מקובלת.</p>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 3: np.array -->
+<div class="slide" id="slide-3">
+  <div class="slide-inner">
+    <div class="section-header">
+      <div class="section-num">SECTION 02</div>
+      <h2><span style="color:var(--accent-blue)">יצירת</span> מערכים</h2>
+      <div class="section-desc">np.array – המרת רשימה למערך NumPy</div>
+    </div>
+    <div class="code-block" style="margin-top:20px;">
+      <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><div class="code-label">array_1d.py</div></div>
+      <div class="code-body"><span class="cm"># מערך חד-ממדי (1D) – וקטור</span>
+grades = np.<span class="fn">array</span>([<span class="num">85</span>, <span class="num">90</span>, <span class="num">78</span>, <span class="num">92</span>, <span class="num">88</span>])
+<span class="fn">print</span>(grades)
+<span class="fn">print</span>(<span class="str">f'Type: </span>{<span class="fn">type</span>(grades)}<span class="str">'</span>)
+<span class="fn">print</span>(<span class="str">f'Shape: </span>{grades.<span class="var">shape</span>}<span class="str">'</span>)</div>
+    </div>
+    <div class="arrow-down">▼</div>
+    <div class="output-block">
+<span class="output-label">OUTPUT ▾</span>
+[85 90 78 92 88]
+Type: &lt;class 'numpy.ndarray'&gt;
+Shape: (5,)              ← 5 איברים, ממד אחד</div>
+    <div class="code-block">
+      <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><div class="code-label">array_2d.py</div></div>
+      <div class="code-body"><span class="cm"># מערך דו-ממדי (2D) – מטריצה</span>
+matrix = np.<span class="fn">array</span>([
+    [<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>],
+    [<span class="num">4</span>, <span class="num">5</span>, <span class="num">6</span>],
+    [<span class="num">7</span>, <span class="num">8</span>, <span class="num">9</span>]
+])
+<span class="fn">print</span>(matrix)
+<span class="fn">print</span>(<span class="str">f'Shape: </span>{matrix.<span class="var">shape</span>}<span class="str">'</span>)</div>
+    </div>
+    <div class="arrow-down">▼</div>
+    <div class="output-block">
+<span class="output-label">OUTPUT ▾</span>
+[[1 2 3]
+ [4 5 6]
+ [7 8 9]]
+Shape: (3, 3)            ← 3 שורות × 3 עמודות</div>
+    <div class="tip-box"><span class="tip-icon">💡</span><p>ברשימה רגילה – סוגים שונים מותרים: <code>[1, "hi", True]</code>. ב-NumPy – <strong>כל האיברים חייבים להיות מאותו סוג!</strong></p></div>
+  </div>
+</div>
+
+<!-- SLIDE 4: zeros, ones, full -->
+<div class="slide" id="slide-4">
+  <div class="slide-inner">
+    <div class="slide-header">
+      <h3>zeros, ones, full <span class="badge badge-blue">מערכים מוכנים</span></h3>
+      <div class="desc">יצירת מערכים בגודל מסוים עם ערך התחלתי</div>
+    </div>
+    <div class="code-block">
+      <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><div class="code-label">zeros_ones.py</div></div>
+      <div class="code-body"><span class="cm"># מערך אפסים</span>
+<span class="fn">print</span>(np.<span class="fn">zeros</span>(<span class="num">5</span>))
+<span class="fn">print</span>(np.<span class="fn">zeros</span>((<span class="num">2</span>, <span class="num">3</span>)))   <span class="cm"># 2D: טאפל!</span></div>
+    </div>
+    <div class="arrow-down">▼</div>
+    <div class="output-block">
+<span class="output-label">OUTPUT ▾</span>
+[0. 0. 0. 0. 0.]
+
+[[0. 0. 0.]
+ [0. 0. 0.]]</div>
+    <div class="code-block">
+      <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><div class="code-label">ones_full.py</div></div>
+      <div class="code-body"><span class="cm"># מערך אחדות</span>
+<span class="fn">print</span>(np.<span class="fn">ones</span>(<span class="num">4</span>))
+
+<span class="cm"># מערך עם ערך לבחירה</span>
+<span class="fn">print</span>(np.<span class="fn">full</span>((<span class="num">2</span>, <span class="num">3</span>), <span class="num">7</span>))</div>
+    </div>
+    <div class="arrow-down">▼</div>
+    <div class="output-block">
+<span class="output-label">OUTPUT ▾</span>
+[1. 1. 1. 1.]
+
+[[7 7 7]
+ [7 7 7]]</div>
+    <div class="tip-box"><span class="tip-icon">⚠️</span><p>ל-2D מעבירים <strong>טאפל</strong>: <code>np.zeros((3, 4))</code> ← סוגריים כפולים! (חיצוניים של הפונקציה, פנימיים של הטאפל)</p></div>
+  </div>
+</div>
+
+<!-- SLIDE 5: arange & linspace -->
+<div class="slide" id="slide-5">
+  <div class="slide-inner">
+    <div class="slide-header">
+      <h3>arange ו-linspace <span class="badge badge-blue">טווחי מספרים</span></h3>
+      <div class="desc">שתי דרכים ליצור סדרת מספרים</div>
+    </div>
+    <div class="compare-row">
+      <div class="compare-col">
+        <h4 style="color:var(--accent-blue)">arange – צעד קבוע (כמו range)</h4>
+        <div class="code-block"><div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><div class="code-label">arange.py</div></div>
+          <div class="code-body">np.<span class="fn">arange</span>(<span class="num">10</span>)
+np.<span class="fn">arange</span>(<span class="num">1</span>, <span class="num">11</span>)
+np.<span class="fn">arange</span>(<span class="num">0</span>, <span class="num">21</span>, <span class="num">2</span>)</div>
+        </div>
+        <div class="output-block" style="font-size:11px;">
+<span class="output-label">OUTPUT ▾</span>
+[0 1 2 3 4 5 6 7 8 9]
+[ 1  2  3  4  5  6  7  8  9 10]
+[ 0  2  4  6  8 10 12 14 16 18 20]</div>
+      </div>
+      <div class="compare-col">
+        <h4 style="color:var(--accent-cyan)">linspace – כמות קבועה</h4>
+        <div class="code-block"><div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><div class="code-label">linspace.py</div></div>
+          <div class="code-body">np.<span class="fn">linspace</span>(<span class="num">0</span>, <span class="num">1</span>, <span class="num">5</span>)
+np.<span class="fn">linspace</span>(<span class="num">0</span>, <span class="num">100</span>, <span class="num">6</span>)</div>
+        </div>
+        <div class="output-block" style="font-size:11px;">
+<span class="output-label">OUTPUT ▾</span>
+[0.   0.25 0.5  0.75 1.  ]
+[  0.  20.  40.  60.  80. 100.]</div>
+      </div>
+    </div>
+    <div class="tip-box"><span class="tip-icon">🎯</span><p><strong>arange</strong>(start, stop, <strong>step</strong>) – בוחרים <strong>גודל צעד</strong>  &nbsp;|&nbsp; <strong>linspace</strong>(start, stop, <strong>num</strong>) – בוחרים <strong>כמות איברים</strong><br/>⚠️ ב-arange ה-stop לא כולל! ב-linspace הוא <strong>כן</strong> כולל!</p></div>
+  </div>
+</div>
+
+<!-- SLIDE 6: Random -->
+<div class="slide" id="slide-6">
+  <div class="slide-inner">
+    <div class="slide-header">
+      <h3>מספרים אקראיים <span class="badge badge-blue">np.random</span></h3>
+      <div class="desc">שימושי לסימולציות ויצירת נתוני בדיקה</div>
+    </div>
+    <div class="code-block">
+      <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><div class="code-label">random_int.py</div></div>
+      <div class="code-body"><span class="cm"># מספרים שלמים אקראיים: randint(low, high, size)</span>
+grades = np.random.<span class="fn">randint</span>(<span class="num">60</span>, <span class="num">101</span>, <span class="var">size</span>=<span class="num">6</span>)
+<span class="fn">print</span>(grades)</div>
+    </div>
+    <div class="arrow-down">▼</div>
+    <div class="output-block">
+<span class="output-label">OUTPUT (ישתנה כל הרצה!) ▾</span>
+[73 88 95 61 82 77]     ← 6 ציונים בין 60 ל-100</div>
+    <div class="code-block">
+      <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><div class="code-label">random_more.py</div></div>
+      <div class="code-body"><span class="cm"># עשרוניים בין 0 ל-1</span>
+<span class="fn">print</span>(np.random.<span class="fn">random</span>(<span class="num">4</span>))
+
+<span class="cm"># התפלגות נורמלית (פעמון): normal(mean, std, size)</span>
+<span class="fn">print</span>(np.random.<span class="fn">normal</span>(<span class="num">70</span>, <span class="num">10</span>, <span class="num">5</span>))</div>
+    </div>
+    <div class="arrow-down">▼</div>
+    <div class="output-block">
+<span class="output-label">OUTPUT ▾</span>
+[0.374 0.951 0.732 0.598]    ← עשרוניים 0-1
+
+[68.2 75.1 82.4 59.3 71.8]   ← סביב ממוצע 70, סט"ת 10</div>
+    <div class="info-grid">
+      <div class="info-card"><h4>randint(low, high, size)</h4><p>שלמים מ-low עד high-1</p></div>
+      <div class="info-card"><h4>random(size)</h4><p>עשרוניים 0-1</p></div>
+      <div class="info-card"><h4>normal(μ, σ, size)</h4><p>התפלגות נורמלית</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 7: shape & dtype -->
+<div class="slide" id="slide-7">
+  <div class="slide-inner">
+    <div class="slide-header">
+      <h3>תכונות מערך <span class="badge badge-blue">shape, dtype, ndim</span></h3>
+      <div class="desc">מידע חשוב על המערך – גודל, סוג נתונים, מספר ממדים</div>
+    </div>
+    <div class="code-block">
+      <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><div class="code-label">properties.py</div></div>
+      <div class="code-body">arr = np.<span class="fn">array</span>([[<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>], [<span class="num">4</span>, <span class="num">5</span>, <span class="num">6</span>]])
+
+<span class="fn">print</span>(<span class="str">f'shape: </span>{arr.<span class="var">shape</span>}<span class="str">'</span>)   <span class="cm"># גודל</span>
+<span class="fn">print</span>(<span class="str">f'ndim:  </span>{arr.<span class="var">ndim</span>}<span class="str">'</span>)    <span class="cm"># מספר ממדים</span>
+<span class="fn">print</span>(<span class="str">f'size:  </span>{arr.<span class="var">size</span>}<span class="str">'</span>)    <span class="cm"># סה"כ איברים</span>
+<span class="fn">print</span>(<span class="str">f'dtype: </span>{arr.<span class="var">dtype</span>}<span class="str">'</span>)   <span class="cm"># סוג נתונים</span></div>
+    </div>
+    <div class="arrow-down">▼</div>
+    <div class="output-block">
+<span class="output-label">OUTPUT ▾</span>
+shape: (2, 3)      ← 2 שורות × 3 עמודות
+ndim:  2           ← דו-ממדי
+size:  6           ← 2×3 = 6 איברים
+dtype: int64       ← מספרים שלמים</div>
+    <div class="info-grid">
+      <div class="info-card"><h4>.shape</h4><p>טאפל עם הגודל בכל ממד</p></div>
+      <div class="info-card"><h4>.ndim</h4><p>מספר ממדים (1D, 2D...)</p></div>
+      <div class="info-card"><h4>.size</h4><p>סה"כ איברים</p></div>
+      <div class="info-card"><h4>.dtype</h4><p>int64, float64, bool...</p></div>
+    </div>
+    <div class="tip-box"><span class="tip-icon">⚡</span><p>כל אלה <strong>תכונות</strong> (properties) – <strong>בלי סוגריים!</strong> (בדיוק כמו shape ב-Pandas)</p></div>
+  </div>
+</div>
+
+<!-- SLIDE 8: Scalar Operations -->
+<div class="slide" id="slide-8">
+  <div class="slide-inner">
+    <div class="section-header">
+      <div class="section-num">SECTION 03</div>
+      <h2><span style="color:var(--accent-purple)">פעולות</span> על מערכים</h2>
+      <div class="section-desc">פעולה עם מספר בודד → מופעלת על כל איבר!</div>
+    </div>
+    <div class="code-block" style="margin-top:20px;">
+      <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><div class="code-label">scalar_ops.py</div></div>
+      <div class="code-body">grades = np.<span class="fn">array</span>([<span class="num">85</span>, <span class="num">90</span>, <span class="num">78</span>, <span class="num">92</span>, <span class="num">88</span>])
+<span class="fn">print</span>(<span class="str">f'Original:   </span>{grades}<span class="str">'</span>)
+
+<span class="fn">print</span>(<span class="str">f'+ 5:        </span>{grades + <span class="num">5</span>}<span class="str">'</span>)
+<span class="fn">print</span>(<span class="str">f'- 10:       </span>{grades - <span class="num">10</span>}<span class="str">'</span>)
+<span class="fn">print</span>(<span class="str">f'* 1.1:      </span>{grades * <span class="num">1.1</span>}<span class="str">'</span>)
+<span class="fn">print</span>(<span class="str">f'/ 100:      </span>{grades / <span class="num">100</span>}<span class="str">'</span>)
+<span class="fn">print</span>(<span class="str">f'** 2:       </span>{grades ** <span class="num">2</span>}<span class="str">'</span>)
+<span class="fn">print</span>(<span class="str">f'> 85:       </span>{grades > <span class="num">85</span>}<span class="str">'</span>)</div>
+    </div>
+    <div class="arrow-down">▼</div>
+    <div class="output-block">
+<span class="output-label">OUTPUT ▾</span>
+Original:   [85 90 78 92 88]
++ 5:        [90 95 83 97 93]      ← 5 נקודות בונוס
+- 10:       [75 80 68 82 78]      ← הורדת 10
+* 1.1:      [93.5 99.  85.8 101.2 96.8]  ← 10% בונוס
+/ 100:      [0.85 0.9  0.78 0.92 0.88]   ← לעשרוני
+** 2:       [7225 8100 6084 8464 7744]    ← בריבוע
+> 85:       [False  True False  True  True]  ← מסכה!</div>
+    <div class="tip-box"><span class="tip-icon">🔑</span><p><strong>Vectorization</strong> – הפעולה מתבצעת על כל איבר בו-זמנית, בלי לולאה. זה מה שהופך את NumPy למהיר!</p></div>
+  </div>
+</div>
+
+<!-- SLIDE 9: Element-wise Operations -->
+<div class="slide" id="slide-9">
+  <div class="slide-inner">
+    <div class="slide-header">
+      <h3>פעולות בין מערכים <span class="badge badge-purple">Element-wise</span></h3>
+      <div class="desc">פעולה בין שני מערכים באותו גודל → מתבצעת איבר-איבר</div>
+    </div>
+    <div class="code-block">
+      <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><div class="code-label">element_wise.py</div></div>
+      <div class="code-body">test1 = np.<span class="fn">array</span>([<span class="num">80</span>, <span class="num">85</span>, <span class="num">90</span>, <span class="num">75</span>, <span class="num">95</span>])
+test2 = np.<span class="fn">array</span>([<span class="num">85</span>, <span class="num">80</span>, <span class="num">88</span>, <span class="num">82</span>, <span class="num">90</span>])
+
+<span class="fn">print</span>(<span class="str">f'Test 1:      </span>{test1}<span class="str">'</span>)
+<span class="fn">print</span>(<span class="str">f'Test 2:      </span>{test2}<span class="str">'</span>)
+<span class="fn">print</span>(<span class="str">f'Sum:         </span>{test1 + test2}<span class="str">'</span>)
+<span class="fn">print</span>(<span class="str">f'Average:     </span>{(test1 + test2) / <span class="num">2</span>}<span class="str">'</span>)
+<span class="fn">print</span>(<span class="str">f'Improvement: </span>{test2 - test1}<span class="str">'</span>)</div>
+    </div>
+    <div class="arrow-down">▼</div>
+    <div class="output-block">
+<span class="output-label">OUTPUT ▾</span>
+Test 1:      [80 85 90 75 95]
+Test 2:      [85 80 88 82 90]
+Sum:         [165 165 178 157 185]    ← 80+85, 85+80, ...
+Average:     [82.5 82.5 89.  78.5 92.5]
+Improvement: [ 5 -5 -2  7 -5]        ← תלמיד 4 השתפר ב-7!</div>
+    <div class="code-block">
+      <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><div class="code-label">weighted_avg.py</div></div>
+      <div class="code-body"><span class="cm"># דוגמה מעשית: ממוצע משוקלל</span>
+exam1 = np.<span class="fn">array</span>([<span class="num">78</span>, <span class="num">85</span>, <span class="num">92</span>, <span class="num">70</span>, <span class="num">88</span>])
+exam2 = np.<span class="fn">array</span>([<span class="num">82</span>, <span class="num">88</span>, <span class="num">85</span>, <span class="num">75</span>, <span class="num">90</span>])
+exam3 = np.<span class="fn">array</span>([<span class="num">80</span>, <span class="num">90</span>, <span class="num">88</span>, <span class="num">78</span>, <span class="num">92</span>])
+
+average = (exam1 + exam2 + exam3) / <span class="num">3</span>
+<span class="fn">print</span>(<span class="str">f'Average: </span>{average}<span class="str">'</span>)</div>
+    </div>
+    <div class="arrow-down">▼</div>
+    <div class="output-block">
+<span class="output-label">OUTPUT ▾</span>
+Average: [80.  87.67 88.33 74.33 90.  ]</div>
+  </div>
+</div>
+
+<!-- SLIDE 10: 1D Indexing -->
+<div class="slide" id="slide-10">
+  <div class="slide-inner">
+    <div class="section-header">
+      <div class="section-num">SECTION 04</div>
+      <h2><span style="color:var(--accent-cyan)">אינדקסים</span> וחיתוכים</h2>
+      <div class="section-desc">גישה לאיבר בודד – בדיוק כמו ברשימות</div>
+    </div>
+    <div class="code-block" style="margin-top:20px;">
+      <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><div class="code-label">indexing.py</div></div>
+      <div class="code-body">arr = np.<span class="fn">array</span>([<span class="num">10</span>, <span class="num">20</span>, <span class="num">30</span>, <span class="num">40</span>, <span class="num">50</span>])
+<span class="cm"># אינדקס:         0   1   2   3   4</span>
+<span class="cm"># אינדקס שלילי:  -5  -4  -3  -2  -1</span>
+
+<span class="fn">print</span>(<span class="str">f'arr[0]  = </span>{arr[<span class="num">0</span>]}<span class="str">'</span>)    <span class="cm"># ראשון</span>
+<span class="fn">print</span>(<span class="str">f'arr[2]  = </span>{arr[<span class="num">2</span>]}<span class="str">'</span>)    <span class="cm"># שלישי</span>
+<span class="fn">print</span>(<span class="str">f'arr[4]  = </span>{arr[<span class="num">4</span>]}<span class="str">'</span>)    <span class="cm"># אחרון</span>
+<span class="fn">print</span>(<span class="str">f'arr[-1] = </span>{arr[-<span class="num">1</span>]}<span class="str">'</span>)   <span class="cm"># אחרון (שלילי)</span>
+<span class="fn">print</span>(<span class="str">f'arr[-2] = </span>{arr[-<span class="num">2</span>]}<span class="str">'</span>)   <span class="cm"># לפני-אחרון</span></div>
+    </div>
+    <div class="arrow-down">▼</div>
+    <div class="output-block">
+<span class="output-label">OUTPUT ▾</span>
+arr[0]  = 10      ← איבר ראשון
+arr[2]  = 30      ← איבר שלישי
+arr[4]  = 50      ← איבר אחרון
+arr[-1] = 50      ← אחרון (מהסוף)
+arr[-2] = 40      ← לפני-אחרון</div>
+    <div class="tip-box"><span class="tip-icon">💡</span><p>אינדקס חיובי מתחיל מ-<strong>0</strong> (מהתחלה). אינדקס שלילי מתחיל מ-<strong>-1</strong> (מהסוף).</p></div>
+  </div>
+</div>
+
+<!-- SLIDE 11: Slicing -->
+<div class="slide" id="slide-11">
+  <div class="slide-inner">
+    <div class="slide-header">
+      <h3>חיתוכים (Slicing) <span class="badge badge-cyan">start:stop:step</span></h3>
+      <div class="desc">גישה לטווח של איברים – כמו ברשימות</div>
+    </div>
+    <div class="code-block">
+      <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><div class="code-label">slicing.py</div></div>
+      <div class="code-body">arr = np.<span class="fn">array</span>([<span class="num">0</span>, <span class="num">10</span>, <span class="num">20</span>, <span class="num">30</span>, <span class="num">40</span>, <span class="num">50</span>, <span class="num">60</span>, <span class="num">70</span>, <span class="num">80</span>, <span class="num">90</span>])
+<span class="cm">#  indices:      0   1   2   3   4   5   6   7   8   9</span>
+
+<span class="fn">print</span>(<span class="str">f'arr[2:5]  = </span>{arr[<span class="num">2</span>:<span class="num">5</span>]}<span class="str">'</span>)
+<span class="fn">print</span>(<span class="str">f'arr[:4]   = </span>{arr[:<span class="num">4</span>]}<span class="str">'</span>)
+<span class="fn">print</span>(<span class="str">f'arr[6:]   = </span>{arr[<span class="num">6</span>:]}<span class="str">'</span>)
+<span class="fn">print</span>(<span class="str">f'arr[::2]  = </span>{arr[::<span class="num">2</span>]}<span class="str">'</span>)
+<span class="fn">print</span>(<span class="str">f'arr[1::2] = </span>{arr[<span class="num">1</span>::<span class="num">2</span>]}<span class="str">'</span>)
+<span class="fn">print</span>(<span class="str">f'arr[::-1] = </span>{arr[::-<span class="num">1</span>]}<span class="str">'</span>)</div>
+    </div>
+    <div class="arrow-down">▼</div>
+    <div class="output-block">
+<span class="output-label">OUTPUT ▾</span>
+arr[2:5]  = [20 30 40]             ← מ-2 עד 4 (5 לא כולל!)
+arr[:4]   = [ 0 10 20 30]          ← מההתחלה עד 3
+arr[6:]   = [60 70 80 90]          ← מ-6 עד הסוף
+arr[::2]  = [ 0 20 40 60 80]       ← כל איבר שני
+arr[1::2] = [10 30 50 70 90]       ← כל איבר שני (מ-1)
+arr[::-1] = [90 80 70 60 50 40 30 20 10  0]  ← הפוך!</div>
+    <div class="tip-box"><span class="tip-icon">⚠️</span><p><strong>stop לא כולל!</strong> <code>arr[2:5]</code> = אינדקסים 2, 3, 4 (בלי 5). בדיוק כמו <code>range</code>.</p></div>
+  </div>
+</div>
+
+<!-- SLIDE 12: 2D Indexing -->
+<div class="slide" id="slide-12">
+  <div class="slide-inner">
+    <div class="slide-header">
+      <h3>אינדקסים 2D <span class="badge badge-cyan">arr[row, col]</span></h3>
+      <div class="desc">במערך דו-ממדי: שני אינדקסים – שורה ועמודה</div>
+    </div>
+    <div class="code-block">
+      <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><div class="code-label">indexing_2d.py</div></div>
+      <div class="code-body">matrix = np.<span class="fn">array</span>([
+    [<span class="num">1</span>,  <span class="num">2</span>,  <span class="num">3</span>,  <span class="num">4</span>],    <span class="cm"># row 0</span>
+    [<span class="num">5</span>,  <span class="num">6</span>,  <span class="num">7</span>,  <span class="num">8</span>],    <span class="cm"># row 1</span>
+    [<span class="num">9</span>, <span class="num">10</span>, <span class="num">11</span>, <span class="num">12</span>]     <span class="cm"># row 2</span>
+])
+
+<span class="cm"># איבר בודד</span>
+<span class="fn">print</span>(<span class="str">f'matrix[0, 0] = </span>{matrix[<span class="num">0</span>, <span class="num">0</span>]}<span class="str">'</span>)
+<span class="fn">print</span>(<span class="str">f'matrix[1, 2] = </span>{matrix[<span class="num">1</span>, <span class="num">2</span>]}<span class="str">'</span>)
+
+<span class="cm"># שורה שלמה</span>
+<span class="fn">print</span>(<span class="str">f'matrix[0, :] = </span>{matrix[<span class="num">0</span>, :]}<span class="str">'</span>)
+
+<span class="cm"># עמודה שלמה</span>
+<span class="fn">print</span>(<span class="str">f'matrix[:, 2] = </span>{matrix[:, <span class="num">2</span>]}<span class="str">'</span>)
+
+<span class="cm"># תת-מטריצה</span>
+<span class="fn">print</span>(matrix[<span class="num">0</span>:<span class="num">2</span>, <span class="num">1</span>:<span class="num">3</span>])</div>
+    </div>
+    <div class="arrow-down">▼</div>
+    <div class="output-block">
+<span class="output-label">OUTPUT ▾</span>
+matrix[0, 0] = 1       ← שורה 0, עמודה 0
+matrix[1, 2] = 7       ← שורה 1, עמודה 2
+
+matrix[0, :] = [1 2 3 4]   ← כל שורה 0
+matrix[:, 2] = [ 3  7 11]  ← כל עמודה 2
+
+[[2 3]                      ← שורות 0-1, עמודות 1-2
+ [6 7]]</div>
+    <div class="tip-box"><span class="tip-icon">🎯</span><p><code>:</code> = "כל"  &nbsp;|&nbsp; <code>matrix[1, :]</code> = כל שורה 1 &nbsp;|&nbsp; <code>matrix[:, 2]</code> = כל עמודה 2</p></div>
+  </div>
+</div>
+
+<!-- SLIDE 13: Statistics -->
+<div class="slide" id="slide-13">
+  <div class="slide-inner">
+    <div class="section-header">
+      <div class="section-num">SECTION 05</div>
+      <h2>פעולות <span style="color:var(--accent-orange)">סטטיסטיות</span></h2>
+      <div class="section-desc">חישובים סטטיסטיים מובנים ב-NumPy</div>
+    </div>
+    <div class="code-block" style="margin-top:20px;">
+      <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><div class="code-label">statistics.py</div></div>
+      <div class="code-body">grades = np.<span class="fn">array</span>([<span class="num">78</span>, <span class="num">85</span>, <span class="num">92</span>, <span class="num">70</span>, <span class="num">88</span>, <span class="num">95</span>, <span class="num">82</span>, <span class="num">76</span>, <span class="num">90</span>, <span class="num">84</span>])
+
+<span class="fn">print</span>(<span class="str">f'Sum:    </span>{np.<span class="fn">sum</span>(grades)}<span class="str">'</span>)
+<span class="fn">print</span>(<span class="str">f'Mean:   </span>{np.<span class="fn">mean</span>(grades)}<span class="str">'</span>)
+<span class="fn">print</span>(<span class="str">f'Median: </span>{np.<span class="fn">median</span>(grades)}<span class="str">'</span>)
+<span class="fn">print</span>(<span class="str">f'Std:    </span>{np.<span class="fn">std</span>(grades):.2f}<span class="str">'</span>)
+<span class="fn">print</span>(<span class="str">f'Min:    </span>{np.<span class="fn">min</span>(grades)}<span class="str">'</span>)
+<span class="fn">print</span>(<span class="str">f'Max:    </span>{np.<span class="fn">max</span>(grades)}<span class="str">'</span>)
+<span class="fn">print</span>(<span class="str">f'Argmin: </span>{np.<span class="fn">argmin</span>(grades)}<span class="str">'</span>)
+<span class="fn">print</span>(<span class="str">f'Argmax: </span>{np.<span class="fn">argmax</span>(grades)}<span class="str">'</span>)</div>
+    </div>
+    <div class="arrow-down">▼</div>
+    <div class="output-block">
+<span class="output-label">OUTPUT ▾</span>
+Sum:    840         ← סכום כל הציונים
+Mean:   84.0        ← ממוצע
+Median: 84.5        ← חציון (האמצעי אחרי מיון)
+Std:    7.43        ← סטיית תקן
+Min:    70          ← הציון הנמוך
+Max:    95          ← הציון הגבוה
+Argmin: 3           ← אינדקס של המינימום (70)
+Argmax: 5           ← אינדקס של המקסימום (95)</div>
+    <div class="info-grid">
+      <div class="info-card"><h4>np.sum / .sum()</h4><p>סכום</p></div>
+      <div class="info-card"><h4>np.mean / .mean()</h4><p>ממוצע</p></div>
+      <div class="info-card"><h4>np.median</h4><p>חציון</p></div>
+      <div class="info-card"><h4>np.argmax</h4><p>אינדקס של המקסימום</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 14: Axis Operations -->
+<div class="slide" id="slide-14">
+  <div class="slide-inner">
+    <div class="slide-header">
+      <h3>פעולות על צירים <span class="badge badge-orange">axis=0, axis=1</span></h3>
+      <div class="desc">ב-2D – אפשר לחשב לפי שורות (axis=1) או עמודות (axis=0)</div>
+    </div>
+    <div class="code-block">
+      <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><div class="code-label">axis_ops.py</div></div>
+      <div class="code-body"><span class="cm"># 3 תלמידים × 4 מבחנים</span>
+grades = np.<span class="fn">array</span>([
+    [<span class="num">85</span>, <span class="num">90</span>, <span class="num">78</span>, <span class="num">92</span>],   <span class="cm"># תלמיד 1</span>
+    [<span class="num">88</span>, <span class="num">82</span>, <span class="num">95</span>, <span class="num">80</span>],   <span class="cm"># תלמיד 2</span>
+    [<span class="num">70</span>, <span class="num">85</span>, <span class="num">88</span>, <span class="num">92</span>]    <span class="cm"># תלמיד 3</span>
+])
+
+<span class="cm"># ממוצע לכל תלמיד (לאורך השורה)</span>
+<span class="fn">print</span>(<span class="str">'Per student (axis=1):'</span>, np.<span class="fn">mean</span>(grades, <span class="var">axis</span>=<span class="num">1</span>))
+
+<span class="cm"># ממוצע לכל מבחן (לאורך העמודה)</span>
+<span class="fn">print</span>(<span class="str">'Per exam (axis=0):   '</span>, np.<span class="fn">mean</span>(grades, <span class="var">axis</span>=<span class="num">0</span>))</div>
+    </div>
+    <div class="arrow-down">▼</div>
+    <div class="output-block">
+<span class="output-label">OUTPUT ▾</span>
+Per student (axis=1): [86.25 86.25 83.75]
+  ← תלמיד 1: (85+90+78+92)/4 = 86.25
+  ← תלמיד 2: (88+82+95+80)/4 = 86.25
+  ← תלמיד 3: (70+85+88+92)/4 = 83.75
+
+Per exam (axis=0):    [81.  85.67 87.  88. ]
+  ← מבחן 1: (85+88+70)/3 = 81.0
+  ← מבחן 2: (90+82+85)/3 = 85.67</div>
+    <div class="compare-row">
+      <div class="compare-col">
+        <div class="info-card" style="border-right:3px solid var(--accent-cyan);">
+          <h4>axis=0 ↓ לאורך שורות</h4>
+          <p>תוצאה <strong>לכל עמודה</strong> (לכל מבחן)</p>
+        </div>
+      </div>
+      <div class="compare-col">
+        <div class="info-card" style="border-right:3px solid var(--accent-orange);">
+          <h4>axis=1 → לאורך עמודות</h4>
+          <p>תוצאה <strong>לכל שורה</strong> (לכל תלמיד)</p>
+        </div>
+      </div>
+    </div>
+    <div class="tip-box"><span class="tip-icon">🎯</span><p>זכרו: <strong>axis=0</strong> "מוחק" את הממד הראשון (שורות) → תוצאה לכל <strong>עמודה</strong>. <strong>axis=1</strong> "מוחק" את הממד השני (עמודות) → תוצאה לכל <strong>שורה</strong>.</p></div>
+  </div>
+</div>
+
+<!-- SLIDE 15: Summary -->
+<div class="slide" id="slide-15">
+  <div class="slide-inner">
+    <div class="title-slide" style="margin-top:4vh;">
+      <div class="emoji-big">🎉</div>
+      <h1 style="font-size:34px;">סיכום – NumPy</h1>
+      <div class="subtitle" style="margin-bottom:20px;">כל מה שצריך לזכור</div>
+    </div>
+    <div class="info-grid" style="max-width:700px;margin:0 auto;">
+      <div class="info-card" style="border-right:3px solid var(--accent-green);"><div class="card-icon">⚡</div><h4 style="color:var(--accent-green);font-family:'Heebo';font-size:14px;">למה NumPy?</h4><p>מהיר, קוד קצר, בסיס ל-Pandas. פעולות בלי לולאות!</p></div>
+      <div class="info-card" style="border-right:3px solid var(--accent-blue);"><div class="card-icon">🔧</div><h4 style="color:var(--accent-blue);font-family:'Heebo';font-size:14px;">יצירת מערכים</h4><p>np.array, zeros, ones, arange, linspace, random</p></div>
+      <div class="info-card" style="border-right:3px solid var(--accent-purple);"><div class="card-icon">➕</div><h4 style="color:var(--accent-purple);font-family:'Heebo';font-size:14px;">פעולות</h4><p>סקלריות (+5), איבר-איבר (arr1+arr2), השוואה (>)</p></div>
+      <div class="info-card" style="border-right:3px solid var(--accent-cyan);"><div class="card-icon">✂️</div><h4 style="color:var(--accent-cyan);font-family:'Heebo';font-size:14px;">אינדקסים וחיתוכים</h4><p>arr[i], arr[start:stop:step], matrix[row, col]</p></div>
+      <div class="info-card" style="border-right:3px solid var(--accent-orange);"><div class="card-icon">📊</div><h4 style="color:var(--accent-orange);font-family:'Heebo';font-size:14px;">סטטיסטיקה</h4><p>sum, mean, median, std, min, max, argmax + axis!</p></div>
+    </div>
+    <div class="tip-box" style="max-width:700px;margin:16px auto 0;">
+      <span class="tip-icon">🔑</span>
+      <p><strong>כלל הזהב:</strong> אם מוצאים את עצמכם כותבים <strong>לולאה על מספרים</strong> – כנראה יש דרך עם NumPy שעושה את זה בשורה אחת!</p>
+    </div>
+  </div>
+</div>
+
+</div><!-- end main-content -->
+
+<div class="bottom-nav" id="bottomNav">
+  <button class="nav-btn" id="prevBtn" onclick="navigate(-1)">הקודם ←</button>
+  <span class="slide-counter" id="slideCounter">1 / 16</span>
+  <button class="nav-btn primary" id="nextBtn" onclick="navigate(1)">→ הבא</button>
+</div>
+
+<script>
+let currentSlide=0;const totalSlides=16;
+function navigate(d){const n=currentSlide+d;if(n<0||n>=totalSlides)return;goToSlide(n)}
+function goToSlide(i){if(i===currentSlide)return;const o=document.getElementById(`slide-${currentSlide}`),n=document.getElementById(`slide-${i}`);o.classList.remove('active');if(i>currentSlide)o.classList.add('exit-left');setTimeout(()=>o.classList.remove('exit-left'),450);n.classList.add('active');n.scrollTop=0;currentSlide=i;updateUI()}
+function updateUI(){document.getElementById('slideCounter').textContent=`${currentSlide+1} / ${totalSlides}`;const p=(currentSlide/(totalSlides-1))*100;document.getElementById('progressFill').style.width=`${p}%`;document.getElementById('progressText').textContent=`${Math.round(p)}%`;document.getElementById('prevBtn').style.opacity=currentSlide===0?'0.3':'1';document.getElementById('prevBtn').style.pointerEvents=currentSlide===0?'none':'all';document.getElementById('nextBtn').style.opacity=currentSlide===totalSlides-1?'0.3':'1';document.getElementById('nextBtn').style.pointerEvents=currentSlide===totalSlides-1?'none':'all';document.querySelectorAll('.nav-item').forEach(item=>{item.classList.toggle('active',parseInt(item.dataset.slide)===currentSlide);if(parseInt(item.dataset.slide)===currentSlide)item.scrollIntoView({block:'nearest',behavior:'smooth'})})}
+document.querySelectorAll('.nav-item').forEach(item=>{item.addEventListener('click',()=>goToSlide(parseInt(item.dataset.slide)))});
+document.addEventListener('keydown',e=>{if(e.key==='ArrowLeft'||e.key==='ArrowUp'){e.preventDefault();navigate(1)}else if(e.key==='ArrowRight'||e.key==='ArrowDown'){e.preventDefault();navigate(-1)}});
+function toggleSidebar(){const s=document.getElementById('sidebar');s.classList.toggle('collapsed');document.getElementById('sidebarToggle').textContent=s.classList.contains('collapsed')?'▶':'◀'}
+let tx=0;document.addEventListener('touchstart',e=>{tx=e.touches[0].clientX});document.addEventListener('touchend',e=>{const d=tx-e.changedTouches[0].clientX;if(Math.abs(d)>50)navigate(d>0?1:-1)});
+updateUI();
+</script>
+</body>
+</html>
