@@ -5,6 +5,7 @@
 // path מגדיר את ההיררכיה: ['נושא', 'תת-נושא', 'תת-תת-נושא', ...]
 // ============================================================
 
+// תמיכה בפורמט ישן (subcategory+subSubcategory) וחדש (path)
 export interface StaticMaterial {
   id: string
   title: string
@@ -13,6 +14,15 @@ export interface StaticMaterial {
   path: string[]
   linkUrl: string
   icon: string
+}
+
+// נרמול: אם חומר עם subcategory ובלי path, ממיר אוטומטית
+function normalizeMaterial(m: any): StaticMaterial {
+  if (m.path && m.path.length > 0) return m as StaticMaterial
+  const path: string[] = []
+  if (m.subcategory) path.push(m.subcategory)
+  if (m.subSubcategory) path.push(m.subSubcategory)
+  return { ...m, path }
 }
 
 // מטא-דאטה לכל נושא - אייקון וצבע לכרטיס
@@ -28,7 +38,8 @@ export const subcategoryMeta: Record<string, { icon: string; color: string }> = 
   'EDA':             { icon: '📉', color: 'from-purple-50 to-violet-50 border-purple-200' },
 }
 
-export const staticMaterials: StaticMaterial[] = [
+export const staticMaterials: StaticMaterial[] = ([
+  // ===== רקורסיה =====
   {
     id: 'recursive-thinking',
     title: 'חשיבה רקורסיבית',
@@ -187,8 +198,8 @@ export const staticMaterials: StaticMaterial[] = [
     title: 'numpy',
     description: '',
     category: 'teaching',
-    subcategory: 'מדעי הנתונים',
+    path: ['מדעי הנתונים'],
     linkUrl: 'numpy.html/',
     icon: '🧮',
-  }
-]
+  },
+] as any[]).map(normalizeMaterial)
