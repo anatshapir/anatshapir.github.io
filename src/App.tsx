@@ -86,13 +86,17 @@ function CategoryPage({ category, title, subtitle }: { category: 'teaching' | 'g
 export default function App() {
   const [page, setPage] = useState('home')
   const [selectedTopic, setSelectedTopic] = useState('')
+  const [selectedSubTopic, setSelectedSubTopic] = useState<string | undefined>(undefined)
 
   useEffect(() => {
     const handleHash = () => {
       const hash = window.location.hash.slice(1)
       if (hash.startsWith('topic/')) {
-        const topic = decodeURIComponent(hash.slice(6))
+        const parts = hash.slice(6).split('/')
+        const topic = decodeURIComponent(parts[0])
+        const subTopic = parts[1] ? decodeURIComponent(parts[1]) : undefined
         setSelectedTopic(topic)
+        setSelectedSubTopic(subTopic)
         setPage('topic')
       } else if (hash === 'about') {
         setPage('home')
@@ -136,7 +140,7 @@ export default function App() {
             subtitle="דברים שפשוט עושים טוב על הלב - ספרים, השראה, שירים והמלצות"
           />
         )}
-        {page === 'topic' && <TopicPage topic={selectedTopic} />}
+        {page === 'topic' && <TopicPage topic={selectedTopic} subTopic={selectedSubTopic} />}
       </main>
 
       <Footer />
