@@ -28,6 +28,8 @@ export const subcategoryMeta: Record<string, { icon: string; color: string }> = 
   'המלצות':         { icon: '⭐', color: 'from-sky-50 to-cyan-50 border-sky-200' },
   // תתי-נושאים של מדעי הנתונים
   'EDA':             { icon: '📉', color: 'from-purple-50 to-violet-50 border-purple-200' },
+  // תת-נושא ברירת מחדל לחומרים בלי תת-קטגוריה
+  'כללי':            { icon: '📂', color: 'from-gray-50 to-slate-50 border-gray-200' },
 }
 
 export const staticMaterials: StaticMaterial[] = [

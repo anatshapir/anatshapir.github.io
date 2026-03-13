@@ -16,7 +16,9 @@ export function TopicPage({ topic, subTopic }: TopicPageProps) {
 
   // If we're viewing a specific sub-topic, show its materials
   if (subTopic) {
-    const subItems = topicItems.filter(m => m.subSubcategory === subTopic);
+    const subItems = subTopic === 'כללי'
+      ? topicItems.filter(m => !m.subSubcategory)
+      : topicItems.filter(m => m.subSubcategory === subTopic);
     const subMeta = subcategoryMeta[subTopic] || { icon: '📁', color: 'from-gray-50 to-slate-50 border-gray-200' };
 
     return (
