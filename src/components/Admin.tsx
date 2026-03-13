@@ -75,17 +75,74 @@ ${materialEntries}
 `
 }
 
+// ─── Emoji Picker ─────────────────────────────────────
+const EMOJI_OPTIONS = [
+  { group: 'למידה', emojis: ['📄', '📚', '📖', '📝', '📋', '🧠', '💡', '🎓', '✏️', '📐'] },
+  { group: 'מדעים', emojis: ['💻', '📊', '📈', '📉', '🔬', '🧪', '⚗️', '🔭', '🧮', '🧬'] },
+  { group: 'כללי', emojis: ['🌐', '⚙️', '🔧', '🔑', '🏰', '🎵', '⭐', '✨', '🌳', '🔄'] },
+  { group: 'עוד', emojis: ['🎯', '🚀', '💎', '🎨', '🎪', '🐼', '☕', '🔍', '📜', '🖥️'] },
+]
+
+function EmojiPicker({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const [open, setOpen] = useState(false)
+  return (
+    <div className="relative">
+      <button
+        type="button"
+        onClick={() => setOpen(!open)}
+        className="flex items-center gap-2 px-3 py-2 border rounded-md hover:bg-muted transition-colors"
+      >
+        <span className="text-2xl">{value || '📄'}</span>
+        <span className="text-xs text-muted-foreground">בחרי אייקון</span>
+      </button>
+      {open && (
+        <div className="absolute z-50 top-full mt-1 bg-background border rounded-lg shadow-lg p-3 w-72">
+          {EMOJI_OPTIONS.map(group => (
+            <div key={group.group} className="mb-2">
+              <p className="text-xs text-muted-foreground mb-1">{group.group}</p>
+              <div className="flex flex-wrap gap-1">
+                {group.emojis.map(emoji => (
+                  <button
+                    key={emoji}
+                    type="button"
+                    onClick={() => { onChange(emoji); setOpen(false) }}
+                    className={`text-xl p-1 rounded hover:bg-muted transition-colors ${
+                      value === emoji ? 'bg-primary/10 ring-2 ring-primary' : ''
+                    }`}
+                  >
+                    {emoji}
+                  </button>
+                ))}
+              </div>
+            </div>
+          ))}
+          <div className="border-t pt-2 mt-2">
+            <Input
+              value={value}
+              onChange={e => onChange(e.target.value)}
+              placeholder="או הקלידי אימוג'י..."
+              className="text-center"
+            />
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
 // ─── Material Form ────────────────────────────────────
 function MaterialForm({
   material,
   categories,
   onSave,
   onCancel,
+  initialLinkUrl,
 }: {
   material?: StaticMaterial
   categories: Record<string, CategoryMeta>
   onSave: (m: StaticMaterial) => void
   onCancel: () => void
+  initialLinkUrl?: string
 }) {
   const [form, setForm] = useState<StaticMaterial>(
     material || {
@@ -95,10 +152,12 @@ function MaterialForm({
       category: 'teaching',
       subcategory: '',
       subSubcategory: '',
-      linkUrl: '',
+      linkUrl: initialLinkUrl || '',
       icon: '📄',
     }
   )
+  const [showNewSubcategory, setShowNewSubcategory] = useState(false)
+  const [newSubcategory, setNewSubcategory] = useState('')
 
   const subcategories = Object.keys(categories)
 
@@ -108,7 +167,7 @@ function MaterialForm({
       return
     }
     if (!form.subcategory.trim()) {
-      toast.error('חובה לבחור קטגוריה')
+      toast.error('חובה לבחור נושא')
       return
     }
     const id = form.id || form.title.toLowerCase().replace(/[^a-z0-9א-ת]/g, '-').replace(/-+/g, '-')
@@ -116,24 +175,31 @@ function MaterialForm({
   }
 
   return (
-    <div className="space-y-4">
-      <div className="grid grid-cols-[auto_1fr] gap-4 items-center">
-        <label className="text-sm font-medium">כותרת *</label>
+    <div className="space-y-5">
+      {/* Title */}
+      <div>
+        <label className="block text-sm font-medium mb-1">כותרת *</label>
         <Input
           value={form.title}
           onChange={e => setForm({ ...form, title: e.target.value })}
           placeholder="שם החומר"
         />
+      </div>
 
-        <label className="text-sm font-medium">תיאור *</label>
+      {/* Description */}
+      <div>
+        <label className="block text-sm font-medium mb-1">תיאור</label>
         <Textarea
           value={form.description}
           onChange={e => setForm({ ...form, description: e.target.value })}
           placeholder="תיאור קצר"
           rows={2}
         />
+      </div>
 
-        <label className="text-sm font-medium">קטגוריה ראשית</label>
+      {/* Category */}
+      <div>
+        <label className="block text-sm font-medium mb-2">קטגוריה ראשית</label>
         <div className="flex gap-2">
           <Button
             type="button"
@@ -141,7 +207,7 @@ function MaterialForm({
             size="sm"
             onClick={() => setForm({ ...form, category: 'teaching' })}
           >
-            חומרי למידה
+            📚 חומרי למידה
           </Button>
           <Button
             type="button"
@@ -149,11 +215,14 @@ function MaterialForm({
             size="sm"
             onClick={() => setForm({ ...form, category: 'general' })}
           >
-            דברים מעניינים
+            ✨ דברים מעניינים
           </Button>
         </div>
+      </div>
 
-        <label className="text-sm font-medium">נושא *</label>
+      {/* Subcategory (Topic) */}
+      <div>
+        <label className="block text-sm font-medium mb-2">נושא *</label>
         <div className="flex gap-2 flex-wrap">
           {subcategories.map(sc => (
             <Button
@@ -166,37 +235,116 @@ function MaterialForm({
               {categories[sc]?.icon} {sc}
             </Button>
           ))}
-          <Input
-            value={subcategories.includes(form.subcategory) ? '' : form.subcategory}
-            onChange={e => setForm({ ...form, subcategory: e.target.value })}
-            placeholder="או הקלידי נושא חדש..."
-            className="w-40"
-          />
+          {!showNewSubcategory ? (
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="border-dashed"
+              onClick={() => setShowNewSubcategory(true)}
+            >
+              <Plus className="w-3 h-3 ml-1" /> נושא חדש
+            </Button>
+          ) : (
+            <div className="flex gap-1 items-center">
+              <Input
+                value={newSubcategory}
+                onChange={e => setNewSubcategory(e.target.value)}
+                placeholder="שם הנושא..."
+                className="w-32 h-8 text-sm"
+                autoFocus
+              />
+              <Button
+                type="button"
+                size="sm"
+                variant="ghost"
+                className="h-8 w-8 p-0"
+                onClick={() => {
+                  if (newSubcategory.trim()) {
+                    setForm({ ...form, subcategory: newSubcategory.trim() })
+                    setShowNewSubcategory(false)
+                  }
+                }}
+              >
+                <Check className="w-3 h-3" />
+              </Button>
+              <Button
+                type="button"
+                size="sm"
+                variant="ghost"
+                className="h-8 w-8 p-0"
+                onClick={() => { setShowNewSubcategory(false); setNewSubcategory('') }}
+              >
+                <X className="w-3 h-3" />
+              </Button>
+            </div>
+          )}
         </div>
+        {form.subcategory && !subcategories.includes(form.subcategory) && (
+          <p className="text-xs text-amber-600 mt-1">
+            נושא חדש: "{form.subcategory}" - ייווצר אוטומטית בשמירה
+          </p>
+        )}
+      </div>
 
-        <label className="text-sm font-medium">תת-נושא</label>
+      {/* Sub-subcategory */}
+      <div>
+        <label className="block text-sm font-medium mb-1">תת-נושא (אופציונלי)</label>
         <Input
           value={form.subSubcategory || ''}
           onChange={e => setForm({ ...form, subSubcategory: e.target.value })}
-          placeholder="אופציונלי (למשל: EDA)"
+          placeholder="למשל: EDA, מיון, חיפוש..."
         />
+        <p className="text-xs text-muted-foreground mt-1">
+          תת-נושא מאפשר חלוקה נוספת בתוך הנושא הראשי
+        </p>
+      </div>
 
-        <label className="text-sm font-medium">קישור</label>
+      {/* Link */}
+      <div>
+        <label className="block text-sm font-medium mb-1">קישור</label>
         <Input
           value={form.linkUrl}
           onChange={e => setForm({ ...form, linkUrl: e.target.value })}
           placeholder="/fileName.html או https://..."
         />
-
-        <label className="text-sm font-medium">אייקון</label>
-        <Input
-          value={form.icon}
-          onChange={e => setForm({ ...form, icon: e.target.value })}
-          placeholder="אימוג'י"
-          className="w-20"
-        />
+        <p className="text-xs text-muted-foreground mt-1">
+          לקובץ שהעלית: <code className="bg-muted px-1 rounded">/שם-הקובץ.html</code> | לאתר חיצוני: <code className="bg-muted px-1 rounded">https://...</code>
+        </p>
       </div>
 
+      {/* Icon */}
+      <div>
+        <label className="block text-sm font-medium mb-2">אייקון</label>
+        <EmojiPicker value={form.icon} onChange={icon => setForm({ ...form, icon })} />
+      </div>
+
+      {/* Preview */}
+      <div className="border rounded-lg p-4 bg-muted/30">
+        <p className="text-xs text-muted-foreground mb-2">תצוגה מקדימה:</p>
+        <div className="flex items-center gap-3">
+          <span className="text-3xl">{form.icon}</span>
+          <div>
+            <h4 className="font-bold">{form.title || 'כותרת החומר'}</h4>
+            <p className="text-sm text-muted-foreground">{form.description || 'תיאור...'}</p>
+            <div className="flex items-center gap-2 mt-1 text-xs">
+              {form.subcategory && (
+                <span className="px-2 py-0.5 rounded bg-primary/10 text-primary">
+                  {categories[form.subcategory]?.icon || '📁'} {form.subcategory}
+                </span>
+              )}
+              {form.subSubcategory && (
+                <>
+                  <ChevronRight className="w-3 h-3" />
+                  <span className="px-2 py-0.5 rounded bg-muted">{form.subSubcategory}</span>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Actions */}
       <div className="flex gap-2 justify-end pt-2">
         <Button variant="outline" onClick={onCancel}>
           <X className="w-4 h-4 ml-1" /> ביטול
@@ -404,6 +552,9 @@ export function AdminPanel() {
   }
 
   // ─── File Upload ──────────────
+  const [uploadedFileLink, setUploadedFileLink] = useState<string | null>(null)
+  const [uploading, setUploading] = useState(false)
+
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
@@ -412,6 +563,7 @@ export function AdminPanel() {
       return
     }
 
+    setUploading(true)
     const reader = new FileReader()
     reader.onload = async () => {
       try {
@@ -419,12 +571,19 @@ export function AdminPanel() {
         const fileName = file.name
         await github.uploadBinaryFile(fileName, base64, `העלאת קובץ ${fileName} מ-Admin Panel`)
         toast.success(`"${fileName}" הועלה בהצלחה!`)
-        setShowUpload(false)
+        setUploadedFileLink(`/${fileName}`)
       } catch (error: any) {
         toast.error(`שגיאה בהעלאה: ${error.message}`)
+      } finally {
+        setUploading(false)
       }
     }
     reader.readAsDataURL(file)
+  }
+
+  const handleCreateMaterialFromUpload = () => {
+    setShowAddMaterial(true)
+    setActiveTab('materials')
   }
 
   // ─── Login Screen ─────────────
@@ -662,26 +821,60 @@ export function AdminPanel() {
                     העלי קובץ HTML שיהפוך לדף באתר. הקובץ יועלה לשורש הפרויקט ויהיה נגיש בכתובת
                     <code className="mx-1 px-1 bg-muted rounded">/fileName.html</code>
                   </p>
-                  <div className="border-2 border-dashed rounded-xl p-8 text-center hover:border-primary transition-colors">
-                    <FolderOpen className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
-                    <label className="cursor-pointer">
-                      <span className="text-lg font-medium text-primary hover:underline">בחרי קובץ להעלאה</span>
-                      <input
-                        type="file"
-                        accept=".html,.htm"
-                        className="hidden"
-                        onChange={handleFileUpload}
-                      />
-                    </label>
-                    <p className="text-sm text-muted-foreground mt-2">HTML files only</p>
-                  </div>
+
+                  {!uploadedFileLink ? (
+                    <div className={`border-2 border-dashed rounded-xl p-8 text-center transition-colors ${
+                      uploading ? 'border-primary bg-primary/5' : 'hover:border-primary'
+                    }`}>
+                      {uploading ? (
+                        <>
+                          <div className="w-12 h-12 mx-auto mb-4 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+                          <p className="text-lg font-medium">מעלה את הקובץ...</p>
+                        </>
+                      ) : (
+                        <>
+                          <FolderOpen className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+                          <label className="cursor-pointer">
+                            <span className="text-lg font-medium text-primary hover:underline">בחרי קובץ להעלאה</span>
+                            <input
+                              type="file"
+                              accept=".html,.htm"
+                              className="hidden"
+                              onChange={handleFileUpload}
+                            />
+                          </label>
+                          <p className="text-sm text-muted-foreground mt-2">קבצי HTML בלבד</p>
+                        </>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="border-2 border-green-300 bg-green-50 rounded-xl p-6 text-center space-y-4">
+                      <div className="text-4xl">✅</div>
+                      <div>
+                        <p className="font-bold text-lg text-green-800">הקובץ הועלה בהצלחה!</p>
+                        <p className="text-green-700 mt-1">
+                          הקובץ זמין בכתובת: <code className="bg-white px-2 py-0.5 rounded font-mono">{uploadedFileLink}</code>
+                        </p>
+                      </div>
+                      <div className="flex gap-3 justify-center">
+                        <Button onClick={handleCreateMaterialFromUpload}>
+                          <Plus className="w-4 h-4 ml-2" /> צרי חומר עם הקישור הזה
+                        </Button>
+                        <Button variant="outline" onClick={() => setUploadedFileLink(null)}>
+                          העלי קובץ נוסף
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+
                   <div className="bg-muted/50 rounded-lg p-4 space-y-2">
-                    <h4 className="font-medium text-sm">טיפים:</h4>
-                    <ul className="text-sm text-muted-foreground space-y-1 list-disc list-inside">
-                      <li>אחרי ההעלאה, הוסיפי חומר חדש בטאב "חומרים" עם הקישור לקובץ</li>
-                      <li>שם הקובץ יהיה הכתובת באתר (למשל: <code>myPage.html</code> → <code>/myPage.html</code>)</li>
-                      <li>הקובץ ייכנס ל-GitHub ויתפרסם אוטומטית</li>
-                    </ul>
+                    <h4 className="font-medium text-sm">איך זה עובד:</h4>
+                    <ol className="text-sm text-muted-foreground space-y-1 list-decimal list-inside">
+                      <li>בחרי קובץ HTML להעלאה</li>
+                      <li>הקובץ יועלה ל-GitHub אוטומטית</li>
+                      <li>לחצי "צרי חומר" כדי להוסיף אותו לאתר עם כותרת, תיאור ואייקון</li>
+                      <li>שמרי ב-GitHub והאתר יתעדכן!</li>
+                    </ol>
                   </div>
                 </CardContent>
               </Card>
@@ -693,23 +886,31 @@ export function AdminPanel() {
       {/* ══════ Dialogs ══════ */}
 
       {/* Add Material Dialog */}
-      <Dialog open={showAddMaterial} onOpenChange={setShowAddMaterial}>
-        <DialogContent className="max-w-2xl" dir="rtl">
+      <Dialog open={showAddMaterial} onOpenChange={(open) => {
+        setShowAddMaterial(open)
+        if (!open) setUploadedFileLink(null)
+      }}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto" dir="rtl">
           <DialogHeader>
             <DialogTitle>הוספת חומר חדש</DialogTitle>
-            <DialogDescription>מלאי את הפרטים של החומר החדש</DialogDescription>
+            <DialogDescription>
+              {uploadedFileLink
+                ? `הקובץ ${uploadedFileLink} הועלה - מלאי את שאר הפרטים`
+                : 'מלאי את הפרטים של החומר החדש'}
+            </DialogDescription>
           </DialogHeader>
           <MaterialForm
             categories={categories}
             onSave={addMaterial}
             onCancel={() => setShowAddMaterial(false)}
+            initialLinkUrl={uploadedFileLink || undefined}
           />
         </DialogContent>
       </Dialog>
 
       {/* Edit Material Dialog */}
       <Dialog open={!!editingMaterial} onOpenChange={() => setEditingMaterial(null)}>
-        <DialogContent className="max-w-2xl" dir="rtl">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto" dir="rtl">
           <DialogHeader>
             <DialogTitle>עריכת חומר</DialogTitle>
             <DialogDescription>ערכי את הפרטים של "{editingMaterial?.title}"</DialogDescription>
