@@ -28,7 +28,6 @@ export const subcategoryMeta: Record<string, { icon: string; color: string }> = 
   'המלצות':         { icon: '⭐', color: 'from-sky-50 to-cyan-50 border-sky-200' },
   // תתי-נושאים של מדעי הנתונים
   'EDA':             { icon: '📉', color: 'from-purple-50 to-violet-50 border-purple-200' },
-  'פרויקט':          { icon: '📈', color: 'from-fuchsia-50 to-pink-50 border-fuchsia-200' },
 }
 
 export const staticMaterials: StaticMaterial[] = [
@@ -143,7 +142,6 @@ export const staticMaterials: StaticMaterial[] = [
     description: 'מדריך מקיף לספריית Pandas - עיבוד וניתוח נתונים ב-Python.',
     category: 'teaching',
     subcategory: 'מדעי הנתונים',
-    subSubcategory: 'EDA',
     linkUrl: '/pandas.html',
     icon: '🐼',
   },
