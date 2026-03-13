@@ -23,10 +23,51 @@ async function githubApi(path: string, options: RequestInit = {}) {
     },
   })
   if (!res.ok) {
-    const body = await res.text()
-    throw new Error(`GitHub API error ${res.status}: ${body}`)
+    const body = await res.json().catch(() => ({}))
+    if (res.status === 403) {
+      throw new Error(
+        'אין הרשאת כתיבה לטוקן.\n\n' +
+        '• Fine-grained token: צריך הרשאת "Contents: Read and write"\n' +
+        '• Classic token: צריך scope של "repo"\n\n' +
+        'לכי ל-GitHub → Settings → Developer settings → Personal access tokens ותעדכני את ההרשאות.'
+      )
+    }
+    if (res.status === 404) {
+      throw new Error('הקובץ או ה-repo לא נמצאו. ודאי שה-token שייך לחשבון הנכון.')
+    }
+    throw new Error(`GitHub API error ${res.status}: ${body.message || JSON.stringify(body)}`)
   }
   return res.json()
+}
+
+// Validate token has WRITE access (not just read)
+export async function validateToken(): Promise<{ valid: boolean; canWrite: boolean; error?: string }> {
+  try {
+    const token = getToken()
+    // Check repo access
+    const repoRes = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}`, {
+      headers: {
+        'Authorization': `token ${token}`,
+        'Accept': 'application/vnd.github.v3+json',
+      },
+    })
+    if (!repoRes.ok) {
+      return { valid: false, canWrite: false, error: 'טוקן לא תקין או אין גישה ל-repo' }
+    }
+    const repo = await repoRes.json()
+    // Check permissions
+    const canWrite = repo.permissions?.push === true || repo.permissions?.admin === true
+    if (!canWrite) {
+      return {
+        valid: true,
+        canWrite: false,
+        error: 'לטוקן יש גישת קריאה בלבד. צריך הרשאת כתיבה:\n• Fine-grained token → Contents: Read and write\n• Classic token → scope: repo'
+      }
+    }
+    return { valid: true, canWrite: true }
+  } catch {
+    return { valid: false, canWrite: false, error: 'שגיאה בבדיקת הטוקן' }
+  }
 }
 
 export async function getFileContent(filePath: string): Promise<{ content: string; sha: string }> {
@@ -67,15 +108,6 @@ export async function uploadBinaryFile(filePath: string, base64Content: string, 
       branch: BRANCH,
     }),
   })
-}
-
-export async function validateToken(): Promise<boolean> {
-  try {
-    await githubApi('')
-    return true
-  } catch {
-    return false
-  }
 }
 
 export function setToken(token: string) {
