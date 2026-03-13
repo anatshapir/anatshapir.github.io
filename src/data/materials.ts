@@ -29,7 +29,6 @@ export const subcategoryMeta: Record<string, { icon: string; color: string }> = 
 }
 
 export const staticMaterials: StaticMaterial[] = [
-  // ===== רקורסיה =====
   {
     id: 'recursive-thinking',
     title: 'חשיבה רקורסיבית',
@@ -75,8 +74,6 @@ export const staticMaterials: StaticMaterial[] = [
     linkUrl: '/recursive_labyrinth.html',
     icon: '🏰',
   },
-
-  // ===== מדעי המחשב =====
   {
     id: 'bfs-dfs',
     title: 'BFS & DFS',
@@ -113,8 +110,6 @@ export const staticMaterials: StaticMaterial[] = [
     linkUrl: '/trackTable.html',
     icon: '📋',
   },
-
-  // ===== מדעי הנתונים =====
   {
     id: 'datascience-project',
     title: 'מבוא למדעי הנתונים',
@@ -142,8 +137,6 @@ export const staticMaterials: StaticMaterial[] = [
     linkUrl: '/pandas.html',
     icon: '🐼',
   },
-
-  // ===== פיתוח ווב =====
   {
     id: 'html-guide',
     title: 'מדריך HTML & VS Code',
@@ -171,8 +164,6 @@ export const staticMaterials: StaticMaterial[] = [
     linkUrl: '/serverImpl.html',
     icon: '🖥️',
   },
-
-  // ===== דברים מעניינים =====
   {
     id: 'little-prince',
     title: 'הנסיך הקטן - אנטואן דה סנט-אכזופרי',
@@ -191,4 +182,13 @@ export const staticMaterials: StaticMaterial[] = [
     linkUrl: '',
     icon: '💡',
   },
+  {
+    id: 'numpy',
+    title: 'numpy',
+    description: '',
+    category: 'teaching',
+    subcategory: 'מדעי הנתונים',
+    linkUrl: 'numpy.html/',
+    icon: '🧮',
+  }
 ]
