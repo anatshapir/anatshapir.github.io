@@ -1,218 +1,698 @@
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>פרוייקט במדעי הנתונים</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
-    <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            line-height: 1.6;
-            margin: 0;
-            padding: 0;
-            background-color: #f8f9fa;
-            color: #333;
-        }
-        header {
-            background-color: #4a6da7;
-            color: white;
-            text-align: center;
-            padding: 2rem 1rem;
-            margin-bottom: 0;
-        }
-        .project-nav {
-            background-color: #375a8e;
-            padding: 1rem 0;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            margin-bottom: 2rem;
-        }
-        .project-nav ul {
-            display: flex;
-            justify-content: center;
-            list-style-type: none;
-            margin: 0;
-            padding: 0;
-            flex-wrap: wrap;
-        }
-        .project-nav li {
-            margin: 0.3rem 0.6rem;
-        }
-        .project-nav a {
-            color: white;
-            text-decoration: none;
-            padding: 0.5rem 1rem;
-            border-radius: 4px;
-            font-weight: 500;
-            transition: background-color 0.3s;
-        }
-        .project-nav a:hover {
-            background-color: #2a4572;
-            text-decoration: none;
-        }
-        .project-nav a.active {
-            background-color: #2a4572;
-        }
-        main {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 2rem;
-            background-color: white;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-        }
-        section {
-            margin-bottom: 2.5rem;
-            padding-bottom: 1.5rem;
-            border-bottom: 1px solid #eee;
-        }
-        h1, h2, h3, h4 {
-            color: #2a4572;
-            margin-top: 1.5rem;
-        }
-        h1 {
-            font-size: 2.5rem;
-        }
-        h2 {
-            font-size: 2rem;
-            padding-bottom: 0.5rem;
-            border-bottom: 2px solid #eaeaea;
-            margin-bottom: 1rem;
-        }
-        h3 {
-            font-size: 1.5rem;
-            margin-top: 1.8rem;
-        }
-        h4 {
-            font-size: 1.2rem;
-        }
-        code {
-            background-color: #f5f5f5;
-            padding: 0.2rem 0.4rem;
-            border-radius: 3px;
-            font-family: Consolas, Monaco, 'Andale Mono', monospace;
-            direction: ltr;
-            text-align: left;
-        }
-        pre {
-            background-color: #f5f5f5;
-            padding: 1rem;
-            border-radius: 5px;
-            overflow-x: auto;
-            font-family: Consolas, Monaco, 'Andale Mono', monospace;
-            border: 1px solid #e0e0e0;
-            max-height: 400px;
-            direction: ltr;
-            text-align: left;
-        }
-        .note {
-            background-color: #e8f4f8;
-            border-right: 4px solid #4a6da7;
-            padding: 1rem;
-            margin: 1rem 0;
-            border-radius: 4px;
-        }
-        .warning {
-            background-color: #fff3cd;
-            border-right: 4px solid #ffc107;
-            padding: 1rem;
-            margin: 1rem 0;
-            border-radius: 4px;
-        }
-        .highlight {
-            background-color: #fffde7;
-            padding: 1rem;
-            border-radius: 5px;
-            margin: 1rem 0;
-            border: 1px solid #fff9c4;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 1rem 0;
-            border: 1px solid #ddd;
-        }
-        th, td {
-            padding: 0.75rem;
-            border: 1px solid #ddd;
-        }
-        th {
-            background-color: #f2f2f2;
-            font-weight: bold;
-        }
-        img {
-            max-width: 100%;
-            height: auto;
-            display: block;
-            margin: 1rem auto;
-            border-radius: 5px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        .step {
-            background-color: #f0f7ff;
-            border-radius: 5px;
-            padding: 1.5rem;
-            margin-bottom: 1.5rem;
-            border: 1px solid #d1e7ff;
-        }
-        .step h4 {
-            margin-top: 0;
-            color: #0056b3;
-            border-bottom: 1px solid #d1e7ff;
-            padding-bottom: 0.5rem;
-            margin-bottom: 1rem;
-        }
-        .top-btn {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background-color: #4a6da7;
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            font-size: 20px;
-            cursor: pointer;
-            display: none;
-            justify-content: center;
-            align-items: center;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-            z-index: 1000;
-        }
-        .top-btn:hover {
-            background-color: #375a8e;
-        }
-        footer {
-            background-color: #375a8e;
-            color: white;
-            text-align: center;
-            padding: 1.5rem 1rem;
-            margin-top: 2rem;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>מבוא ללמידת מכונה - מדעי הנתונים</title>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-primary:#0a0a1a;--bg-card:#1a1a34;--bg-code:#0d1117;
+  --accent-blue:#3b82f6;--accent-purple:#8b5cf6;--accent-indigo:#6366f1;
+  --accent-cyan:#06b6d4;--accent-green:#10b981;--accent-orange:#f59e0b;--accent-pink:#ec4899;--accent-red:#ef4444;
+  --text-primary:#f1f5f9;--text-secondary:#94a3b8;--text-muted:#64748b;--border-color:#1e1e3a;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Heebo',sans-serif;background:var(--bg-primary);color:var(--text-primary);overflow:hidden;height:100vh;width:100vw}
+.bg-grid{position:fixed;inset:0;background-image:linear-gradient(rgba(99,102,241,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(99,102,241,0.03) 1px,transparent 1px);background-size:60px 60px;z-index:0}
+.bg-glow{position:fixed;width:600px;height:600px;border-radius:50%;filter:blur(120px);opacity:0.12;z-index:0;pointer-events:none}
+.bg-glow-1{background:var(--accent-indigo);top:-200px;right:-200px}
+.bg-glow-2{background:var(--accent-purple);bottom:-200px;left:-200px}
+.top-bar{position:fixed;top:0;left:0;right:0;height:50px;background:rgba(10,10,26,0.9);backdrop-filter:blur(20px);border-bottom:1px solid var(--border-color);display:flex;align-items:center;justify-content:space-between;padding:0 24px;z-index:100}
+.top-bar-title{font-size:14px;font-weight:500;color:var(--text-secondary);display:flex;align-items:center;gap:8px}
+.progress-container{display:flex;align-items:center;gap:12px}
+.progress-bar{width:200px;height:3px;background:var(--border-color);border-radius:2px;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent-indigo),var(--accent-purple));border-radius:2px;transition:width .5s ease}
+.progress-text{font-size:12px;color:var(--text-muted);font-family:'Fira Code',monospace;min-width:55px;text-align:left;direction:ltr}
+.sidebar{position:fixed;top:50px;right:0;width:260px;height:calc(100vh - 50px);background:rgba(20,20,40,0.7);backdrop-filter:blur(10px);border-left:1px solid var(--border-color);z-index:90;overflow-y:auto;padding:12px 0;transition:transform .3s ease}
+.sidebar.collapsed{transform:translateX(260px)}
+.sidebar-toggle{position:fixed;top:60px;right:260px;width:26px;height:26px;background:var(--bg-card);border:1px solid var(--border-color);border-radius:6px 0 0 6px;color:var(--text-muted);cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:91;transition:all .3s ease;font-size:11px}
+.sidebar.collapsed+.sidebar-toggle{right:0}
+.stn{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted);padding:8px 18px 4px;margin-top:6px}
+.nav-item{padding:6px 18px;font-size:12.5px;color:var(--text-secondary);cursor:pointer;transition:all .2s ease;display:flex;align-items:center;gap:8px;border-right:2px solid transparent}
+.nav-item:hover{background:rgba(99,102,241,0.05);color:var(--text-primary)}
+.nav-item.active{background:rgba(99,102,241,0.08);color:var(--accent-indigo);border-right-color:var(--accent-indigo)}
+.nav-item .num{font-family:'Fira Code',monospace;font-size:10px;color:var(--text-muted);min-width:18px}
+.main-content{position:fixed;top:50px;left:0;right:260px;height:calc(100vh - 50px);overflow:hidden;z-index:1;transition:right .3s ease}
+.sidebar.collapsed~.main-content{right:0}
+.slide{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:24px 50px 70px;overflow-y:auto;opacity:0;transform:translateX(-30px);transition:all .45s cubic-bezier(.4,0,.2,1);pointer-events:none}
+.slide.active{opacity:1;transform:translateX(0);pointer-events:all}
+.slide.exit-left{opacity:0;transform:translateX(30px)}
+.slide-inner{max-width:880px;width:100%}
+.title-slide{text-align:center;margin-top:8vh}
+.title-slide .emoji-big{font-size:56px;margin-bottom:12px;animation:float 3s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.title-slide h1{font-size:44px;font-weight:900;background:linear-gradient(135deg,var(--accent-indigo),var(--accent-purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:10px}
+.title-slide .subtitle{font-size:18px;color:var(--text-secondary);font-weight:300}
+.section-header{text-align:center;margin-top:5vh}
+.section-header .section-num{font-family:'Fira Code',monospace;font-size:13px;color:var(--accent-cyan);margin-bottom:6px;letter-spacing:2px}
+.section-header h2{font-size:36px;font-weight:800;margin-bottom:10px}
+.section-header .section-desc{font-size:17px;color:var(--text-secondary);max-width:600px;margin:0 auto;line-height:1.6}
+.slide-header{margin-bottom:16px}
+.slide-header h3{font-size:24px;font-weight:700;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.slide-header .desc{font-size:15px;color:var(--text-secondary);margin-top:6px;line-height:1.6}
+.badge{font-family:'Fira Code',monospace;font-size:10px;padding:2px 9px;border-radius:10px;font-weight:500}
+.badge-blue{background:rgba(59,130,246,0.15);color:var(--accent-blue)}
+.badge-purple{background:rgba(139,92,246,0.15);color:var(--accent-purple)}
+.badge-green{background:rgba(16,185,129,0.15);color:var(--accent-green)}
+.badge-orange{background:rgba(245,158,11,0.15);color:var(--accent-orange)}
+.badge-cyan{background:rgba(6,182,212,0.15);color:var(--accent-cyan)}
+.code-block{background:var(--bg-code);border:1px solid var(--border-color);border-radius:10px;overflow:hidden;margin:10px 0;direction:ltr;text-align:left}
+.code-header{display:flex;align-items:center;justify-content:space-between;padding:8px 14px;background:rgba(30,30,58,0.5);border-bottom:1px solid var(--border-color)}
+.code-dots{display:flex;gap:5px}
+.code-dots span{width:9px;height:9px;border-radius:50%}
+.code-dots span:nth-child(1){background:#ef4444}
+.code-dots span:nth-child(2){background:#f59e0b}
+.code-dots span:nth-child(3){background:#10b981}
+.code-label{font-family:'Fira Code',monospace;font-size:10px;color:var(--text-muted)}
+.code-body{padding:12px 16px;font-family:'Fira Code',monospace;font-size:12.5px;line-height:1.65;overflow-x:auto;white-space:pre}
+.kw{color:#c678dd}.fn{color:#61afef}.str{color:#98c379}.num{color:#d19a66}.cm{color:#5c6370;font-style:italic}.op{color:#56b6c2}.var{color:#e06c75}
+.output-block{background:rgba(16,185,129,0.05);border:1px solid rgba(16,185,129,0.15);border-radius:8px;padding:10px 14px;margin:8px 0;direction:ltr;text-align:left;font-family:'Fira Code',monospace;font-size:11.5px;line-height:1.55;color:var(--accent-green);white-space:pre;overflow-x:auto}
+.output-label{font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted);margin-bottom:4px;display:block}
+.arrow-down{text-align:center;color:var(--text-muted);font-size:16px;margin:2px 0;opacity:.5}
+.info-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin:12px 0}
+.info-card{background:var(--bg-card);border:1px solid var(--border-color);border-radius:9px;padding:14px;transition:all .3s ease}
+.info-card:hover{border-color:var(--accent-indigo);transform:translateY(-2px)}
+.info-card .card-icon{font-size:24px;margin-bottom:6px}
+.info-card h4{font-size:14px;font-weight:600;margin-bottom:4px;color:var(--text-primary)}
+.info-card p{font-size:12.5px;color:var(--text-secondary);line-height:1.5}
+.tip-box{background:rgba(245,158,11,0.06);border:1px solid rgba(245,158,11,0.15);border-radius:8px;padding:10px 14px;margin:10px 0;display:flex;gap:8px;align-items:flex-start}
+.tip-box .tip-icon{font-size:16px;flex-shrink:0;margin-top:1px}
+.tip-box p{font-size:13px;color:var(--text-secondary);line-height:1.5}
+.compare-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:10px 0}
+.compare-col h4{font-size:13px;font-weight:600;margin-bottom:6px}
+/* Concept boxes */
+.concept-box{background:var(--bg-card);border:1px solid var(--border-color);border-radius:10px;padding:16px;margin:10px 0;position:relative;overflow:hidden}
+.concept-box::before{content:'';position:absolute;top:0;right:0;width:4px;height:100%}
+.concept-box.blue::before{background:var(--accent-blue)}
+.concept-box.purple::before{background:var(--accent-purple)}
+.concept-box.green::before{background:var(--accent-green)}
+.concept-box.orange::before{background:var(--accent-orange)}
+.concept-box h4{font-size:16px;margin-bottom:6px}
+.concept-box p{font-size:13.5px;color:var(--text-secondary);line-height:1.6}
+/* Flow */
+.flow-row{display:flex;align-items:center;justify-content:center;gap:6px;margin:14px 0;flex-wrap:wrap}
+.flow-step{background:var(--bg-card);border:1px solid var(--border-color);border-radius:10px;padding:10px 14px;text-align:center;min-width:100px;transition:all .3s}
+.flow-step:hover{border-color:var(--accent-indigo);transform:translateY(-2px)}
+.flow-step .step-icon{font-size:22px;margin-bottom:4px}
+.flow-step .step-title{font-size:11px;font-weight:600;color:var(--text-primary)}
+.flow-step .step-desc{font-size:10px;color:var(--text-muted);margin-top:2px}
+.flow-arrow{color:var(--text-muted);font-size:18px}
+/* Table */
+.data-table{width:100%;border-collapse:collapse;margin:8px 0;font-size:12px;direction:ltr;text-align:left}
+.data-table th{background:rgba(99,102,241,0.1);padding:7px 12px;font-weight:600;color:var(--accent-indigo);border-bottom:1px solid var(--border-color);font-family:'Fira Code',monospace;font-size:11px}
+.data-table td{padding:6px 12px;border-bottom:1px solid rgba(30,30,58,0.5);font-family:'Fira Code',monospace;font-size:11px;color:var(--text-secondary)}
+.data-table tr:hover td{background:rgba(99,102,241,0.03)}
+.highlight-col{background:rgba(236,72,153,0.08)!important;color:var(--accent-pink)!important;font-weight:600}
+/* Quote */
+.quote-box{background:rgba(99,102,241,0.06);border:1px solid rgba(99,102,241,0.15);border-radius:8px;padding:14px 18px;margin:12px 0;font-size:15px;line-height:1.6;color:var(--text-secondary);font-style:italic;position:relative}
+.quote-box::before{content:'"';font-size:40px;color:var(--accent-indigo);position:absolute;top:2px;right:12px;font-style:normal;opacity:.3}
+.quote-author{font-size:12px;color:var(--text-muted);margin-top:6px;font-style:normal}
+.bottom-nav{position:fixed;bottom:0;left:0;right:260px;height:54px;background:rgba(10,10,26,0.9);backdrop-filter:blur(20px);border-top:1px solid var(--border-color);display:flex;align-items:center;justify-content:center;gap:14px;z-index:100;transition:right .3s ease}
+.sidebar.collapsed~.bottom-nav{right:0}
+.nav-btn{padding:7px 18px;border-radius:7px;border:1px solid var(--border-color);background:var(--bg-card);color:var(--text-primary);font-family:'Heebo',sans-serif;font-size:13px;cursor:pointer;transition:all .2s ease}
+.nav-btn:hover{border-color:var(--accent-indigo);background:rgba(99,102,241,0.1)}
+.nav-btn.primary{background:var(--accent-indigo);border-color:var(--accent-indigo);color:white}
+.nav-btn.primary:hover{background:#4f46e5}
+.slide-counter{font-family:'Fira Code',monospace;font-size:11px;color:var(--text-muted);min-width:55px;text-align:center}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border-color);border-radius:2px}
+@media(max-width:768px){.sidebar,.sidebar-toggle{display:none}.main-content,.bottom-nav{right:0!important}.slide{padding:20px 16px 65px}.title-slide h1{font-size:30px}.section-header h2{font-size:26px}.slide-header h3{font-size:20px}.code-body{font-size:11px}.compare-row{grid-template-columns:1fr}.flow-row{flex-direction:column}.flow-arrow{transform:rotate(90deg)}}
+</style>
 </head>
 <body>
-    <header>
-        <div class="container">
-            <h1>פרוקייקט במדעי הנתונים</h1>
-        </div>
-    </header>
-    
-    <nav class="project-nav">
-        <div class="container">
-            <ul>
-                <li><a href="eda.html">חקר נתונים EDA</a></li>
-                <li><a href="pandas.html">pandas</a></li>
-                <li><a href="#visitor-counter">מונה מבקרים</a></li>
-                <li><a href="#survey">סקר</a></li>
-                <li><a href="#admin-page">דף מנהל</a></li>
-                <li><a href="#login-registration">התחברות והרשמה</a></li>
-                <li><a href="#security">אבטחה</a></li>
-                <li><a href="#summary">סיכום</a></li>
-            </ul>
-        </div>
-    </nav>
+<div class="bg-grid"></div>
+<div class="bg-glow bg-glow-1"></div>
+<div class="bg-glow bg-glow-2"></div>
 
-   
+<div class="top-bar">
+  <div class="top-bar-title"><span>🤖</span> מבוא ללמידת מכונה – מדעי הנתונים</div>
+  <div class="progress-container">
+    <div class="progress-text" id="progressText">0%</div>
+    <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+  </div>
+</div>
+
+<div class="sidebar" id="sidebar">
+  <div class="stn">📌 תוכן עניינים</div>
+  <div class="nav-item" data-slide="0"><span class="num">00</span> פתיחה</div>
+  <div class="stn" style="color:var(--accent-indigo)">01 · מהי למידת מכונה?</div>
+  <div class="nav-item" data-slide="1"><span class="num">01</span> ההגדרה</div>
+  <div class="nav-item" data-slide="2"><span class="num">02</span> תכנות רגיל vs ML</div>
+  <div class="nav-item" data-slide="3"><span class="num">03</span> דוגמה: זיהוי ספאם</div>
+  <div class="stn" style="color:var(--accent-purple)">02 · סוגי למידת מכונה</div>
+  <div class="nav-item" data-slide="4"><span class="num">04</span> שלושת הסוגים</div>
+  <div class="nav-item" data-slide="5"><span class="num">05</span> סיווג vs רגרסיה</div>
+  <div class="stn" style="color:var(--accent-cyan)">03 · מושגי יסוד</div>
+  <div class="nav-item" data-slide="6"><span class="num">06</span> מילון מושגים</div>
+  <div class="nav-item" data-slide="7"><span class="num">07</span> Features ו-Target</div>
+  <div class="stn" style="color:var(--accent-green)">04 · התהליך בפעולה</div>
+  <div class="nav-item" data-slide="8"><span class="num">08</span> צינור ML</div>
+  <div class="nav-item" data-slide="9"><span class="num">09</span> שלב 1-2: נתונים</div>
+  <div class="nav-item" data-slide="10"><span class="num">10</span> שלב 3: חלוקת נתונים</div>
+  <div class="nav-item" data-slide="11"><span class="num">11</span> שלב 4-5: אימון והערכה</div>
+  <div class="nav-item" data-slide="12"><span class="num">12</span> שלב 6: חיזוי חדש</div>
+  <div class="stn" style="color:var(--accent-orange)">05 · שגיאות נפוצות</div>
+  <div class="nav-item" data-slide="13"><span class="num">13</span> Overfitting</div>
+  <div class="nav-item" data-slide="14"><span class="num">14</span> סיכום 🎉</div>
+</div>
+<button class="sidebar-toggle" id="sidebarToggle" onclick="toggleSidebar()">◀</button>
+
+<div class="main-content" id="mainContent">
+
+<!-- SLIDE 0: TITLE -->
+<div class="slide active" id="slide-0">
+  <div class="title-slide">
+    <div class="emoji-big">🤖</div>
+    <h1>מבוא ללמידת מכונה</h1>
+    <div class="subtitle">Introduction to Machine Learning · מדעי הנתונים · תיכון</div>
+    <div style="margin-top:30px;color:var(--text-muted);font-size:14px;">← / → לניווט &nbsp;|&nbsp; 15 שקפים &nbsp;|&nbsp; מהתיאוריה לקוד עובד</div>
+  </div>
+</div>
+
+<!-- SLIDE 1: Definition -->
+<div class="slide" id="slide-1">
+  <div class="slide-inner">
+    <div class="section-header">
+      <div class="section-num">SECTION 01</div>
+      <h2>מהי <span style="color:var(--accent-indigo)">למידת מכונה</span>?</h2>
+    </div>
+    <div class="quote-box" style="margin-top:20px;padding-right:40px;">
+      למידת מכונה היא תחום שעוסק במתן יכולת למחשבים ללמוד מבלי שיתוכנתו במפורש
+      <div class="quote-author">— ארתור סמואל, 1959</div>
+    </div>
+    <div class="concept-box blue" style="margin-top:16px;">
+      <h4>💡 במילים פשוטות:</h4>
+      <p>במקום לכתוב <strong>חוקים מפורשים</strong>, אנחנו <strong>מראים למחשב דוגמאות</strong> והוא <strong>לומד בעצמו</strong> את הדפוסים.</p>
+    </div>
+    <div class="info-grid" style="margin-top:16px;">
+      <div class="info-card"><div class="card-icon">🧠</div><h4>לומד מדוגמאות</h4><p>לא צריך לכתוב כל חוק ידנית – המכונה מזהה דפוסים לבד</p></div>
+      <div class="info-card"><div class="card-icon">📈</div><h4>משתפר עם נתונים</h4><p>ככל שיותר נתונים = בדרך כלל תוצאות טובות יותר</p></div>
+      <div class="info-card"><div class="card-icon">🔄</div><h4>מסתגל</h4><p>לומד דפוסים חדשים כשהנתונים משתנים</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 2: Traditional vs ML -->
+<div class="slide" id="slide-2">
+  <div class="slide-inner">
+    <div class="slide-header">
+      <h3>תכנות רגיל vs למידת מכונה <span class="badge badge-blue">ההבדל המרכזי</span></h3>
+    </div>
+    <div class="compare-row">
+      <div class="compare-col">
+        <div class="concept-box orange" style="min-height:180px;">
+          <h4>📝 תכנות רגיל</h4>
+          <div style="margin-top:10px;font-size:14px;color:var(--text-secondary);line-height:1.8;">
+            <div style="text-align:center;direction:ltr;margin:8px 0;">
+              <span style="background:rgba(59,130,246,0.15);padding:4px 10px;border-radius:6px;color:var(--accent-blue);font-size:12px;">📊 Data</span>
+              <span style="margin:0 4px;">+</span>
+              <span style="background:rgba(245,158,11,0.15);padding:4px 10px;border-radius:6px;color:var(--accent-orange);font-size:12px;">📏 Rules</span>
+              <span style="margin:0 6px;">→</span>
+              <span style="background:rgba(16,185,129,0.15);padding:4px 10px;border-radius:6px;color:var(--accent-green);font-size:12px;">💡 Answer</span>
+            </div>
+            <p style="margin-top:8px;">המתכנת כותב את <strong>החוקים</strong> ידנית. המחשב רק מפעיל אותם.</p>
+          </div>
+        </div>
+      </div>
+      <div class="compare-col">
+        <div class="concept-box purple" style="min-height:180px;">
+          <h4>🤖 למידת מכונה</h4>
+          <div style="margin-top:10px;font-size:14px;color:var(--text-secondary);line-height:1.8;">
+            <div style="text-align:center;direction:ltr;margin:8px 0;">
+              <span style="background:rgba(59,130,246,0.15);padding:4px 10px;border-radius:6px;color:var(--accent-blue);font-size:12px;">📊 Data</span>
+              <span style="margin:0 4px;">+</span>
+              <span style="background:rgba(16,185,129,0.15);padding:4px 10px;border-radius:6px;color:var(--accent-green);font-size:12px;">💡 Answers</span>
+              <span style="margin:0 6px;">→</span>
+              <span style="background:rgba(245,158,11,0.15);padding:4px 10px;border-radius:6px;color:var(--accent-orange);font-size:12px;">📏 Rules</span>
+            </div>
+            <p style="margin-top:8px;">המחשב <strong>לומד את החוקים</strong> בעצמו מתוך הנתונים והתשובות.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="tip-box"><span class="tip-icon">🔑</span><p>ההבדל: בתכנות רגיל <strong>אנחנו</strong> כותבים חוקים. ב-ML <strong>המחשב מגלה</strong> את החוקים מדוגמאות. כשהבעיה מורכבת מדי לחוקים ידניים (כמו זיהוי פרצופים) – ML עדיף!</p></div>
+  </div>
+</div>
+
+<!-- SLIDE 3: Spam Example -->
+<div class="slide" id="slide-3">
+  <div class="slide-inner">
+    <div class="slide-header">
+      <h3>📧 דוגמה: זיהוי ספאם <span class="badge badge-blue">למה ML עדיף?</span></h3>
+    </div>
+    <div class="compare-row">
+      <div class="compare-col">
+        <h4 style="color:var(--accent-orange)">📝 גישה רגילה – חוקים ידניים</h4>
+        <div class="code-block"><div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><div class="code-label">rules.py</div></div>
+          <div class="code-body"><span class="kw">if</span> <span class="str">"free money"</span> <span class="kw">in</span> email:
+    spam = <span class="kw">True</span>
+<span class="kw">if</span> <span class="str">"click here"</span> <span class="kw">in</span> email:
+    spam = <span class="kw">True</span>
+<span class="kw">if</span> <span class="str">"winner"</span> <span class="kw">in</span> email:
+    spam = <span class="kw">True</span>
+<span class="cm"># ... עוד מאות חוקים?</span>
+<span class="cm"># 😫 הספאמרים משנים נוסח!</span></div>
+        </div>
+      </div>
+      <div class="compare-col">
+        <h4 style="color:var(--accent-purple)">🤖 גישה ML – לומד מדוגמאות</h4>
+        <div class="code-block"><div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><div class="code-label">ml_approach.py</div></div>
+          <div class="code-body"><span class="cm"># מאמנים על אלפי מיילים מתויגים</span>
+model.<span class="fn">fit</span>(emails, labels)
+
+<span class="cm"># המודל לומד לבד אילו דפוסים</span>
+<span class="cm"># מעידים על ספאם!</span>
+<span class="cm"># ✅ מסתגל לניסוחים חדשים</span>
+<span class="cm"># ✅ מזהה דפוסים מורכבים</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="tip-box"><span class="tip-icon">💬</span>
+      <p><strong>מתי בוחרים מה?</strong><br/>
+      חישוב ממוצע ציונים → <strong>תכנות רגיל</strong> (חוק פשוט וברור)<br/>
+      זיהוי חתולים בתמונות → <strong>ML</strong> (איך כותבים "חוק" לזיהוי חתול? 🐱)<br/>
+      המלצות סרטים → <strong>ML</strong> (דפוסים מורכבים בטעם אישי)</p>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 4: Types of ML -->
+<div class="slide" id="slide-4">
+  <div class="slide-inner">
+    <div class="section-header">
+      <div class="section-num">SECTION 02</div>
+      <h2>סוגי <span style="color:var(--accent-purple)">למידת מכונה</span></h2>
+      <div class="section-desc">שלושה סוגים עיקריים</div>
+    </div>
+    <div class="info-grid" style="margin-top:20px;grid-template-columns:1fr 1fr 1fr;">
+      <div class="info-card" style="border-top:3px solid var(--accent-blue);">
+        <div class="card-icon">🏷️</div>
+        <h4 style="color:var(--accent-blue);">למידה מפוקחת</h4>
+        <p style="font-size:11px;color:var(--accent-blue);margin-bottom:4px;font-family:'Fira Code',monospace;">Supervised Learning</p>
+        <p>לומד מדוגמאות <strong>עם תשובות</strong> (תוויות)</p>
+        <p style="margin-top:6px;font-size:11.5px;">✅ יש תוויות<br/>📌 ניבוי מחירים, זיהוי ספאם, אבחון רפואי</p>
+      </div>
+      <div class="info-card" style="border-top:3px solid var(--accent-purple);">
+        <div class="card-icon">🔍</div>
+        <h4 style="color:var(--accent-purple);">למידה לא מפוקחת</h4>
+        <p style="font-size:11px;color:var(--accent-purple);margin-bottom:4px;font-family:'Fira Code',monospace;">Unsupervised Learning</p>
+        <p>מוצא דפוסים <strong>בלי תשובות</strong></p>
+        <p style="margin-top:6px;font-size:11.5px;">❌ אין תוויות<br/>📌 פילוח לקוחות, זיהוי אנומליות</p>
+      </div>
+      <div class="info-card" style="border-top:3px solid var(--accent-green);">
+        <div class="card-icon">🎮</div>
+        <h4 style="color:var(--accent-green);">למידה מחוזקת</h4>
+        <p style="font-size:11px;color:var(--accent-green);margin-bottom:4px;font-family:'Fira Code',monospace;">Reinforcement Learning</p>
+        <p>לומד מ<strong>ניסוי וטעייה</strong> עם תגמולים</p>
+        <p style="margin-top:6px;font-size:11.5px;">🎯 פידבק (שכר/עונש)<br/>📌 משחקים, רובוטים, רכב אוטונומי</p>
+      </div>
+    </div>
+    <div class="tip-box"><span class="tip-icon">📌</span><p><strong>בקורס שלנו נתמקד בלמידה מפוקחת</strong> – הסוג הנפוץ ביותר בתעשייה.</p></div>
+  </div>
+</div>
+
+<!-- SLIDE 5: Classification vs Regression -->
+<div class="slide" id="slide-5">
+  <div class="slide-inner">
+    <div class="slide-header">
+      <h3>סיווג vs רגרסיה <span class="badge badge-purple">למידה מפוקחת</span></h3>
+      <div class="desc">שני סוגי בעיות בלמידה מפוקחת – לפי סוג התשובה</div>
+    </div>
+    <div class="compare-row">
+      <div class="compare-col">
+        <div class="concept-box blue" style="min-height:170px;">
+          <h4>🏷️ סיווג (Classification)</h4>
+          <p style="margin-top:8px;">התשובה היא <strong>קטגוריה</strong></p>
+          <p style="margin-top:6px;font-size:12px;">
+            האם זה ספאם? → <strong>כן / לא</strong><br/>
+            איזה חיה? → <strong>חתול / כלב / ציפור</strong><br/>
+            האם יעבור? → <strong>עובר / נכשל</strong>
+          </p>
+        </div>
+      </div>
+      <div class="compare-col">
+        <div class="concept-box purple" style="min-height:170px;">
+          <h4>📈 רגרסיה (Regression)</h4>
+          <p style="margin-top:8px;">התשובה היא <strong>מספר רציף</strong></p>
+          <p style="margin-top:6px;font-size:12px;">
+            מה מחיר הדירה? → <strong>2,500,000 ₪</strong><br/>
+            מה הטמפרטורה? → <strong>28.5°C</strong><br/>
+            כמה זמן? → <strong>3.2 שעות</strong>
+          </p>
+        </div>
+      </div>
+    </div>
+    <div class="concept-box green" style="margin-top:6px;">
+      <h4>🧪 תרגלו – סיווג או רגרסיה?</h4>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px 16px;margin-top:8px;font-size:13px;color:var(--text-secondary);">
+        <div>ניבוי מחיר דירה → <strong style="color:var(--accent-purple)">רגרסיה</strong> (מספר)</div>
+        <div>זיהוי תמונת כלב/חתול → <strong style="color:var(--accent-blue)">סיווג</strong> (קטגוריה)</div>
+        <div>ניבוי ציון במבחן → <strong style="color:var(--accent-purple)">רגרסיה</strong> (מספר)</div>
+        <div>אבחון מחלה (חולה/בריא) → <strong style="color:var(--accent-blue)">סיווג</strong> (קטגוריה)</div>
+        <div>ניבוי מספר צפיות ביוטיוב → <strong style="color:var(--accent-purple)">רגרסיה</strong> (מספר)</div>
+        <div>סיווג מייל (ספאם/לא) → <strong style="color:var(--accent-blue)">סיווג</strong> (קטגוריה)</div>
+      </div>
+    </div>
+    <div class="tip-box"><span class="tip-icon">🎯</span><p><strong>כלל פשוט:</strong> אם התשובה היא "כמה?" → רגרסיה. אם התשובה היא "מה?" / "האם?" → סיווג.</p></div>
+  </div>
+</div>
+
+<!-- SLIDE 6: Terminology -->
+<div class="slide" id="slide-6">
+  <div class="slide-inner">
+    <div class="section-header">
+      <div class="section-num">SECTION 03</div>
+      <h2><span style="color:var(--accent-cyan)">מושגי</span> יסוד</h2>
+      <div class="section-desc">המילון שחייבים לדעת</div>
+    </div>
+    <div class="info-grid" style="margin-top:20px;grid-template-columns:1fr 1fr;">
+      <div class="info-card" style="border-right:3px solid var(--accent-blue);"><h4 style="color:var(--accent-blue);">Feature (מאפיין)</h4><p>משתנה קלט – מידע שעוזר לחזות. למשל: גודל דירה, מספר חדרים, קומה</p></div>
+      <div class="info-card" style="border-right:3px solid var(--accent-pink);"><h4 style="color:var(--accent-pink);">Target / Label (יעד)</h4><p>מה שרוצים לחזות. למשל: מחיר הדירה, האם ספאם</p></div>
+      <div class="info-card" style="border-right:3px solid var(--accent-cyan);"><h4 style="color:var(--accent-cyan);">Sample (דגימה)</h4><p>שורה אחת בנתונים – דוגמה אחת. למשל: דירה ספציפית עם כל הפרטים שלה</p></div>
+      <div class="info-card" style="border-right:3px solid var(--accent-green);"><h4 style="color:var(--accent-green);">Model (מודל)</h4><p>האלגוריתם שלומד את הדפוסים ויודע לחזות על נתונים חדשים</p></div>
+      <div class="info-card" style="border-right:3px solid var(--accent-orange);"><h4 style="color:var(--accent-orange);">Training (אימון)</h4><p>התהליך שבו המודל לומד מהנתונים</p></div>
+      <div class="info-card" style="border-right:3px solid var(--accent-purple);"><h4 style="color:var(--accent-purple);">Prediction (חיזוי)</h4><p>כשהמודל מקבל נתון חדש ומנחש את התשובה</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 7: Features and Target Visual -->
+<div class="slide" id="slide-7">
+  <div class="slide-inner">
+    <div class="slide-header">
+      <h3>Features ו-Target <span class="badge badge-cyan">דוגמה ויזואלית</span></h3>
+      <div class="desc">בעיה: ניבוי מחיר דירה</div>
+    </div>
+    <table class="data-table">
+      <tr><th>Size (sqm)</th><th>Rooms</th><th>Floor</th><th>Age (years)</th><th class="highlight-col">Price (M ₪) 🎯</th></tr>
+      <tr><td>50</td><td>2</td><td>1</td><td>20</td><td class="highlight-col">1.2</td></tr>
+      <tr><td>70</td><td>3</td><td>3</td><td>15</td><td class="highlight-col">1.5</td></tr>
+      <tr><td>80</td><td>3</td><td>5</td><td>5</td><td class="highlight-col">1.8</td></tr>
+      <tr><td>100</td><td>4</td><td>2</td><td>10</td><td class="highlight-col">2.0</td></tr>
+      <tr><td>120</td><td>4</td><td>8</td><td>2</td><td class="highlight-col">2.5</td></tr>
+      <tr><td>150</td><td>5</td><td>4</td><td>8</td><td class="highlight-col">2.8</td></tr>
+    </table>
+    <div class="compare-row" style="margin-top:12px;">
+      <div class="compare-col">
+        <div class="concept-box blue">
+          <h4>📊 Features (X) – מאפיינים</h4>
+          <p>Size, Rooms, Floor, Age<br/>= <strong>הקלט</strong> למודל (מה שאנחנו יודעים)</p>
+        </div>
+      </div>
+      <div class="compare-col">
+        <div class="concept-box" style="border-right:none;border-left:none;">
+          <h4 style="color:var(--accent-pink);">🎯 Target (y) – יעד</h4>
+          <p>Price<br/>= <strong>מה שרוצים לחזות</strong></p>
+          <div style="margin-top:4px;">
+            <span style="background:rgba(236,72,153,0.1);padding:2px 8px;border-radius:4px;font-size:11px;color:var(--accent-pink);">כל שורה = דגימה (Sample)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="code-block">
+      <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><div class="code-label">terminology.py</div></div>
+      <div class="code-body"><span class="cm"># בקוד – כך מפרידים Features מ-Target:</span>
+X = df[[<span class="str">'Size'</span>, <span class="str">'Rooms'</span>, <span class="str">'Floor'</span>, <span class="str">'Age'</span>]]   <span class="cm"># Features</span>
+y = df[<span class="str">'Price'</span>]                                 <span class="cm"># Target</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 8: ML Pipeline -->
+<div class="slide" id="slide-8">
+  <div class="slide-inner">
+    <div class="section-header">
+      <div class="section-num">SECTION 04</div>
+      <h2>תהליך <span style="color:var(--accent-green)">למידת מכונה</span></h2>
+      <div class="section-desc">6 שלבים מנתונים לחיזוי</div>
+    </div>
+    <div class="flow-row" style="margin-top:24px;">
+      <div class="flow-step" style="border-top:3px solid var(--accent-blue)"><div class="step-icon">📊</div><div class="step-title">1. איסוף</div><div class="step-desc">Collect Data</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step" style="border-top:3px solid var(--accent-purple)"><div class="step-icon">🧹</div><div class="step-title">2. הכנה</div><div class="step-desc">Prepare Data</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step" style="border-top:3px solid var(--accent-cyan)"><div class="step-icon">✂️</div><div class="step-title">3. חלוקה</div><div class="step-desc">Train / Test</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step" style="border-top:3px solid var(--accent-green)"><div class="step-icon">🏋️</div><div class="step-title">4. אימון</div><div class="step-desc">Train Model</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step" style="border-top:3px solid var(--accent-orange)"><div class="step-icon">📏</div><div class="step-title">5. הערכה</div><div class="step-desc">Evaluate</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step" style="border-top:3px solid var(--accent-pink)"><div class="step-icon">🔮</div><div class="step-title">6. חיזוי</div><div class="step-desc">Predict</div></div>
+    </div>
+    <div class="tip-box" style="margin-top:16px;"><span class="tip-icon">📌</span><p>נעבור על כל שלב עם <strong>קוד ותוצאות</strong> – על בעיה אמיתית: <strong>ניבוי עובר/נכשל</strong> לפי שעות לימוד וציון קודם.</p></div>
+  </div>
+</div>
+
+<!-- SLIDE 9: Steps 1-2 Data -->
+<div class="slide" id="slide-9">
+  <div class="slide-inner">
+    <div class="slide-header">
+      <h3>📊 שלב 1-2: נתונים <span class="badge badge-green">איסוף והכנה</span></h3>
+      <div class="desc">בעיה: ניבוי האם תלמיד יעבור – לפי שעות לימוד וציון קודם</div>
+    </div>
+    <div class="code-block">
+      <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><div class="code-label">step1_data.py</div></div>
+      <div class="code-body"><span class="kw">import</span> pandas <span class="kw">as</span> pd
+<span class="kw">import</span> numpy <span class="kw">as</span> np
+
+<span class="cm"># יצירת נתוני תלמידים</span>
+np.random.<span class="fn">seed</span>(<span class="num">42</span>)
+n = <span class="num">50</span>  <span class="cm"># 50 תלמידים</span>
+
+hours   = np.random.<span class="fn">uniform</span>(<span class="num">1</span>, <span class="num">10</span>, n)
+prev    = np.random.<span class="fn">uniform</span>(<span class="num">40</span>, <span class="num">100</span>, n)
+passed  = ((hours * <span class="num">5</span> + prev * <span class="num">0.5</span>) > <span class="num">70</span>).<span class="fn">astype</span>(<span class="var">int</span>)
+
+df = pd.<span class="fn">DataFrame</span>({
+    <span class="str">'Hours_Studied'</span>: hours.<span class="fn">round</span>(<span class="num">1</span>),
+    <span class="str">'Previous_Grade'</span>: prev.<span class="fn">round</span>(<span class="num">1</span>),
+    <span class="str">'Passed'</span>: passed          <span class="cm"># 1=עבר, 0=נכשל</span>
+})
+<span class="fn">print</span>(df.<span class="fn">head</span>(<span class="num">8</span>))</div>
+    </div>
+    <div class="arrow-down">▼</div>
+    <div class="output-block">
+<span class="output-label">OUTPUT ▾</span>
+   Hours_Studied  Previous_Grade  Passed
+0            4.7            74.6       1
+1           10.0            60.5       1
+2            8.3            54.4       1
+3            6.6            62.0       1
+4            3.1            54.2       0
+5            2.1            62.5       0
+6            8.5            74.7       1
+7            7.1            82.3       1</div>
+    <div class="tip-box"><span class="tip-icon">📊</span><p><strong>Features (X):</strong> Hours_Studied, Previous_Grade &nbsp;|&nbsp; <strong>Target (y):</strong> Passed (0 או 1)<br/>זו בעיית <strong>סיווג</strong> – שתי קטגוריות: עובר (1) או נכשל (0).</p></div>
+  </div>
+</div>
+
+<!-- SLIDE 10: Step 3 Train/Test Split -->
+<div class="slide" id="slide-10">
+  <div class="slide-inner">
+    <div class="slide-header">
+      <h3>✂️ שלב 3: חלוקת נתונים <span class="badge badge-green">Train / Test</span></h3>
+      <div class="desc">למה מחלקים? כדי לבדוק את המודל על נתונים שהוא <strong>לא ראה</strong>!</div>
+    </div>
+    <div class="code-block">
+      <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><div class="code-label">step3_split.py</div></div>
+      <div class="code-body"><span class="kw">from</span> sklearn.model_selection <span class="kw">import</span> train_test_split
+
+<span class="cm"># הפרדה ל-Features ו-Target</span>
+X = df[[<span class="str">'Hours_Studied'</span>, <span class="str">'Previous_Grade'</span>]]
+y = df[<span class="str">'Passed'</span>]
+
+<span class="cm"># חלוקה: 80% אימון, 20% בדיקה</span>
+X_train, X_test, y_train, y_test = <span class="fn">train_test_split</span>(
+    X, y, <span class="var">test_size</span>=<span class="num">0.2</span>, <span class="var">random_state</span>=<span class="num">42</span>
+)
+
+<span class="fn">print</span>(<span class="str">f'Training set: </span>{X_train.<span class="var">shape</span>[<span class="num">0</span>]}<span class="str"> samples'</span>)
+<span class="fn">print</span>(<span class="str">f'Test set:     </span>{X_test.<span class="var">shape</span>[<span class="num">0</span>]}<span class="str"> samples'</span>)</div>
+    </div>
+    <div class="arrow-down">▼</div>
+    <div class="output-block">
+<span class="output-label">OUTPUT ▾</span>
+Training set: 40 samples    ← 80% – המודל לומד מאלה
+Test set:     10 samples    ← 20% – לבדיקה בלבד!</div>
+    <div class="compare-row">
+      <div class="compare-col">
+        <div class="concept-box blue">
+          <h4>🏋️ Training Set (80%)</h4>
+          <p>המודל <strong>לומד</strong> מנתונים אלה – רואה גם את ה-Features וגם את ה-Target</p>
+        </div>
+      </div>
+      <div class="compare-col">
+        <div class="concept-box orange">
+          <h4>📏 Test Set (20%)</h4>
+          <p>המודל <strong>נבחן</strong> על נתונים שלא ראה – כמו מבחן בהפתעה!</p>
+        </div>
+      </div>
+    </div>
+    <div class="tip-box"><span class="tip-icon">⚠️</span><p><strong>למה לא לבחון על נתוני אימון?</strong> כי זה כמו לתת לתלמיד את אותן שאלות שתרגל – לא באמת יודעים אם הבין!</p></div>
+  </div>
+</div>
+
+<!-- SLIDE 11: Steps 4-5 Train & Evaluate -->
+<div class="slide" id="slide-11">
+  <div class="slide-inner">
+    <div class="slide-header">
+      <h3>🏋️ שלב 4-5: אימון והערכה <span class="badge badge-green">KNN</span></h3>
+      <div class="desc">מאמנים מודל KNN – השכנים הקרובים</div>
+    </div>
+    <div class="code-block">
+      <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><div class="code-label">step4_train.py</div></div>
+      <div class="code-body"><span class="kw">from</span> sklearn.neighbors <span class="kw">import</span> KNeighborsClassifier
+<span class="kw">from</span> sklearn.metrics <span class="kw">import</span> accuracy_score
+
+<span class="cm"># שלב 4: יצירה ואימון</span>
+model = <span class="fn">KNeighborsClassifier</span>(<span class="var">n_neighbors</span>=<span class="num">5</span>)
+model.<span class="fn">fit</span>(X_train, y_train)
+<span class="fn">print</span>(<span class="str">'✅ Model trained!'</span>)
+
+<span class="cm"># שלב 5: חיזוי על הטסט + הערכה</span>
+y_pred = model.<span class="fn">predict</span>(X_test)
+accuracy = <span class="fn">accuracy_score</span>(y_test, y_pred)
+<span class="fn">print</span>(<span class="str">f'Accuracy: </span>{accuracy:.0%}<span class="str">'</span>)</div>
+    </div>
+    <div class="arrow-down">▼</div>
+    <div class="output-block">
+<span class="output-label">OUTPUT ▾</span>
+✅ Model trained!
+Accuracy: 90%         ← 9 מתוך 10 תלמידים נוחזו נכון!</div>
+    <div class="concept-box purple">
+      <h4>🏘️ איך KNN עובד?</h4>
+      <p>עבור תלמיד חדש, המודל מסתכל על <strong>5 השכנים הכי קרובים</strong> (K=5) בנתוני האימון. אם רובם עברו → חוזה "עובר". אם רובם נכשלו → חוזה "נכשל".</p>
+    </div>
+    <div class="tip-box"><span class="tip-icon">📏</span><p><strong>Accuracy = 90%</strong> פירושו: מתוך 10 תלמידים בסט הבדיקה, המודל צדק ב-9 מקרים.</p></div>
+  </div>
+</div>
+
+<!-- SLIDE 12: Step 6 Predict New -->
+<div class="slide" id="slide-12">
+  <div class="slide-inner">
+    <div class="slide-header">
+      <h3>🔮 שלב 6: חיזוי על תלמידים חדשים <span class="badge badge-green">Predict</span></h3>
+      <div class="desc">המודל מוכן – בואו ננבא עבור תלמידים שלא ראינו!</div>
+    </div>
+    <div class="code-block">
+      <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><div class="code-label">step6_predict.py</div></div>
+      <div class="code-body"><span class="cm"># תלמידים חדשים</span>
+new_students = pd.<span class="fn">DataFrame</span>({
+    <span class="str">'Hours_Studied'</span>:  [<span class="num">2</span>, <span class="num">8</span>, <span class="num">5</span>, <span class="num">3</span>],
+    <span class="str">'Previous_Grade'</span>: [<span class="num">50</span>, <span class="num">85</span>, <span class="num">70</span>, <span class="num">90</span>]
+})
+
+predictions = model.<span class="fn">predict</span>(new_students)
+new_students[<span class="str">'Prediction'</span>] = [<span class="str">'PASS ✅'</span> <span class="kw">if</span> p <span class="kw">else</span> <span class="str">'FAIL ❌'</span> <span class="kw">for</span> p <span class="kw">in</span> predictions]
+<span class="fn">print</span>(new_students)</div>
+    </div>
+    <div class="arrow-down">▼</div>
+    <div class="output-block">
+<span class="output-label">OUTPUT ▾</span>
+   Hours_Studied  Previous_Grade Prediction
+0              2              50    FAIL ❌    ← מעט שעות + ציון נמוך
+1              8              85    PASS ✅    ← הרבה שעות + ציון גבוה
+2              5              70    PASS ✅    ← ממוצע של שניהם
+3              3              90    PASS ✅    ← ציון קודם גבוה מספיק</div>
+    <div class="tip-box"><span class="tip-icon">🎯</span><p><strong>כל התהליך ב-3 שורות:</strong><br/>
+    <code dir="ltr" style="color:var(--accent-green);">model = KNeighborsClassifier(n_neighbors=5)</code> ← יוצרים<br/>
+    <code dir="ltr" style="color:var(--accent-green);">model.fit(X_train, y_train)</code> ← מאמנים<br/>
+    <code dir="ltr" style="color:var(--accent-green);">model.predict(new_data)</code> ← חוזים</p></div>
+  </div>
+</div>
+
+<!-- SLIDE 13: Overfitting -->
+<div class="slide" id="slide-13">
+  <div class="slide-inner">
+    <div class="section-header">
+      <div class="section-num">SECTION 05</div>
+      <h2><span style="color:var(--accent-orange)">Overfitting</span> ו-Underfitting</h2>
+      <div class="section-desc">שתי בעיות נפוצות שחשוב להכיר</div>
+    </div>
+    <div class="compare-row" style="margin-top:20px;">
+      <div class="compare-col">
+        <div class="concept-box orange" style="min-height:160px;">
+          <h4>📚 Overfitting – התאמת יתר</h4>
+          <p style="margin-top:6px;">המודל <strong>"שינן"</strong> את נתוני האימון במקום ללמוד דפוסים כלליים.</p>
+          <p style="margin-top:6px;font-size:12px;">כמו תלמיד שמשנן תשובות בעל-פה אבל לא מבין – נכשל בשאלות חדשות.</p>
+          <div style="margin-top:8px;font-family:'Fira Code',monospace;font-size:11px;">
+            <span style="color:var(--accent-green);">Train: 99%</span> &nbsp;
+            <span style="color:var(--accent-red);">Test: 65%</span> &nbsp;
+            <span style="color:var(--accent-red);">⚠️ פער!</span>
+          </div>
+        </div>
+      </div>
+      <div class="compare-col">
+        <div class="concept-box blue" style="min-height:160px;">
+          <h4>😴 Underfitting – התאמת חסר</h4>
+          <p style="margin-top:6px;">המודל <strong>פשוט מדי</strong> – לא הצליח ללמוד את הדפוסים.</p>
+          <p style="margin-top:6px;font-size:12px;">כמו תלמיד שלא למד בכלל – נכשל גם בשאלות קלות.</p>
+          <div style="margin-top:8px;font-family:'Fira Code',monospace;font-size:11px;">
+            <span style="color:var(--accent-red);">Train: 55%</span> &nbsp;
+            <span style="color:var(--accent-red);">Test: 50%</span> &nbsp;
+            <span style="color:var(--accent-red);">⚠️ שניהם נמוכים!</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="concept-box green" style="margin-top:6px;">
+      <h4>✅ Good Fit – מודל טוב</h4>
+      <div style="display:flex;align-items:center;gap:16px;margin-top:6px;">
+        <div style="font-family:'Fira Code',monospace;font-size:12px;">
+          <span style="color:var(--accent-green);">Train: 88%</span> &nbsp;
+          <span style="color:var(--accent-green);">Test: 85%</span> &nbsp;
+          <span style="color:var(--accent-green);">✅ קרובים!</span>
+        </div>
+        <p style="font-size:13px;color:var(--text-secondary);">ביצועים דומים על אימון ובדיקה – סימן שהמודל <strong>הכליל</strong> (generalized) טוב.</p>
+      </div>
+    </div>
+    <div class="tip-box"><span class="tip-icon">🔑</span><p><strong>איך מונעים Overfitting?</strong> יותר נתונים, מודל פשוט יותר, הסרת מאפיינים לא רלוונטיים. <strong>הסימן:</strong> פער גדול בין Train ל-Test.</p></div>
+  </div>
+</div>
+
+<!-- SLIDE 14: Summary -->
+<div class="slide" id="slide-14">
+  <div class="slide-inner">
+    <div class="title-slide" style="margin-top:3vh;">
+      <div class="emoji-big">🎉</div>
+      <h1 style="font-size:34px;">סיכום – מבוא ללמידת מכונה</h1>
+    </div>
+    <div class="info-grid" style="max-width:740px;margin:16px auto 0;grid-template-columns:1fr 1fr;">
+      <div class="info-card" style="border-right:3px solid var(--accent-indigo);"><div class="card-icon">🤖</div><h4 style="color:var(--accent-indigo)">מהי ML?</h4><p>מחשבים לומדים מדוגמאות – לא מחוקים ידניים</p></div>
+      <div class="info-card" style="border-right:3px solid var(--accent-purple);"><div class="card-icon">📚</div><h4 style="color:var(--accent-purple)">סוגי ML</h4><p>מפוקחת (עם תוויות), לא מפוקחת, מחוזקת</p></div>
+      <div class="info-card" style="border-right:3px solid var(--accent-blue);"><div class="card-icon">🏷️</div><h4 style="color:var(--accent-blue)">סיווג vs רגרסיה</h4><p>קטגוריה (כן/לא) vs מספר רציף (כמה?)</p></div>
+      <div class="info-card" style="border-right:3px solid var(--accent-cyan);"><div class="card-icon">📖</div><h4 style="color:var(--accent-cyan)">מושגים</h4><p>Feature, Target, Sample, Model, Training</p></div>
+      <div class="info-card" style="border-right:3px solid var(--accent-green);"><div class="card-icon">🔄</div><h4 style="color:var(--accent-green)">התהליך</h4><p>איסוף → הכנה → חלוקה → אימון → הערכה → חיזוי</p></div>
+      <div class="info-card" style="border-right:3px solid var(--accent-orange);"><div class="card-icon">⚠️</div><h4 style="color:var(--accent-orange)">שגיאות</h4><p>Overfitting (שינון) vs Underfitting (לא למד)</p></div>
+    </div>
+    <div class="code-block" style="max-width:740px;margin:12px auto 0;">
+      <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><div class="code-label">the_pattern.py</div></div>
+      <div class="code-body"><span class="cm"># כל פרויקט ML בשלוש שורות:</span>
+model = <span class="fn">SomeModel</span>()           <span class="cm"># 1. יוצרים מודל</span>
+model.<span class="fn">fit</span>(X_train, y_train)    <span class="cm"># 2. מאמנים</span>
+predictions = model.<span class="fn">predict</span>(X_new)  <span class="cm"># 3. חוזים</span></div>
+    </div>
+  </div>
+</div>
+
+</div><!-- end main-content -->
+
+<div class="bottom-nav" id="bottomNav">
+  <button class="nav-btn" id="prevBtn" onclick="navigate(-1)">הקודם ←</button>
+  <span class="slide-counter" id="slideCounter">1 / 15</span>
+  <button class="nav-btn primary" id="nextBtn" onclick="navigate(1)">→ הבא</button>
+</div>
+
+<script>
+let currentSlide=0;const totalSlides=15;
+function navigate(d){const n=currentSlide+d;if(n<0||n>=totalSlides)return;goToSlide(n)}
+function goToSlide(i){if(i===currentSlide)return;const o=document.getElementById(`slide-${currentSlide}`),n=document.getElementById(`slide-${i}`);o.classList.remove('active');if(i>currentSlide)o.classList.add('exit-left');setTimeout(()=>o.classList.remove('exit-left'),450);n.classList.add('active');n.scrollTop=0;currentSlide=i;updateUI()}
+function updateUI(){document.getElementById('slideCounter').textContent=`${currentSlide+1} / ${totalSlides}`;const p=(currentSlide/(totalSlides-1))*100;document.getElementById('progressFill').style.width=`${p}%`;document.getElementById('progressText').textContent=`${Math.round(p)}%`;document.getElementById('prevBtn').style.opacity=currentSlide===0?'0.3':'1';document.getElementById('prevBtn').style.pointerEvents=currentSlide===0?'none':'all';document.getElementById('nextBtn').style.opacity=currentSlide===totalSlides-1?'0.3':'1';document.getElementById('nextBtn').style.pointerEvents=currentSlide===totalSlides-1?'none':'all';document.querySelectorAll('.nav-item').forEach(item=>{item.classList.toggle('active',parseInt(item.dataset.slide)===currentSlide);if(parseInt(item.dataset.slide)===currentSlide)item.scrollIntoView({block:'nearest',behavior:'smooth'})})}
+document.querySelectorAll('.nav-item').forEach(item=>{item.addEventListener('click',()=>goToSlide(parseInt(item.dataset.slide)))});
+document.addEventListener('keydown',e=>{if(e.key==='ArrowLeft'||e.key==='ArrowUp'){e.preventDefault();navigate(1)}else if(e.key==='ArrowRight'||e.key==='ArrowDown'){e.preventDefault();navigate(-1)}});
+function toggleSidebar(){const s=document.getElementById('sidebar');s.classList.toggle('collapsed');document.getElementById('sidebarToggle').textContent=s.classList.contains('collapsed')?'▶':'◀'}
+let tx=0;document.addEventListener('touchstart',e=>{tx=e.touches[0].clientX});document.addEventListener('touchend',e=>{const d=tx-e.changedTouches[0].clientX;if(Math.abs(d)>50)navigate(d>0?1:-1)});
+updateUI();
+</script>
 </body>
 </html>
