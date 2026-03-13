@@ -16,12 +16,13 @@ export function MaterialsPage({ category }: MaterialsPageProps) {
 
   const allItems = staticMaterials.filter(m => m.category === category);
 
-  // Group by subcategory
+  // Group by top-level path
   const grouped = useMemo(() => {
     const groups: Record<string, StaticMaterial[]> = {};
     allItems.forEach(m => {
-      if (!groups[m.subcategory]) groups[m.subcategory] = [];
-      groups[m.subcategory].push(m);
+      const topLevel = m.path[0];
+      if (!groups[topLevel]) groups[topLevel] = [];
+      groups[topLevel].push(m);
     });
     return Object.entries(groups);
   }, [allItems]);

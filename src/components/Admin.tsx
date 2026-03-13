@@ -37,11 +37,10 @@ function generateMaterialsFile(
         `    title: '${m.title.replace(/'/g, "\\'")}',`,
         `    description: '${m.description.replace(/'/g, "\\'")}',`,
         `    category: '${m.category}',`,
-        `    subcategory: '${m.subcategory}',`,
+        `    path: [${m.path.map(p => `'${p.replace(/'/g, "\\'")}'`).join(', ')}],`,
+        `    linkUrl: '${m.linkUrl}',`,
+        `    icon: '${m.icon}',`,
       ]
-      if (m.subSubcategory) lines.push(`    subSubcategory: '${m.subSubcategory}',`)
-      lines.push(`    linkUrl: '${m.linkUrl}',`)
-      lines.push(`    icon: '${m.icon}',`)
       return `  {\n${lines.join('\n')}\n  }`
     })
     .join(',\n')
@@ -50,7 +49,7 @@ function generateMaterialsFile(
 // חומרי למידה והמלצות
 // כדי להוסיף חומר חדש: העתיקי בלוק ושני את הפרטים
 // כדי להוסיף נושא חדש: הוסיפי ערך ב-subcategoryMeta
-// כדי להוסיף תת-נושא: הוסיפי subSubcategory לחומר + ערך ב-subcategoryMeta
+// path מגדיר את ההיררכיה: ['נושא', 'תת-נושא', 'תת-תת-נושא', ...]
 // ============================================================
 
 export interface StaticMaterial {
@@ -58,8 +57,7 @@ export interface StaticMaterial {
   title: string
   description: string
   category: 'teaching' | 'general'
-  subcategory: string
-  subSubcategory?: string
+  path: string[]
   linkUrl: string
   icon: string
 }
@@ -130,16 +128,149 @@ function EmojiPicker({ value, onChange }: { value: string; onChange: (v: string)
   )
 }
 
+// ─── Path Builder Component ──────────────────────────
+function PathBuilder({
+  path,
+  onChange,
+  categories,
+  allMaterials,
+}: {
+  path: string[]
+  onChange: (path: string[]) => void
+  categories: Record<string, CategoryMeta>
+  allMaterials: StaticMaterial[]
+}) {
+  const [addingAt, setAddingAt] = useState<number | null>(null)
+  const [newSegment, setNewSegment] = useState('')
+
+  // Get existing segments at each level from all materials
+  const getOptionsAtLevel = (level: number, parentPath: string[]): string[] => {
+    const options = new Set<string>()
+    allMaterials.forEach(m => {
+      if (m.path.length > level && parentPath.every((seg, i) => m.path[i] === seg)) {
+        options.add(m.path[level])
+      }
+    })
+    // Also include category meta names at level 0
+    if (level === 0) {
+      Object.keys(categories).forEach(name => options.add(name))
+    }
+    return Array.from(options).sort()
+  }
+
+  const currentOptions = getOptionsAtLevel(path.length, path)
+
+  const addSegment = (seg: string) => {
+    onChange([...path, seg])
+    setAddingAt(null)
+    setNewSegment('')
+  }
+
+  const removeFromLevel = (level: number) => {
+    onChange(path.slice(0, level))
+  }
+
+  return (
+    <div className="space-y-3">
+      {/* Current path display */}
+      {path.length > 0 && (
+        <div className="flex items-center gap-1 flex-wrap">
+          {path.map((seg, i) => (
+            <React.Fragment key={i}>
+              {i > 0 && <ChevronRight className="w-4 h-4 text-muted-foreground flex-shrink-0" />}
+              <span className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-primary/10 text-primary text-sm font-medium">
+                {categories[seg]?.icon || '📁'} {seg}
+                <button
+                  type="button"
+                  onClick={() => removeFromLevel(i)}
+                  className="mr-1 hover:text-destructive transition-colors"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              </span>
+            </React.Fragment>
+          ))}
+        </div>
+      )}
+
+      {/* Options for next level */}
+      <div>
+        <p className="text-xs text-muted-foreground mb-2">
+          {path.length === 0 ? 'בחרי נושא ראשי *' : 'הוסיפי תת-נושא (אופציונלי)'}
+        </p>
+        <div className="flex gap-2 flex-wrap">
+          {currentOptions.map(opt => (
+            <Button
+              key={opt}
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => addSegment(opt)}
+            >
+              {categories[opt]?.icon || '📁'} {opt}
+            </Button>
+          ))}
+          {addingAt === path.length ? (
+            <div className="flex gap-1 items-center">
+              <Input
+                value={newSegment}
+                onChange={e => setNewSegment(e.target.value)}
+                placeholder="שם חדש..."
+                className="w-32 h-8 text-sm"
+                autoFocus
+                onKeyDown={e => {
+                  if (e.key === 'Enter' && newSegment.trim()) addSegment(newSegment.trim())
+                  if (e.key === 'Escape') { setAddingAt(null); setNewSegment('') }
+                }}
+              />
+              <Button
+                type="button"
+                size="sm"
+                variant="ghost"
+                className="h-8 w-8 p-0"
+                onClick={() => { if (newSegment.trim()) addSegment(newSegment.trim()) }}
+              >
+                <Check className="w-3 h-3" />
+              </Button>
+              <Button
+                type="button"
+                size="sm"
+                variant="ghost"
+                className="h-8 w-8 p-0"
+                onClick={() => { setAddingAt(null); setNewSegment('') }}
+              >
+                <X className="w-3 h-3" />
+              </Button>
+            </div>
+          ) : (
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="border-dashed"
+              onClick={() => setAddingAt(path.length)}
+            >
+              <Plus className="w-3 h-3 ml-1" /> {path.length === 0 ? 'נושא חדש' : 'תת-נושא חדש'}
+            </Button>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // ─── Material Form ────────────────────────────────────
 function MaterialForm({
   material,
   categories,
+  allMaterials,
   onSave,
   onCancel,
   initialLinkUrl,
 }: {
   material?: StaticMaterial
   categories: Record<string, CategoryMeta>
+  allMaterials: StaticMaterial[]
   onSave: (m: StaticMaterial) => void
   onCancel: () => void
   initialLinkUrl?: string
@@ -150,28 +281,23 @@ function MaterialForm({
       title: '',
       description: '',
       category: 'teaching',
-      subcategory: '',
-      subSubcategory: '',
+      path: [],
       linkUrl: initialLinkUrl || '',
       icon: '📄',
     }
   )
-  const [showNewSubcategory, setShowNewSubcategory] = useState(false)
-  const [newSubcategory, setNewSubcategory] = useState('')
-
-  const subcategories = Object.keys(categories)
 
   const handleSave = () => {
     if (!form.title.trim()) {
       toast.error('חובה למלא כותרת')
       return
     }
-    if (!form.subcategory.trim()) {
-      toast.error('חובה לבחור נושא')
+    if (form.path.length === 0) {
+      toast.error('חובה לבחור לפחות נושא אחד')
       return
     }
     const id = form.id || form.title.toLowerCase().replace(/[^a-z0-9א-ת]/g, '-').replace(/-+/g, '-')
-    onSave({ ...form, id, subSubcategory: form.subSubcategory || undefined })
+    onSave({ ...form, id })
   }
 
   return (
@@ -220,84 +346,15 @@ function MaterialForm({
         </div>
       </div>
 
-      {/* Subcategory (Topic) */}
+      {/* Path (dynamic hierarchy) */}
       <div>
-        <label className="block text-sm font-medium mb-2">נושא *</label>
-        <div className="flex gap-2 flex-wrap">
-          {subcategories.map(sc => (
-            <Button
-              key={sc}
-              type="button"
-              variant={form.subcategory === sc ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setForm({ ...form, subcategory: sc })}
-            >
-              {categories[sc]?.icon} {sc}
-            </Button>
-          ))}
-          {!showNewSubcategory ? (
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              className="border-dashed"
-              onClick={() => setShowNewSubcategory(true)}
-            >
-              <Plus className="w-3 h-3 ml-1" /> נושא חדש
-            </Button>
-          ) : (
-            <div className="flex gap-1 items-center">
-              <Input
-                value={newSubcategory}
-                onChange={e => setNewSubcategory(e.target.value)}
-                placeholder="שם הנושא..."
-                className="w-32 h-8 text-sm"
-                autoFocus
-              />
-              <Button
-                type="button"
-                size="sm"
-                variant="ghost"
-                className="h-8 w-8 p-0"
-                onClick={() => {
-                  if (newSubcategory.trim()) {
-                    setForm({ ...form, subcategory: newSubcategory.trim() })
-                    setShowNewSubcategory(false)
-                  }
-                }}
-              >
-                <Check className="w-3 h-3" />
-              </Button>
-              <Button
-                type="button"
-                size="sm"
-                variant="ghost"
-                className="h-8 w-8 p-0"
-                onClick={() => { setShowNewSubcategory(false); setNewSubcategory('') }}
-              >
-                <X className="w-3 h-3" />
-              </Button>
-            </div>
-          )}
-        </div>
-        {form.subcategory && !subcategories.includes(form.subcategory) && (
-          <p className="text-xs text-amber-600 mt-1">
-            נושא חדש: "{form.subcategory}" - ייווצר אוטומטית בשמירה
-          </p>
-        )}
-      </div>
-
-      {/* Sub-subcategory */}
-      <div>
-        <label className="block text-sm font-medium mb-1">תת-נושא (אופציונלי)</label>
-        <Input
-          value={form.subSubcategory || ''}
-          onChange={e => setForm({ ...form, subSubcategory: e.target.value })}
-          placeholder="למשל: EDA, מיון, חיפוש..."
+        <label className="block text-sm font-medium mb-2">מיקום בהיררכיה *</label>
+        <PathBuilder
+          path={form.path}
+          onChange={path => setForm({ ...form, path })}
+          categories={categories}
+          allMaterials={allMaterials}
         />
-        <p className="text-xs text-muted-foreground mt-1">
-          תת-נושא מאפשר חלוקה נוספת בתוך הנושא הראשי
-        </p>
       </div>
 
       {/* Link */}
@@ -327,19 +384,18 @@ function MaterialForm({
           <div>
             <h4 className="font-bold">{form.title || 'כותרת החומר'}</h4>
             <p className="text-sm text-muted-foreground">{form.description || 'תיאור...'}</p>
-            <div className="flex items-center gap-2 mt-1 text-xs">
-              {form.subcategory && (
-                <span className="px-2 py-0.5 rounded bg-primary/10 text-primary">
-                  {categories[form.subcategory]?.icon || '📁'} {form.subcategory}
-                </span>
-              )}
-              {form.subSubcategory && (
-                <>
-                  <ChevronRight className="w-3 h-3" />
-                  <span className="px-2 py-0.5 rounded bg-muted">{form.subSubcategory}</span>
-                </>
-              )}
-            </div>
+            {form.path.length > 0 && (
+              <div className="flex items-center gap-1 mt-1 text-xs">
+                {form.path.map((seg, i) => (
+                  <React.Fragment key={i}>
+                    {i > 0 && <ChevronRight className="w-3 h-3 text-muted-foreground" />}
+                    <span className="px-2 py-0.5 rounded bg-primary/10 text-primary">
+                      {categories[seg]?.icon || '📁'} {seg}
+                    </span>
+                  </React.Fragment>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -487,6 +543,15 @@ export function AdminPanel() {
 
   // ─── Materials CRUD ───────────
   const addMaterial = (m: StaticMaterial) => {
+    // Auto-add category meta for new path segments
+    m.path.forEach(seg => {
+      if (!categories[seg]) {
+        setCategories(prev => ({
+          ...prev,
+          [seg]: { icon: '📁', color: 'from-gray-50 to-slate-50 border-gray-200' }
+        }))
+      }
+    })
     setMaterials(prev => [...prev, m])
     setShowAddMaterial(false)
     setHasChanges(true)
@@ -494,6 +559,14 @@ export function AdminPanel() {
   }
 
   const updateMaterial = (m: StaticMaterial) => {
+    m.path.forEach(seg => {
+      if (!categories[seg]) {
+        setCategories(prev => ({
+          ...prev,
+          [seg]: { icon: '📁', color: 'from-gray-50 to-slate-50 border-gray-200' }
+        }))
+      }
+    })
     setMaterials(prev => prev.map(existing => existing.id === m.id ? m : existing))
     setEditingMaterial(null)
     setHasChanges(true)
@@ -518,7 +591,7 @@ export function AdminPanel() {
   }
 
   const deleteCategory = (name: string) => {
-    const usedBy = materials.filter(m => m.subcategory === name || m.subSubcategory === name)
+    const usedBy = materials.filter(m => m.path.includes(name))
     if (usedBy.length > 0) {
       toast.error(`לא ניתן למחוק - ${usedBy.length} חומרים משתמשים בקטגוריה זו`)
       return
@@ -751,18 +824,17 @@ export function AdminPanel() {
                             </span>
                           </div>
                           <p className="text-sm text-muted-foreground truncate">{m.description}</p>
-                          <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
-                            <span className={`px-2 py-0.5 rounded bg-gradient-to-br ${categories[m.subcategory]?.color || 'bg-muted'}`}>
-                              {categories[m.subcategory]?.icon} {m.subcategory}
-                            </span>
-                            {m.subSubcategory && (
-                              <>
-                                <ChevronRight className="w-3 h-3" />
-                                <span className="px-2 py-0.5 rounded bg-muted">{m.subSubcategory}</span>
-                              </>
-                            )}
+                          <div className="flex items-center gap-1 mt-1 text-xs text-muted-foreground">
+                            {m.path.map((seg, i) => (
+                              <React.Fragment key={i}>
+                                {i > 0 && <ChevronRight className="w-3 h-3" />}
+                                <span className={`px-2 py-0.5 rounded bg-gradient-to-br ${categories[seg]?.color || 'bg-muted'}`}>
+                                  {categories[seg]?.icon || '📁'} {seg}
+                                </span>
+                              </React.Fragment>
+                            ))}
                             {m.linkUrl && (
-                              <span className="text-primary">{m.linkUrl}</span>
+                              <span className="text-primary mr-2">{m.linkUrl}</span>
                             )}
                           </div>
                         </div>
@@ -794,9 +866,7 @@ export function AdminPanel() {
 
               <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {Object.entries(categories).map(([name, meta]) => {
-                  const count = materials.filter(
-                    m => m.subcategory === name || m.subSubcategory === name
-                  ).length
+                  const count = materials.filter(m => m.path.includes(name)).length
                   return (
                     <Card key={name} className={`bg-gradient-to-br ${meta.color} hover:shadow-md transition-shadow`}>
                       <CardContent className="p-4">
@@ -919,6 +989,7 @@ export function AdminPanel() {
           </DialogHeader>
           <MaterialForm
             categories={categories}
+            allMaterials={materials}
             onSave={addMaterial}
             onCancel={() => setShowAddMaterial(false)}
             initialLinkUrl={uploadedFileLink || undefined}
@@ -937,6 +1008,7 @@ export function AdminPanel() {
             <MaterialForm
               material={editingMaterial}
               categories={categories}
+              allMaterials={materials}
               onSave={updateMaterial}
               onCancel={() => setEditingMaterial(null)}
             />
