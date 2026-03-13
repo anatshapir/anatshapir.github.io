@@ -462,17 +462,20 @@ export function AdminPanel() {
     : materials.filter(m => m.category === filterCategory)
 
   // ─── Auth ─────────────────────
+  const [authError, setAuthError] = useState('')
+
   const handleLogin = async () => {
     setValidating(true)
+    setAuthError('')
     github.setToken(tokenInput)
-    const valid = await github.validateToken()
+    const result = await github.validateToken()
     setValidating(false)
-    if (valid) {
+    if (result.valid && result.canWrite) {
       setAuthenticated(true)
-      toast.success('התחברת בהצלחה!')
+      toast.success('התחברת בהצלחה! יש הרשאת כתיבה ✅')
     } else {
       github.clearToken()
-      toast.error('טוקן לא תקין')
+      setAuthError(result.error || 'טוקן לא תקין')
     }
   }
 
@@ -602,23 +605,38 @@ export function AdminPanel() {
             <Input
               type="password"
               value={tokenInput}
-              onChange={e => setTokenInput(e.target.value)}
-              placeholder="ghp_xxxxxxxxxxxx"
+              onChange={e => { setTokenInput(e.target.value); setAuthError('') }}
+              placeholder="ghp_xxxxxxxxxxxx או github_pat_xxxx"
               onKeyDown={e => e.key === 'Enter' && handleLogin()}
             />
+
+            {authError && (
+              <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-sm text-red-800 whitespace-pre-line">
+                ❌ {authError}
+              </div>
+            )}
+
             <Button
               className="w-full"
               onClick={handleLogin}
               disabled={!tokenInput || validating}
             >
-              {validating ? 'מאמת...' : <><Key className="w-4 h-4 ml-2" /> התחברי</>}
+              {validating ? 'בודק הרשאות...' : <><Key className="w-4 h-4 ml-2" /> התחברי</>}
             </Button>
-            <div className="text-xs text-muted-foreground space-y-1">
-              <p>
-                <strong>איך מייצרים Token?</strong>
-              </p>
-              <p>GitHub → Settings → Developer settings → Personal access tokens → Generate new token</p>
-              <p>הרשאות נדרשות: <code className="bg-muted px-1 rounded">repo</code></p>
+
+            <div className="text-xs text-muted-foreground space-y-2 bg-muted/50 rounded-lg p-3">
+              <p className="font-bold">איך מייצרים Token?</p>
+              <ol className="list-decimal list-inside space-y-1">
+                <li>GitHub → Settings → Developer settings → Personal access tokens</li>
+                <li>בחרי <strong>Fine-grained tokens</strong> → Generate new token</li>
+                <li>ב-Repository access: בחרי <strong>Only select repositories</strong> → <code className="bg-background px-1 rounded">anatshapir.github.io</code></li>
+                <li>ב-Permissions → Repository permissions:</li>
+              </ol>
+              <div className="mr-4 space-y-0.5">
+                <p>• <strong>Contents</strong>: Read and write ✅</p>
+                <p>• <strong>Metadata</strong>: Read-only ✅ (אוטומטי)</p>
+              </div>
+              <p className="mt-2 text-amber-700 font-medium">⚠️ Classic token? צריך scope של <code className="bg-background px-1 rounded">repo</code></p>
             </div>
           </CardContent>
         </Card>
