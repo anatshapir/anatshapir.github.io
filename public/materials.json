@@ -282,6 +282,18 @@
       ],
       "linkUrl": "/The_Abstraction_Ladder.pdf",
       "icon": "💻"
+    },
+    {
+      "id": "שפת-מכונה-לשפות-תכנות",
+      "title": "שפת מכונה לשפות תכנות",
+      "description": "",
+      "category": "teaching",
+      "path": [
+        "מדעי המחשב",
+        "מה זה בעצם מדעי המחשב"
+      ],
+      "linkUrl": "/שפת_סף__לדבר_עם_המכונה.mp4",
+      "icon": "📄"
     }
   ]
 }
