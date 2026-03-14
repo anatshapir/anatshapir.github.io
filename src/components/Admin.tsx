@@ -592,18 +592,21 @@ export function AdminPanel() {
     setSaving(true)
     try {
       const newContent = generateMaterialsJSON(materials, categories)
-      // Save as JSON to docs/ - takes effect immediately without rebuild
-      let sha: string | undefined
-      try {
-        const existing = await github.getFileContent('docs/materials.json')
-        sha = existing.sha
-      } catch {
-        // File doesn't exist yet, that's OK
-      }
-      if (sha) {
-        await github.updateFile('docs/materials.json', newContent, 'עדכון חומרי למידה מ-Admin Panel', sha)
-      } else {
-        await github.createFile('docs/materials.json', newContent, 'עדכון חומרי למידה מ-Admin Panel')
+      // Save to both docs/ (immediate effect) and public/ (survives rebuilds)
+      const paths = ['docs/materials.json', 'public/materials.json']
+      for (const path of paths) {
+        let sha: string | undefined
+        try {
+          const existing = await github.getFileContent(path)
+          sha = existing.sha
+        } catch {
+          // File doesn't exist yet, that's OK
+        }
+        if (sha) {
+          await github.updateFile(path, newContent, `עדכון חומרי למידה מ-Admin Panel (${path})`, sha)
+        } else {
+          await github.createFile(path, newContent, `עדכון חומרי למידה מ-Admin Panel (${path})`)
+        }
       }
       setHasChanges(false)
       toast.success('השינויים נשמרו ונכנסו לתוקף מיידית!')
@@ -637,7 +640,9 @@ export function AdminPanel() {
       try {
         const base64 = (reader.result as string).split(',')[1]
         const fileName = file.name
-        await github.uploadBinaryFile(fileName, base64, `העלאת קובץ ${fileName} מ-Admin Panel`)
+        // Upload to both docs/ (immediate) and public/ (survives rebuilds)
+        await github.uploadBinaryFile(`docs/${fileName}`, base64, `העלאת קובץ ${fileName} מ-Admin Panel`)
+        await github.uploadBinaryFile(`public/${fileName}`, base64, `העלאת קובץ ${fileName} מ-Admin Panel (public)`)
         toast.success(`"${fileName}" הועלה בהצלחה!`)
         setUploadedFileLink(`/${fileName}`)
       } catch (error: any) {
