@@ -26,7 +26,7 @@ function normalizeMaterial(m: any): StaticMaterial {
 }
 
 // מטא-דאטה לכל נושא - אייקון וצבע לכרטיס
-export const subcategoryMeta: Record<string, { icon: string; color: string }> = {
+export const subcategoryMeta: Record<string, { icon: string; color: string; headerImage?: string }> = {
   'רקורסיה': {'icon':'🔄','color':'from-orange-50 to-amber-50 border-orange-200'},
   'מדעי המחשב': {'icon':'💻','color':'from-blue-50 to-indigo-50 border-blue-200'},
   'מדעי הנתונים': {'icon':'📊','color':'from-purple-50 to-fuchsia-50 border-purple-200'},

@@ -13,8 +13,8 @@ export function Footer() {
               className="w-full h-full object-cover"
             />
           </div>
-          <span className="text-2xl font-serif font-bold text-primary">
-            דברים שענת אוהבת במיוחד
+          <span className="text-2xl font-serif font-bold text-secondary">
+            דברים שענת <span className="text-primary">אוהבת</span> במיוחד
           </span>
         </div>
         

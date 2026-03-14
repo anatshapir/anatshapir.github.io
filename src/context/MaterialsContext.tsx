@@ -3,7 +3,7 @@ import { staticMaterials, subcategoryMeta, type StaticMaterial } from '@/data/ma
 
 interface MaterialsData {
   materials: StaticMaterial[]
-  meta: Record<string, { icon: string; color: string }>
+  meta: Record<string, { icon: string; color: string; headerImage?: string }>
   loading: boolean
 }
 
