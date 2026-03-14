@@ -248,6 +248,18 @@
       ],
       "linkUrl": "/numpy.html",
       "icon": "🎬"
+    },
+    {
+      "id": "eda-מצגת",
+      "title": "EDA מצגת",
+      "description": "מצגת הסבר EDA",
+      "category": "teaching",
+      "path": [
+        "מדעי הנתונים",
+        "EDA"
+      ],
+      "linkUrl": "/Practical_EDA.pdf",
+      "icon": "📈"
     }
   ]
 }
