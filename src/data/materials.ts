@@ -219,5 +219,14 @@ export const staticMaterials: StaticMaterial[] = ([
     path: ['מדעי הנתונים', 'EDA'],
     linkUrl: '/Practical_EDA.pdf',
     icon: '📄',
+  },
+  {
+    id: 'איך-נוצרו-שפות-התכנות',
+    title: 'איך נוצרו שפות התכנות',
+    description: '',
+    category: 'teaching',
+    path: ['מדעי המחשב'],
+    linkUrl: '/The_Abstraction_Ladder.pdf',
+    icon: '💻',
   }
 ] as any[]).map(normalizeMaterial)
