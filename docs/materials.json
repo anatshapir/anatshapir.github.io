@@ -306,6 +306,18 @@
       ],
       "linkUrl": "/NB07_Evaluation_Metrics.ipynb",
       "icon": "📄"
+    },
+    {
+      "id": "numpy-מחברת",
+      "title": "Numpy - מחברת",
+      "description": "מחברת הסבר ותרגול",
+      "category": "teaching",
+      "path": [
+        "מדעי הנתונים",
+        "ספריות"
+      ],
+      "linkUrl": "/04 NumPy Notebook.ipynb",
+      "icon": "📄"
     }
   ]
 }
