@@ -294,6 +294,18 @@
       ],
       "linkUrl": "/שפת_סף__לדבר_עם_המכונה.mp4",
       "icon": "📄"
+    },
+    {
+      "id": "eda-מחברת",
+      "title": "EDA - מחברת",
+      "description": "מחברת הסבר ותרגול",
+      "category": "teaching",
+      "path": [
+        "מדעי הנתונים",
+        "EDA"
+      ],
+      "linkUrl": "/NB07_Evaluation_Metrics.ipynb",
+      "icon": "📄"
     }
   ]
 }
