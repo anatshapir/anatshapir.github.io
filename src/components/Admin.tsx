@@ -648,6 +648,10 @@ export function AdminPanel() {
       toast.error('יש להתחבר עם GitHub token קודם')
       return
     }
+    if (file.size > 100 * 1024 * 1024) {
+      toast.error('הקובץ גדול מדי (מקסימום 100MB)')
+      return
+    }
 
     setUploading(true)
     const reader = new FileReader()
@@ -911,13 +915,13 @@ export function AdminPanel() {
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <Upload className="w-5 h-5" /> העלאת קובץ HTML
+                    <Upload className="w-5 h-5" /> העלאת קבצים
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <p className="text-muted-foreground">
-                    העלי קובץ HTML שיהפוך לדף באתר. הקובץ יועלה לשורש הפרויקט ויהיה נגיש בכתובת
-                    <code className="mx-1 px-1 bg-muted rounded">/fileName.html</code>
+                    העלי קובץ שיהיה זמין באתר. הקובץ יועלה לשורש הפרויקט ויהיה נגיש בכתובת
+                    <code className="mx-1 px-1 bg-muted rounded">/fileName</code>
                   </p>
 
                   {!uploadedFileLink ? (
@@ -936,12 +940,12 @@ export function AdminPanel() {
                             <span className="text-lg font-medium text-primary hover:underline">בחרי קובץ להעלאה</span>
                             <input
                               type="file"
-                              accept=".html,.htm"
+                              accept=".html,.htm,.pdf,.mp4,.webm,.mov,.png,.jpg,.jpeg,.gif,.svg"
                               className="hidden"
                               onChange={handleFileUpload}
                             />
                           </label>
-                          <p className="text-sm text-muted-foreground mt-2">קבצי HTML בלבד</p>
+                          <p className="text-sm text-muted-foreground mt-2">HTML, PDF, MP4, תמונות (עד 100MB)</p>
                         </>
                       )}
                     </div>
@@ -968,11 +972,14 @@ export function AdminPanel() {
                   <div className="bg-muted/50 rounded-lg p-4 space-y-2">
                     <h4 className="font-medium text-sm">איך זה עובד:</h4>
                     <ol className="text-sm text-muted-foreground space-y-1 list-decimal list-inside">
-                      <li>בחרי קובץ HTML להעלאה</li>
+                      <li>בחרי קובץ להעלאה (HTML, PDF, MP4, תמונות)</li>
                       <li>הקובץ יועלה ל-GitHub אוטומטית</li>
                       <li>לחצי "צרי חומר" כדי להוסיף אותו לאתר עם כותרת, תיאור ואייקון</li>
                       <li>שמרי ב-GitHub והאתר יתעדכן!</li>
                     </ol>
+                    <p className="text-xs text-amber-700 mt-2">
+                      סרטונים גדולים (מעל 25MB) עלולים להיות איטיים בהעלאה. מקסימום 100MB.
+                    </p>
                   </div>
                 </CardContent>
               </Card>
