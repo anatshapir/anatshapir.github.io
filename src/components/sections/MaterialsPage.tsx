@@ -1,12 +1,14 @@
 import React, { useMemo } from 'react';
 import { ExternalLink, BookOpen, Star, ArrowRight } from 'lucide-react';
-import { staticMaterials, subcategoryMeta, StaticMaterial } from '@/data/materials';
+import { useMaterials } from '@/context/MaterialsContext';
+import type { StaticMaterial } from '@/data/materials';
 
 interface MaterialsPageProps {
   category: 'teaching' | 'general';
 }
 
 export function MaterialsPage({ category }: MaterialsPageProps) {
+  const { materials: staticMaterials, meta: subcategoryMeta } = useMaterials();
   const isTeaching = category === 'teaching';
   const title = isTeaching ? 'חומרי למידה' : 'דברים מעניינים';
   const subtitle = isTeaching

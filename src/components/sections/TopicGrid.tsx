@@ -1,5 +1,5 @@
 import React from 'react';
-import { staticMaterials, subcategoryMeta } from '@/data/materials';
+import { useMaterials } from '@/context/MaterialsContext';
 
 interface TopicGridProps {
   category?: 'teaching' | 'general';
@@ -7,9 +7,11 @@ interface TopicGridProps {
 }
 
 export function TopicGrid({ category, title = 'מה תמצאו כאן?' }: TopicGridProps) {
+  const { materials, meta: subcategoryMeta } = useMaterials();
+
   const filtered = category
-    ? staticMaterials.filter(m => m.category === category)
-    : staticMaterials;
+    ? materials.filter(m => m.category === category)
+    : materials;
 
   const topics = Object.entries(
     filtered.reduce((acc, m) => {

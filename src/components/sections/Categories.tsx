@@ -1,11 +1,12 @@
 import React from 'react';
 import { BookOpen, Star, Pencil, Heart } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
-import { staticMaterials } from '@/data/materials';
+import { useMaterials } from '@/context/MaterialsContext';
 
 export function Categories() {
-  const teachingMaterials = staticMaterials.filter(m => m.category === 'teaching');
-  const generalMaterials = staticMaterials.filter(m => m.category === 'general');
+  const { materials } = useMaterials();
+  const teachingMaterials = materials.filter(m => m.category === 'teaching');
+  const generalMaterials = materials.filter(m => m.category === 'general');
 
   // Count by subcategory
   const teachingSubs = Object.entries(

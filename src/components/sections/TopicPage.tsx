@@ -1,17 +1,20 @@
 import React from 'react';
 import { ArrowRight, ArrowLeft } from 'lucide-react';
-import { staticMaterials, subcategoryMeta, StaticMaterial } from '@/data/materials';
+import { useMaterials } from '@/context/MaterialsContext';
+import type { StaticMaterial } from '@/data/materials';
 
 interface TopicPageProps {
   pathSegments: string[];
 }
 
 export function TopicPage({ pathSegments }: TopicPageProps) {
+  const { materials, meta: subcategoryMeta } = useMaterials();
+
   const currentName = pathSegments[pathSegments.length - 1];
   const meta = subcategoryMeta[currentName] || { icon: '📁', color: 'from-gray-50 to-slate-50 border-gray-200' };
 
   // Find materials whose path starts with current segments
-  const descendants = staticMaterials.filter(m =>
+  const descendants = materials.filter(m =>
     pathSegments.every((seg, i) => m.path[i] === seg)
   );
 
