@@ -2,7 +2,7 @@
 // חומרי למידה והמלצות
 // כדי להוסיף חומר חדש: העתיקי בלוק ושני את הפרטים
 // כדי להוסיף נושא חדש: הוסיפי ערך ב-subcategoryMeta
-// כדי להוסיף תת-נושא: הוסיפי subSubcategory לחומר + ערך ב-subcategoryMeta
+// path מגדיר את ההיררכיה: ['נושא', 'תת-נושא', 'תת-תת-נושא', ...]
 // ============================================================
 
 // תמיכה בפורמט ישן (subcategory+subSubcategory) וחדש (path)
@@ -11,8 +11,7 @@ export interface StaticMaterial {
   title: string
   description: string
   category: 'teaching' | 'general'
-  subcategory: string
-  subSubcategory?: string
+  path: string[]
   linkUrl: string
   icon: string
 }
@@ -36,17 +35,17 @@ export const subcategoryMeta: Record<string, { icon: string; color: string }> = 
   'השראה': {'icon':'✨','color':'from-rose-50 to-pink-50 border-rose-200'},
   'שירים': {'icon':'🎵','color':'from-violet-50 to-purple-50 border-violet-200'},
   'המלצות': {'icon':'⭐','color':'from-sky-50 to-cyan-50 border-sky-200'},
-  'EDA': {'icon':'📉','color':'from-purple-50 to-violet-50 border-purple-200'}
+  'EDA': {'icon':'📉','color':'from-purple-50 to-violet-50 border-purple-200'},
+  'ספריות': {'icon':'📁','color':'from-gray-50 to-slate-50 border-gray-200'}
 }
 
 export const staticMaterials: StaticMaterial[] = ([
-  // ===== רקורסיה =====
   {
     id: 'recursive-thinking',
     title: 'חשיבה רקורסיבית',
     description: 'מדריך מקיף לחשיבה רקורסיבית - מהבסיס ועד לפתרון בעיות מורכבות.',
     category: 'teaching',
-    subcategory: 'רקורסיה',
+    path: ['רקורסיה'],
     linkUrl: '/recursiveThinking.html',
     icon: '🧠',
   },
@@ -55,7 +54,7 @@ export const staticMaterials: StaticMaterial[] = ([
     title: 'הדמיית זמן ריצה של רקורסיה',
     description: 'כלי אינטראקטיבי להמחשת זמן ריצה של פונקציות רקורסיביות.',
     category: 'teaching',
-    subcategory: 'רקורסיה',
+    path: ['רקורסיה'],
     linkUrl: '/recursionVisualization.html',
     icon: '📊',
   },
@@ -64,7 +63,7 @@ export const staticMaterials: StaticMaterial[] = ([
     title: 'רקורסיה על עצים בינאריים',
     description: 'מדריך לרקורסיה על עצים בינאריים עם הדמיות והסברים מפורטים.',
     category: 'teaching',
-    subcategory: 'רקורסיה',
+    path: ['רקורסיה'],
     linkUrl: '/bintree_recursion.html',
     icon: '🌳',
   },
@@ -73,7 +72,7 @@ export const staticMaterials: StaticMaterial[] = ([
     title: 'חדר בריחה - רקורסיה מתקדם',
     description: 'תרגיל אינטראקטיבי בסגנון חדר בריחה לתרגול רקורסיה ברמה מתקדמת.',
     category: 'teaching',
-    subcategory: 'רקורסיה',
+    path: ['רקורסיה'],
     linkUrl: '/recursionEscapeRoom.html',
     icon: '🔑',
   },
@@ -82,7 +81,7 @@ export const staticMaterials: StaticMaterial[] = ([
     title: 'חדר בריחה - רקורסיה',
     description: 'משחק חדר בריחה ללימוד רקורסיה בצורה חווייתית ומהנה.',
     category: 'teaching',
-    subcategory: 'רקורסיה',
+    path: ['רקורסיה'],
     linkUrl: '/recursive_labyrinth.html',
     icon: '🏰',
   },
@@ -91,7 +90,7 @@ export const staticMaterials: StaticMaterial[] = ([
     title: 'BFS & DFS',
     description: 'הדמיה אינטראקטיבית של אלגוריתמי חיפוש BFS ו-DFS בגרפים.',
     category: 'teaching',
-    subcategory: 'מדעי המחשב',
+    path: ['מדעי המחשב'],
     linkUrl: '/bfs_dfs.html',
     icon: '🔍',
   },
@@ -100,7 +99,7 @@ export const staticMaterials: StaticMaterial[] = ([
     title: 'שפות רגולריות',
     description: 'מדריך מקיף לשפות רגולריות, אוטומטים וביטויים רגולריים.',
     category: 'teaching',
-    subcategory: 'מדעי המחשב',
+    path: ['מדעי המחשב'],
     linkUrl: '/regularLanguages.html',
     icon: '📜',
   },
@@ -109,7 +108,7 @@ export const staticMaterials: StaticMaterial[] = ([
     title: 'פותר תרגילי Java',
     description: 'כלי אינטראקטיבי לפתרון תרגילים בשפת Java.',
     category: 'teaching',
-    subcategory: 'מדעי המחשב',
+    path: ['מדעי המחשב'],
     linkUrl: '/javaExercise.html',
     icon: '☕',
   },
@@ -118,7 +117,7 @@ export const staticMaterials: StaticMaterial[] = ([
     title: 'טבלת מעקב',
     description: 'כלי לבניית טבלאות מעקב (Trace Table) לתרגילי תכנות.',
     category: 'teaching',
-    subcategory: 'מדעי המחשב',
+    path: ['מדעי המחשב'],
     linkUrl: '/trackTable.html',
     icon: '📋',
   },
@@ -127,7 +126,7 @@ export const staticMaterials: StaticMaterial[] = ([
     title: 'מבוא למדעי הנתונים',
     description: 'מבוא למדעי הנתונים - מושגי יסוד, כלים וטכניקות בסיסיות.',
     category: 'teaching',
-    subcategory: 'מדעי הנתונים',
+    path: ['מדעי הנתונים'],
     linkUrl: '/datascience-project.html',
     icon: '📈',
   },
@@ -136,8 +135,7 @@ export const staticMaterials: StaticMaterial[] = ([
     title: 'ניתוח נתונים חקירתי (EDA)',
     description: 'מדריך מקיף ל-Exploratory Data Analysis עם דוגמאות וכלים.',
     category: 'teaching',
-    subcategory: 'מדעי הנתונים',
-    subSubcategory: 'EDA',
+    path: ['מדעי הנתונים', 'EDA'],
     linkUrl: '/eda.html',
     icon: '📉',
   },
@@ -146,7 +144,7 @@ export const staticMaterials: StaticMaterial[] = ([
     title: 'מדריך Pandas',
     description: 'מדריך מקיף לספריית Pandas - עיבוד וניתוח נתונים ב-Python.',
     category: 'teaching',
-    subcategory: 'מדעי הנתונים',
+    path: ['מדעי הנתונים'],
     linkUrl: '/pandas.html',
     icon: '🐼',
   },
@@ -155,7 +153,7 @@ export const staticMaterials: StaticMaterial[] = ([
     title: 'מדריך HTML & VS Code',
     description: 'מדריך מקיף ל-HTML ולסביבת העבודה Visual Studio Code.',
     category: 'teaching',
-    subcategory: 'פיתוח ווב',
+    path: ['פיתוח ווב'],
     linkUrl: '/htmlGuide.html',
     icon: '🌐',
   },
@@ -164,7 +162,7 @@ export const staticMaterials: StaticMaterial[] = ([
     title: 'מדריך ASP.NET',
     description: 'מדריך לפיתוח שרת עם ASP.NET - מהבסיס ועד ליישומים מתקדמים.',
     category: 'teaching',
-    subcategory: 'פיתוח ווב',
+    path: ['פיתוח ווב'],
     linkUrl: '/aspDev.html',
     icon: '⚙️',
   },
@@ -173,7 +171,7 @@ export const staticMaterials: StaticMaterial[] = ([
     title: 'מדריך Server Implementation',
     description: 'מדריך מקיף למימוש שרת - ארכיטקטורה, API ותקשורת.',
     category: 'teaching',
-    subcategory: 'פיתוח ווב',
+    path: ['פיתוח ווב'],
     linkUrl: '/serverImpl.html',
     icon: '🖥️',
   },
@@ -182,7 +180,7 @@ export const staticMaterials: StaticMaterial[] = ([
     title: 'הנסיך הקטן - אנטואן דה סנט-אכזופרי',
     description: 'ספר שמלווה אותי מגיל צעיר. כל קריאה מחדש חושפת שכבה חדשה של משמעות.',
     category: 'general',
-    subcategory: 'ספרים',
+    path: ['ספרים'],
     linkUrl: '',
     icon: '📚',
   },
@@ -191,7 +189,7 @@ export const staticMaterials: StaticMaterial[] = ([
     title: 'ציטוט שאני אוהבת',
     description: '"העולם מלא בדברים קטנים ומיוחדים, צריך רק לדעת איפה לחפש אותם."',
     category: 'general',
-    subcategory: 'השראה',
+    path: ['השראה'],
     linkUrl: '',
     icon: '💡',
   },
@@ -201,7 +199,16 @@ export const staticMaterials: StaticMaterial[] = ([
     description: '',
     category: 'teaching',
     path: ['מדעי הנתונים'],
-    linkUrl: '/numpy.html',
+    linkUrl: 'numpy.html/',
     icon: '🧮',
   },
+  {
+    id: 'ספריות',
+    title: 'ספריות',
+    description: '',
+    category: 'teaching',
+    path: ['מדעי הנתונים', 'ספריות'],
+    linkUrl: 'numpy.html/',
+    icon: '📖',
+  }
 ] as any[]).map(normalizeMaterial)
