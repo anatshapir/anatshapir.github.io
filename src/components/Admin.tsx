@@ -644,7 +644,12 @@ export function AdminPanel() {
         await github.uploadBinaryFile(`docs/${fileName}`, base64, `העלאת קובץ ${fileName} מ-Admin Panel`)
         await github.uploadBinaryFile(`public/${fileName}`, base64, `העלאת קובץ ${fileName} מ-Admin Panel (public)`)
         toast.success(`"${fileName}" הועלה בהצלחה!`)
-        setUploadedFileLink(`/${fileName}`)
+        // For .ipynb files, generate a Google Colab link
+        if (fileName.endsWith('.ipynb')) {
+          setUploadedFileLink(`https://colab.research.google.com/github/anatshapir/anatshapir.github.io/blob/main/docs/${fileName}`)
+        } else {
+          setUploadedFileLink(`/${fileName}`)
+        }
       } catch (error: any) {
         toast.error(`שגיאה בהעלאה: ${error.message}`)
       } finally {
@@ -923,12 +928,12 @@ export function AdminPanel() {
                             <span className="text-lg font-medium text-primary hover:underline">בחרי קובץ להעלאה</span>
                             <input
                               type="file"
-                              accept=".html,.htm,.pdf,.mp4,.webm,.mov,.png,.jpg,.jpeg,.gif,.svg"
+                              accept=".html,.htm,.pdf,.mp4,.webm,.mov,.png,.jpg,.jpeg,.gif,.svg,.ipynb"
                               className="hidden"
                               onChange={handleFileUpload}
                             />
                           </label>
-                          <p className="text-sm text-muted-foreground mt-2">HTML, PDF, MP4, תמונות (עד 100MB)</p>
+                          <p className="text-sm text-muted-foreground mt-2">HTML, PDF, MP4, Jupyter Notebooks, תמונות (עד 100MB)</p>
                         </>
                       )}
                     </div>
@@ -955,7 +960,7 @@ export function AdminPanel() {
                   <div className="bg-muted/50 rounded-lg p-4 space-y-2">
                     <h4 className="font-medium text-sm">איך זה עובד:</h4>
                     <ol className="text-sm text-muted-foreground space-y-1 list-decimal list-inside">
-                      <li>בחרי קובץ להעלאה (HTML, PDF, MP4, תמונות)</li>
+                      <li>בחרי קובץ להעלאה (HTML, PDF, MP4, Jupyter Notebooks, תמונות)</li>
                       <li>הקובץ יועלה ל-GitHub אוטומטית</li>
                       <li>לחצי "צרי חומר" כדי להוסיף אותו לאתר עם כותרת, תיאור ואייקון</li>
                       <li>שמרי ב-GitHub והאתר יתעדכן!</li>
