@@ -318,6 +318,18 @@
       ],
       "linkUrl": "/04 NumPy Notebook.ipynb",
       "icon": "📄"
+    },
+    {
+      "id": "pandas-מחברת",
+      "title": "Pandas - מחברת",
+      "description": "מחברת הסבר ותרגול",
+      "category": "teaching",
+      "path": [
+        "מדעי הנתונים",
+        "ספריות"
+      ],
+      "linkUrl": "/NB04_Pandas_DataFrames_IMPROVED.ipynb",
+      "icon": "📄"
     }
   ]
 }
