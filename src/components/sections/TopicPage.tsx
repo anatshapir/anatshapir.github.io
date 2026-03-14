@@ -49,11 +49,21 @@ export function TopicPage({ pathSegments }: TopicPageProps) {
   return (
     <div className="pt-24 pb-16 min-h-screen">
       {/* Header */}
-      <section className={`py-16 bg-gradient-to-br ${meta.color} border-b-2`}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section
+        className={`py-16 border-b-2 relative overflow-hidden ${meta.headerImage ? '' : `bg-gradient-to-br ${meta.color}`}`}
+        style={meta.headerImage ? {
+          backgroundImage: `url(${meta.headerImage})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+        } : undefined}
+      >
+        {meta.headerImage && (
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px]" />
+        )}
+        <div className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 ${meta.headerImage ? 'relative z-10' : ''}`}>
           <a
             href={backHref}
-            className="inline-flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors mb-8 text-lg"
+            className={`inline-flex items-center gap-2 transition-colors mb-8 text-lg ${meta.headerImage ? 'text-white/80 hover:text-white' : 'text-muted-foreground hover:text-primary'}`}
           >
             <ArrowRight className="w-5 h-5" />
             {backLabel}
@@ -82,8 +92,8 @@ export function TopicPage({ pathSegments }: TopicPageProps) {
 
           <div className="text-center space-y-4">
             <span className="text-6xl">{meta.icon}</span>
-            <h1 className="text-4xl sm:text-5xl font-serif font-bold text-foreground">{currentName}</h1>
-            <p className="text-xl text-muted-foreground">
+            <h1 className={`text-4xl sm:text-5xl font-serif font-bold ${meta.headerImage ? 'text-white drop-shadow-lg' : 'text-foreground'}`}>{currentName}</h1>
+            <p className={`text-xl ${meta.headerImage ? 'text-white/80' : 'text-muted-foreground'}`}>
               {descendants.length} {descendants.length === 1 ? 'פריט' : 'פריטים'}
             </p>
           </div>
