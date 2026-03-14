@@ -30,13 +30,18 @@ export function TopicPage({ pathSegments }: TopicPageProps) {
     }, {} as Record<string, number>)
   );
 
+  // Determine which category page this topic belongs to
+  const topCategory = descendants.length > 0 ? descendants[0].category : null;
+  const categoryHref = topCategory === 'teaching' ? '#materials' : topCategory === 'general' ? '#interesting' : '#';
+  const categoryLabel = topCategory === 'teaching' ? 'חומרי למידה' : topCategory === 'general' ? 'דברים מעניינים' : 'דף הבית';
+
   // Back link
   const backHref = pathSegments.length > 1
     ? `#topic/${pathSegments.slice(0, -1).map(encodeURIComponent).join('/')}`
-    : '#';
+    : categoryHref;
   const backLabel = pathSegments.length > 1
     ? `חזרה ל${pathSegments[pathSegments.length - 2]}`
-    : 'חזרה לדף הבית';
+    : `חזרה ל${categoryLabel}`;
 
   return (
     <div className="pt-24 pb-16 min-h-screen">
