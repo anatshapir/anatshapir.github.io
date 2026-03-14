@@ -35,7 +35,8 @@ export const subcategoryMeta: Record<string, { icon: string; color: string }> = 
   'השראה': {'icon':'✨','color':'from-rose-50 to-pink-50 border-rose-200'},
   'שירים': {'icon':'🎵','color':'from-violet-50 to-purple-50 border-violet-200'},
   'המלצות': {'icon':'⭐','color':'from-sky-50 to-cyan-50 border-sky-200'},
-  'EDA': {'icon':'📉','color':'from-purple-50 to-violet-50 border-purple-200'}
+  'EDA': {'icon':'📉','color':'from-purple-50 to-violet-50 border-purple-200'},
+  'ספריות': {'icon':'📁','color':'from-gray-50 to-slate-50 border-gray-200'}
 }
 
 export const staticMaterials: StaticMaterial[] = ([
@@ -131,11 +132,11 @@ export const staticMaterials: StaticMaterial[] = ([
   },
   {
     id: 'eda',
-    title: 'EDA',
-    description: 'וידאו הסבר',
+    title: 'Numpy',
+    description: 'ספריית Numpy לניהול מערכים/רשימות',
     category: 'teaching',
-    path: ['מדעי הנתונים', 'EDA'],
-    linkUrl: 'eda_video.mp4',
+    path: ['מדעי הנתונים', 'ספריות'],
+    linkUrl: '/numpy.html',
     icon: '📖',
   },
   {
@@ -203,11 +204,11 @@ export const staticMaterials: StaticMaterial[] = ([
   },
   {
     id: 'eda',
-    title: 'EDA',
-    description: 'וידאו הסבר',
+    title: 'Numpy',
+    description: 'ספריית Numpy לניהול מערכים/רשימות',
     category: 'teaching',
-    path: ['מדעי הנתונים', 'EDA'],
-    linkUrl: 'eda_video.mp4',
+    path: ['מדעי הנתונים', 'ספריות'],
+    linkUrl: '/numpy.html',
     icon: '📖',
   }
 ] as any[]).map(normalizeMaterial)
