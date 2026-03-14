@@ -202,12 +202,12 @@ export const staticMaterials: StaticMaterial[] = ([
     icon: '🧮',
   },
   {
-    id: 'eda',
-    title: 'EDA',
-    description: 'וידאו הסבר',
+    id: 'eda-video',
+    title: 'וידאו הסבר EDA',
+    description: 'וידאו הסבר על ניתוח נתונים חקירתי',
     category: 'teaching',
-    path: ['מדעי הנתונים', 'ספריות'],
+    path: ['מדעי הנתונים', 'EDA'],
     linkUrl: '/numpy.html',
-    icon: '📖',
+    icon: '🎬',
   }
 ] as any[]).map(normalizeMaterial)
