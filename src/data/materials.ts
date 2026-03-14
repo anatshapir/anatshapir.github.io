@@ -186,6 +186,15 @@ export const staticMaterials: StaticMaterial[] = ([
   },
   {
     id: 'eda',
+    title: 'ניתוח נתונים חקירתי (EDA)',
+    description: 'מדריך מקיף ל-Exploratory Data Analysis עם דוגמאות וכלים.',
+    category: 'teaching',
+    path: ['מדעי הנתונים', 'EDA'],
+    linkUrl: '/eda.html',
+    icon: '📉',
+  },
+  {
+    id: 'numpy',
     title: 'Numpy',
     description: 'ספריית Numpy לניהול מערכים/רשימות',
     category: 'teaching',
@@ -201,5 +210,14 @@ export const staticMaterials: StaticMaterial[] = ([
     path: ['מדעי הנתונים', 'EDA'],
     linkUrl: '/numpy.html',
     icon: '🎬',
+  },
+  {
+    id: 'eda-pdf',
+    title: 'Practical EDA',
+    description: 'מסמך PDF - מדריך מעשי ל-EDA',
+    category: 'teaching',
+    path: ['מדעי הנתונים', 'EDA'],
+    linkUrl: '/Practical_EDA.pdf',
+    icon: '📄',
   }
 ] as any[]).map(normalizeMaterial)
