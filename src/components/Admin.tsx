@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
-import { staticMaterials, subcategoryMeta, type StaticMaterial } from '@/data/materials'
+import { type StaticMaterial } from '@/data/materials'
+import { useMaterials } from '@/context/MaterialsContext'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -21,66 +22,23 @@ interface CategoryMeta {
   color: string
 }
 
-// ─── Generate materials.ts content from data ──────────
-function generateMaterialsFile(
+// ─── Generate materials.json content from data ──────────
+function generateMaterialsJSON(
   materials: StaticMaterial[],
   meta: Record<string, CategoryMeta>
 ): string {
-  const metaEntries = Object.entries(meta)
-    .map(([key, val]) => `  '${key}': ${JSON.stringify({ icon: val.icon, color: val.color }).replace(/"/g, "'")}`)
-    .join(',\n')
-
-  const materialEntries = materials
-    .map(m => {
-      const lines = [
-        `    id: '${m.id}',`,
-        `    title: '${m.title.replace(/'/g, "\\'")}',`,
-        `    description: '${m.description.replace(/'/g, "\\'")}',`,
-        `    category: '${m.category}',`,
-        `    path: [${m.path.map(p => `'${p.replace(/'/g, "\\'")}'`).join(', ')}],`,
-        `    linkUrl: '${m.linkUrl}',`,
-        `    icon: '${m.icon}',`,
-      ]
-      return `  {\n${lines.join('\n')}\n  }`
-    })
-    .join(',\n')
-
-  return `// ============================================================
-// חומרי למידה והמלצות
-// כדי להוסיף חומר חדש: העתיקי בלוק ושני את הפרטים
-// כדי להוסיף נושא חדש: הוסיפי ערך ב-subcategoryMeta
-// path מגדיר את ההיררכיה: ['נושא', 'תת-נושא', 'תת-תת-נושא', ...]
-// ============================================================
-
-// תמיכה בפורמט ישן (subcategory+subSubcategory) וחדש (path)
-export interface StaticMaterial {
-  id: string
-  title: string
-  description: string
-  category: 'teaching' | 'general'
-  path: string[]
-  linkUrl: string
-  icon: string
-}
-
-// נרמול: אם חומר עם subcategory ובלי path, ממיר אוטומטית
-function normalizeMaterial(m: any): StaticMaterial {
-  if (m.path && m.path.length > 0) return m as StaticMaterial
-  const path: string[] = []
-  if (m.subcategory) path.push(m.subcategory)
-  if (m.subSubcategory) path.push(m.subSubcategory)
-  return { ...m, path }
-}
-
-// מטא-דאטה לכל נושא - אייקון וצבע לכרטיס
-export const subcategoryMeta: Record<string, { icon: string; color: string }> = {
-${metaEntries}
-}
-
-export const staticMaterials: StaticMaterial[] = ([
-${materialEntries}
-] as any[]).map(normalizeMaterial)
-`
+  return JSON.stringify({
+    meta,
+    materials: materials.map(m => ({
+      id: m.id,
+      title: m.title,
+      description: m.description,
+      category: m.category,
+      path: m.path,
+      linkUrl: m.linkUrl,
+      icon: m.icon,
+    })),
+  }, null, 2)
 }
 
 // ─── Emoji Picker ─────────────────────────────────────
@@ -503,9 +461,18 @@ function CategoryForm({
 
 // ─── Main Admin Panel ─────────────────────────────────
 export function AdminPanel() {
+  // Load from runtime context (fetched from materials.json)
+  const { materials: loadedMaterials, meta: loadedMeta } = useMaterials()
+
   // State
-  const [materials, setMaterials] = useState<StaticMaterial[]>([...staticMaterials])
-  const [categories, setCategories] = useState<Record<string, CategoryMeta>>({ ...subcategoryMeta })
+  const [materials, setMaterials] = useState<StaticMaterial[]>([...loadedMaterials])
+  const [categories, setCategories] = useState<Record<string, CategoryMeta>>({ ...loadedMeta })
+
+  // Sync when context data loads from JSON
+  useEffect(() => {
+    setMaterials([...loadedMaterials])
+    setCategories({ ...loadedMeta })
+  }, [loadedMaterials, loadedMeta])
   const [authenticated, setAuthenticated] = useState(github.hasToken())
   const [tokenInput, setTokenInput] = useState('')
   const [validating, setValidating] = useState(false)
@@ -624,11 +591,22 @@ export function AdminPanel() {
     }
     setSaving(true)
     try {
-      const newContent = generateMaterialsFile(materials, categories)
-      const { sha } = await github.getFileContent('src/data/materials.ts')
-      await github.updateFile('src/data/materials.ts', newContent, 'עדכון חומרי למידה מ-Admin Panel', sha)
+      const newContent = generateMaterialsJSON(materials, categories)
+      // Save as JSON to docs/ - takes effect immediately without rebuild
+      let sha: string | undefined
+      try {
+        const existing = await github.getFileContent('docs/materials.json')
+        sha = existing.sha
+      } catch {
+        // File doesn't exist yet, that's OK
+      }
+      if (sha) {
+        await github.updateFile('docs/materials.json', newContent, 'עדכון חומרי למידה מ-Admin Panel', sha)
+      } else {
+        await github.createFile('docs/materials.json', newContent, 'עדכון חומרי למידה מ-Admin Panel')
+      }
       setHasChanges(false)
-      toast.success('השינויים נשמרו ב-GitHub! הבילד יתחיל אוטומטית.')
+      toast.success('השינויים נשמרו ונכנסו לתוקף מיידית!')
     } catch (error: any) {
       console.error('Save error:', error)
       toast.error(`שגיאה בשמירה: ${error.message}`)

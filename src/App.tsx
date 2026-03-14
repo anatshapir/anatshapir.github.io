@@ -5,6 +5,7 @@ import { Hero } from '@/components/sections/Hero';
 import { TopicGrid } from '@/components/sections/TopicGrid';
 import { TopicPage } from '@/components/sections/TopicPage';
 import { AdminPanel } from '@/components/Admin';
+import { MaterialsProvider } from '@/context/MaterialsContext';
 import { ArrowRight } from 'lucide-react';
 
 function HomePage() {
@@ -121,30 +122,32 @@ export default function App() {
   }, [])
 
   return (
-    <div className="min-h-screen bg-background font-sans selection:bg-primary/20 selection:text-primary">
-      <Navbar />
+    <MaterialsProvider>
+      <div className="min-h-screen bg-background font-sans selection:bg-primary/20 selection:text-primary">
+        <Navbar />
 
-      <main className="relative z-10">
-        {page === 'home' && <HomePage />}
-        {page === 'materials' && (
-          <CategoryPage
-            category="teaching"
-            title="חומרי למידה"
-            subtitle="חומרי למידה יצירתיים ואינטראקטיביים במגוון נושאים"
-          />
-        )}
-        {page === 'interesting' && (
-          <CategoryPage
-            category="general"
-            title="דברים מעניינים"
-            subtitle="דברים שפשוט עושים טוב על הלב - ספרים, השראה, שירים והמלצות"
-          />
-        )}
-        {page === 'topic' && <TopicPage pathSegments={topicPath} />}
-        {page === 'admin' && <AdminPanel />}
-      </main>
+        <main className="relative z-10">
+          {page === 'home' && <HomePage />}
+          {page === 'materials' && (
+            <CategoryPage
+              category="teaching"
+              title="חומרי למידה"
+              subtitle="חומרי למידה יצירתיים ואינטראקטיביים במגוון נושאים"
+            />
+          )}
+          {page === 'interesting' && (
+            <CategoryPage
+              category="general"
+              title="דברים מעניינים"
+              subtitle="דברים שפשוט עושים טוב על הלב - ספרים, השראה, שירים והמלצות"
+            />
+          )}
+          {page === 'topic' && <TopicPage pathSegments={topicPath} />}
+          {page === 'admin' && <AdminPanel />}
+        </main>
 
-      <Footer />
-    </div>
+        <Footer />
+      </div>
+    </MaterialsProvider>
   );
 }
