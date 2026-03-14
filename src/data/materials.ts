@@ -210,5 +210,14 @@ export const staticMaterials: StaticMaterial[] = ([
     path: ['מדעי הנתונים', 'EDA'],
     linkUrl: '/numpy.html',
     icon: '🎬',
+  },
+  {
+    id: 'eda-pdf',
+    title: 'Practical EDA',
+    description: 'מסמך PDF - מדריך מעשי ל-EDA',
+    category: 'teaching',
+    path: ['מדעי הנתונים', 'EDA'],
+    linkUrl: '/Practical_EDA.pdf',
+    icon: '📄',
   }
 ] as any[]).map(normalizeMaterial)
