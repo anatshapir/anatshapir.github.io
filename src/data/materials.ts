@@ -206,8 +206,8 @@ export const staticMaterials: StaticMaterial[] = ([
     title: 'EDA',
     description: 'וידאו הסבר',
     category: 'teaching',
-    path: ['EDA'],
-    linkUrl: '/חקר_נתונים_(EDA)__המדריך_לבלש.mp4',
-    icon: '📄',
+    path: ['מדעי הנתונים', 'ספריות'],
+    linkUrl: '/numpy.html',
+    icon: '📖',
   }
 ] as any[]).map(normalizeMaterial)
