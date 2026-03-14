@@ -39,6 +39,10 @@
     "ספריות": {
       "icon": "📁",
       "color": "from-gray-50 to-slate-50 border-gray-200"
+    },
+    "מה זה בעצם מדעי המחשב": {
+      "icon": "🤔",
+      "color": "from-cyan-50 to-blue-50 border-cyan-200"
     }
   },
   "materials": [
@@ -273,7 +277,8 @@
       "description": "",
       "category": "teaching",
       "path": [
-        "מדעי המחשב"
+        "מדעי המחשב",
+        "מה זה בעצם מדעי המחשב"
       ],
       "linkUrl": "/The_Abstraction_Ladder.pdf",
       "icon": "💻"
