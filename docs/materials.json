@@ -346,6 +346,18 @@
       ],
       "linkUrl": "https://colab.research.google.com/github/anatshapir/anatshapir.github.io/blob/main/docs/NB06_KNN_Algorithm_IMPROVED.ipynb",
       "icon": "⚗️"
+    },
+    {
+      "id": "knn-מצגת",
+      "title": "KNN  - מצגת",
+      "description": "",
+      "category": "teaching",
+      "path": [
+        "מדעי הנתונים",
+        "KNN"
+      ],
+      "linkUrl": "/knn_presentation.html",
+      "icon": "📄"
     }
   ]
 }
