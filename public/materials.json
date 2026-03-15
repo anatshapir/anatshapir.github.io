@@ -293,7 +293,7 @@
         "מה זה בעצם מדעי המחשב"
       ],
       "linkUrl": "/שפת_סף__לדבר_עם_המכונה.mp4",
-      "icon": "📄"
+      "icon": "🎬"
     },
     {
       "id": "eda-מחברת",
@@ -304,8 +304,8 @@
         "מדעי הנתונים",
         "EDA"
       ],
-      "linkUrl": "/NB07_Evaluation_Metrics.ipynb",
-      "icon": "📄"
+      "linkUrl": "https://colab.research.google.com/github/anatshapir/anatshapir.github.io/blob/main/docs/NB07_Evaluation_Metrics.ipynb",
+      "icon": "📓"
     },
     {
       "id": "numpy-מחברת",
@@ -316,8 +316,8 @@
         "מדעי הנתונים",
         "ספריות"
       ],
-      "linkUrl": "/04 NumPy Notebook.ipynb",
-      "icon": "📄"
+      "linkUrl": "https://colab.research.google.com/github/anatshapir/anatshapir.github.io/blob/main/docs/04 NumPy Notebook.ipynb",
+      "icon": "📓"
     },
     {
       "id": "pandas-מחברת",
@@ -328,8 +328,8 @@
         "מדעי הנתונים",
         "ספריות"
       ],
-      "linkUrl": "/NB04_Pandas_DataFrames_IMPROVED.ipynb",
-      "icon": "📄"
+      "linkUrl": "https://colab.research.google.com/github/anatshapir/anatshapir.github.io/blob/main/docs/NB04_Pandas_DataFrames_IMPROVED.ipynb",
+      "icon": "📓"
     }
   ]
 }
