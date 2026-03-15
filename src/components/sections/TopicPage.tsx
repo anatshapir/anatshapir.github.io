@@ -1,6 +1,7 @@
 import React from 'react';
 import { ArrowRight, ArrowLeft } from 'lucide-react';
 import { useMaterials } from '@/context/MaterialsContext';
+import { IconDisplay } from '@/components/IconDisplay';
 import type { StaticMaterial } from '@/data/materials';
 
 interface TopicPageProps {
@@ -80,10 +81,10 @@ export function TopicPage({ pathSegments }: TopicPageProps) {
                       href={`#topic/${pathSegments.slice(0, i + 1).map(encodeURIComponent).join('/')}`}
                       className="hover:text-primary transition-colors"
                     >
-                      {subcategoryMeta[seg]?.icon || '📁'} {seg}
+                      <IconDisplay icon={subcategoryMeta[seg]?.icon || '📁'} className="text-sm inline-block align-middle" /> {seg}
                     </a>
                   ) : (
-                    <span className="font-medium text-foreground">{subcategoryMeta[seg]?.icon || '📁'} {seg}</span>
+                    <span className="font-medium text-foreground"><IconDisplay icon={subcategoryMeta[seg]?.icon || '📁'} className="text-sm inline-block align-middle" /> {seg}</span>
                   )}
                 </React.Fragment>
               ))}
@@ -91,7 +92,7 @@ export function TopicPage({ pathSegments }: TopicPageProps) {
           )}
 
           <div className="text-center space-y-4">
-            <span className="text-6xl">{meta.icon}</span>
+            <IconDisplay icon={meta.icon} className="text-6xl" />
             <h1 className={`text-4xl sm:text-5xl font-serif font-bold ${meta.headerImage ? 'text-white drop-shadow-lg' : 'text-foreground'}`}>{currentName}</h1>
             <p className={`text-xl ${meta.headerImage ? 'text-white/80' : 'text-muted-foreground'}`}>
               {descendants.length} {descendants.length === 1 ? 'פריט' : 'פריטים'}
@@ -118,7 +119,7 @@ export function TopicPage({ pathSegments }: TopicPageProps) {
                       shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer aspect-square`}
                   >
                     <span className="text-5xl sm:text-6xl group-hover:scale-110 transition-transform duration-300">
-                      {subMeta.icon}
+                      <IconDisplay icon={subMeta.icon} className="text-5xl sm:text-6xl" />
                     </span>
                     <h3 className="text-xl sm:text-2xl font-serif font-bold text-foreground text-center">
                       {name}
@@ -177,7 +178,7 @@ function MaterialCard({ item }: { item: StaticMaterial }) {
         transition-all duration-200 group
         ${hasLink ? 'hover:shadow-lg hover:-translate-y-1 cursor-pointer' : ''}`}
     >
-      <span className="text-3xl">{item.icon}</span>
+      <IconDisplay icon={item.icon} className="text-3xl" />
       <h3 className="text-xl font-bold text-foreground group-hover:text-primary transition-colors">
         {item.title}
       </h3>

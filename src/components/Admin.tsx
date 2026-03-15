@@ -49,8 +49,41 @@ const EMOJI_OPTIONS = [
   { group: 'עוד', emojis: ['🎯', '🚀', '💎', '🎨', '🎪', '🐼', '☕', '🔍', '📜', '🖥️'] },
 ]
 
+function isImageIcon(v: string) {
+  return v.startsWith('/') || v.startsWith('http') || v.startsWith('data:')
+}
+
 function EmojiPicker({ value, onChange }: { value: string; onChange: (v: string) => void }) {
   const [open, setOpen] = useState(false)
+  const [uploadingIcon, setUploadingIcon] = useState(false)
+
+  const handleIconUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error('תמונת אייקון עד 2MB')
+      return
+    }
+    setUploadingIcon(true)
+    try {
+      const base64 = await new Promise<string>((resolve) => {
+        const reader = new FileReader()
+        reader.onload = () => resolve((reader.result as string).split(',')[1])
+        reader.readAsDataURL(file)
+      })
+      const fileName = `icons/${Date.now()}_${file.name}`
+      await github.uploadBinaryFile(`docs/${fileName}`, base64, `העלאת אייקון ${file.name}`)
+      await github.uploadBinaryFile(`public/${fileName}`, base64, `העלאת אייקון ${file.name} (public)`)
+      onChange(`/${fileName}`)
+      setOpen(false)
+      toast.success('האייקון הועלה!')
+    } catch (err: any) {
+      toast.error(`שגיאה: ${err.message}`)
+    } finally {
+      setUploadingIcon(false)
+    }
+  }
+
   return (
     <div className="relative">
       <button
@@ -58,7 +91,11 @@ function EmojiPicker({ value, onChange }: { value: string; onChange: (v: string)
         onClick={() => setOpen(!open)}
         className="flex items-center gap-2 px-3 py-2 border rounded-md hover:bg-muted transition-colors"
       >
-        <span className="text-2xl">{value || '📄'}</span>
+        {isImageIcon(value) ? (
+          <img src={value} alt="" className="w-7 h-7 object-contain" />
+        ) : (
+          <span className="text-2xl">{value || '📄'}</span>
+        )}
         <span className="text-xs text-muted-foreground">בחרי אייקון</span>
       </button>
       {open && (
@@ -82,13 +119,24 @@ function EmojiPicker({ value, onChange }: { value: string; onChange: (v: string)
               </div>
             </div>
           ))}
-          <div className="border-t pt-2 mt-2">
+          <div className="border-t pt-2 mt-2 space-y-2">
             <Input
-              value={value}
+              value={isImageIcon(value) ? '' : value}
               onChange={e => onChange(e.target.value)}
               placeholder="או הקלידי אימוג'י..."
               className="text-center"
             />
+            <label className={`flex items-center justify-center gap-2 px-3 py-2 border border-dashed rounded-md cursor-pointer hover:bg-muted transition-colors text-sm ${uploadingIcon ? 'opacity-50' : ''}`}>
+              <Upload className="w-4 h-4" />
+              {uploadingIcon ? 'מעלה...' : 'העלי תמונת אייקון'}
+              <input
+                type="file"
+                accept=".png,.jpg,.jpeg,.gif,.svg,.webp"
+                className="hidden"
+                onChange={handleIconUpload}
+                disabled={uploadingIcon}
+              />
+            </label>
           </div>
         </div>
       )}

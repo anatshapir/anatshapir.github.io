@@ -1,5 +1,6 @@
 import React from 'react';
 import { useMaterials } from '@/context/MaterialsContext';
+import { IconDisplay } from '@/components/IconDisplay';
 
 interface TopicGridProps {
   category?: 'teaching' | 'general';
@@ -46,7 +47,7 @@ export function TopicGrid({ category, title = 'מה תמצאו כאן?' }: Topic
                   shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer aspect-square`}
               >
                 <span className="text-5xl sm:text-6xl group-hover:scale-110 transition-transform duration-300">
-                  {meta.icon}
+                  <IconDisplay icon={meta.icon} className="text-5xl sm:text-6xl" />
                 </span>
                 <h3 className="text-xl sm:text-2xl font-serif font-bold text-foreground text-center">
                   {name}
