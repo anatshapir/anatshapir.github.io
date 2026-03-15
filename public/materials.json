@@ -45,7 +45,7 @@
       "color": "from-cyan-50 to-blue-50 border-cyan-200"
     },
     "KNN": {
-      "icon": "📁",
+      "icon": "",
       "color": "from-gray-50 to-slate-50 border-gray-200"
     }
   },
@@ -358,6 +358,17 @@
       ],
       "linkUrl": "/knn_presentation.html",
       "icon": "📄"
+    },
+    {
+      "id": "data-preparation",
+      "title": "Data Preparation",
+      "description": "הכנת המידע להפעלת המודלים",
+      "category": "teaching",
+      "path": [
+        "מדעי הנתונים"
+      ],
+      "linkUrl": "https://colab.research.google.com/github/anatshapir/anatshapir.github.io/blob/main/docs/NB14_Data_Preparation_Advanced_IMPROVED.ipynb",
+      "icon": "📋"
     }
   ]
 }
