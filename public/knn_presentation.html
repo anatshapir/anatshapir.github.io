@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>אלגוריתם KNN - מדעי הנתונים</title>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0c0a1a;--card:#191530;--code:#0d1117;--indigo:#6366f1;--violet:#8b5cf6;--purple:#a855f7;--blue:#3b82f6;--cyan:#06b6d4;--green:#10b981;--orange:#f59e0b;--pink:#ec4899;--red:#ef4444;--text:#f1f5f9;--text2:#94a3b8;--muted:#64748b;--border:#25204a}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Heebo',sans-serif;background:var(--bg);color:var(--text);overflow:hidden;height:100vh;width:100vw}
+.bgr{position:fixed;inset:0;background-image:linear-gradient(rgba(99,102,241,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(99,102,241,.03) 1px,transparent 1px);background-size:60px 60px;z-index:0}
+.gw{position:fixed;width:600px;height:600px;border-radius:50%;filter:blur(120px);opacity:.13;z-index:0;pointer-events:none}
+.g1{background:var(--indigo);top:-200px;left:-200px}.g2{background:var(--purple);bottom:-200px;right:-200px}
+.tb{position:fixed;top:0;left:0;right:0;height:50px;background:rgba(12,10,26,.9);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 24px;z-index:100}
+.tbt{font-size:14px;font-weight:500;color:var(--text2);display:flex;align-items:center;gap:8px}
+.pc{display:flex;align-items:center;gap:12px}
+.pb{width:200px;height:3px;background:var(--border);border-radius:2px;overflow:hidden}
+.pfl{height:100%;background:linear-gradient(90deg,var(--indigo),var(--purple));border-radius:2px;transition:width .5s}
+.pt{font-size:12px;color:var(--muted);font-family:'Fira Code',monospace;min-width:55px;text-align:left;direction:ltr}
+.sb{position:fixed;top:50px;right:0;width:255px;height:calc(100vh - 50px);background:rgba(20,16,40,.7);backdrop-filter:blur(10px);border-left:1px solid var(--border);z-index:90;overflow-y:auto;padding:12px 0;transition:transform .3s}
+.sb.cl{transform:translateX(255px)}
+.sbt{position:fixed;top:60px;right:255px;width:26px;height:26px;background:var(--card);border:1px solid var(--border);border-radius:6px 0 0 6px;color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:91;transition:all .3s;font-size:11px}
+.sb.cl+.sbt{right:0}
+.stn{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);padding:8px 18px 4px;margin-top:6px}
+.ni{padding:6px 18px;font-size:12px;color:var(--text2);cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:8px;border-right:2px solid transparent}
+.ni:hover{background:rgba(99,102,241,.05);color:var(--text)}
+.ni.a{background:rgba(99,102,241,.08);color:var(--indigo);border-right-color:var(--indigo)}
+.ni .n{font-family:'Fira Code',monospace;font-size:10px;color:var(--muted);min-width:18px}
+.mc{position:fixed;top:50px;left:0;right:255px;height:calc(100vh - 50px);overflow:hidden;z-index:1;transition:right .3s}
+.sb.cl~.mc{right:0}
+.sl{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:22px 46px 68px;overflow-y:auto;opacity:0;transform:translateX(-30px);transition:all .45s cubic-bezier(.4,0,.2,1);pointer-events:none}
+.sl.ac{opacity:1;transform:translateX(0);pointer-events:all}
+.sl.ex{opacity:0;transform:translateX(30px)}
+.si{max-width:900px;width:100%}
+.ts{text-align:center;margin-top:8vh}
+.ts .eb{font-size:56px;margin-bottom:12px;animation:fl 3s ease-in-out infinite}
+@keyframes fl{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.ts h1{font-size:42px;font-weight:900;background:linear-gradient(135deg,var(--indigo),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:10px}
+.ts .su{font-size:17px;color:var(--text2);font-weight:300}
+.sh{text-align:center;margin-top:4vh}
+.sh .sn{font-family:'Fira Code',monospace;font-size:13px;color:var(--cyan);margin-bottom:6px;letter-spacing:2px}
+.sh h2{font-size:32px;font-weight:800;margin-bottom:8px}
+.sh .sd{font-size:15px;color:var(--text2);max-width:620px;margin:0 auto;line-height:1.6}
+.hd{margin-bottom:12px}
+.hd h3{font-size:22px;font-weight:700;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.hd .d{font-size:13.5px;color:var(--text2);margin-top:4px;line-height:1.5}
+.badge{font-family:'Fira Code',monospace;font-size:10px;padding:2px 9px;border-radius:10px;font-weight:500}
+.b-i{background:rgba(99,102,241,.15);color:var(--indigo)}.b-v{background:rgba(139,92,246,.15);color:var(--violet)}.b-p{background:rgba(168,85,247,.15);color:var(--purple)}.b-b{background:rgba(59,130,246,.15);color:var(--blue)}.b-c{background:rgba(6,182,212,.15);color:var(--cyan)}.b-g{background:rgba(16,185,129,.15);color:var(--green)}.b-o{background:rgba(245,158,11,.15);color:var(--orange)}.b-pk{background:rgba(236,72,153,.15);color:var(--pink)}
+.cb{background:var(--code);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin:7px 0;direction:ltr;text-align:left}
+.ch{display:flex;align-items:center;justify-content:space-between;padding:7px 14px;background:rgba(37,32,74,.5);border-bottom:1px solid var(--border)}
+.cd{display:flex;gap:5px}.cd span{width:9px;height:9px;border-radius:50%}.cd span:nth-child(1){background:#ef4444}.cd span:nth-child(2){background:#f59e0b}.cd span:nth-child(3){background:#10b981}
+.cll{font-family:'Fira Code',monospace;font-size:10px;color:var(--muted)}
+.cc{padding:10px 15px;font-family:'Fira Code',monospace;font-size:12px;line-height:1.6;overflow-x:auto;white-space:pre}
+.kw{color:#c678dd}.fn{color:#61afef}.str{color:#98c379}.num{color:#d19a66}.cm{color:#5c6370;font-style:italic}.op{color:#56b6c2}.vr{color:#e06c75}
+.ob{background:rgba(99,102,241,.04);border:1px solid rgba(99,102,241,.15);border-radius:8px;padding:9px 14px;margin:5px 0;direction:ltr;text-align:left;font-family:'Fira Code',monospace;font-size:11px;line-height:1.5;color:var(--indigo);white-space:pre;overflow-x:auto}
+.ol{font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:3px;display:block}
+.ad{text-align:center;color:var(--muted);font-size:16px;margin:1px 0;opacity:.5}
+.ig{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:9px;margin:10px 0}
+.ic{background:var(--card);border:1px solid var(--border);border-radius:9px;padding:11px;transition:all .3s}
+.ic:hover{border-color:var(--indigo);transform:translateY(-2px)}
+.ic .ci{font-size:20px;margin-bottom:4px}.ic h4{font-size:13px;font-weight:600;margin-bottom:3px}.ic p{font-size:12px;color:var(--text2);line-height:1.4}
+.tp{background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.15);border-radius:8px;padding:9px 13px;margin:7px 0;display:flex;gap:8px;align-items:flex-start}
+.tp .ti{font-size:15px;flex-shrink:0;margin-top:1px}.tp p{font-size:12px;color:var(--text2);line-height:1.5}
+.cr{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:8px 0}
+.cx{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:13px;position:relative;overflow:hidden}
+.cx::before{content:'';position:absolute;top:0;right:0;width:4px;height:100%}
+.cx.indigo::before{background:var(--indigo)}.cx.violet::before{background:var(--violet)}.cx.blue::before{background:var(--blue)}.cx.green::before{background:var(--green)}.cx.orange::before{background:var(--orange)}.cx.red::before{background:var(--red)}.cx.cyan::before{background:var(--cyan)}.cx.pink::before{background:var(--pink)}
+.cx h4{font-size:14px;margin-bottom:5px}.cx p{font-size:12.5px;color:var(--text2);line-height:1.5}
+.bn{position:fixed;bottom:0;left:0;right:255px;height:52px;background:rgba(12,10,26,.9);backdrop-filter:blur(20px);border-top:1px solid var(--border);display:flex;align-items:center;justify-content:center;gap:14px;z-index:100;transition:right .3s}
+.sb.cl~.bn{right:0}
+.nb{padding:7px 18px;border-radius:7px;border:1px solid var(--border);background:var(--card);color:var(--text);font-family:'Heebo',sans-serif;font-size:13px;cursor:pointer;transition:all .2s}
+.nb:hover{border-color:var(--indigo);background:rgba(99,102,241,.1)}
+.nb.pr{background:var(--indigo);border-color:var(--indigo);color:#fff}
+.nb.pr:hover{background:#4f46e5}
+.sc{font-family:'Fira Code',monospace;font-size:11px;color:var(--muted);min-width:55px;text-align:center}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+@media(max-width:768px){.sb,.sbt{display:none}.mc,.bn{right:0!important}.sl{padding:18px 14px 62px}.ts h1{font-size:28px}.sh h2{font-size:24px}.hd h3{font-size:18px}.cc{font-size:10px}.cr{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="bgr"></div><div class="gw g1"></div><div class="gw g2"></div>
+<div class="tb"><div class="tbt"><span>🎯</span> אלגוריתם KNN – מדעי הנתונים</div><div class="pc"><div class="pt" id="pT">0%</div><div class="pb"><div class="pfl" id="pF" style="width:0%"></div></div></div></div>
+
+<div class="sb" id="sb">
+  <div class="stn">📌 תוכן עניינים</div>
+  <div class="ni" data-s="0"><span class="n">00</span> פתיחה</div>
+  <div class="stn" style="color:var(--indigo)">01 · הרעיון</div>
+  <div class="ni" data-s="1"><span class="n">01</span> מהו KNN?</div>
+  <div class="ni" data-s="2"><span class="n">02</span> חישוב מרחק</div>
+  <div class="stn" style="color:var(--violet)">02 · הכנת נתונים</div>
+  <div class="ni" data-s="3"><span class="n">03</span> נרמול – למה קריטי?</div>
+  <div class="ni" data-s="4"><span class="n">04</span> One-Hot Encoding</div>
+  <div class="ni" data-s="5"><span class="n">05</span> חלוקת Train/Test</div>
+  <div class="stn" style="color:var(--blue)">03 · דוגמה מלאה</div>
+  <div class="ni" data-s="6"><span class="n">06</span> נתוני פירות 🍎🍊</div>
+  <div class="ni" data-s="7"><span class="n">07</span> נרמול + אימון</div>
+  <div class="ni" data-s="8"><span class="n">08</span> חיזוי והערכה</div>
+  <div class="stn" style="color:var(--cyan)">04 · בחירת K</div>
+  <div class="ni" data-s="9"><span class="n">09</span> השפעת K</div>
+  <div class="ni" data-s="10"><span class="n">10</span> Elbow Method</div>
+  <div class="stn" style="color:var(--green)">05 · סיום</div>
+  <div class="ni" data-s="11"><span class="n">11</span> Decision Boundary</div>
+  <div class="ni" data-s="12"><span class="n">12</span> חיזוי פרי חדש</div>
+  <div class="ni" data-s="13"><span class="n">13</span> תהליך עבודה</div>
+  <div class="ni" data-s="14"><span class="n">14</span> סיכום 🎉</div>
+</div>
+<button class="sbt" id="sbT" onclick="tSB()">◀</button>
+
+<div class="mc" id="mc">
+
+<!-- S0: TITLE -->
+<div class="sl ac" id="s-0"><div class="ts">
+  <div class="eb">🎯</div>
+  <h1>אלגוריתם KNN</h1>
+  <div class="su">K-Nearest Neighbors · מדעי הנתונים · תיכון</div>
+  <div style="margin-top:24px;color:var(--muted);font-size:14px;">← / → לניווט &nbsp;|&nbsp; 15 שקפים &nbsp;|&nbsp; מהרעיון לקוד עובד</div>
+</div></div>
+
+<!-- S1: What is KNN? -->
+<div class="sl" id="s-1"><div class="si">
+  <div class="sh"><div class="sn">SECTION 01</div><h2>מהו <span style="color:var(--indigo)">KNN</span>?</h2><div class="sd">K-Nearest Neighbors – "תגיד לי מי חבריך ואומר לך מי אתה"</div></div>
+  <div class="cx indigo" style="margin-top:16px;"><h4>💡 הרעיון בפשטות:</h4><p>כדי לסווג נקודה חדשה, מסתכלים על <strong>K השכנים הכי קרובים</strong> ומחליטים לפי <strong>הרוב</strong>.</p></div>
+  <div style="margin:14px 0;text-align:center;direction:ltr;font-family:'Fira Code',monospace;font-size:12px;color:var(--text2);background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;">
+    <div style="font-size:11px;color:var(--muted);margin-bottom:8px;">EXAMPLE: K=5</div>
+    <div>New point ⭐ has 5 nearest neighbors:</div>
+    <div style="margin:8px 0;font-size:14px;">🔵 🔵 🔵 🔴 🔴</div>
+    <div>3 Blue vs 2 Red → <span style="color:var(--blue);font-weight:700;">Classify as BLUE!</span></div>
+    <div style="margin-top:6px;font-size:11px;color:var(--muted);">(majority vote = הצבעת רוב)</div>
+  </div>
+  <div class="ig">
+    <div class="ic" style="border-top:3px solid var(--green)"><div class="ci">✅</div><h4>יתרונות</h4><p>פשוט, אינטואיטיבי, אין אימון ממש, עובד טוב על נתונים קטנים</p></div>
+    <div class="ic" style="border-top:3px solid var(--red)"><div class="ci">⚠️</div><h4>חסרונות</h4><p>איטי על נתונים גדולים, רגיש לסקאלה, צריך לבחור K</p></div>
+    <div class="ic" style="border-top:3px solid var(--blue)"><div class="ci">🎯</div><h4>שימושים</h4><p>סיווג (ספאם, מחלות), המלצות, זיהוי תמונות</p></div>
+  </div>
+</div></div>
+
+<!-- S2: Distance -->
+<div class="sl" id="s-2"><div class="si">
+  <div class="hd"><h3>📐 חישוב מרחק <span class="badge b-i">Euclidean Distance</span></h3>
+    <div class="d">כדי למצוא "שכנים קרובים" – צריך למדוד מרחק!</div></div>
+  <div class="cx indigo" style="margin-top:8px;">
+    <h4>📏 מרחק אוקלידי = "קו ישר"</h4>
+    <p style="direction:ltr;text-align:center;margin-top:6px;font-size:16px;">d = √((x₂-x₁)² + (y₂-y₁)²)</p>
+  </div>
+  <div class="cb"><div class="ch"><div class="cd"><span></span><span></span><span></span></div><div class="cll">distance.py</div></div>
+    <div class="cc">point_a = (<span class="num">2</span>, <span class="num">3</span>)
+point_b = (<span class="num">5</span>, <span class="num">7</span>)
+
+dist = np.<span class="fn">sqrt</span>((<span class="num">5</span>-<span class="num">2</span>)**<span class="num">2</span> + (<span class="num">7</span>-<span class="num">3</span>)**<span class="num">2</span>)
+<span class="fn">print</span>(<span class="str">f'Distance A→B: √(3² + 4²) = √(9+16) = √25 = </span>{dist}<span class="str">'</span>)
+
+<span class="cm"># או בקיצור עם NumPy:</span>
+<span class="fn">print</span>(np.<span class="fn">linalg.norm</span>(
+    np.<span class="fn">array</span>(point_a) - np.<span class="fn">array</span>(point_b)))</div></div>
+  <div class="ad">▼</div>
+  <div class="ob"><span class="ol">OUTPUT ▾</span>
+Distance A→B: √(3² + 4²) = √(9+16) = √25 = 5.0</div>
+  <div class="tp"><span class="ti">📌</span><p>עובד גם ב-3D, 4D, 100D! ככל שיותר מאפיינים – פשוט מוסיפים ממדים לנוסחה.</p></div>
+</div></div>
+
+<!-- S3: Normalization -->
+<div class="sl" id="s-3"><div class="si">
+  <div class="sh"><div class="sn">SECTION 02</div><h2><span style="color:var(--violet)">נרמול</span> – למה קריטי?</h2><div class="sd">בלי נרמול, KNN נותן תוצאות שגויות!</div></div>
+  <div class="cx red" style="margin-top:16px;"><h4>⚠️ הבעיה: סקאלות שונות</h4>
+    <p>גיל: 20-80 (טווח 60) &nbsp;|&nbsp; משכורת: 5,000-50,000 (טווח 45,000)<br/>
+    <strong>המשכורת תשלוט על המרחק!</strong> הגיל כמעט לא ישפיע.</p></div>
+  <div class="cb"><div class="ch"><div class="cd"><span></span><span></span><span></span></div><div class="cll">normalize.py</div></div>
+    <div class="cc"><span class="cm"># בלי נרמול:</span>
+A = {<span class="str">'age'</span>: <span class="num">25</span>, <span class="str">'salary'</span>: <span class="num">8000</span>}
+B = {<span class="str">'age'</span>: <span class="num">55</span>, <span class="str">'salary'</span>: <span class="num">8500</span>}   <span class="cm"># גיל שונה!</span>
+C = {<span class="str">'age'</span>: <span class="num">26</span>, <span class="str">'salary'</span>: <span class="num">45000</span>}  <span class="cm"># משכורת שונה!</span>
+
+dist_AB = np.<span class="fn">sqrt</span>((<span class="num">55</span>-<span class="num">25</span>)**<span class="num">2</span> + (<span class="num">8500</span>-<span class="num">8000</span>)**<span class="num">2</span>)  <span class="cm"># = 500.9</span>
+dist_AC = np.<span class="fn">sqrt</span>((<span class="num">26</span>-<span class="num">25</span>)**<span class="num">2</span> + (<span class="num">45000</span>-<span class="num">8000</span>)**<span class="num">2</span>) <span class="cm"># = 37000!</span></div></div>
+  <div class="ad">▼</div>
+  <div class="ob"><span class="ol">OUTPUT – בלי נרמול ▾</span>
+A→B: 500.9     ← KNN אומר B קרוב!
+A→C: 37000.0   ← C "רחוק"
+
+❌ אבל A ו-B שונים ב-30 שנה!!!
+   ו-A ו-C דומים בגיל (25 vs 26)...
+   המשכורת שולטת על הכל!</div>
+  <div class="cb"><div class="ch"><div class="cd"><span></span><span></span><span></span></div><div class="cll">after_norm.py</div></div>
+    <div class="cc"><span class="cm"># אחרי Min-Max Normalization (0-1):</span>
+<span class="cm"># norm = (value - min) / (max - min)</span>
+dist_AB_norm = <span class="num">0.502</span>  <span class="cm"># עכשיו הגיל כן משפיע!</span>
+dist_AC_norm = <span class="num">0.822</span>  <span class="cm"># ✅ מאוזן</span></div></div>
+  <div class="tp"><span class="ti">🔑</span><p><strong>כלל זהב: תמיד לנרמל לפני KNN!</strong> שיטות: <code>MinMaxScaler</code> (0-1) או <code>StandardScaler</code> (ממוצע=0, סט"ת=1).</p></div>
+</div></div>
+
+<!-- S4: One-Hot -->
+<div class="sl" id="s-4"><div class="si">
+  <div class="hd"><h3>🏷️ One-Hot Encoding <span class="badge b-v">משתנים קטגוריאליים</span></h3>
+    <div class="d">KNN עובד רק עם <strong>מספרים</strong> – אז מה עושים עם "עיר"?</div></div>
+  <div class="cr" style="margin-top:8px;">
+    <div class="cx red"><h4>❌ טעות: מספרים רגילים</h4>
+      <p style="font-size:12px;direction:ltr;text-align:left;margin-top:4px;">
+        Tel Aviv → 1<br/>Jerusalem → 2<br/>Haifa → 3<br/><span style="color:var(--red);">⚠️ KNN חושב: חיפה (3) "רחוקה" מת"א (1)!</span>
+      </p>
+    </div>
+    <div class="cx green"><h4>✅ פתרון: One-Hot</h4>
+      <p style="font-size:12px;direction:ltr;text-align:left;margin-top:4px;">
+        Tel Aviv → [1, 0, 0]<br/>Jerusalem → [0, 1, 0]<br/>Haifa → [0, 0, 1]<br/><span style="color:var(--green);">✅ כל עיר שווה, אין "סדר"!</span>
+      </p>
+    </div>
+  </div>
+  <div class="cb"><div class="ch"><div class="cd"><span></span><span></span><span></span></div><div class="cll">one_hot.py</div></div>
+    <div class="cc">df_encoded = pd.<span class="fn">get_dummies</span>(df, <span class="vr">columns</span>=[<span class="str">'city'</span>])
+<span class="fn">print</span>(df_encoded)</div></div>
+  <div class="ad">▼</div>
+  <div class="ob"><span class="ol">OUTPUT ▾</span>
+   city_TelAviv  city_Jerusalem  city_Haifa
+0            1               0           0
+1            0               1           0
+2            0               0           1
+3            1               0           0</div>
+  <div class="tp"><span class="ti">📋</span><p><strong>סיכום הכנת נתונים ל-KNN:</strong> מספרי → <strong>נרמול</strong> (StandardScaler). קטגוריאלי → <strong>One-Hot</strong> (get_dummies).</p></div>
+</div></div>
+
+<!-- S5: Train/Test -->
+<div class="sl" id="s-5"><div class="si">
+  <div class="hd"><h3>🔀 חלוקת Train / Test <span class="badge b-v">למה מחלקים?</span></h3></div>
+  <div class="cx red" style="margin-top:8px;"><h4>❌ בלי חלוקה</h4><p>מאמנים ובודקים על אותם נתונים = כמו לתת לתלמיד את אותן שאלות שתרגל. לא באמת יודעים אם הבין!</p></div>
+  <div class="cx green"><h4>✅ עם חלוקה</h4><p>מאמנים על 80%, בודקים על 20% <strong>שהמודל לא ראה</strong> = "מבחן בהפתעה" אמיתי!</p></div>
+  <div class="cb"><div class="ch"><div class="cd"><span></span><span></span><span></span></div><div class="cll">split.py</div></div>
+    <div class="cc"><span class="kw">from</span> sklearn.model_selection <span class="kw">import</span> train_test_split
+
+X_train, X_test, y_train, y_test = <span class="fn">train_test_split</span>(
+    X, y,
+    <span class="vr">test_size</span>=<span class="num">0.2</span>,       <span class="cm"># 20% לבדיקה</span>
+    <span class="vr">random_state</span>=<span class="num">42</span>,    <span class="cm"># שחזור</span>
+    <span class="vr">stratify</span>=y          <span class="cm"># שמירת יחס הקטגוריות</span>
+)</div></div>
+  <div class="ad">▼</div>
+  <div class="ob"><span class="ol">OUTPUT ▾</span>
+Training: 48 samples (80%)   ← המודל לומד מאלה
+Testing:  12 samples (20%)   ← "מבחן בהפתעה"</div>
+  <div class="tp"><span class="ti">📌</span><p><code>stratify=y</code> → שומר יחס זהה של קטגוריות ב-Train וב-Test (למשל 50% תפוחים, 50% תפוזים בשניהם).</p></div>
+</div></div>
+
+<!-- S6: Fruit Dataset -->
+<div class="sl" id="s-6"><div class="si">
+  <div class="sh"><div class="sn">SECTION 03</div><h2>דוגמה מלאה: <span style="color:var(--blue)">סיווג פירות</span> 🍎🍊</h2><div class="sd">נבנה מודל KNN לסווג תפוחים ותפוזים לפי משקל וקוטר</div></div>
+  <div class="cb" style="margin-top:14px;"><div class="ch"><div class="cd"><span></span><span></span><span></span></div><div class="cll">data.py</div></div>
+    <div class="cc"><span class="cm"># יצירת נתוני פירות (60 דגימות)</span>
+np.random.<span class="fn">seed</span>(<span class="num">42</span>)
+
+<span class="cm"># 🍎 תפוחים: קלים + קטנים</span>
+apple_weight = np.random.<span class="fn">normal</span>(<span class="num">150</span>, <span class="num">20</span>, <span class="num">30</span>)
+apple_diam   = np.random.<span class="fn">normal</span>(<span class="num">7</span>, <span class="num">0.5</span>, <span class="num">30</span>)
+
+<span class="cm"># 🍊 תפוזים: כבדים + גדולים</span>
+orange_weight = np.random.<span class="fn">normal</span>(<span class="num">200</span>, <span class="num">25</span>, <span class="num">30</span>)
+orange_diam   = np.random.<span class="fn">normal</span>(<span class="num">8.5</span>, <span class="num">0.6</span>, <span class="num">30</span>)</div></div>
+  <div class="ad">▼</div>
+  <div class="ob"><span class="ol">df.head(4) ▾</span>
+   weight  diameter  fruit
+0   159.9      7.08  apple
+1   147.2      6.93  apple
+2   162.9      6.82  apple
+...
+30  174.2      7.90  orange
+31  223.4      8.93  orange
+
+Features: weight, diameter
+Target: fruit (apple / orange)</div>
+</div></div>
+
+<!-- S7: Normalize + Train -->
+<div class="sl" id="s-7"><div class="si">
+  <div class="hd"><h3>⚖️ נרמול + אימון <span class="badge b-b">StandardScaler + KNN</span></h3></div>
+  <div class="cb"><div class="ch"><div class="cd"><span></span><span></span><span></span></div><div class="cll">normalize_train.py</div></div>
+    <div class="cc"><span class="kw">from</span> sklearn.preprocessing <span class="kw">import</span> StandardScaler
+<span class="kw">from</span> sklearn.neighbors <span class="kw">import</span> KNeighborsClassifier
+
+<span class="cm"># נרמול</span>
+scaler = <span class="fn">StandardScaler</span>()
+X_train_sc = scaler.<span class="fn">fit_transform</span>(X_train)  <span class="cm"># fit+transform על Train!</span>
+X_test_sc  = scaler.<span class="fn">transform</span>(X_test)       <span class="cm"># transform בלבד על Test!</span>
+
+<span class="cm"># אימון KNN</span>
+knn = <span class="fn">KNeighborsClassifier</span>(<span class="vr">n_neighbors</span>=<span class="num">5</span>)
+knn.<span class="fn">fit</span>(X_train_sc, y_train)
+<span class="fn">print</span>(<span class="str">'✅ Model trained!'</span>)</div></div>
+  <div class="ad">▼</div>
+  <div class="ob"><span class="ol">Before vs After Scaling ▾</span>
+Before:  weight: [120-240]  diameter: [5.5-10]
+After:   weight: [-2, +2]   diameter: [-2, +2]
+✅ עכשיו שני המאפיינים באותה סקאלה!</div>
+  <div class="cx red" style="margin-top:6px;">
+    <h4>⚠️ השגיאה הנפוצה ביותר!</h4>
+    <p><code>fit_transform</code> על <strong>Train בלבד!</strong> &nbsp; <code>transform</code> על Test.<br/>
+    אם עושים fit גם על Test → <strong>Data Leakage</strong> (דליפת מידע) = תוצאות שקריות!</p>
+  </div>
+</div></div>
+
+<!-- S8: Predict + Evaluate -->
+<div class="sl" id="s-8"><div class="si">
+  <div class="hd"><h3>📏 חיזוי והערכה <span class="badge b-b">Accuracy + Confusion Matrix</span></h3></div>
+  <div class="cb"><div class="ch"><div class="cd"><span></span><span></span><span></span></div><div class="cll">evaluate.py</div></div>
+    <div class="cc"><span class="kw">from</span> sklearn.metrics <span class="kw">import</span> accuracy_score, confusion_matrix
+
+y_pred = knn.<span class="fn">predict</span>(X_test_sc)
+accuracy = <span class="fn">accuracy_score</span>(y_test, y_pred)
+<span class="fn">print</span>(<span class="str">f'Accuracy: </span>{accuracy:.0%}<span class="str">'</span>)
+
+cm = <span class="fn">confusion_matrix</span>(y_test, y_pred)
+<span class="fn">print</span>(cm)</div></div>
+  <div class="ad">▼</div>
+  <div class="ob"><span class="ol">OUTPUT ▾</span>
+Accuracy: 92%
+
+Confusion Matrix:
+              Predicted
+              apple  orange
+Actual apple [  5      1  ]  ← 1 תפוח סווג כתפוז
+      orange [  0      6  ]  ← כל התפוזים נכונים!</div>
+  <div class="cr" style="margin-top:6px;">
+    <div class="cx green"><h4>✅ True Positive / Negative</h4><p>5 תפוחים זוהו נכון, 6 תפוזים זוהו נכון = <strong>11 הצלחות</strong></p></div>
+    <div class="cx red"><h4>❌ Errors</h4><p>1 תפוח סווג כתפוז (False Negative) = <strong>שגיאה אחת</strong><br/>סה"כ: 11/12 = 92%</p></div>
+  </div>
+  <div class="tp"><span class="ti">💡</span><p>92% זה לא 100% – וזה <strong>נורמלי ורצוי!</strong> 100% על Test = חשד ל-Overfitting. בעולם האמיתי תמיד יש חפיפה בין הקבוצות.</p></div>
+</div></div>
+
+<!-- S9: Effect of K -->
+<div class="sl" id="s-9"><div class="si">
+  <div class="sh"><div class="sn">SECTION 04</div><h2>בחירת <span style="color:var(--cyan)">K</span> אופטימלי</h2><div class="sd">K קטן = רועש, K גדול = מוחלק מדי</div></div>
+  <div class="cr" style="margin-top:14px;">
+    <div class="cx orange"><h4>K=1 (קטן מדי)</h4>
+      <p>מסתכל רק על שכן אחד → רגיש לרעש<br/>
+      <span style="font-family:'Fira Code',monospace;font-size:11px;color:var(--green);">Train: 100%</span> <span style="font-family:'Fira Code',monospace;font-size:11px;color:var(--red);">Test: 75%</span><br/>
+      <span style="color:var(--red);">← Overfitting!</span></p></div>
+    <div class="cx orange"><h4>K=50 (גדול מדי)</h4>
+      <p>מסתכל על 50 שכנים → "ממוצע" כולם<br/>
+      <span style="font-family:'Fira Code',monospace;font-size:11px;color:var(--red);">Train: 65%</span> <span style="font-family:'Fira Code',monospace;font-size:11px;color:var(--red);">Test: 60%</span><br/>
+      <span style="color:var(--red);">← Underfitting!</span></p></div>
+  </div>
+  <div class="cb"><div class="ch"><div class="cd"><span></span><span></span><span></span></div><div class="cll">find_best_k.py</div></div>
+    <div class="cc"><span class="cm"># בדיקת K=1 עד K=20</span>
+<span class="kw">for</span> k <span class="kw">in</span> <span class="fn">range</span>(<span class="num">1</span>, <span class="num">21</span>):
+    knn = <span class="fn">KNeighborsClassifier</span>(<span class="vr">n_neighbors</span>=k)
+    knn.<span class="fn">fit</span>(X_train_sc, y_train)
+    train_acc = knn.<span class="fn">score</span>(X_train_sc, y_train)
+    test_acc  = knn.<span class="fn">score</span>(X_test_sc, y_test)</div></div>
+  <div class="ad">▼</div>
+  <div class="ob"><span class="ol">OUTPUT ▾</span>
+K=1:  Train=100%  Test=83%   ← פער! Overfitting
+K=3:  Train=96%   Test=92%   ← טוב!
+K=5:  Train=94%   Test=92%   ← 🏆 Best! (יציב)
+K=7:  Train=92%   Test=92%   ← עדיין טוב
+K=15: Train=88%   Test=83%   ← מתחיל לרדת</div>
+  <div class="tp"><span class="ti">🎯</span><p><strong>מחפשים K שנותן Test accuracy מקסימלי</strong> עם פער קטן מה-Train. בדרך כלל K=3 עד K=9 עובד טוב. <strong>עדיף אי-זוגי</strong> (למניעת תיקו).</p></div>
+</div></div>
+
+<!-- S10: Elbow Method -->
+<div class="sl" id="s-10"><div class="si">
+  <div class="hd"><h3>📐 שיטת המרפק (Elbow Method) <span class="badge b-c">Error Rate</span></h3>
+    <div class="d">מסתכלים על שגיאה (Error = 1 - Accuracy) כפונקציה של K</div></div>
+  <div class="cb"><div class="ch"><div class="cd"><span></span><span></span><span></span></div><div class="cll">elbow.py</div></div>
+    <div class="cc">error_rates = []
+<span class="kw">for</span> k <span class="kw">in</span> <span class="fn">range</span>(<span class="num">1</span>, <span class="num">21</span>):
+    knn = <span class="fn">KNeighborsClassifier</span>(<span class="vr">n_neighbors</span>=k)
+    knn.<span class="fn">fit</span>(X_train_sc, y_train)
+    y_pred = knn.<span class="fn">predict</span>(X_test_sc)
+    error_rates.<span class="fn">append</span>(<span class="num">1</span> - <span class="fn">accuracy_score</span>(y_test, y_pred))
+
+plt.<span class="fn">plot</span>(<span class="fn">range</span>(<span class="num">1</span>,<span class="num">21</span>), error_rates, <span class="str">'r-o'</span>)
+plt.<span class="fn">xlabel</span>(<span class="str">'K'</span>); plt.<span class="fn">ylabel</span>(<span class="str">'Error Rate'</span>)</div></div>
+  <div class="ob"><span class="ol">מה מחפשים בגרף? ▾</span>
+Error
+  ↑
+  │\
+  │ \
+  │  \___________   ← "מרפק" = כאן השגיאה מפסיקה לרדת
+  │              \___
+  │
+  └────────────────→ K
+       ↑
+     Best K (בדרך כלל 3-7)
+
+📌 בוחרים את K בנקודת ה"מרפק" – אחריה כבר לא שווה להגדיל K.</div>
+</div></div>
+
+<!-- S11: Decision Boundary -->
+<div class="sl" id="s-11"><div class="si">
+  <div class="hd"><h3>🗺️ גבול ההחלטה (Decision Boundary) <span class="badge b-g">ויזואלי</span></h3>
+    <div class="d">איך K משפיע על "המפה" של ההחלטות?</div></div>
+  <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px;margin:10px 0;direction:ltr;text-align:center;font-family:'Fira Code',monospace;font-size:11px;color:var(--text2);">
+    <div class="cr" style="gap:8px;">
+      <div style="padding:10px;background:rgba(244,63,94,.05);border:1px solid rgba(244,63,94,.1);border-radius:8px;">
+        <div style="font-weight:700;color:var(--orange);margin-bottom:6px;">K=1: Overfitting</div>
+        <pre style="font-size:10px;line-height:1.3;color:var(--text2);">
+🟦🟦🟥🟦🟦🟥🟦
+🟦🟥🟥🟥🟦🟦🟦
+🟦🟦🟦🟥🟥🟥🟥
+🟥🟥🟦🟦🟥🟥🟥
+🟥🟥🟥🟥🟥🟥🟥</pre>
+        <div style="font-size:10px;color:var(--red);">גבול מסובך, עוקב אחרי כל נקודה</div>
+      </div>
+      <div style="padding:10px;background:rgba(16,185,129,.05);border:1px solid rgba(16,185,129,.1);border-radius:8px;">
+        <div style="font-weight:700;color:var(--green);margin-bottom:6px;">K=5: Good Fit ✅</div>
+        <pre style="font-size:10px;line-height:1.3;color:var(--text2);">
+🟦🟦🟦🟦🟦🟦🟦
+🟦🟦🟦🟦🟦🟦🟦
+🟦🟦🟦🟦🟥🟥🟥
+🟥🟥🟥🟥🟥🟥🟥
+🟥🟥🟥🟥🟥🟥🟥</pre>
+        <div style="font-size:10px;color:var(--green);">גבול חלק, מפריד טוב</div>
+      </div>
+    </div>
+  </div>
+  <div class="tp"><span class="ti">🔑</span><p><strong>K קטן</strong> = גבול מסובך (Overfit). <strong>K גדול</strong> = גבול פשוט מדי (Underfit). <strong>K אופטימלי</strong> = גבול חלק שמפריד טוב.</p></div>
+</div></div>
+
+<!-- S12: Predict New -->
+<div class="sl" id="s-12"><div class="si">
+  <div class="hd"><h3>🔮 חיזוי פרי חדש <span class="badge b-g">Predict</span></h3></div>
+  <div class="cb"><div class="ch"><div class="cd"><span></span><span></span><span></span></div><div class="cll">predict_new.py</div></div>
+    <div class="cc"><span class="cm"># פרי חדש: משקל 180g, קוטר 7.5cm</span>
+new_fruit = pd.<span class="fn">DataFrame</span>({
+    <span class="str">'weight'</span>: [<span class="num">180</span>],
+    <span class="str">'diameter'</span>: [<span class="num">7.5</span>]
+})
+
+<span class="cm"># 1. נרמול (באותו scaler!)</span>
+new_scaled = scaler.<span class="fn">transform</span>(new_fruit)
+
+<span class="cm"># 2. חיזוי</span>
+prediction = knn.<span class="fn">predict</span>(new_scaled)
+proba = knn.<span class="fn">predict_proba</span>(new_scaled)
+
+<span class="fn">print</span>(<span class="str">f'Prediction: </span>{prediction[<span class="num">0</span>]}<span class="str">'</span>)
+<span class="fn">print</span>(<span class="str">f'Confidence: </span>{proba}<span class="str">'</span>)</div></div>
+  <div class="ad">▼</div>
+  <div class="ob"><span class="ol">OUTPUT ▾</span>
+New fruit: weight=180g, diameter=7.5cm
+
+Prediction: apple 🍎
+Confidence: [0.80, 0.20]  ← 80% תפוח, 20% תפוז
+
+📊 מ-5 שכנים: 4 תפוחים, 1 תפוז → apple!</div>
+  <div class="tp"><span class="ti">📌</span><p><code>predict_proba</code> מחזיר <strong>הסתברויות</strong> – שימושי כשרוצים לדעת כמה המודל "בטוח" בחיזוי!</p></div>
+</div></div>
+
+<!-- S13: Workflow -->
+<div class="sl" id="s-13"><div class="si">
+  <div class="hd"><h3>📋 תהליך עבודה מלא <span class="badge b-g">Pipeline</span></h3></div>
+  <div class="cb"><div class="ch"><div class="cd"><span></span><span></span><span></span></div><div class="cll">full_pipeline.py</div></div>
+    <div class="cc"><span class="cm"># 1️⃣ הפרדת מאפיינים ויעד</span>
+X = df[[<span class="str">'weight'</span>, <span class="str">'diameter'</span>]]
+y = df[<span class="str">'fruit'</span>]
+
+<span class="cm"># 2️⃣ חלוקה</span>
+X_tr, X_te, y_tr, y_te = <span class="fn">train_test_split</span>(X, y, <span class="vr">test_size</span>=<span class="num">0.2</span>)
+
+<span class="cm"># 3️⃣ נרמול (fit על Train בלבד!)</span>
+scaler = <span class="fn">StandardScaler</span>()
+X_tr_sc = scaler.<span class="fn">fit_transform</span>(X_tr)
+X_te_sc = scaler.<span class="fn">transform</span>(X_te)
+
+<span class="cm"># 4️⃣ אימון</span>
+knn = <span class="fn">KNeighborsClassifier</span>(<span class="vr">n_neighbors</span>=<span class="num">5</span>)
+knn.<span class="fn">fit</span>(X_tr_sc, y_tr)
+
+<span class="cm"># 5️⃣ הערכה</span>
+<span class="fn">print</span>(<span class="str">f'Accuracy: </span>{knn.<span class="fn">score</span>(X_te_sc, y_te):.0%}<span class="str">'</span>)
+
+<span class="cm"># 6️⃣ חיזוי</span>
+new_sc = scaler.<span class="fn">transform</span>(new_data)
+knn.<span class="fn">predict</span>(new_sc)</div></div>
+  <div class="tp"><span class="ti">🔑</span><p>שימו לב לסדר! <strong>חלוקה</strong> → <strong>נרמול</strong> (fit רק Train) → <strong>אימון</strong> → <strong>הערכה</strong> → <strong>חיזוי</strong>. שגיאה בסדר = Data Leakage!</p></div>
+</div></div>
+
+<!-- S14: Summary -->
+<div class="sl" id="s-14"><div class="si">
+  <div class="ts" style="margin-top:3vh;">
+    <div class="eb">🎉</div>
+    <h1 style="font-size:32px;">סיכום – אלגוריתם KNN</h1>
+  </div>
+  <div class="ig" style="max-width:750px;margin:12px auto 0;">
+    <div class="ic" style="border-right:3px solid var(--indigo)"><h4 style="color:var(--indigo)">הרעיון</h4><p>סיווג לפי K שכנים קרובים – הצבעת רוב</p></div>
+    <div class="ic" style="border-right:3px solid var(--indigo)"><h4 style="color:var(--indigo)">מרחק</h4><p>אוקלידי: √(Σ(xi-yi)²)</p></div>
+    <div class="ic" style="border-right:3px solid var(--violet)"><h4 style="color:var(--violet)">נרמול</h4><p>חובה! StandardScaler, fit רק Train</p></div>
+    <div class="ic" style="border-right:3px solid var(--violet)"><h4 style="color:var(--violet)">One-Hot</h4><p>קטגוריאלי → get_dummies</p></div>
+    <div class="ic" style="border-right:3px solid var(--blue)"><h4 style="color:var(--blue)">Train/Test</h4><p>80/20, stratify=y</p></div>
+    <div class="ic" style="border-right:3px solid var(--cyan)"><h4 style="color:var(--cyan)">בחירת K</h4><p>Elbow, K אי-זוגי, בד"כ 3-9</p></div>
+    <div class="ic" style="border-right:3px solid var(--green)"><h4 style="color:var(--green)">הערכה</h4><p>accuracy_score, confusion_matrix</p></div>
+    <div class="ic" style="border-right:3px solid var(--green)"><h4 style="color:var(--green)">חיזוי</h4><p>predict + predict_proba</p></div>
+  </div>
+  <div class="cx indigo" style="max-width:750px;margin:8px auto 0;"><h4>🔑 4 כללים לזכור</h4>
+    <p style="font-size:12.5px;">1️⃣ <strong>תמיד לנרמל!</strong> &nbsp; 2️⃣ <strong>fit רק Train!</strong> &nbsp; 3️⃣ <strong>K אי-זוגי!</strong> &nbsp; 4️⃣ <strong>בדקו כמה ערכי K!</strong></p></div>
+</div></div>
+
+</div><!-- mc -->
+
+<div class="bn" id="bn">
+  <button class="nb" id="pB" onclick="go(-1)">הקודם ←</button>
+  <span class="sc" id="sC">1 / 15</span>
+  <button class="nb pr" id="nB" onclick="go(1)">→ הבא</button>
+</div>
+
+<script>
+let c=0;const T=15;
+function go(d){const n=c+d;if(n<0||n>=T)return;gs(n)}
+function gs(i){if(i===c)return;const o=document.getElementById(`s-${c}`),n=document.getElementById(`s-${i}`);o.classList.remove('ac');if(i>c)o.classList.add('ex');setTimeout(()=>o.classList.remove('ex'),450);n.classList.add('ac');n.scrollTop=0;c=i;u()}
+function u(){document.getElementById('sC').textContent=`${c+1} / ${T}`;const p=(c/(T-1))*100;document.getElementById('pF').style.width=`${p}%`;document.getElementById('pT').textContent=`${Math.round(p)}%`;document.getElementById('pB').style.opacity=c===0?'.3':'1';document.getElementById('pB').style.pointerEvents=c===0?'none':'all';document.getElementById('nB').style.opacity=c===T-1?'.3':'1';document.getElementById('nB').style.pointerEvents=c===T-1?'none':'all';document.querySelectorAll('.ni').forEach(e=>{e.classList.toggle('a',parseInt(e.dataset.s)===c);if(parseInt(e.dataset.s)===c)e.scrollIntoView({block:'nearest',behavior:'smooth'})})}
+document.querySelectorAll('.ni').forEach(e=>{e.addEventListener('click',()=>gs(parseInt(e.dataset.s)))});
+document.addEventListener('keydown',e=>{if(e.key==='ArrowLeft'||e.key==='ArrowUp'){e.preventDefault();go(1)}else if(e.key==='ArrowRight'||e.key==='ArrowDown'){e.preventDefault();go(-1)}});
+function tSB(){const s=document.getElementById('sb');s.classList.toggle('cl');document.getElementById('sbT').textContent=s.classList.contains('cl')?'▶':'◀'}
+let tx=0;document.addEventListener('touchstart',e=>{tx=e.touches[0].clientX});document.addEventListener('touchend',e=>{const d=tx-e.changedTouches[0].clientX;if(Math.abs(d)>50)go(d>0?1:-1)});
+u();
+</script>
+</body>
+</html>
