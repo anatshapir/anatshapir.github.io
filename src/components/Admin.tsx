@@ -468,7 +468,7 @@ function CategoryForm({
         />
 
         <label className="text-sm font-medium">אייקון</label>
-        <Input value={icon} onChange={e => setIcon(e.target.value)} className="w-20" />
+        <EmojiPicker value={icon} onChange={setIcon} />
 
         <label className="text-sm font-medium">צבע</label>
         <div className="flex gap-2 flex-wrap">
@@ -488,8 +488,12 @@ function CategoryForm({
 
       <div className="flex items-center gap-4 p-4 rounded-lg bg-muted/50">
         <span className="text-sm text-muted-foreground">תצוגה מקדימה:</span>
-        <div className={`px-4 py-2 rounded-xl border bg-gradient-to-br ${color}`}>
-          <span className="text-2xl ml-2">{icon}</span>
+        <div className={`px-4 py-2 rounded-xl border bg-gradient-to-br ${color} flex items-center gap-2`}>
+          {isImageIcon(icon) ? (
+            <img src={icon} alt="" className="w-8 h-8 object-contain" />
+          ) : (
+            <span className="text-2xl">{icon}</span>
+          )}
           <span className="font-medium">{name || 'שם הקטגוריה'}</span>
         </div>
       </div>
