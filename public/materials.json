@@ -346,7 +346,7 @@
       "category": "teaching",
       "path": [
         "מדעי הנתונים",
-        "KNN"
+        "מודלים"
       ],
       "linkUrl": "https://colab.research.google.com/github/anatshapir/anatshapir.github.io/blob/main/docs/NB06_KNN_Algorithm_IMPROVED.ipynb",
       "icon": "⚗️"
@@ -358,7 +358,7 @@
       "category": "teaching",
       "path": [
         "מדעי הנתונים",
-        "KNN"
+        "מודלים"
       ],
       "linkUrl": "/knn_presentation.html",
       "icon": "📄"
