@@ -47,6 +47,10 @@
     "KNN": {
       "icon": "",
       "color": "from-gray-50 to-slate-50 border-gray-200"
+    },
+    "מודלים": {
+      "icon": "📁",
+      "color": "from-gray-50 to-slate-50 border-gray-200"
     }
   },
   "materials": [
@@ -369,6 +373,18 @@
       ],
       "linkUrl": "https://colab.research.google.com/github/anatshapir/anatshapir.github.io/blob/main/docs/NB14_Data_Preparation_Advanced_IMPROVED.ipynb",
       "icon": "📋"
+    },
+    {
+      "id": "svm-percepton",
+      "title": "SVM & Percepton",
+      "description": "",
+      "category": "teaching",
+      "path": [
+        "מדעי הנתונים",
+        "מודלים"
+      ],
+      "linkUrl": "https://colab.research.google.com/github/anatshapir/anatshapir.github.io/blob/main/docs/NB15_SVM_Perceptron.ipynb",
+      "icon": "🧠"
     }
   ]
 }
