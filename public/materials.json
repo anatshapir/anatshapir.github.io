@@ -385,6 +385,18 @@
       ],
       "linkUrl": "https://colab.research.google.com/github/anatshapir/anatshapir.github.io/blob/main/docs/NB15_SVM_Perceptron.ipynb",
       "icon": "🧠"
+    },
+    {
+      "id": "svm-מצגת-אינטרקטיבית",
+      "title": "SVM מצגת אינטרקטיבית",
+      "description": "",
+      "category": "teaching",
+      "path": [
+        "מדעי הנתונים",
+        "מודלים"
+      ],
+      "linkUrl": "/From_Neurons_to_SVM.pdf",
+      "icon": "📄"
     }
   ]
 }
