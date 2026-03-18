@@ -397,6 +397,18 @@
       ],
       "linkUrl": "/From_Neurons_to_SVM.pdf",
       "icon": "📄"
+    },
+    {
+      "id": "svm",
+      "title": "SVM",
+      "description": "",
+      "category": "teaching",
+      "path": [
+        "מדעי הנתונים",
+        "מודלים"
+      ],
+      "linkUrl": "/svm_perceptron_presentation.html",
+      "icon": "📄"
     }
   ]
 }
