@@ -413,6 +413,17 @@
       ],
       "linkUrl": "/svm_perceptron_presentation.html",
       "icon": "📄"
+    },
+    {
+      "id": "סימולטור-מכונת-טיורינג",
+      "title": "סימולטור מכונת טיורינג",
+      "description": "",
+      "category": "teaching",
+      "path": [
+        "חישוביות/מודלים"
+      ],
+      "linkUrl": "turing-student.html/",
+      "icon": "/icons/1774120518940_turing.png"
     }
   ]
 }
