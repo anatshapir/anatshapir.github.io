@@ -532,10 +532,10 @@ main{display:flex;flex:1;overflow:hidden}
         </select>
       </div>
       <!-- Class Rules & Examples (collapsible) -->
-      <div class="t-section-toggle open" id="t-rules-toggle">
+      <div class="t-section-toggle" id="t-rules-toggle">
         <span class="arrow">▶</span> Class Rules &amp; Examples (teach the AI your notation)
       </div>
-      <div class="t-section-content open" id="t-rules-content">
+      <div class="t-section-content" id="t-rules-content">
         <div class="t-hint">
           Define the symbols and conventions your class uses. This is sent with every question so the AI follows your notation.
         </div>
@@ -658,7 +658,7 @@ or: Build a TM that accepts strings over {a,b} containing equal numbers of a's a
 <!-- Pin Code Overlay -->
 <div class="pin-overlay" id="pin-overlay" style="display: none;">
   <div class="pin-box">
-    <h3 id="pin-title">Set Teacher PIN (first time)</h3>
+    <h3 id="pin-title">Enter Teacher PIN</h3>
     <input type="password" id="pin-input" maxlength="8" placeholder="PIN">
     <div class="pin-error" id="pin-error"></div>
     <div class="pin-actions">
@@ -670,7 +670,7 @@ or: Build a TM that accepts strings over {a,b} containing equal numbers of a's a
 
 <script>
 // Embedded config (populated by "Save for Students" export)
-var __EMBEDDED_CONFIG__ = {"aes":{"iv":[76,74,107,21,107,163,200,97,141,116,63,101],"ct":[44,205,7,129,84,172,152,178,216,191,48,240,38,225,136,199,227,35,192,252,32,46,118,162,139,189,148,10,151,166,69,91,189,94,53,229,66,155,154,202,19,1,160,106,243,33,97,233,23,240,34,154,12,122,35,171,134,14,93,92,29,32,212,93,138,48,142,122,75,253,24,212,162,186,17,148,211,98,187,249,99,234,62,231,117,189,129,161,74,16,57,243,117,119,141,253,46,98,133,51,80,4,153,162,188,17,69,223,231,169,115,194,68,243,43,228,209,86,194,151,148,146,133,1]},"r":{"rules":"Numbers are unary, i.e. number 7 is build of seven 1 digits. \nNumbers are seperated by # sign\nResult is written between two $\nEmpty cell is marked with triangle\nstart of tape is marked with |-","examples":[]}};
+var __EMBEDDED_CONFIG__ = {"aes":{"iv":[172,227,54,228,85,169,111,212,175,26,222,140],"ct":[115,48,245,240,19,34,180,142,200,209,230,0,56,69,249,24,18,2,164,108,116,140,2,96,69,108,136,13,166,178,198,70,26,143,140,201,174,126,93,70,150,115,87,93,239,125,139,134,56,64,113,176,181,4,12,53,158,225,11,60,126,111,26,108,43,137,6,1,103,65,28,51,89,85,213,242,191,255,58,93,202,241,30,131,221,183,209,185,39,139,93,63,119,82,199,37,214,65,90,236,28,8,53,190,80,75,97,249,245,124,81,240,58,148,210,13,155,130,203,12,216,21,232,225],"h":[61,228,50,128,140,233,191,48]},"r":{"rules":"Numbers are unary, i.e. number 7 is build of seven 1 digits. \nNumbers are seperated by # sign\nResult is written between two $\nEmpty cell is marked with triangle\nstart of tape is marked with |-","examples":[]}};
 // ══════════════════════════════════════════════════════════
 //  TURING MACHINE (pure logic)
 // ══════════════════════════════════════════════════════════
@@ -1186,11 +1186,23 @@ class App {
     const iv = crypto.getRandomValues(new Uint8Array(12));
     const enc = new TextEncoder();
     const ciphertext = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, enc.encode(plaintext));
-    return { iv: Array.from(iv), ct: Array.from(new Uint8Array(ciphertext)) };
+    // Also store a hash of the password so we can verify before attempting decrypt
+    const hashBuf = await crypto.subtle.digest('SHA-256', enc.encode(salt + password));
+    const hash = Array.from(new Uint8Array(hashBuf)).slice(0, 8);
+    return { iv: Array.from(iv), ct: Array.from(new Uint8Array(ciphertext)), h: hash };
   }
 
   async _aesDecrypt(encrypted, password) {
     const salt = 'tm-sim-v1';
+    const enc = new TextEncoder();
+    // Quick hash check before expensive PBKDF2
+    if (encrypted.h) {
+      const hashBuf = await crypto.subtle.digest('SHA-256', enc.encode(salt + password));
+      const hash = Array.from(new Uint8Array(hashBuf)).slice(0, 8);
+      if (JSON.stringify(hash) !== JSON.stringify(encrypted.h)) {
+        throw new Error('Code mismatch');
+      }
+    }
     const key = await this._deriveKey(password, salt);
     const iv = new Uint8Array(encrypted.iv);
     const ct = new Uint8Array(encrypted.ct);
@@ -1234,8 +1246,9 @@ class App {
       // Continue with what the student was trying to do
       if (this._afterLogin) { this._afterLogin(); this._afterLogin = null; }
     } catch(e) {
-      error.textContent = 'Incorrect access code.';
-      input.value = ''; input.focus();
+      console.error('[Login] Decryption failed:', e.message || e);
+      error.textContent = 'Incorrect access code. (Check capitalization and spaces)';
+      input.focus(); input.select();
     }
   }
 
