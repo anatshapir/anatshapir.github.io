@@ -1,0 +1,1162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DFA Simulator</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root,:root[data-theme="dark"]{
+  --bg:#0a0a1a;--panel:#12122a;--panel-border:#2a2a4a;--card:#1a1a35;
+  --primary:#7c3aed;--primary-l:#a78bfa;--secondary:#06b6d4;
+  --success:#10b981;--danger:#ef4444;--warning:#f59e0b;
+  --text:#e8e8f0;--muted:#8888a0;--state-fill:#1e1e3f;
+  --radius:8px;--shadow:0 4px 20px rgba(0,0,0,.3);
+  --header-bg:linear-gradient(135deg,#1a1a35,#12122a);
+  --svg-bg:radial-gradient(circle at 50% 50%,#16163a 0%,#0d0d20 100%);
+}
+:root[data-theme="light"]{
+  --bg:#f0f2f5;--panel:#ffffff;--panel-border:#d0d5dd;--card:#f8f9fb;
+  --primary:#7c3aed;--primary-l:#6d28d9;--secondary:#0891b2;
+  --success:#059669;--danger:#dc2626;--warning:#d97706;
+  --text:#1a1a2e;--muted:#6b7280;--state-fill:#eef0ff;
+  --radius:8px;--shadow:0 4px 20px rgba(0,0,0,.08);
+  --header-bg:linear-gradient(135deg,#f0f0ff,#e8e8f8);
+  --svg-bg:radial-gradient(circle at 50% 50%,#f4f4ff 0%,#eaebf5 100%);
+}
+body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);height:100vh;overflow:hidden}
+#app{display:flex;flex-direction:column;height:100vh}
+header{display:flex;justify-content:space-between;align-items:center;padding:10px 24px;
+  background:var(--header-bg);border-bottom:1px solid var(--panel-border)}
+header h1{font-size:1.35rem;font-weight:700;
+  background:linear-gradient(135deg,var(--primary-l),var(--secondary));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.header-controls{display:flex;gap:10px;align-items:center}
+.btn{padding:6px 14px;border:1px solid var(--panel-border);border-radius:var(--radius);
+  background:var(--card);color:var(--text);cursor:pointer;font-size:.85rem;transition:all .15s}
+.btn:hover{border-color:var(--primary);background:#22224a}
+.btn:disabled{opacity:.4;cursor:default}
+.btn-primary{background:var(--primary);border-color:var(--primary);color:#fff}
+.btn-primary:hover{background:#6d28d9}
+.btn-danger{border-color:var(--danger);color:var(--danger)}
+.btn-danger:hover{background:var(--danger);color:#fff}
+.btn-warning{border-color:var(--warning);color:var(--warning)}
+.btn-success{border-color:var(--success);color:var(--success)}
+.tool-btn{width:36px;height:36px;padding:0;font-size:1.1rem;display:flex;align-items:center;justify-content:center}
+.tool-btn.active{background:var(--primary);border-color:var(--primary);color:#fff}
+.tool-btn.danger{color:var(--danger)}
+select{padding:6px 10px;border:1px solid var(--panel-border);border-radius:var(--radius);
+  background:var(--card);color:var(--text);font-size:.85rem;cursor:pointer}
+.theme-btn{background:none;border:1px solid var(--panel-border);border-radius:var(--radius);
+  width:36px;height:36px;cursor:pointer;font-size:1.1rem;display:flex;align-items:center;justify-content:center;
+  color:var(--text);transition:all .15s}
+.theme-btn:hover{border-color:var(--primary)}
+main{display:flex;flex:1;overflow:hidden}
+.panel{display:flex;flex-direction:column;background:var(--panel);overflow:hidden}
+#editor-panel{flex:1.15;border-right:1px solid var(--panel-border)}
+#simulator-panel{flex:0.85;display:flex;flex-direction:column}
+.panel-header{display:flex;justify-content:space-between;align-items:center;
+  padding:10px 16px;border-bottom:1px solid var(--panel-border);min-height:48px}
+.panel-header h2{font-size:1rem;font-weight:600;color:var(--primary-l)}
+.toolbar{display:flex;gap:6px}
+.svg-container{flex:1;position:relative;overflow:hidden;background:var(--svg-bg)}
+#diagram{width:100%;height:100%;cursor:default}
+#diagram.mode-add-state{cursor:crosshair}
+#diagram.mode-add-trans{cursor:pointer}
+.svg-container .hint{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);
+  color:var(--muted);font-size:.8rem;pointer-events:none;opacity:.7}
+.state-circle{fill:var(--state-fill);stroke:var(--primary);stroke-width:2.5;cursor:grab;transition:fill .2s}
+.state-circle:hover{fill:#28285a}
+.state-circle.accept{stroke:var(--success)}
+.state-circle.active{fill:#2d1a6b;filter:drop-shadow(0 0 8px var(--primary))}
+.state-inner{fill:none;stroke:var(--success);stroke-width:2}
+.state-label{fill:var(--text);font-size:14px;text-anchor:middle;dominant-baseline:central;pointer-events:none;font-weight:600}
+.state-selected{stroke:var(--secondary)!important;stroke-width:3}
+.trans-path{fill:none;stroke:var(--muted);stroke-width:2;cursor:pointer;transition:stroke .2s}
+.trans-path:hover{stroke:var(--primary-l)}
+.trans-path.active{stroke:var(--warning);stroke-width:3}
+.trans-label{fill:var(--text);font-size:12px;text-anchor:middle;pointer-events:none;font-weight:500}
+.trans-label-bg{fill:var(--panel);opacity:.85;rx:3}
+.start-arrow{fill:none;stroke:var(--success);stroke-width:2.5;marker-end:url(#arrowGreen)}
+/* Transition table */
+#transition-table-container{border-top:1px solid var(--panel-border);overflow:hidden;display:flex;flex-direction:column}
+#transition-table-container .tt-header{display:flex;justify-content:space-between;align-items:center;
+  padding:6px 12px;cursor:pointer;user-select:none}
+#transition-table-container .tt-header:hover{background:rgba(124,58,237,.06)}
+#transition-table-container .tt-header h3{font-size:.85rem;color:var(--muted);margin:0}
+#transition-table-container .tt-header .tt-toggle{font-size:.7rem;color:var(--muted);transition:transform .2s}
+#transition-table-container .tt-header.collapsed .tt-toggle{transform:rotate(-90deg)}
+#transition-table-container .tt-body{overflow-y:auto;max-height:200px;padding:0 12px 8px}
+#transition-table-container .tt-body.collapsed{display:none}
+#transition-table{width:100%;border-collapse:collapse;font-size:.82rem}
+#transition-table th{text-align:left;color:var(--muted);padding:4px 8px;border-bottom:1px solid var(--panel-border);font-weight:500}
+#transition-table td{padding:4px 8px;border-bottom:1px solid rgba(255,255,255,.04);font-family:monospace}
+#transition-table tr:hover td{background:rgba(124,58,237,.08)}
+#transition-table .del-btn{background:none;border:none;color:var(--danger);cursor:pointer;font-size:.9rem;opacity:.5}
+#transition-table .del-btn:hover{opacity:1}
+/* Simulator */
+.sim-section{padding:16px;border-bottom:1px solid var(--panel-border);display:flex;flex-direction:column;gap:12px}
+.sim-section h2{font-size:1rem;color:var(--primary-l);font-weight:600}
+.input-row{display:flex;gap:8px;align-items:center}
+.input-row label{font-size:.85rem;color:var(--muted);white-space:nowrap}
+.input-row input{flex:1;padding:7px 12px;border:1px solid var(--panel-border);border-radius:var(--radius);
+  background:var(--card);color:var(--text);font-size:.9rem;font-family:monospace}
+.input-row input:focus{outline:none;border-color:var(--primary)}
+/* Input string display */
+.input-display{display:flex;justify-content:center;gap:2px;padding:12px 0;min-height:60px;align-items:center}
+.input-cell{width:40px;height:44px;border:2px solid var(--panel-border);border-radius:6px;
+  display:flex;align-items:center;justify-content:center;font-size:1.1rem;font-family:monospace;
+  color:var(--text);transition:all .2s}
+.input-cell.current{border-color:var(--secondary);background:linear-gradient(135deg,#0e3a4a,#12122a);
+  box-shadow:0 0 10px rgba(6,182,212,.3)}
+.input-cell.read{border-color:var(--success);opacity:.6}
+.input-cell.unread{opacity:.4}
+.status-bar{display:flex;gap:20px;padding:8px 16px;font-size:.85rem;color:var(--muted);
+  border-top:1px solid var(--panel-border)}
+.status-bar .value{color:var(--text);font-weight:600;font-family:monospace}
+.status-accepted .value{color:var(--success)!important}
+.status-rejected .value{color:var(--danger)!important}
+.controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.speed-control{display:flex;align-items:center;gap:6px;margin-left:auto;font-size:.82rem;color:var(--muted)}
+.speed-control input[type=range]{width:80px}
+/* Test cases */
+.qa-section{padding:12px 16px;flex:1;overflow-y:auto}
+.qa-section h2{font-size:1rem;color:var(--primary-l);font-weight:600;margin-bottom:8px}
+.qa-controls{display:flex;gap:8px;margin-bottom:8px}
+#test-table{width:100%;border-collapse:collapse;font-size:.82rem}
+#test-table th{text-align:left;color:var(--muted);padding:6px 8px;border-bottom:1px solid var(--panel-border);font-weight:500}
+#test-table td{padding:6px 8px;border-bottom:1px solid rgba(255,255,255,.04);font-family:monospace}
+.test-pass{color:var(--success);font-weight:700}
+.test-fail{color:var(--danger);font-weight:700}
+.test-pending{color:var(--muted)}
+/* Panel resizer */
+.panel-resizer{width:6px;cursor:col-resize;background:transparent;flex-shrink:0;position:relative;z-index:10;
+  display:flex;align-items:center;justify-content:center;transition:background .15s}
+.panel-resizer:hover,.panel-resizer.active{background:var(--primary)}
+.panel-resizer::after{content:'';width:2px;height:40px;background:var(--panel-border);border-radius:1px}
+.panel-resizer:hover::after,.panel-resizer.active::after{background:#fff}
+/* Step trace */
+#trace-section{border-bottom:1px solid var(--panel-border);overflow:hidden;display:flex;flex-direction:column}
+/* Modal */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;
+  justify-content:center;z-index:1000}
+.modal-overlay.open{display:flex}
+.modal{background:var(--panel);border:1px solid var(--panel-border);border-radius:12px;
+  width:420px;max-width:90vw;box-shadow:var(--shadow)}
+.modal-header{display:flex;justify-content:space-between;align-items:center;padding:14px 20px;
+  border-bottom:1px solid var(--panel-border)}
+.modal-header h3{font-size:1rem;color:var(--primary-l)}
+.modal-close{background:none;border:none;color:var(--muted);font-size:1.3rem;cursor:pointer}
+.modal-body{padding:16px 20px;display:flex;flex-direction:column;gap:14px}
+.modal-field label{display:block;font-size:.85rem;color:var(--muted);margin-bottom:4px;font-weight:500}
+.modal-field input,.modal-field select{width:100%;padding:8px 12px;border:1px solid var(--panel-border);
+  border-radius:var(--radius);background:var(--card);color:var(--text);font-size:.9rem}
+.modal-field input:focus,.modal-field select:focus{outline:none;border-color:var(--primary)}
+.modal-field-row{display:flex;gap:16px}
+.modal-field-row .modal-field{flex:1}
+.checkbox-row{display:flex;gap:18px;padding:6px 0}
+.checkbox-row label{display:flex;align-items:center;gap:6px;font-size:.85rem;cursor:pointer}
+.checkbox-row input[type=checkbox]{accent-color:var(--primary);width:16px;height:16px}
+.modal-footer{display:flex;justify-content:flex-end;gap:8px;padding:12px 20px;border-top:1px solid var(--panel-border)}
+/* Scrollbar */
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--panel-border);border-radius:3px}
+/* Light mode overrides */
+:root[data-theme="light"] .state-circle{fill:#eef0ff;stroke:var(--primary)}
+:root[data-theme="light"] .state-circle:hover{fill:#dde0ff}
+:root[data-theme="light"] .state-circle.active{fill:#d0d0ff}
+:root[data-theme="light"] .trans-label-bg{fill:var(--panel);opacity:.92}
+:root[data-theme="light"] .btn:hover{background:#e8e8f8}
+:root[data-theme="light"] .btn-primary:hover{background:#6d28d9}
+/* Presets dropdown */
+.preset-info{font-size:.78rem;color:var(--muted);padding:4px 0}
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <h1>DFA Simulator</h1>
+    <div class="header-controls">
+      <select id="preset-select">
+        <option value="">Load Preset...</option>
+        <option value="even-zeros">Even number of 0s</option>
+        <option value="ends-01">Ends with "01"</option>
+        <option value="divisible-3">Binary divisible by 3</option>
+        <option value="contains-ab">Contains "ab"</option>
+      </select>
+      <select id="alphabet-select">
+        <option value="01">Σ = {0, 1}</option>
+        <option value="ab">Σ = {a, b}</option>
+        <option value="abc">Σ = {a, b, c}</option>
+        <option value="012">Σ = {0, 1, 2}</option>
+        <option value="custom">Custom...</option>
+      </select>
+      <button class="theme-btn" id="theme-toggle" title="Toggle light/dark mode">&#9788;</button>
+      <button class="btn btn-danger" id="clear-btn">Clear All</button>
+    </div>
+  </header>
+
+  <main>
+    <div class="panel" id="editor-panel">
+      <div class="panel-header">
+        <h2>State Diagram</h2>
+        <div class="toolbar">
+          <button class="btn tool-btn active" id="mode-select" title="Select & Move (S)">S</button>
+          <button class="btn tool-btn" id="mode-add-state" title="Add State (A)">+Q</button>
+          <button class="btn tool-btn" id="mode-add-trans" title="Add Transition (T)">+δ</button>
+          <button class="btn tool-btn danger" id="delete-selected" title="Delete (Del)">X</button>
+          <button class="btn tool-btn" id="reset-view" title="Fit all states" style="font-size:.7rem">FIT</button>
+        </div>
+      </div>
+      <div class="svg-container">
+        <svg id="diagram"></svg>
+        <div class="hint" id="editor-hint">Click "+Q" then click canvas to add states</div>
+      </div>
+      <div id="transition-table-container">
+        <div class="tt-header" id="tt-toggle-header">
+          <h3>Transitions (δ)</h3>
+          <span class="tt-toggle">&#9660;</span>
+        </div>
+        <div class="tt-body" id="tt-body">
+          <table id="transition-table"><thead><tr>
+            <th>From</th><th>Symbol</th><th>To</th><th></th>
+          </tr></thead><tbody></tbody></table>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel-resizer" id="panel-resizer"></div>
+    <div class="panel" id="simulator-panel">
+      <div class="sim-section">
+        <h2>Simulator</h2>
+        <div class="input-row">
+          <label>Input (w):</label>
+          <input type="text" id="string-input" placeholder="e.g. 0110" spellcheck="false">
+          <button class="btn btn-primary" id="load-btn">Load</button>
+        </div>
+        <div class="input-display" id="input-display"></div>
+        <div class="status-bar">
+          <span>State: <span class="value" id="state-val">-</span></span>
+          <span>Position: <span class="value" id="pos-val">0</span></span>
+          <span id="status-span">Status: <span class="value" id="status-val">Ready</span></span>
+        </div>
+        <div class="controls">
+          <button class="btn" id="step-btn">Step</button>
+          <button class="btn btn-primary" id="run-btn">Run</button>
+          <button class="btn btn-warning" id="pause-btn" disabled>Pause</button>
+          <button class="btn" id="reset-btn">Reset</button>
+          <div class="speed-control">
+            <label>Speed:</label>
+            <input type="range" id="speed-slider" min="1" max="30" value="8">
+          </div>
+        </div>
+      </div>
+
+      <div id="trace-section">
+        <div class="tt-header" id="trace-toggle-header">
+          <h3 style="font-size:.85rem;color:var(--muted)">Step Trace</h3>
+          <div style="display:flex;gap:6px;align-items:center">
+            <button class="btn" id="trace-clear" style="padding:1px 8px;font-size:.75rem">Clear</button>
+            <span class="tt-toggle">&#9660;</span>
+          </div>
+        </div>
+        <div id="trace-body" style="max-height:160px;overflow-y:auto;padding:4px 10px;font-family:monospace;font-size:.78rem;line-height:1.6">
+          <div id="trace-log" style="color:var(--muted)">Run or step to see trace.</div>
+        </div>
+      </div>
+
+      <div class="qa-section">
+        <h2>Test Cases</h2>
+        <div class="qa-controls">
+          <button class="btn" id="add-test-btn">+ Add Test</button>
+          <button class="btn btn-primary" id="run-tests-btn">Run All</button>
+        </div>
+        <table id="test-table"><thead><tr>
+          <th>Input</th><th>Expected</th><th>Result</th><th>Status</th><th></th>
+        </tr></thead><tbody></tbody></table>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="modal-title">Edit</h3>
+      <button class="modal-close" id="modal-close">&times;</button>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+    <div class="modal-footer">
+      <button class="btn" id="modal-cancel">Cancel</button>
+      <button class="btn btn-primary" id="modal-ok">OK</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════════
+//  DFA (pure logic)
+// ══════════════════════════════════════════════════════════
+class DFA {
+  constructor() {
+    this.states = [];       // {id, name, x, y, isStart, isAccept}
+    this.transitions = [];  // {id, fromId, toId, symbol}
+    this.alphabet = ['0','1'];
+    this.inputStr = '';
+    this.pos = -1;          // current position in input (-1 = not started)
+    this.currentStateId = null;
+    this.finished = false;
+    this.accepted = false;
+    this._nextId = 1;
+  }
+  _id() { return this._nextId++; }
+  getState(id) { return this.states.find(s => s.id === id); }
+  getStartState() { return this.states.find(s => s.isStart); }
+
+  addState(name, x, y) {
+    const s = { id: this._id(), name, x, y, isStart: this.states.length === 0, isAccept: false };
+    this.states.push(s); return s;
+  }
+  removeState(id) {
+    this.states = this.states.filter(s => s.id !== id);
+    this.transitions = this.transitions.filter(t => t.fromId !== id && t.toId !== id);
+  }
+  addTransition(fromId, toId, symbol) {
+    const t = { id: this._id(), fromId, toId, symbol };
+    this.transitions.push(t); return t;
+  }
+  removeTransition(id) { this.transitions = this.transitions.filter(t => t.id !== id); }
+
+  loadInput(str) {
+    this.inputStr = str;
+    this.pos = -1;
+    this.finished = false;
+    this.accepted = false;
+    const start = this.getStartState();
+    this.currentStateId = start ? start.id : null;
+    if (!start) this.finished = true;
+  }
+
+  step() {
+    if (this.finished) return null;
+    this.pos++;
+    if (this.pos >= this.inputStr.length) {
+      // End of input — check if in accept state
+      this.finished = true;
+      const st = this.getState(this.currentStateId);
+      this.accepted = st ? st.isAccept : false;
+      return { finished: true, accepted: this.accepted, symbol: null, fromId: null, toId: null };
+    }
+    const sym = this.inputStr[this.pos];
+    const tr = this.transitions.find(t => t.fromId === this.currentStateId && t.symbol === sym);
+    if (!tr) {
+      // Dead — no transition (DFA should be complete, but handle gracefully)
+      this.finished = true;
+      this.accepted = false;
+      return { finished: true, accepted: false, dead: true, symbol: sym };
+    }
+    const result = { symbol: sym, fromId: tr.fromId, toId: tr.toId, transId: tr.id };
+    this.currentStateId = tr.toId;
+    return result;
+  }
+
+  // Run to completion, return accept/reject
+  run(maxSteps) {
+    let steps = 0;
+    while (!this.finished && steps < (maxSteps || 10000)) { this.step(); steps++; }
+    return { accepted: this.accepted, steps };
+  }
+
+  clone() {
+    const m = new DFA();
+    m.states = JSON.parse(JSON.stringify(this.states));
+    m.transitions = JSON.parse(JSON.stringify(this.transitions));
+    m.alphabet = [...this.alphabet];
+    m._nextId = this._nextId;
+    return m;
+  }
+
+  // Check completeness: every state has a transition for every alphabet symbol
+  checkCompleteness() {
+    const missing = [];
+    this.states.forEach(s => {
+      this.alphabet.forEach(sym => {
+        const has = this.transitions.some(t => t.fromId === s.id && t.symbol === sym);
+        if (!has) missing.push({ state: s.name, symbol: sym });
+      });
+    });
+    return missing;
+  }
+}
+
+// ══════════════════════════════════════════════════════════
+//  APP
+// ══════════════════════════════════════════════════════════
+class App {
+  constructor() {
+    this.dfa = new DFA();
+    this.mode = 'select';
+    this.selectedStateId = null;
+    this.selectedTransId = null;
+    this.transSourceId = null;
+    this.dragging = null;
+    this.running = false;
+    this.runTimer = null;
+    this.testCases = [];
+    this.activeTransId = null;
+    this.stateCounter = 0;
+    this._traceCount = 0;
+    this._panX = 0; this._panY = 0; this._zoom = 1;
+    this._panning = false; this._panStart = null;
+
+    this.svg = document.getElementById('diagram');
+    this.hint = document.getElementById('editor-hint');
+    this.init();
+  }
+
+  init() {
+    // Toolbar
+    document.getElementById('mode-select').onclick = () => this.setMode('select');
+    document.getElementById('mode-add-state').onclick = () => this.setMode('addState');
+    document.getElementById('mode-add-trans').onclick = () => this.setMode('addTransition');
+    document.getElementById('delete-selected').onclick = () => this.deleteSelected();
+
+    // SVG events
+    this.svg.addEventListener('mousedown', e => this.onSVGMouseDown(e));
+    this.svg.addEventListener('mousemove', e => this.onSVGMouseMove(e));
+    this.svg.addEventListener('mouseup', e => this.onSVGMouseUp(e));
+    this.svg.addEventListener('dblclick', e => this.onSVGDblClick(e));
+    this.svg.addEventListener('contextmenu', e => e.preventDefault());
+    this.svg.addEventListener('wheel', e => {
+      e.preventDefault();
+      const delta = e.deltaY > 0 ? 1.1 : 0.9;
+      const pt = this.svgScreenPt(e);
+      this._zoom *= delta;
+      this._zoom = Math.max(0.2, Math.min(5, this._zoom));
+      this._panX = pt.x - (pt.x - this._panX) * delta;
+      this._panY = pt.y - (pt.y - this._panY) * delta;
+      this._applySVGTransform();
+    }, { passive: false });
+
+    // Keyboard
+    document.addEventListener('keydown', e => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') return;
+      if (e.key === 'Delete' || e.key === 'Backspace') this.deleteSelected();
+      if (e.key === 's' || e.key === 'S') this.setMode('select');
+      if (e.key === 'a' || e.key === 'A') this.setMode('addState');
+      if (e.key === 't' || e.key === 'T') this.setMode('addTransition');
+    });
+
+    // Reset view
+    document.getElementById('reset-view').onclick = () => {
+      if (this.dfa.states.length === 0) { this._resetView(); return; }
+      const pad = 60;
+      let minX=Infinity,minY=Infinity,maxX=-Infinity,maxY=-Infinity;
+      this.dfa.states.forEach(s => { if(s.x<minX)minX=s.x;if(s.y<minY)minY=s.y;if(s.x>maxX)maxX=s.x;if(s.y>maxY)maxY=s.y; });
+      const w=maxX-minX+pad*2,h=maxY-minY+pad*2;
+      const svgR=this.svg.getBoundingClientRect();
+      const scaleX=svgR.width/w,scaleY=svgR.height/h;
+      this._zoom=Math.min(scaleX,scaleY,2);
+      this._panX=(svgR.width-w*this._zoom)/2-(minX-pad)*this._zoom;
+      this._panY=(svgR.height-h*this._zoom)/2-(minY-pad)*this._zoom;
+      this._applySVGTransform();
+    };
+
+    // Transition table toggle
+    document.getElementById('tt-toggle-header').onclick = () => {
+      document.getElementById('tt-toggle-header').classList.toggle('collapsed');
+      document.getElementById('tt-body').classList.toggle('collapsed');
+    };
+
+    // Trace toggle & clear
+    document.getElementById('trace-toggle-header').onclick = (e) => {
+      if (e.target.id === 'trace-clear') return;
+      document.getElementById('trace-toggle-header').classList.toggle('collapsed');
+      document.getElementById('trace-body').style.display =
+        document.getElementById('trace-toggle-header').classList.contains('collapsed') ? 'none' : '';
+    };
+    document.getElementById('trace-clear').onclick = (e) => { e.stopPropagation(); this._clearTrace(); };
+
+    // Simulator
+    document.getElementById('load-btn').onclick = () => this.loadInput();
+    document.getElementById('step-btn').onclick = () => this.doStep();
+    document.getElementById('run-btn').onclick = () => this.doRun();
+    document.getElementById('pause-btn').onclick = () => this.doPause();
+    document.getElementById('reset-btn').onclick = () => this.doReset();
+
+    // Tests
+    document.getElementById('add-test-btn').onclick = () => this.addTestCase();
+    document.getElementById('run-tests-btn').onclick = () => this.runAllTests();
+
+    // Presets
+    document.getElementById('preset-select').onchange = e => {
+      if (e.target.value) { this.loadPreset(e.target.value); e.target.value = ''; }
+    };
+    document.getElementById('clear-btn').onclick = () => this.clearAll();
+
+    // Alphabet
+    document.getElementById('alphabet-select').onchange = e => {
+      const v = e.target.value;
+      if (v === 'custom') {
+        const custom = prompt('Enter alphabet symbols (e.g., "abc" or "012"):', this.dfa.alphabet.join(''));
+        if (custom) this.dfa.alphabet = [...new Set(custom.split(''))];
+        e.target.value = 'custom';
+      } else {
+        this.dfa.alphabet = v.split('');
+      }
+    };
+
+    // Modal
+    document.getElementById('modal-close').onclick = () => this.hideModal();
+    document.getElementById('modal-cancel').onclick = () => this.hideModal();
+    document.getElementById('modal-overlay').onclick = e => { if (e.target === e.currentTarget) this.hideModal(); };
+
+    // Theme
+    const savedTheme = localStorage.getItem('dfa-theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    document.getElementById('theme-toggle').innerHTML = savedTheme === 'dark' ? '&#9788;' : '&#9790;';
+    document.getElementById('theme-toggle').onclick = () => {
+      const cur = document.documentElement.getAttribute('data-theme') || 'dark';
+      const next = cur === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('dfa-theme', next);
+      document.getElementById('theme-toggle').innerHTML = next === 'dark' ? '&#9788;' : '&#9790;';
+    };
+
+    // Resizer
+    this._initResizer();
+
+    this.renderAll();
+  }
+
+  // ── Mode ──
+  setMode(mode) {
+    this.mode = mode;
+    this.transSourceId = null;
+    document.getElementById('mode-select').classList.toggle('active', mode === 'select');
+    document.getElementById('mode-add-state').classList.toggle('active', mode === 'addState');
+    document.getElementById('mode-add-trans').classList.toggle('active', mode === 'addTransition');
+    this.svg.className.baseVal = mode === 'addState' ? 'mode-add-state' : mode === 'addTransition' ? 'mode-add-trans' : '';
+    this.hint.textContent = mode === 'addState' ? 'Click canvas to add a state' :
+      mode === 'addTransition' ? 'Click source state, then target state' : '';
+  }
+
+  // ── SVG helpers ──
+  svgPt(e) {
+    const r = this.svg.getBoundingClientRect();
+    const sx = e.clientX - r.left, sy = e.clientY - r.top;
+    return { x: (sx - this._panX) / this._zoom, y: (sy - this._panY) / this._zoom };
+  }
+  svgScreenPt(e) { const r = this.svg.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top }; }
+  _applySVGTransform() { let g = this.svg.querySelector('#svg-world'); if (g) g.setAttribute('transform', `translate(${this._panX},${this._panY}) scale(${this._zoom})`); }
+  _resetView() { this._panX=0; this._panY=0; this._zoom=1; this._applySVGTransform(); }
+  stateAt(x, y) { return this.dfa.states.find(s => Math.hypot(s.x - x, s.y - y) <= 30); }
+
+  transAtScreenPoint(sx, sy) {
+    const labels = this.svg.querySelectorAll('.trans-hit');
+    for (const el of labels) {
+      const r = el.getBoundingClientRect(), sr = this.svg.getBoundingClientRect();
+      const lx = r.left - sr.left, ly = r.top - sr.top;
+      if (sx >= lx-5 && sx <= lx+r.width+5 && sy >= ly-5 && sy <= ly+r.height+5) return parseInt(el.dataset.tid);
+    }
+    return null;
+  }
+
+  // ── SVG Events ──
+  onSVGMouseDown(e) {
+    if (e.button === 1 || e.button === 2) {
+      e.preventDefault(); this._panning = true; this._panStart = this.svgScreenPt(e);
+      this._panStartX = this._panX; this._panStartY = this._panY; return;
+    }
+    const pt = this.svgPt(e);
+    const state = this.stateAt(pt.x, pt.y);
+    if (this.mode === 'select') {
+      if (state) {
+        this.selectedStateId = state.id; this.selectedTransId = null;
+        this.dragging = { stateId: state.id, ox: pt.x - state.x, oy: pt.y - state.y };
+        this.renderDiagram();
+      } else {
+        const sp = this.svgScreenPt(e);
+        const tid = this.transAtScreenPoint(sp.x, sp.y);
+        if (tid) { this.selectedTransId = tid; this.selectedStateId = null; }
+        else {
+          this.selectedStateId = null; this.selectedTransId = null;
+          this._panning = true; this._panStart = this.svgScreenPt(e);
+          this._panStartX = this._panX; this._panStartY = this._panY;
+        }
+        this.renderDiagram();
+      }
+    } else if (this.mode === 'addState') {
+      const name = 'q' + this.stateCounter++;
+      this.dfa.addState(name, pt.x, pt.y);
+      this.setMode('select'); this.renderAll();
+    } else if (this.mode === 'addTransition') {
+      if (state) {
+        if (!this.transSourceId) {
+          this.transSourceId = state.id; this.selectedStateId = state.id;
+          this.hint.textContent = `Source: ${state.name} — now click target state`;
+          this.renderDiagram();
+        } else {
+          this.showTransitionModal(null, this.transSourceId, state.id);
+        }
+      }
+    }
+  }
+  onSVGMouseMove(e) {
+    if (this._panning && this._panStart) {
+      const sp = this.svgScreenPt(e);
+      this._panX = this._panStartX + (sp.x - this._panStart.x);
+      this._panY = this._panStartY + (sp.y - this._panStart.y);
+      this._applySVGTransform(); return;
+    }
+    if (!this.dragging) return;
+    const pt = this.svgPt(e);
+    const s = this.dfa.getState(this.dragging.stateId);
+    if (s) { s.x = pt.x - this.dragging.ox; s.y = pt.y - this.dragging.oy; this.renderDiagram(); }
+  }
+  onSVGMouseUp() { this.dragging = null; this._panning = false; this._panStart = null; }
+
+  onSVGDblClick(e) {
+    const pt = this.svgPt(e);
+    const state = this.stateAt(pt.x, pt.y);
+    if (state) { this.showStateModal(state); }
+    else {
+      const sp = this.svgScreenPt(e);
+      const tid = this.transAtScreenPoint(sp.x, sp.y);
+      if (tid) { const tr = this.dfa.transitions.find(t => t.id === tid); if (tr) this.showTransitionModal(tr, tr.fromId, tr.toId); }
+    }
+  }
+
+  // ── Delete ──
+  deleteSelected() {
+    if (this.selectedStateId) { this.dfa.removeState(this.selectedStateId); this.selectedStateId = null; }
+    if (this.selectedTransId) { this.dfa.removeTransition(this.selectedTransId); this.selectedTransId = null; }
+    this.renderAll();
+  }
+
+  // ── Rendering ──
+  renderAll() { this.renderDiagram(); this.renderInput(); this.renderTransitionTable(); this.renderTestTable(); this.updateStatus(); }
+
+  renderDiagram() {
+    const R = 30;
+    const defs = `<defs>
+      <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#8888a0"/></marker>
+      <marker id="arrowActive" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#f59e0b"/></marker>
+      <marker id="arrowGreen" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#10b981"/></marker>
+    </defs>`;
+    let html = '';
+
+    // Group transitions by from-to
+    const groups = {};
+    this.dfa.transitions.forEach(t => { const key = `${t.fromId}-${t.toId}`; if (!groups[key]) groups[key] = []; groups[key].push(t); });
+    const rendered = new Set();
+
+    for (const [key, transitions] of Object.entries(groups)) {
+      if (rendered.has(key)) continue;
+      rendered.add(key);
+      const from = this.dfa.getState(transitions[0].fromId);
+      const to = this.dfa.getState(transitions[0].toId);
+      if (!from || !to) continue;
+      if (from.id === to.id) {
+        html += this.renderSelfLoop(from, transitions);
+      } else {
+        const reverseKey = `${to.id}-${from.id}`;
+        const hasReverse = !!groups[reverseKey];
+        const offset = hasReverse ? 25 : 0;
+        html += this.renderArrow(from, to, offset, transitions);
+        if (hasReverse && !rendered.has(reverseKey)) {
+          rendered.add(reverseKey);
+          html += this.renderArrow(to, from, offset, groups[reverseKey]);
+        }
+      }
+    }
+
+    // Start arrow
+    const startState = this.dfa.getStartState();
+    if (startState) {
+      const sx = startState.x - R - 35, sy = startState.y, ex = startState.x - R - 2;
+      html += `<path d="M${sx} ${sy} L${ex} ${sy}" class="start-arrow"/>`;
+    }
+
+    // States
+    this.dfa.states.forEach(s => {
+      const isActive = s.id === this.dfa.currentStateId && !this.dfa.finished;
+      const isSelected = s.id === this.selectedStateId;
+      let cls = 'state-circle';
+      if (s.isAccept) cls += ' accept';
+      if (isActive) cls += ' active';
+      if (isSelected) cls += ' state-selected';
+      html += `<circle cx="${s.x}" cy="${s.y}" r="${R}" class="${cls}" data-sid="${s.id}"/>`;
+      if (s.isAccept) html += `<circle cx="${s.x}" cy="${s.y}" r="${R-5}" class="state-inner" data-sid="${s.id}"/>`;
+      html += `<text x="${s.x}" y="${s.y}" class="state-label" data-sid="${s.id}">${this.escSVG(s.name)}</text>`;
+    });
+
+    this.svg.innerHTML = defs + `<g id="svg-world" transform="translate(${this._panX},${this._panY}) scale(${this._zoom})">${html}</g>`;
+  }
+
+  renderArrow(from, to, offset, transitions) {
+    const R = 30;
+    const dx = to.x-from.x, dy = to.y-from.y, dist = Math.hypot(dx,dy), angle = Math.atan2(dy,dx);
+    const perpAngle = angle + Math.PI/2;
+    let path, labelX, labelY;
+    if (offset === 0) {
+      const sx = from.x + R*Math.cos(angle), sy = from.y + R*Math.sin(angle);
+      const ex = to.x - R*Math.cos(angle), ey = to.y - R*Math.sin(angle);
+      path = `M${sx} ${sy} L${ex} ${ey}`;
+      labelX = (sx+ex)/2 + 12*Math.cos(perpAngle); labelY = (sy+ey)/2 + 12*Math.sin(perpAngle);
+    } else {
+      const cpX = (from.x+to.x)/2 + offset*Math.cos(perpAngle), cpY = (from.y+to.y)/2 + offset*Math.sin(perpAngle);
+      const startAngle = Math.atan2(cpY-from.y, cpX-from.x);
+      const endAngle = Math.atan2(cpY-to.y, cpX-to.x);
+      const sx = from.x + R*Math.cos(startAngle), sy = from.y + R*Math.sin(startAngle);
+      const ex = to.x + R*Math.cos(endAngle), ey = to.y + R*Math.sin(endAngle);
+      path = `M${sx} ${sy} Q${cpX} ${cpY} ${ex} ${ey}`;
+      labelX = .25*sx+.5*cpX+.25*ex; labelY = .25*sy+.5*cpY+.25*ey;
+    }
+    const isActive = transitions.some(t => t.id === this.activeTransId);
+    const label = transitions.map(t => t.symbol).join(', ');
+    const cls = 'trans-path' + (isActive ? ' active' : '');
+    const marker = isActive ? 'url(#arrowActive)' : 'url(#arrow)';
+    const tid = transitions[0].id;
+    let svg = `<path d="${path}" class="${cls}" marker-end="${marker}" data-tid="${tid}"/>`;
+    const lw = label.length * 7 + 10, lh = 18;
+    svg += `<rect x="${labelX-lw/2}" y="${labelY-lh/2}" width="${lw}" height="${lh}" class="trans-label-bg trans-hit" data-tid="${tid}"/>`;
+    svg += `<text x="${labelX}" y="${labelY+1}" class="trans-label">${this.escSVG(label)}</text>`;
+    return svg;
+  }
+
+  renderSelfLoop(state, transitions) {
+    const R = 30;
+    const sA = -Math.PI/4, eA = -3*Math.PI/4;
+    const sx = state.x+R*Math.cos(sA), sy = state.y+R*Math.sin(sA);
+    const ex = state.x+R*Math.cos(eA), ey = state.y+R*Math.sin(eA);
+    const cp1x = state.x+45, cp1y = state.y-65, cp2x = state.x-45, cp2y = state.y-65;
+    const path = `M${sx} ${sy} C${cp1x} ${cp1y} ${cp2x} ${cp2y} ${ex} ${ey}`;
+    const labelX = state.x, labelY = state.y - 72;
+    const isActive = transitions.some(t => t.id === this.activeTransId);
+    const label = transitions.map(t => t.symbol).join(', ');
+    const cls = 'trans-path' + (isActive ? ' active' : '');
+    const marker = isActive ? 'url(#arrowActive)' : 'url(#arrow)';
+    const tid = transitions[0].id;
+    let svg = `<path d="${path}" class="${cls}" marker-end="${marker}" data-tid="${tid}"/>`;
+    const lw = label.length * 7 + 10, lh = 18;
+    svg += `<rect x="${labelX-lw/2}" y="${labelY-lh/2}" width="${lw}" height="${lh}" class="trans-label-bg trans-hit" data-tid="${tid}"/>`;
+    svg += `<text x="${labelX}" y="${labelY+1}" class="trans-label">${this.escSVG(label)}</text>`;
+    return svg;
+  }
+
+  escSVG(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  escHTML(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
+  // ── Input Display ──
+  renderInput() {
+    const container = document.getElementById('input-display');
+    if (!this.dfa.inputStr && this.dfa.pos === -1) {
+      container.innerHTML = '<span style="color:var(--muted);font-size:.85rem">Load an input string to simulate</span>';
+      return;
+    }
+    let html = '';
+    for (let i = 0; i < this.dfa.inputStr.length; i++) {
+      let cls = 'input-cell';
+      if (i === this.dfa.pos) cls += ' current';
+      else if (i < this.dfa.pos) cls += ' read';
+      else cls += ' unread';
+      html += `<div class="${cls}">${this.escHTML(this.dfa.inputStr[i])}</div>`;
+    }
+    if (this.dfa.inputStr.length === 0) html = '<span style="color:var(--muted)">ε (empty string)</span>';
+    container.innerHTML = html;
+  }
+
+  // ── Transition Table ──
+  renderTransitionTable() {
+    const tbody = document.querySelector('#transition-table tbody');
+    if (this.dfa.transitions.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="4" style="color:var(--muted);text-align:center;padding:12px">No transitions</td></tr>';
+      return;
+    }
+    tbody.innerHTML = this.dfa.transitions.map(t => {
+      const from = this.dfa.getState(t.fromId), to = this.dfa.getState(t.toId);
+      return `<tr style="cursor:pointer" data-edit-tid="${t.id}">
+        <td>${from?from.name:'?'}</td><td>${this.escHTML(t.symbol)}</td><td>${to?to.name:'?'}</td>
+        <td><button class="del-btn" data-tid="${t.id}" title="Delete">&times;</button></td></tr>`;
+    }).join('');
+    tbody.querySelectorAll('tr[data-edit-tid]').forEach(row => {
+      row.onclick = (e) => {
+        if (e.target.classList.contains('del-btn')) return;
+        const tr = this.dfa.transitions.find(t => t.id === parseInt(row.dataset.editTid));
+        if (tr) this.showTransitionModal(tr, tr.fromId, tr.toId);
+      };
+    });
+    tbody.querySelectorAll('.del-btn').forEach(btn => {
+      btn.onclick = (e) => { e.stopPropagation(); this.dfa.removeTransition(parseInt(btn.dataset.tid)); this.renderAll(); };
+    });
+  }
+
+  // ── Status ──
+  updateStatus() {
+    const stateEl = document.getElementById('state-val');
+    const posEl = document.getElementById('pos-val');
+    const statusEl = document.getElementById('status-val');
+    const statusSpan = document.getElementById('status-span');
+    const cs = this.dfa.getState(this.dfa.currentStateId);
+    stateEl.textContent = cs ? cs.name : '-';
+    posEl.textContent = Math.max(0, this.dfa.pos);
+    statusSpan.className = '';
+    if (this.dfa.finished && this.dfa.accepted) {
+      statusEl.textContent = 'Accepted'; statusSpan.className = 'status-accepted';
+    } else if (this.dfa.finished && !this.dfa.accepted && this.dfa.pos >= 0) {
+      statusEl.textContent = 'Rejected'; statusSpan.className = 'status-rejected';
+    } else if (this.running) {
+      statusEl.textContent = 'Running...';
+    } else if (this.dfa.pos >= 0) {
+      statusEl.textContent = 'Loaded';
+    } else {
+      statusEl.textContent = 'Ready';
+    }
+  }
+
+  // ── Trace ──
+  _clearTrace() { document.getElementById('trace-log').innerHTML = '<span style="color:var(--muted)">Run or step to see trace.</span>'; this._traceCount = 0; }
+  _appendTrace(entry) {
+    const log = document.getElementById('trace-log');
+    if (this._traceCount === 0) log.innerHTML = '';
+    if (this._traceCount < 500) {
+      const div = document.createElement('div');
+      div.style.cssText = entry.finished ? 'color:var(--text);padding:1px 0;border-top:1px solid var(--panel-border);margin-top:2px' : 'color:var(--muted);padding:1px 0';
+      div.innerHTML = entry.text;
+      log.appendChild(div);
+    }
+    this._traceCount++;
+    document.getElementById('trace-body').scrollTop = document.getElementById('trace-body').scrollHeight;
+  }
+
+  // ── Simulation ──
+  loadInput() {
+    const input = document.getElementById('string-input').value;
+    if (!this.dfa.getStartState()) { alert('Define a start state first.'); return; }
+    this.dfa.loadInput(input);
+    this._clearTrace();
+    this.renderAll();
+  }
+
+  doStep() {
+    if (this.dfa.finished && this.dfa.pos === -1) this.loadInput();
+    if (this.dfa.finished) return;
+    // Capture before step
+    const st = this.dfa.getState(this.dfa.currentStateId);
+    const nextPos = this.dfa.pos + 1;
+    const sym = nextPos < this.dfa.inputStr.length ? this.dfa.inputStr[nextPos] : null;
+    const result = this.dfa.step();
+    if (!result) return;
+    // Trace
+    if (result.finished && !result.dead) {
+      const finalSt = this.dfa.getState(this.dfa.currentStateId);
+      const status = result.accepted ? '<span style="color:var(--success)">ACCEPTED</span>' : '<span style="color:var(--danger)">REJECTED</span>';
+      this._appendTrace({ finished: true, text: `End of input. State <b>${finalSt?finalSt.name:'?'}</b> ${finalSt&&finalSt.isAccept?'is':'is not'} accepting → ${status}` });
+    } else if (result.dead) {
+      this._appendTrace({ finished: true, text: `<b>${st?st.name:'?'}</b>: read '<b>${sym}</b>' → <span style="color:var(--danger)">NO TRANSITION (dead/rejected)</span>` });
+    } else {
+      const toSt = this.dfa.getState(result.toId);
+      this._appendTrace({ finished: false, text: `<b>${st?st.name:'?'}</b>: read '<b>${result.symbol}</b>' → goto <b>${toSt?toSt.name:'?'}</b>` });
+    }
+    this.activeTransId = result.transId || null;
+    this.renderDiagram(); this.renderInput(); this.updateStatus();
+    if (this.activeTransId) setTimeout(() => { this.activeTransId = null; this.renderDiagram(); }, 300);
+  }
+
+  doRun() {
+    if (this.dfa.finished && this.dfa.pos === -1) this.loadInput();
+    if (this.dfa.finished) return;
+    this.running = true;
+    document.getElementById('run-btn').disabled = true;
+    document.getElementById('pause-btn').disabled = false;
+    this.updateStatus(); this._runStep();
+  }
+
+  _runStep() {
+    if (!this.running || this.dfa.finished) { this.doPause(); return; }
+    this.doStep();
+    if (this.dfa.finished) { this.doPause(); return; }
+    const speed = parseInt(document.getElementById('speed-slider').value);
+    const delay = Math.max(10, 500 - speed * 16);
+    this.runTimer = setTimeout(() => this._runStep(), delay);
+  }
+
+  doPause() {
+    this.running = false; clearTimeout(this.runTimer);
+    document.getElementById('run-btn').disabled = false;
+    document.getElementById('pause-btn').disabled = true;
+    this.activeTransId = null; this.renderDiagram(); this.updateStatus();
+  }
+
+  doReset() {
+    this.doPause();
+    this.dfa.pos = -1; this.dfa.currentStateId = null; this.dfa.finished = true; this.dfa.accepted = false; this.dfa.inputStr = '';
+    this._clearTrace(); this.renderAll();
+  }
+
+  // ── Modals ──
+  showModal(title, bodyHTML, onOk) {
+    document.getElementById('modal-title').textContent = title;
+    document.getElementById('modal-body').innerHTML = bodyHTML;
+    document.getElementById('modal-overlay').classList.add('open');
+    this._modalOk = onOk;
+    document.getElementById('modal-ok').onclick = () => { if (this._modalOk) this._modalOk(); this.hideModal(); };
+    const firstInput = document.querySelector('#modal-body input[type=text], #modal-body select');
+    if (firstInput) setTimeout(() => firstInput.focus(), 50);
+    document.querySelectorAll('#modal-body input[type=text]').forEach(inp => {
+      inp.onkeydown = e => { if (e.key === 'Enter') document.getElementById('modal-ok').click(); };
+    });
+  }
+  hideModal() { document.getElementById('modal-overlay').classList.remove('open'); this._modalOk = null; }
+
+  showStateModal(state) {
+    const html = `
+      <div class="modal-field"><label>State Name</label><input type="text" id="m-name" value="${this.escHTML(state.name)}"></div>
+      <div class="modal-field"><label>State Type</label>
+        <select id="m-type">
+          <option value="normal" ${!state.isAccept?'selected':''}>Normal</option>
+          <option value="accept" ${state.isAccept?'selected':''}>Accept (double circle)</option>
+        </select></div>
+      <div class="checkbox-row"><label><input type="checkbox" id="m-start" ${state.isStart?'checked':''}> Start State</label></div>`;
+    this.showModal('Edit State: ' + state.name, html, () => {
+      state.name = document.getElementById('m-name').value || state.name;
+      state.isAccept = document.getElementById('m-type').value === 'accept';
+      const isStart = document.getElementById('m-start').checked;
+      if (isStart) { this.dfa.states.forEach(s => s.isStart = false); state.isStart = true; }
+      else if (state.isStart && !isStart) state.isStart = false;
+      this.renderAll();
+    });
+  }
+
+  showTransitionModal(existing, fromId, toId) {
+    const from = this.dfa.getState(fromId), to = this.dfa.getState(toId);
+    const sym = existing ? existing.symbol : '';
+    const symBtns = this.dfa.alphabet.map(s =>
+      `<button type="button" class="btn sym-pick" data-val="${this.escHTML(s)}" style="padding:3px 8px;font-size:.95rem;min-width:30px;font-family:monospace">${this.escHTML(s)}</button>`
+    ).join(' ');
+    const html = `
+      <p style="color:var(--muted);font-size:.85rem;margin-bottom:12px">δ(${from?from.name:'?'}, ?) = ${to?to.name:'?'}</p>
+      <div class="modal-field">
+        <label>Symbol</label>
+        <input type="text" id="m-symbol" value="${this.escHTML(sym)}" maxlength="1" placeholder="Enter symbol">
+        <div style="display:flex;gap:4px;margin-top:6px">${symBtns}</div>
+      </div>`;
+    setTimeout(() => {
+      document.querySelectorAll('.sym-pick').forEach(btn => {
+        btn.onclick = () => { document.getElementById('m-symbol').value = btn.dataset.val; };
+      });
+    }, 50);
+    this.showModal(existing ? 'Edit Transition' : 'Add Transition', html, () => {
+      const symbol = document.getElementById('m-symbol').value;
+      if (!symbol) return;
+      if (existing) { existing.symbol = symbol; }
+      else { this.dfa.addTransition(fromId, toId, symbol); }
+      this.transSourceId = null; this.setMode('select'); this.renderAll();
+    });
+  }
+
+  // ── Tests ──
+  addTestCase() {
+    const html = `
+      <div class="modal-field"><label>Input String</label><input type="text" id="m-tinput" placeholder="e.g. 0110"></div>
+      <div class="modal-field"><label>Expected Result</label>
+        <select id="m-texpected"><option value="accept">Accept</option><option value="reject">Reject</option></select></div>`;
+    this.showModal('Add Test Case', html, () => {
+      this.testCases.push({ input: document.getElementById('m-tinput').value, expected: document.getElementById('m-texpected').value, result: null, status: 'pending' });
+      this.renderTestTable();
+    });
+  }
+
+  runAllTests() {
+    const btn = document.getElementById('run-tests-btn');
+    try {
+      if (!this.dfa.getStartState()) { alert('Define a start state first.'); return; }
+      if (this.testCases.length === 0) return;
+      btn.textContent = 'Running...'; btn.disabled = true;
+      this.testCases.forEach(tc => {
+        try {
+          const m = this.dfa.clone();
+          m.loadInput(tc.input || '');
+          m.run();
+          tc.result = m.accepted ? 'accept' : 'reject';
+          tc.status = tc.result === tc.expected ? 'pass' : 'fail';
+        } catch(e) {
+          tc.result = 'error'; tc.status = 'fail';
+        }
+      });
+      this.renderTestTable();
+    } finally {
+      btn.textContent = 'Run All'; btn.disabled = false;
+    }
+  }
+
+  renderTestTable() {
+    const tbody = document.querySelector('#test-table tbody');
+    if (this.testCases.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="5" style="color:var(--muted);text-align:center;padding:12px">No test cases</td></tr>';
+      return;
+    }
+    tbody.innerHTML = this.testCases.map((tc, i) => {
+      const statusCls = tc.status === 'pass' ? 'test-pass' : tc.status === 'fail' ? 'test-fail' : 'test-pending';
+      const statusText = tc.status === 'pass' ? 'PASS' : tc.status === 'fail' ? 'FAIL' : '-';
+      return `<tr>
+        <td>${this.escHTML(tc.input) || 'ε'}</td><td>${tc.expected}</td><td>${tc.result || '-'}</td>
+        <td class="${statusCls}">${statusText}</td>
+        <td style="white-space:nowrap">
+          <button class="del-btn load-test-btn" data-ti="${i}" title="Load">&#9654;</button>
+          <button class="del-btn" data-ti="${i}" title="Delete">&times;</button></td></tr>`;
+    }).join('');
+    tbody.querySelectorAll('.load-test-btn').forEach(btn => {
+      btn.onclick = () => { const tc = this.testCases[parseInt(btn.dataset.ti)]; if (tc) { document.getElementById('string-input').value = tc.input; this.loadInput(); } };
+    });
+    tbody.querySelectorAll('.del-btn:not(.load-test-btn)').forEach(btn => {
+      btn.onclick = () => { this.testCases.splice(parseInt(btn.dataset.ti), 1); this.renderTestTable(); };
+    });
+  }
+
+  // ── Clear / Presets ──
+  clearAll() {
+    this.dfa = new DFA(); this.dfa.alphabet = document.getElementById('alphabet-select').value === 'custom' ? this.dfa.alphabet : document.getElementById('alphabet-select').value.split('');
+    this.stateCounter = 0; this.selectedStateId = null; this.selectedTransId = null;
+    this.testCases = []; this.doPause(); this._clearTrace(); this.renderAll();
+  }
+
+  loadPreset(name) {
+    this.clearAll();
+    const P = PRESETS[name];
+    if (!P) return;
+    P.states.forEach(s => { const st = this.dfa.addState(s.name, s.x, s.y); st.isStart = !!s.isStart; st.isAccept = !!s.isAccept; });
+    P.transitions.forEach(t => {
+      const from = this.dfa.states.find(s => s.name === t.from);
+      const to = this.dfa.states.find(s => s.name === t.to);
+      if (from && to) this.dfa.addTransition(from.id, to.id, t.symbol);
+    });
+    this.dfa.alphabet = P.alphabet || ['0','1'];
+    this.stateCounter = this.dfa.states.length;
+    if (P.tests) this.testCases = P.tests.map(t => ({ input: t.input, expected: t.expected, result: null, status: 'pending' }));
+    // Set alphabet dropdown
+    const alphaStr = this.dfa.alphabet.join('');
+    const select = document.getElementById('alphabet-select');
+    const match = [...select.options].find(o => o.value === alphaStr);
+    if (match) select.value = alphaStr; else select.value = 'custom';
+    this.renderAll();
+  }
+
+  // ── Resizer ──
+  _initResizer() {
+    const resizer = document.getElementById('panel-resizer');
+    const editorPanel = document.getElementById('editor-panel');
+    const simPanel = document.getElementById('simulator-panel');
+    let startX, startEditorW, overlay;
+    const onMouseMove = (e) => {
+      e.preventDefault();
+      const dx = e.clientX - startX;
+      const totalW = editorPanel.parentElement.clientWidth - resizer.offsetWidth;
+      const newW = Math.max(250, Math.min(totalW - 250, startEditorW + dx));
+      editorPanel.style.flex = 'none'; editorPanel.style.width = newW + 'px';
+      simPanel.style.flex = 'none'; simPanel.style.width = (totalW - newW) + 'px';
+    };
+    const onMouseUp = () => {
+      resizer.classList.remove('active');
+      document.removeEventListener('mousemove', onMouseMove);
+      document.removeEventListener('mouseup', onMouseUp);
+      document.body.style.cursor = ''; document.body.style.userSelect = '';
+      if (overlay && overlay.parentNode) overlay.parentNode.removeChild(overlay); overlay = null;
+    };
+    resizer.addEventListener('mousedown', (e) => {
+      e.preventDefault(); startX = e.clientX; startEditorW = editorPanel.offsetWidth;
+      resizer.classList.add('active');
+      document.body.style.cursor = 'col-resize'; document.body.style.userSelect = 'none';
+      overlay = document.createElement('div');
+      overlay.style.cssText = 'position:fixed;inset:0;z-index:9999;cursor:col-resize';
+      document.body.appendChild(overlay);
+      document.addEventListener('mousemove', onMouseMove);
+      document.addEventListener('mouseup', onMouseUp);
+    });
+  }
+}
+
+// ══════════════════════════════════════════════════════════
+//  PRESETS
+// ══════════════════════════════════════════════════════════
+const PRESETS = {
+  'even-zeros': {
+    alphabet: ['0','1'],
+    states: [
+      { name: 'q0', x: 150, y: 180, isStart: true, isAccept: true },
+      { name: 'q1', x: 400, y: 180 },
+    ],
+    transitions: [
+      { from: 'q0', to: 'q1', symbol: '0' }, { from: 'q0', to: 'q0', symbol: '1' },
+      { from: 'q1', to: 'q0', symbol: '0' }, { from: 'q1', to: 'q1', symbol: '1' },
+    ],
+    tests: [
+      { input: '', expected: 'accept' }, { input: '1', expected: 'accept' },
+      { input: '0', expected: 'reject' }, { input: '00', expected: 'accept' },
+      { input: '010', expected: 'reject' }, { input: '0110', expected: 'accept' },
+    ]
+  },
+  'ends-01': {
+    alphabet: ['0','1'],
+    states: [
+      { name: 'q0', x: 120, y: 180, isStart: true },
+      { name: 'q1', x: 320, y: 180 },
+      { name: 'q2', x: 520, y: 180, isAccept: true },
+    ],
+    transitions: [
+      { from: 'q0', to: 'q0', symbol: '1' }, { from: 'q0', to: 'q1', symbol: '0' },
+      { from: 'q1', to: 'q1', symbol: '0' }, { from: 'q1', to: 'q2', symbol: '1' },
+      { from: 'q2', to: 'q1', symbol: '0' }, { from: 'q2', to: 'q0', symbol: '1' },
+    ],
+    tests: [
+      { input: '01', expected: 'accept' }, { input: '001', expected: 'accept' },
+      { input: '10', expected: 'reject' }, { input: '0101', expected: 'accept' },
+      { input: '', expected: 'reject' }, { input: '1', expected: 'reject' },
+    ]
+  },
+  'divisible-3': {
+    alphabet: ['0','1'],
+    states: [
+      { name: 'q0', x: 120, y: 200, isStart: true, isAccept: true },
+      { name: 'q1', x: 350, y: 100 },
+      { name: 'q2', x: 350, y: 300 },
+    ],
+    transitions: [
+      { from: 'q0', to: 'q0', symbol: '0' }, { from: 'q0', to: 'q1', symbol: '1' },
+      { from: 'q1', to: 'q2', symbol: '0' }, { from: 'q1', to: 'q0', symbol: '1' },
+      { from: 'q2', to: 'q1', symbol: '0' }, { from: 'q2', to: 'q2', symbol: '1' },
+    ],
+    tests: [
+      { input: '', expected: 'accept' }, { input: '0', expected: 'accept' },
+      { input: '11', expected: 'accept' }, { input: '110', expected: 'accept' },
+      { input: '1', expected: 'reject' }, { input: '10', expected: 'reject' },
+      { input: '101', expected: 'reject' },
+    ]
+  },
+  'contains-ab': {
+    alphabet: ['a','b'],
+    states: [
+      { name: 'q0', x: 120, y: 180, isStart: true },
+      { name: 'q1', x: 320, y: 180 },
+      { name: 'q2', x: 520, y: 180, isAccept: true },
+    ],
+    transitions: [
+      { from: 'q0', to: 'q1', symbol: 'a' }, { from: 'q0', to: 'q0', symbol: 'b' },
+      { from: 'q1', to: 'q1', symbol: 'a' }, { from: 'q1', to: 'q2', symbol: 'b' },
+      { from: 'q2', to: 'q2', symbol: 'a' }, { from: 'q2', to: 'q2', symbol: 'b' },
+    ],
+    tests: [
+      { input: 'ab', expected: 'accept' }, { input: 'aab', expected: 'accept' },
+      { input: 'ba', expected: 'reject' }, { input: 'bab', expected: 'accept' },
+      { input: 'a', expected: 'reject' }, { input: '', expected: 'reject' },
+    ]
+  }
+};
+
+const app = new App();
+</script>
+</body>
+</html>
