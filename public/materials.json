@@ -415,15 +415,15 @@
       "icon": "📄"
     },
     {
-      "id": "סימולטור-מכונת-טיורינג",
-      "title": "סימולטור מכונת טיורינג",
+      "id": "turing-machine-simulator",
+      "title": "Turing machine simulator",
       "description": "",
       "category": "teaching",
       "path": [
         "חישוביות/מודלים"
       ],
-      "linkUrl": "turing-student.html/",
-      "icon": "/icons/1774120518940_turing.png"
+      "linkUrl": "turing-student.html",
+      "icon": "/icons/1774120689984_turing.png"
     }
   ]
 }
