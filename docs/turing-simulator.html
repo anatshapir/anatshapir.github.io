@@ -1163,11 +1163,23 @@ class App {
     const iv = crypto.getRandomValues(new Uint8Array(12));
     const enc = new TextEncoder();
     const ciphertext = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, enc.encode(plaintext));
-    return { iv: Array.from(iv), ct: Array.from(new Uint8Array(ciphertext)) };
+    // Also store a hash of the password so we can verify before attempting decrypt
+    const hashBuf = await crypto.subtle.digest('SHA-256', enc.encode(salt + password));
+    const hash = Array.from(new Uint8Array(hashBuf)).slice(0, 8);
+    return { iv: Array.from(iv), ct: Array.from(new Uint8Array(ciphertext)), h: hash };
   }
 
   async _aesDecrypt(encrypted, password) {
     const salt = 'tm-sim-v1';
+    const enc = new TextEncoder();
+    // Quick hash check before expensive PBKDF2
+    if (encrypted.h) {
+      const hashBuf = await crypto.subtle.digest('SHA-256', enc.encode(salt + password));
+      const hash = Array.from(new Uint8Array(hashBuf)).slice(0, 8);
+      if (JSON.stringify(hash) !== JSON.stringify(encrypted.h)) {
+        throw new Error('Code mismatch');
+      }
+    }
     const key = await this._deriveKey(password, salt);
     const iv = new Uint8Array(encrypted.iv);
     const ct = new Uint8Array(encrypted.ct);
@@ -1211,8 +1223,9 @@ class App {
       // Continue with what the student was trying to do
       if (this._afterLogin) { this._afterLogin(); this._afterLogin = null; }
     } catch(e) {
-      error.textContent = 'Incorrect access code.';
-      input.value = ''; input.focus();
+      console.error('[Login] Decryption failed:', e.message || e);
+      error.textContent = 'Incorrect access code. (Check capitalization and spaces)';
+      input.focus(); input.select();
     }
   }
 
