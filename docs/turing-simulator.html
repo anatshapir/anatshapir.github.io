@@ -1277,13 +1277,34 @@ class App {
       r: rulesData
     };
 
-    // Get the current HTML source
+    // Clean up DOM before capturing — hide panels, clear sensitive fields
+    const savedApiKey = document.getElementById('t-api-key').value;
+    const savedAccessCode = document.getElementById('t-access-code').value;
+    const savedQuestion = document.getElementById('t-question').value;
+    document.getElementById('t-api-key').value = '';
+    document.getElementById('t-access-code').value = '';
+    document.getElementById('t-question').value = '';
+    document.getElementById('teacher-overlay').classList.remove('open');
+    document.getElementById('student-overlay').classList.remove('open');
+    document.getElementById('pin-overlay').style.display = 'none';
+
+    // Capture clean HTML
     let html = document.documentElement.outerHTML;
     html = html.replace(
       /var __EMBEDDED_CONFIG__\s*=\s*[^;]*;/,
       'var __EMBEDDED_CONFIG__ = ' + JSON.stringify(config) + ';'
     );
     html = '<!DOCTYPE html>\n<html lang="en">' + html.substring(html.indexOf('<head'));
+
+    // Remove Teacher button and teacher overlay from student version
+    html = html.replace(/<button[^>]*id="teacher-btn"[^>]*>.*?<\/button>/g, '');
+    html = html.replace(/<div[^>]*class="teacher-overlay"[^>]*>[\s\S]*?<\/div>\s*<\/div>\s*<\/div>/g, '');
+
+    // Restore DOM state
+    document.getElementById('t-api-key').value = savedApiKey;
+    document.getElementById('t-access-code').value = savedAccessCode;
+    document.getElementById('t-question').value = savedQuestion;
+    document.getElementById('teacher-overlay').classList.add('open');
 
     const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
     const url = URL.createObjectURL(blob);
