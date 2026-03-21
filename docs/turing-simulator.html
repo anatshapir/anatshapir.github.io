@@ -1,0 +1,3409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Turing Machine Simulator</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root,:root[data-theme="dark"]{
+  --bg:#0a0a1a;--panel:#12122a;--panel-border:#2a2a4a;--card:#1a1a35;
+  --primary:#7c3aed;--primary-l:#a78bfa;--secondary:#06b6d4;
+  --success:#10b981;--danger:#ef4444;--warning:#f59e0b;
+  --text:#e8e8f0;--muted:#8888a0;--state-fill:#1e1e3f;
+  --radius:8px;--shadow:0 4px 20px rgba(0,0,0,.3);
+  --header-bg:linear-gradient(135deg,#1a1a35,#12122a);
+  --svg-bg:radial-gradient(circle at 50% 50%,#16163a 0%,#0d0d20 100%);
+}
+:root[data-theme="light"]{
+  --bg:#f0f2f5;--panel:#ffffff;--panel-border:#d0d5dd;--card:#f8f9fb;
+  --primary:#7c3aed;--primary-l:#6d28d9;--secondary:#0891b2;
+  --success:#059669;--danger:#dc2626;--warning:#d97706;
+  --text:#1a1a2e;--muted:#6b7280;--state-fill:#eef0ff;
+  --radius:8px;--shadow:0 4px 20px rgba(0,0,0,.08);
+  --header-bg:linear-gradient(135deg,#f0f0ff,#e8e8f8);
+  --svg-bg:radial-gradient(circle at 50% 50%,#f4f4ff 0%,#eaebf5 100%);
+}
+body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);height:100vh;overflow:hidden}
+#app{display:flex;flex-direction:column;height:100vh}
+
+/* ── Header ── */
+header{display:flex;justify-content:space-between;align-items:center;padding:10px 24px;
+  background:var(--header-bg);border-bottom:1px solid var(--panel-border)}
+header h1{font-size:1.35rem;font-weight:700;
+  background:linear-gradient(135deg,var(--primary-l),var(--secondary));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.header-controls{display:flex;gap:10px;align-items:center}
+
+/* ── Buttons ── */
+.btn{padding:6px 14px;border:1px solid var(--panel-border);border-radius:var(--radius);
+  background:var(--card);color:var(--text);cursor:pointer;font-size:.85rem;transition:all .15s}
+.btn:hover{border-color:var(--primary);background:#22224a}
+.btn:disabled{opacity:.4;cursor:default;border-color:var(--panel-border)}
+.btn-primary{background:var(--primary);border-color:var(--primary);color:#fff}
+.btn-primary:hover{background:#6d28d9}
+.btn-danger{border-color:var(--danger);color:var(--danger)}
+.btn-danger:hover{background:var(--danger);color:#fff}
+.btn-warning{border-color:var(--warning);color:var(--warning)}
+.btn-warning:hover{background:var(--warning);color:#000}
+.btn-success{border-color:var(--success);color:var(--success)}
+.tool-btn{width:36px;height:36px;padding:0;font-size:1.1rem;display:flex;align-items:center;justify-content:center}
+.tool-btn.active{background:var(--primary);border-color:var(--primary);color:#fff}
+.tool-btn.danger{color:var(--danger)}
+
+select{padding:6px 10px;border:1px solid var(--panel-border);border-radius:var(--radius);
+  background:var(--card);color:var(--text);font-size:.85rem;cursor:pointer}
+select:focus{outline:none;border-color:var(--primary)}
+
+/* ── Main Layout ── */
+main{display:flex;flex:1;overflow:hidden}
+.panel{display:flex;flex-direction:column;background:var(--panel);overflow:hidden}
+#editor-panel{flex:1.15;border-right:1px solid var(--panel-border)}
+#simulator-panel{flex:0.85;display:flex;flex-direction:column}
+
+.panel-header{display:flex;justify-content:space-between;align-items:center;
+  padding:10px 16px;border-bottom:1px solid var(--panel-border);min-height:48px}
+.panel-header h2{font-size:1rem;font-weight:600;color:var(--primary-l)}
+.toolbar{display:flex;gap:6px}
+
+/* ── SVG Editor ── */
+.svg-container{flex:1;position:relative;overflow:hidden;background:var(--svg-bg)}
+#diagram{width:100%;height:100%;cursor:default}
+#diagram.mode-add-state{cursor:crosshair}
+#diagram.mode-add-trans{cursor:pointer}
+.svg-container .hint{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);
+  color:var(--muted);font-size:.8rem;pointer-events:none;opacity:.7}
+
+/* SVG elements */
+.state-circle{fill:var(--state-fill);stroke:var(--primary);stroke-width:2.5;cursor:grab;transition:fill .2s}
+.state-circle:hover{fill:#28285a}
+.state-circle.accept{stroke:var(--success)}
+.state-circle.reject{stroke:var(--danger)}
+.state-circle.active{fill:#2d1a6b;filter:drop-shadow(0 0 8px var(--primary))}
+.state-inner{fill:none;stroke:var(--success);stroke-width:2}
+.state-label{fill:var(--text);font-size:14px;text-anchor:middle;dominant-baseline:central;pointer-events:none;font-weight:600}
+.state-selected{stroke:var(--secondary)!important;stroke-width:3}
+.trans-path{fill:none;stroke:var(--muted);stroke-width:2;cursor:pointer;transition:stroke .2s}
+.trans-path:hover{stroke:var(--primary-l)}
+.trans-path.active{stroke:var(--warning);stroke-width:3}
+.trans-label{fill:var(--text);font-size:11.5px;text-anchor:middle;pointer-events:none;font-weight:500}
+.trans-label-bg{fill:var(--panel);opacity:.85;rx:3}
+.start-arrow{fill:none;stroke:var(--success);stroke-width:2.5;marker-end:url(#arrowGreen)}
+
+/* ── Transition Table ── */
+#transition-table-container{border-top:1px solid var(--panel-border);overflow:hidden;display:flex;flex-direction:column}
+#transition-table-container .tt-header{display:flex;justify-content:space-between;align-items:center;
+  padding:6px 12px;cursor:pointer;user-select:none}
+#transition-table-container .tt-header:hover{background:rgba(124,58,237,.06)}
+#transition-table-container .tt-header h3{font-size:.85rem;color:var(--muted);margin:0}
+#transition-table-container .tt-header .tt-toggle{font-size:.7rem;color:var(--muted);transition:transform .2s}
+#transition-table-container .tt-header.collapsed .tt-toggle{transform:rotate(-90deg)}
+#transition-table-container .tt-body{overflow-y:auto;max-height:200px;padding:0 12px 8px}
+#transition-table-container .tt-body.collapsed{display:none}
+#transition-table{width:100%;border-collapse:collapse;font-size:.82rem}
+#transition-table th{text-align:left;color:var(--muted);padding:4px 8px;border-bottom:1px solid var(--panel-border);font-weight:500}
+#transition-table td{padding:4px 8px;border-bottom:1px solid rgba(255,255,255,.04);font-family:monospace}
+#transition-table tr:hover td{background:rgba(124,58,237,.08)}
+#transition-table .del-btn{background:none;border:none;color:var(--danger);cursor:pointer;font-size:.9rem;opacity:.5}
+#transition-table .del-btn:hover{opacity:1}
+
+/* ── Simulator ── */
+.sim-section{padding:16px;border-bottom:1px solid var(--panel-border);display:flex;flex-direction:column;gap:12px}
+.sim-section h2{font-size:1rem;color:var(--primary-l);font-weight:600}
+.input-row{display:flex;gap:8px;align-items:center}
+.input-row label{font-size:.85rem;color:var(--muted);white-space:nowrap}
+.input-row input{flex:1;padding:7px 12px;border:1px solid var(--panel-border);border-radius:var(--radius);
+  background:var(--card);color:var(--text);font-size:.9rem;font-family:monospace}
+.input-row input:focus{outline:none;border-color:var(--primary)}
+
+/* ── Tape ── */
+#tape-display{position:relative;padding:16px 0 28px;overflow:hidden}
+.tape-row{display:flex;justify-content:center;gap:2px;transition:transform .15s ease}
+.tape-cell{width:44px;height:50px;border:2px solid var(--panel-border);border-radius:6px;
+  display:flex;align-items:center;justify-content:center;font-size:1.2rem;font-family:monospace;
+  font-weight:700;background:var(--card);color:var(--text);flex-shrink:0;transition:all .15s;position:relative}
+.tape-cell.head{border-color:var(--secondary);background:linear-gradient(135deg,#0e3a4a,#12122a);
+  color:var(--secondary);box-shadow:0 0 12px rgba(6,182,212,.3);transform:scale(1.08)}
+.tape-cell.written{animation:cellPulse .3s ease}
+.head-pointer{text-align:center;color:var(--secondary);font-size:1.3rem;margin-top:2px;
+  filter:drop-shadow(0 0 4px rgba(6,182,212,.5))}
+
+@keyframes cellPulse{0%{transform:scale(1.2);box-shadow:0 0 20px rgba(6,182,212,.5)}100%{transform:scale(1.08)}}
+
+/* ── Status & Controls ── */
+.status-bar{display:flex;gap:16px;font-size:.85rem;color:var(--muted);padding:4px 0;flex-wrap:wrap}
+.status-bar span{display:flex;align-items:center;gap:4px}
+.status-bar .label{color:var(--muted)}
+.status-bar .value{color:var(--text);font-weight:600;font-family:monospace}
+.status-accepted .value{color:var(--success)!important}
+.status-rejected .value{color:var(--danger)!important}
+.status-running .value{color:var(--warning)!important}
+
+.controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.speed-control{display:flex;align-items:center;gap:6px;margin-left:auto}
+.speed-control label{font-size:.8rem;color:var(--muted)}
+.speed-control input[type=range]{width:80px;accent-color:var(--primary)}
+
+/* ── Q&A Section ── */
+.qa-section{flex:1;padding:16px;overflow-y:auto;display:flex;flex-direction:column;gap:10px}
+.qa-section h2{font-size:1rem;color:var(--primary-l);font-weight:600}
+.qa-controls{display:flex;gap:8px}
+#test-table{width:100%;border-collapse:collapse;font-size:.82rem}
+#test-table th{text-align:left;color:var(--muted);padding:6px 8px;border-bottom:1px solid var(--panel-border);font-weight:500}
+#test-table td{padding:6px 8px;border-bottom:1px solid rgba(255,255,255,.04);font-family:monospace}
+#test-table tr:hover td{background:rgba(124,58,237,.06)}
+.test-pass{color:var(--success);font-weight:700}
+.test-fail{color:var(--danger);font-weight:700}
+.test-pending{color:var(--muted)}
+.test-timeout{color:var(--warning);font-weight:700}
+
+/* ── Modal ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;
+  justify-content:center;z-index:1000;backdrop-filter:blur(4px)}
+.modal-overlay.open{display:flex}
+.modal{background:var(--panel);border:1px solid var(--panel-border);border-radius:12px;
+  width:380px;max-width:90vw;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+.modal-header{display:flex;justify-content:space-between;align-items:center;
+  padding:16px 20px;border-bottom:1px solid var(--panel-border)}
+.modal-header h3{font-size:1rem;color:var(--primary-l)}
+.modal-close{background:none;border:none;color:var(--muted);font-size:1.4rem;cursor:pointer;line-height:1}
+.modal-close:hover{color:var(--text)}
+.modal-body{padding:20px}
+.modal-field{margin-bottom:14px}
+.modal-field label{display:block;font-size:.85rem;color:var(--muted);margin-bottom:5px}
+.modal-field input[type=text],.modal-field select{width:100%;padding:8px 12px;border:1px solid var(--panel-border);
+  border-radius:var(--radius);background:var(--card);color:var(--text);font-size:.9rem}
+.modal-field input:focus,.modal-field select:focus{outline:none;border-color:var(--primary)}
+.modal-field-row{display:flex;gap:16px}
+.modal-field-row .modal-field{flex:1}
+.checkbox-row{display:flex;gap:18px;padding:6px 0}
+.checkbox-row label{display:flex;align-items:center;gap:6px;font-size:.85rem;cursor:pointer;color:var(--text)}
+.checkbox-row input[type=checkbox]{accent-color:var(--primary);width:16px;height:16px}
+.modal-footer{display:flex;justify-content:flex-end;gap:8px;padding:12px 20px;border-top:1px solid var(--panel-border)}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--panel-border);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:var(--muted)}
+
+/* ── Empty State ── */
+.empty-hint{color:var(--muted);font-size:.85rem;text-align:center;padding:30px;line-height:1.6}
+
+/* ── Teacher Area ── */
+.teacher-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;align-items:center;
+  justify-content:center;z-index:1001;backdrop-filter:blur(6px)}
+.teacher-overlay.open{display:flex}
+.teacher-modal{background:var(--panel);border:1px solid var(--panel-border);border-radius:16px;
+  width:580px;max-width:92vw;max-height:92vh;overflow-y:auto;box-shadow:0 24px 80px rgba(0,0,0,.6)}
+.teacher-modal .tm-header{display:flex;justify-content:space-between;align-items:center;
+  padding:18px 24px;border-bottom:1px solid var(--panel-border)}
+.teacher-modal .tm-header h3{font-size:1.15rem;font-weight:700;
+  background:linear-gradient(135deg,var(--primary-l),var(--secondary));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.teacher-body{padding:24px;display:flex;flex-direction:column;gap:18px}
+.t-field{display:flex;flex-direction:column;gap:5px}
+.t-field label{font-size:.85rem;color:var(--muted);font-weight:500}
+.t-field input[type=text],.t-field input[type=password],.t-field select{
+  padding:8px 12px;border:1px solid var(--panel-border);border-radius:var(--radius);
+  background:var(--card);color:var(--text);font-size:.9rem}
+.t-field input:focus,.t-field select:focus{outline:none;border-color:var(--primary)}
+.key-row{display:flex;gap:8px}.key-row input{flex:1}
+.t-field textarea{width:100%;padding:10px 12px;border:1px solid var(--panel-border);border-radius:var(--radius);
+  background:var(--card);color:var(--text);font-size:.9rem;font-family:inherit;resize:vertical;min-height:70px;line-height:1.5}
+.t-field textarea:focus{outline:none;border-color:var(--primary)}
+.t-field textarea::placeholder{color:var(--muted);opacity:.6}
+.t-or{text-align:center;color:var(--muted);font-size:.8rem;text-transform:uppercase;letter-spacing:1px;
+  position:relative;padding:2px 0}
+.t-or::before,.t-or::after{content:'';position:absolute;top:50%;width:calc(50% - 20px);height:1px;background:var(--panel-border)}
+.t-or::before{left:0}.t-or::after{right:0}
+.drop-zone{border:2px dashed var(--panel-border);border-radius:12px;padding:20px;text-align:center;
+  cursor:pointer;transition:all .2s;background:var(--card);min-height:60px;display:flex;
+  align-items:center;justify-content:center;gap:10px;position:relative;overflow:hidden}
+.drop-zone:hover,.drop-zone.dragover{border-color:var(--primary);background:#1a1a40}
+.drop-zone .drop-text{color:var(--muted);font-size:.85rem}
+.drop-zone input[type=file]{display:none}
+.t-img-preview{margin-top:4px;border:1px solid var(--panel-border);border-radius:10px;overflow:hidden;
+  background:#0a0a18;display:none;position:relative}
+.t-img-preview.visible{display:block}
+.t-img-preview img{width:100%;max-height:340px;object-fit:contain;display:block}
+.t-img-preview .t-img-remove{position:absolute;top:8px;right:8px;width:28px;height:28px;border-radius:50%;
+  background:rgba(0,0,0,.7);border:1px solid var(--panel-border);color:var(--text);font-size:1rem;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1}
+.t-img-preview .t-img-remove:hover{background:var(--danger);border-color:var(--danger)}
+.teacher-actions{display:flex;gap:10px;justify-content:flex-end;padding:16px 24px;border-top:1px solid var(--panel-border)}
+.t-status{padding:12px 16px;border-radius:var(--radius);font-size:.85rem;display:none;line-height:1.5}
+.t-status.visible{display:block}
+.t-status.loading{background:rgba(124,58,237,.12);color:var(--primary-l);border:1px solid rgba(124,58,237,.2)}
+.t-status.success{background:rgba(16,185,129,.12);color:var(--success);border:1px solid rgba(16,185,129,.2)}
+.t-status.error{background:rgba(239,68,68,.12);color:var(--danger);border:1px solid rgba(239,68,68,.2)}
+.t-desc{padding:14px 16px;background:var(--card);border-radius:var(--radius);font-size:.85rem;
+  color:var(--text);line-height:1.6;display:none;border:1px solid var(--panel-border)}
+.t-desc.visible{display:block}
+.t-desc strong{color:var(--primary-l)}
+.spinner{display:inline-block;width:14px;height:14px;border:2px solid var(--primary-l);
+  border-top-color:transparent;border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle;margin-right:6px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.btn-teacher{background:linear-gradient(135deg,var(--primary),#4f46e5);border:none;color:#fff;font-weight:600;letter-spacing:.3px}
+.btn-teacher:hover{background:linear-gradient(135deg,#6d28d9,#4338ca)}
+.theme-btn{background:none;border:1px solid var(--panel-border);border-radius:var(--radius);
+  width:36px;height:36px;cursor:pointer;font-size:1.1rem;display:flex;align-items:center;justify-content:center;
+  color:var(--text);transition:all .15s}
+.theme-btn:hover{border-color:var(--primary);background:rgba(124,58,237,.1)}
+
+/* ── Panel Resizer ── */
+.panel-resizer{width:6px;cursor:col-resize;background:transparent;flex-shrink:0;position:relative;z-index:10;
+  display:flex;align-items:center;justify-content:center;transition:background .15s}
+.panel-resizer:hover,.panel-resizer.active{background:var(--primary)}
+.panel-resizer::after{content:'';width:2px;height:40px;background:var(--panel-border);border-radius:1px}
+.panel-resizer:hover::after,.panel-resizer.active::after{background:#fff}
+
+/* ── Pin Overlay ── */
+.pin-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);display:flex;align-items:center;
+  justify-content:center;z-index:1002;backdrop-filter:blur(6px)}
+.pin-box{background:var(--panel);border:1px solid var(--panel-border);border-radius:16px;padding:32px;
+  width:340px;text-align:center;box-shadow:0 24px 80px rgba(0,0,0,.6)}
+.pin-box h3{font-size:1.1rem;margin-bottom:16px;color:var(--primary-l)}
+.pin-box input{width:100%;padding:10px 14px;border:1px solid var(--panel-border);border-radius:var(--radius);
+  background:var(--card);color:var(--text);font-size:1.2rem;text-align:center;letter-spacing:8px;font-family:monospace}
+.pin-box input:focus{outline:none;border-color:var(--primary)}
+.pin-box .pin-actions{margin-top:16px;display:flex;gap:8px;justify-content:center}
+.pin-box .pin-error{color:var(--danger);font-size:.82rem;margin-top:8px;min-height:1.2em}
+
+/* ── Light mode overrides ── */
+:root[data-theme="light"] .state-circle{fill:#eef0ff;stroke:var(--primary)}
+:root[data-theme="light"] .state-circle:hover{fill:#dde0ff}
+:root[data-theme="light"] .state-circle.active{fill:#d0d0ff}
+:root[data-theme="light"] .trans-label-bg{fill:var(--panel);opacity:.92}
+:root[data-theme="light"] .teacher-overlay,.pin-overlay{background:rgba(0,0,0,.4)}
+:root[data-theme="light"] .btn:hover{background:#e8e8f8}
+:root[data-theme="light"] .btn-primary:hover{background:#6d28d9}
+:root[data-theme="light"] .drop-zone:hover,.drop-zone.dragover{background:#eeeeff}
+
+/* ── Student overlay ── */
+.student-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;align-items:center;
+  justify-content:center;z-index:1001;backdrop-filter:blur(6px)}
+.student-overlay.open{display:flex}
+.student-modal{background:var(--panel);border:1px solid var(--panel-border);border-radius:16px;
+  width:560px;max-width:92vw;max-height:92vh;overflow-y:auto;box-shadow:0 24px 80px rgba(0,0,0,.6)}
+.student-modal .sm-header{display:flex;justify-content:space-between;align-items:center;
+  padding:18px 24px;border-bottom:1px solid var(--panel-border)}
+.student-modal .sm-header h3{font-size:1.15rem;font-weight:700;
+  background:linear-gradient(135deg,var(--secondary),var(--success));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.student-body{padding:24px;display:flex;flex-direction:column;gap:16px}
+.student-actions{display:flex;gap:10px;justify-content:flex-end;padding:16px 24px;border-top:1px solid var(--panel-border)}
+.s-result{padding:14px 16px;background:var(--card);border:1px solid var(--panel-border);border-radius:var(--radius);
+  font-size:.88rem;color:var(--text);line-height:1.7;max-height:340px;overflow-y:auto;display:none;white-space:pre-wrap}
+.s-result.visible{display:block}
+.s-result h4{color:var(--primary-l);margin-bottom:6px;font-size:.92rem}
+.s-result ul{margin:4px 0 4px 18px}
+.btn-student{background:linear-gradient(135deg,var(--secondary),#0891b2);border:none;color:#fff;font-weight:600;letter-spacing:.3px}
+.btn-student:hover{background:linear-gradient(135deg,#0891b2,#0e7490)}
+
+/* ── Class Rules panel ── */
+.t-section-toggle{display:flex;align-items:center;gap:8px;cursor:pointer;padding:8px 12px;
+  background:var(--card);border:1px solid var(--panel-border);border-radius:var(--radius);
+  color:var(--primary-l);font-size:.85rem;font-weight:600;transition:all .15s;user-select:none}
+.t-section-toggle:hover{border-color:var(--primary);background:#1e1e42}
+.t-section-toggle .arrow{transition:transform .2s;font-size:.7rem}
+.t-section-toggle.open .arrow{transform:rotate(90deg)}
+.t-section-content{display:none;flex-direction:column;gap:14px;padding:14px;
+  background:var(--card);border:1px solid var(--panel-border);border-top:none;
+  border-radius:0 0 var(--radius) var(--radius);margin-top:-1px}
+.t-section-content.open{display:flex}
+.t-section-content textarea{width:100%;padding:10px 12px;border:1px solid var(--panel-border);
+  border-radius:var(--radius);background:var(--bg);color:var(--text);font-size:.85rem;
+  font-family:'Consolas','Monaco',monospace;resize:vertical;min-height:80px;line-height:1.5}
+.t-section-content textarea:focus{outline:none;border-color:var(--primary)}
+.t-section-content .t-hint{font-size:.78rem;color:var(--muted);line-height:1.5}
+.t-section-content .t-save-row{display:flex;gap:8px;justify-content:flex-end}
+.t-example-pair{border:1px solid var(--panel-border);border-radius:var(--radius);overflow:hidden}
+.t-example-pair .t-ex-header{display:flex;justify-content:space-between;align-items:center;
+  padding:6px 10px;background:rgba(124,58,237,.08);font-size:.8rem;color:var(--primary-l);font-weight:600}
+.t-example-pair .t-ex-header button{background:none;border:none;color:var(--danger);cursor:pointer;
+  font-size:.9rem;opacity:.5;padding:0 4px}.t-example-pair .t-ex-header button:hover{opacity:1}
+.t-example-pair textarea{border:none;border-top:1px solid var(--panel-border);border-radius:0;
+  background:var(--bg);min-height:50px}
+.t-add-example{border:1px dashed var(--panel-border);border-radius:var(--radius);padding:8px;
+  text-align:center;cursor:pointer;color:var(--muted);font-size:.85rem;transition:all .15s}
+.t-add-example:hover{border-color:var(--primary);color:var(--primary-l);background:rgba(124,58,237,.05)}
+.t-ex-img-row{display:flex;gap:8px;align-items:center;padding:4px 10px;background:var(--bg);border-top:1px solid var(--panel-border)}
+.t-ex-img-row .btn{font-size:.78rem;padding:3px 10px}
+.t-ex-img-row input[type=file]{display:none}
+.t-ex-img-row .t-ex-img-name{font-size:.78rem;color:var(--muted);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.t-ex-img-preview{max-width:100%;max-height:140px;border-top:1px solid var(--panel-border);display:block;object-fit:contain;background:#08081a}
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <h1>Turing Machine Simulator</h1>
+    <div class="header-controls">
+      <select id="preset-select">
+        <option value="">Load Preset...</option>
+        <option value="binary-inc">Binary Increment</option>
+        <option value="palindrome">Palindrome Checker (a,b)</option>
+        <option value="ones-complement">1's Complement</option>
+      </select>
+      <button class="theme-btn" id="theme-toggle" title="Toggle light/dark mode">&#9788;</button>
+      <button class="btn btn-student" id="student-btn">Student</button>
+      <button class="btn btn-teacher" id="teacher-btn">Teacher</button>
+      <button class="btn btn-danger" id="clear-btn">Clear All</button>
+    </div>
+  </header>
+
+  <main>
+    <div class="panel" id="editor-panel">
+      <div class="panel-header">
+        <h2>State Machine</h2>
+        <div class="toolbar">
+          <button class="btn tool-btn active" id="mode-select" title="Select &amp; Move (S)">S</button>
+          <button class="btn tool-btn" id="mode-add-state" title="Add State (A)">+Q</button>
+          <button class="btn tool-btn" id="mode-add-trans" title="Add Transition (T)">+T</button>
+          <button class="btn tool-btn danger" id="delete-selected" title="Delete (Del)">X</button>
+          <button class="btn tool-btn" id="reset-view" title="Reset View (Fit)" style="font-size:.7rem">FIT</button>
+        </div>
+      </div>
+      <div class="svg-container">
+        <svg id="diagram"></svg>
+        <div class="hint" id="editor-hint">Click "+Q" then click canvas to add states</div>
+      </div>
+      <div id="transition-table-container">
+        <div class="tt-header" id="tt-toggle-header">
+          <h3>Transitions</h3>
+          <span class="tt-toggle">&#9660;</span>
+        </div>
+        <div class="tt-body" id="tt-body">
+          <table id="transition-table"><thead><tr>
+            <th>From</th><th>Read</th><th>Write</th><th>To</th><th>Dir</th><th></th>
+          </tr></thead><tbody></tbody></table>
+        </div>
+      </div>
+      <div id="states-list-container" style="border-top:1px solid var(--panel-border);overflow:hidden">
+        <div class="tt-header" id="states-toggle-header">
+          <h3>States</h3>
+          <span class="tt-toggle">&#9660;</span>
+        </div>
+        <div class="tt-body" id="states-body">
+          <div id="states-list" style="display:flex;flex-wrap:wrap;gap:4px;padding:4px 0"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel-resizer" id="panel-resizer"></div>
+    <div class="panel" id="simulator-panel">
+      <div class="sim-section">
+        <h2>Simulator</h2>
+        <div class="input-row">
+          <label>Input:</label>
+          <input type="text" id="tape-input" placeholder="e.g. 1011" spellcheck="false">
+          <button class="btn btn-primary" id="load-btn">Load</button>
+        </div>
+        <div id="tape-sym-bar" style="display:flex;gap:3px;margin-top:-6px;margin-bottom:4px;flex-wrap:wrap;padding:0 2px"></div>
+        <div id="tape-display">
+          <div class="tape-row" id="tape-row"></div>
+          <div class="head-pointer" id="head-pointer">&#9650;</div>
+        </div>
+        <div class="status-bar">
+          <span>State: <span class="value" id="state-val">-</span></span>
+          <span>Steps: <span class="value" id="step-val">0</span></span>
+          <span id="status-span">Status: <span class="value" id="status-val">Ready</span></span>
+        </div>
+        <div class="controls">
+          <button class="btn" id="step-btn">Step</button>
+          <button class="btn btn-primary" id="run-btn">Run</button>
+          <button class="btn btn-warning" id="pause-btn" disabled>Pause</button>
+          <button class="btn" id="reset-btn">Reset</button>
+          <div class="speed-control">
+            <label>Speed:</label>
+            <input type="range" id="speed-slider" min="1" max="30" value="8">
+          </div>
+        </div>
+      </div>
+
+      <div id="trace-section" style="border-bottom:1px solid var(--panel-border);overflow:hidden;display:flex;flex-direction:column">
+        <div class="tt-header" id="trace-toggle-header">
+          <h3 style="font-size:.85rem;color:var(--muted)">Step Trace</h3>
+          <div style="display:flex;gap:6px;align-items:center">
+            <button class="btn" id="trace-clear" style="padding:1px 8px;font-size:.75rem">Clear</button>
+            <span class="tt-toggle">&#9660;</span>
+          </div>
+        </div>
+        <div id="trace-body" style="max-height:180px;overflow-y:auto;padding:4px 10px;font-family:monospace;font-size:.78rem;line-height:1.6">
+          <div id="trace-log" style="color:var(--muted)">Run or step through the machine to see the trace.</div>
+        </div>
+      </div>
+
+      <div class="qa-section">
+        <h2>Test Cases</h2>
+        <div class="qa-controls">
+          <button class="btn" id="add-test-btn">+ Add Test</button>
+          <button class="btn btn-primary" id="run-tests-btn">Run All</button>
+        </div>
+        <table id="test-table"><thead><tr>
+          <th>Input</th><th>Expected</th><th>Result</th><th>Status</th><th></th>
+        </tr></thead><tbody></tbody></table>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="modal-title">Edit</h3>
+      <button class="modal-close" id="modal-close">&times;</button>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+    <div class="modal-footer">
+      <button class="btn" id="modal-cancel">Cancel</button>
+      <button class="btn btn-primary" id="modal-ok">OK</button>
+    </div>
+  </div>
+</div>
+
+<!-- Teacher Modal -->
+<div class="teacher-overlay" id="teacher-overlay">
+  <div class="teacher-modal">
+    <div class="tm-header">
+      <h3>Teacher Assistant</h3>
+      <button class="modal-close" id="teacher-close">&times;</button>
+    </div>
+    <div class="teacher-body">
+      <div class="t-field">
+        <label>Anthropic API Key</label>
+        <div class="key-row">
+          <input type="password" id="t-api-key" placeholder="sk-ant-api03-...">
+          <button class="btn" id="t-save-key">Save</button>
+        </div>
+      </div>
+      <div class="t-field">
+        <label>Mode</label>
+        <select id="t-mode">
+          <option value="solve">Solve a Question</option>
+          <option value="read">Read Machine from Diagram</option>
+        </select>
+      </div>
+      <div class="t-field" id="t-ptype-field">
+        <label>Problem Type</label>
+        <select id="t-ptype">
+          <option value="auto">Auto-detect from question</option>
+          <option value="function">Compute a function (output on tape)</option>
+          <option value="language">Recognize a language (accept / reject)</option>
+        </select>
+      </div>
+      <div class="t-field" id="t-ostyle-field">
+        <label>Output Style (for function-type)</label>
+        <select id="t-ostyle">
+          <option value="auto">Auto-detect from class rules</option>
+          <option value="after">Write output AFTER input (between $ on blank cells)</option>
+          <option value="replace">Replace input with output (in-place)</option>
+        </select>
+      </div>
+      <div class="t-field">
+        <label>Model</label>
+        <select id="t-model">
+          <option value="claude-sonnet-4-6">Claude Sonnet 4.6 (fast)</option>
+          <option value="claude-opus-4-6">Claude Opus 4.6 (best)</option>
+          <option value="claude-sonnet-4-20250514">Claude Sonnet 4 (legacy)</option>
+        </select>
+      </div>
+      <!-- Class Rules & Examples (collapsible) -->
+      <div class="t-section-toggle" id="t-rules-toggle">
+        <span class="arrow">&#9654;</span> Class Rules &amp; Examples (teach the AI your notation)
+      </div>
+      <div class="t-section-content" id="t-rules-content">
+        <div class="t-hint">
+          Define the symbols and conventions your class uses. This is sent with every question so the AI follows your notation.
+        </div>
+        <div class="t-field">
+          <label>Class Rules / Notation</label>
+          <textarea id="t-rules" placeholder="Examples of rules you can write:&#10;&#10;- Blank symbol is B (not □)&#10;- Transitions are written as δ(q,a) = (q',b,D)&#10;- Use 0 and 1 for binary, | for unary&#10;- The head starts at the leftmost symbol&#10;- Output should be left-aligned on the tape&#10;- We use # as a delimiter between numbers"></textarea>
+        </div>
+        <div class="t-field">
+          <label>Example Q&amp;A Pairs (teach by example)</label>
+          <div id="t-examples-list"></div>
+          <div class="t-add-example" id="t-add-example">+ Add Example Q&amp;A Pair</div>
+        </div>
+        <div class="t-save-row">
+          <button class="btn btn-success" id="t-save-rules">Save Rules &amp; Examples</button>
+        </div>
+      </div>
+
+      <div class="t-field">
+        <label>Question / Description (text)</label>
+        <textarea id="t-question" placeholder="e.g. Build a Turing machine that computes f(x) = x + 1 in binary...&#10;&#10;or: Build a TM that accepts strings over {a,b} containing equal numbers of a's and b's..."></textarea>
+      </div>
+      <div class="t-or">or attach an image</div>
+      <div class="drop-zone" id="t-dropzone">
+        <div class="drop-text">Drop, click to upload, or Ctrl+V to paste an image</div>
+        <input type="file" id="t-file" accept="image/*">
+      </div>
+      <div class="t-img-preview" id="t-img-preview">
+        <img id="t-img-tag" src="" alt="Question image">
+        <button class="t-img-remove" id="t-img-remove" title="Remove image">&times;</button>
+      </div>
+      <div class="t-status" id="t-status"></div>
+      <div class="t-desc" id="t-desc"></div>
+    </div>
+    <div class="teacher-actions">
+      <button class="btn btn-success" id="t-export" title="Download a copy of this app with your API key and class rules embedded — ready to share with students">Save for Students</button>
+      <button class="btn" id="t-close-btn">Close</button>
+      <button class="btn btn-primary" id="t-process">Process</button>
+    </div>
+  </div>
+</div>
+
+<!-- Student Modal -->
+<div class="student-overlay" id="student-overlay">
+  <div class="student-modal">
+    <div class="sm-header">
+      <h3>Student Assistant</h3>
+      <button class="modal-close" id="student-close">&times;</button>
+    </div>
+    <div class="student-body">
+      <div class="t-field">
+        <label>What do you need?</label>
+        <select id="s-mode">
+          <option value="diagram">Upload My Diagram (test your solution)</option>
+          <option value="hints">Get Hints for a Question</option>
+          <option value="tests">Generate Test Cases for a Question</option>
+        </select>
+      </div>
+
+      <!-- Diagram image (only in diagram mode) -->
+      <div id="s-diagram-section">
+        <div class="t-field"><label>Your Diagram</label></div>
+        <div class="drop-zone" id="s-dropzone">
+          <div class="drop-text">Drop, click to upload, or Ctrl+V to paste your diagram</div>
+          <input type="file" id="s-file" accept="image/*">
+        </div>
+        <div class="t-img-preview" id="s-img-preview">
+          <img id="s-img-tag" src="" alt="Diagram">
+          <button class="t-img-remove" id="s-img-remove" title="Remove">&times;</button>
+        </div>
+      </div>
+
+      <!-- Question: text + optional image (always shown) -->
+      <div class="t-field" id="s-question-field">
+        <label id="s-question-label">Question / Description</label>
+        <textarea id="s-question" placeholder="Paste or type the question here..."></textarea>
+      </div>
+      <div class="t-or" id="s-or-label">or attach question as image</div>
+      <div class="drop-zone" id="s-q-dropzone">
+        <div class="drop-text">Drop, click, or Ctrl+V to paste question image</div>
+        <input type="file" id="s-q-file" accept="image/*">
+      </div>
+      <div class="t-img-preview" id="s-q-img-preview">
+        <img id="s-q-img-tag" src="" alt="Question">
+        <button class="t-img-remove" id="s-q-img-remove" title="Remove">&times;</button>
+      </div>
+
+      <div class="t-status" id="s-status"></div>
+      <div class="s-result" id="s-result"></div>
+    </div>
+    <div class="student-actions">
+      <button class="btn" id="s-close-btn">Close</button>
+      <button class="btn btn-primary" id="s-process">Go</button>
+    </div>
+  </div>
+</div>
+
+<!-- Pin Code Overlay -->
+<div class="pin-overlay" id="pin-overlay" style="display:none">
+  <div class="pin-box">
+    <h3 id="pin-title">Enter Teacher PIN</h3>
+    <input type="password" id="pin-input" maxlength="8" placeholder="PIN">
+    <div class="pin-error" id="pin-error"></div>
+    <div class="pin-actions">
+      <button class="btn" id="pin-cancel">Cancel</button>
+      <button class="btn btn-primary" id="pin-ok">OK</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// Embedded config (populated by "Save for Students" export)
+var __EMBEDDED_CONFIG__ = null;
+// ══════════════════════════════════════════════════════════
+//  TURING MACHINE (pure logic)
+// ══════════════════════════════════════════════════════════
+class TuringMachine {
+  constructor() {
+    this.states = [];       // {id, name, x, y, isStart, isAccept, isReject}
+    this.transitions = [];  // {id, fromId, toId, read, write, direction}
+    this.tape = {};
+    this.headPos = 0;
+    this.currentStateId = null;
+    this.halted = true;
+    this.accepted = false;
+    this.rejected = false;
+    this.stepCount = 0;
+    this.blank = '\u25a1';  // □
+    this._nextId = 1;
+  }
+  _id() { return this._nextId++; }
+  getState(id) { return this.states.find(s => s.id === id); }
+  getStartState() { return this.states.find(s => s.isStart); }
+
+  addState(name, x, y) {
+    const s = { id: this._id(), name, x, y, isStart: this.states.length === 0, isAccept: false, isReject: false };
+    this.states.push(s);
+    return s;
+  }
+  removeState(id) {
+    this.states = this.states.filter(s => s.id !== id);
+    this.transitions = this.transitions.filter(t => t.fromId !== id && t.toId !== id);
+  }
+  addTransition(fromId, toId, read, write, direction) {
+    const t = { id: this._id(), fromId, toId, read, write, direction };
+    this.transitions.push(t);
+    return t;
+  }
+  removeTransition(id) { this.transitions = this.transitions.filter(t => t.id !== id); }
+
+  loadInput(input) {
+    this.tape = {};
+    for (let i = 0; i < input.length; i++) this.tape[i] = input[i];
+    this.stepCount = 0;
+    this.halted = false;
+    this.accepted = false;
+    this.rejected = false;
+    const start = this.getStartState();
+    this.currentStateId = start ? start.id : null;
+    if (!start) { this.halted = true; this.headPos = 0; return; }
+
+    // Smart head placement for ⊢ (tape-start marker):
+    // If input starts with ⊢ and start state has NO transition for ⊢,
+    // place head on the first data cell (position 1) instead of on ⊢.
+    const firstSym = this.tape[0];
+    if (firstSym === '\u22a2' && start) {
+      const hasStartTransition = this.transitions.some(t => t.fromId === start.id && t.read === '\u22a2');
+      this.headPos = hasStartTransition ? 0 : 1;
+    } else {
+      this.headPos = 0;
+    }
+  }
+
+  readTape() { return this.tape[this.headPos] || this.blank; }
+
+  step() {
+    if (this.halted) return null;
+    const sym = this.readTape();
+    const tr = this.transitions.find(t => t.fromId === this.currentStateId && t.read === sym);
+    if (!tr) {
+      this.halted = true;
+      const st = this.getState(this.currentStateId);
+      this.accepted = st ? st.isAccept : false;
+      this.rejected = !this.accepted;
+      return { halted: true, accepted: this.accepted };
+    }
+    const result = { read: sym, write: tr.write, direction: tr.direction,
+      fromId: tr.fromId, toId: tr.toId, transId: tr.id };
+    this.tape[this.headPos] = tr.write;
+    this.currentStateId = tr.toId;
+    this.headPos += tr.direction === 'R' ? 1 : -1;
+    this.stepCount++;
+    const ns = this.getState(this.currentStateId);
+    if (ns && (ns.isAccept || ns.isReject)) {
+      this.halted = true;
+      this.accepted = ns.isAccept;
+      this.rejected = ns.isReject;
+      result.halted = true;
+      result.accepted = this.accepted;
+    }
+    return result;
+  }
+
+  getTapeString() {
+    const keys = Object.keys(this.tape).map(Number).sort((a,b) => a - b);
+    if (keys.length === 0) return '';
+    let s = '';
+    for (let i = keys[0]; i <= keys[keys.length-1]; i++) {
+      const c = this.tape[i] || this.blank;
+      if (c !== this.blank) s += c;
+    }
+    return s;
+  }
+
+  clone() {
+    const m = new TuringMachine();
+    m.states = JSON.parse(JSON.stringify(this.states));
+    m.transitions = JSON.parse(JSON.stringify(this.transitions));
+    m.blank = this.blank;
+    m._nextId = this._nextId;
+    return m;
+  }
+}
+
+// ══════════════════════════════════════════════════════════
+//  SYMBOL RENDERING — always replace hard-to-render symbols
+// ══════════════════════════════════════════════════════════
+const SymbolRenderer = (() => {
+  // Direct mapping: Unicode chars that commonly fail to render → safe alternatives
+  const _map = {
+    // Geometric triangles → Greek Delta Δ (U+0394, renders in ALL fonts)
+    '\u25B3': '\u0394', '\u25B7': '\u0394', '\u25B2': '\u0394',
+    '\u25BD': '\u0394', '\u25C1': '\u0394', '\u25B6': '\u0394',
+    '\u25BC': '\u0394', '\u25C0': '\u0394', '\u25B9': '\u0394',
+    '\u25BF': '\u0394', '\u25B5': '\u0394', '\u25BB': '\u0394',
+    '\u25C3': '\u0394', '\u25C5': '\u0394',
+    '\u2206': '\u0394', // INCREMENT → Δ
+    '\u25C7': '\u0394', '\u25C8': '\u0394', // diamonds → Δ
+    // Turnstile / tape-start markers → plain ASCII
+    '\u22A2': '|-', '\u22A3': '-|',
+    '\u251C': '|-', '\u2524': '-|',
+    '\u23A8': '|-', '\u27DE': '|-',
+    // Other common math/box symbols
+    '\u2610': '\u25A1', // ballot box → □
+    '\u25FB': '\u25A1', // medium square → □
+    '\u25AB': '\u25A1', // small square → □
+    '\u2B1C': '\u25A1', // large square → □
+  };
+
+  function display(char) {
+    // Check direct mapping first
+    if (_map[char]) return _map[char];
+    // Range-based fallbacks for any unmapped geometric/math symbols
+    const cp = char.codePointAt(0);
+    // Geometric shapes (U+25A0-25FF) except □ (U+25A1) which is our blank
+    if (cp >= 0x25A0 && cp <= 0x25FF && cp !== 0x25A1) return '\u0394';
+    // Box drawing (U+2500-257F)
+    if (cp >= 0x2500 && cp <= 0x257F) return '|-';
+    return char;
+  }
+
+  return { display };
+})();
+
+// ══════════════════════════════════════════════════════════
+//  APP
+// ══════════════════════════════════════════════════════════
+class App {
+  constructor() {
+    this.tm = new TuringMachine();
+    this.mode = 'select'; // select | addState | addTransition
+    this.selectedStateId = null;
+    this.selectedTransId = null;
+    this.transSourceId = null; // for addTransition mode
+    this.dragging = null;
+    this.running = false;
+    this.runTimer = null;
+    this.testCases = [];
+    this.activeTransId = null;
+    this.stateCounter = 0;
+
+    this.svg = document.getElementById('diagram');
+    this.tapeRow = document.getElementById('tape-row');
+    this.hint = document.getElementById('editor-hint');
+
+    // SVG pan & zoom state
+    this._panX = 0; this._panY = 0; this._zoom = 1;
+    this._panning = false; this._panStart = null;
+
+    this.init();
+  }
+
+  // ── Initialization ──
+  init() {
+    // Toolbar
+    document.getElementById('mode-select').onclick = () => this.setMode('select');
+    document.getElementById('mode-add-state').onclick = () => this.setMode('addState');
+    document.getElementById('mode-add-trans').onclick = () => this.setMode('addTransition');
+    document.getElementById('delete-selected').onclick = () => this.deleteSelected();
+
+    // SVG events
+    this.svg.addEventListener('mousedown', e => this.onSVGMouseDown(e));
+    this.svg.addEventListener('mousemove', e => this.onSVGMouseMove(e));
+    this.svg.addEventListener('mouseup', e => this.onSVGMouseUp(e));
+    this.svg.addEventListener('dblclick', e => this.onSVGDblClick(e));
+    // Prevent context menu on SVG for right-click pan
+    this.svg.addEventListener('contextmenu', e => e.preventDefault());
+    // Zoom with mouse wheel
+    this.svg.addEventListener('wheel', e => {
+      e.preventDefault();
+      const delta = e.deltaY > 0 ? 1.1 : 0.9;
+      const pt = this.svgPt(e);
+      // Zoom toward cursor position
+      this._zoom *= delta;
+      this._zoom = Math.max(0.2, Math.min(5, this._zoom));
+      this._panX = pt.x - (pt.x - this._panX) * delta;
+      this._panY = pt.y - (pt.y - this._panY) * delta;
+      this._applySVGTransform();
+    }, { passive: false });
+    window.addEventListener('mouseup', () => { this.dragging = null; });
+
+    // Keyboard
+    window.addEventListener('keydown', e => {
+      if (document.querySelector('.modal-overlay.open') || document.querySelector('.teacher-overlay.open')) return;
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
+      if (e.key === 'Delete' || e.key === 'Backspace') this.deleteSelected();
+      if (e.key === 's' || e.key === 'S') this.setMode('select');
+      if (e.key === 'a' || e.key === 'A') this.setMode('addState');
+      if (e.key === 't' || e.key === 'T') this.setMode('addTransition');
+    });
+
+    // Reset view
+    document.getElementById('reset-view').onclick = () => {
+      if (this.tm.states.length === 0) { this._resetView(); return; }
+      // Fit all states in view
+      const pad = 60;
+      let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+      this.tm.states.forEach(s => {
+        if (s.x < minX) minX = s.x; if (s.y < minY) minY = s.y;
+        if (s.x > maxX) maxX = s.x; if (s.y > maxY) maxY = s.y;
+      });
+      const w = maxX - minX + pad * 2, h = maxY - minY + pad * 2;
+      const svgR = this.svg.getBoundingClientRect();
+      const scaleX = svgR.width / w, scaleY = svgR.height / h;
+      this._zoom = Math.min(scaleX, scaleY, 2);
+      this._panX = (svgR.width - w * this._zoom) / 2 - (minX - pad) * this._zoom;
+      this._panY = (svgR.height - h * this._zoom) / 2 - (minY - pad) * this._zoom;
+      this._applySVGTransform();
+    };
+
+    // Transition table toggle
+    document.getElementById('tt-toggle-header').onclick = () => {
+      document.getElementById('tt-toggle-header').classList.toggle('collapsed');
+      document.getElementById('tt-body').classList.toggle('collapsed');
+    };
+    // States list toggle
+    document.getElementById('states-toggle-header').onclick = () => {
+      document.getElementById('states-toggle-header').classList.toggle('collapsed');
+      document.getElementById('states-body').style.display =
+        document.getElementById('states-toggle-header').classList.contains('collapsed') ? 'none' : '';
+    };
+
+    // Simulator controls
+    document.getElementById('load-btn').onclick = () => this.loadInput();
+    document.getElementById('step-btn').onclick = () => this.doStep();
+    document.getElementById('run-btn').onclick = () => this.doRun();
+    document.getElementById('pause-btn').onclick = () => this.doPause();
+    document.getElementById('reset-btn').onclick = () => this.doReset();
+
+    // Trace log toggle & clear
+    document.getElementById('trace-toggle-header').onclick = (e) => {
+      if (e.target.id === 'trace-clear') return;
+      document.getElementById('trace-toggle-header').classList.toggle('collapsed');
+      document.getElementById('trace-body').style.display =
+        document.getElementById('trace-toggle-header').classList.contains('collapsed') ? 'none' : '';
+    };
+    document.getElementById('trace-clear').onclick = (e) => {
+      e.stopPropagation();
+      this._clearTrace();
+    };
+
+    // Quick-pick symbol bar for tape input
+    const symBar = document.getElementById('tape-sym-bar');
+    const tapeSyms = [
+      { label: '|-', value: '\u22a2', title: 'Start of tape (⊢)' },
+      { label: '\u0394', value: '\u0394', title: 'Triangle / Delta (blank)' },
+      { label: '$', value: '$', title: 'Dollar (output marker)' },
+      { label: '#', value: '#', title: 'Hash (separator)' },
+      { label: '0', value: '0', title: '0' },
+      { label: '1', value: '1', title: '1' },
+    ];
+    tapeSyms.forEach(s => {
+      const btn = document.createElement('button');
+      btn.className = 'btn';
+      btn.style.cssText = 'padding:2px 7px;font-size:.85rem;min-width:24px;font-family:monospace';
+      btn.title = s.title;
+      btn.textContent = s.label;
+      btn.onclick = () => {
+        const inp = document.getElementById('tape-input');
+        const pos = inp.selectionStart || inp.value.length;
+        inp.value = inp.value.slice(0, pos) + s.value + inp.value.slice(pos);
+        inp.focus();
+        inp.setSelectionRange(pos + s.value.length, pos + s.value.length);
+      };
+      symBar.appendChild(btn);
+    });
+
+    // Test cases
+    document.getElementById('add-test-btn').onclick = () => this.addTestCase();
+    document.getElementById('run-tests-btn').onclick = () => this.runAllTests();
+
+    // Preset
+    document.getElementById('preset-select').onchange = e => {
+      if (e.target.value) { this.loadPreset(e.target.value); e.target.value = ''; }
+    };
+    document.getElementById('clear-btn').onclick = () => this.clearAll();
+
+    // Modal
+    document.getElementById('modal-close').onclick = () => this.hideModal();
+    document.getElementById('modal-cancel').onclick = () => this.hideModal();
+    document.getElementById('modal-overlay').onclick = e => {
+      if (e.target === e.currentTarget) this.hideModal();
+    };
+
+    // Teacher — PIN protected
+    document.getElementById('teacher-btn').onclick = () => this._requestPin(() => this.showTeacher());
+    document.getElementById('teacher-close').onclick = () => this.hideTeacher();
+    document.getElementById('t-close-btn').onclick = () => this.hideTeacher();
+    document.getElementById('teacher-overlay').onclick = e => {
+      if (e.target === e.currentTarget) this.hideTeacher();
+    };
+    // API key — encrypted with PIN
+    document.getElementById('t-save-key').onclick = () => {
+      this._saveApiKey(document.getElementById('t-api-key').value);
+      const btn = document.getElementById('t-save-key');
+      btn.textContent = 'Saved!'; setTimeout(() => btn.textContent = 'Save', 1200);
+    };
+    document.getElementById('t-api-key').value = this._loadApiKey();
+    const dropzone = document.getElementById('t-dropzone');
+    const fileInput = document.getElementById('t-file');
+    dropzone.addEventListener('click', () => fileInput.click());
+    fileInput.onchange = e => this.handleTeacherFile(e.target.files[0]);
+    dropzone.ondragover = e => { e.preventDefault(); dropzone.classList.add('dragover'); };
+    dropzone.ondragleave = () => dropzone.classList.remove('dragover');
+    dropzone.ondrop = e => { e.preventDefault(); dropzone.classList.remove('dragover');
+      if (e.dataTransfer.files[0]) this.handleTeacherFile(e.dataTransfer.files[0]); };
+    document.getElementById('t-img-remove').onclick = () => this.removeTeacherImage();
+    document.getElementById('t-process').onclick = () => this.processTeacher();
+    document.getElementById('t-export').onclick = () => this._exportForStudents();
+    document.getElementById('t-mode').onchange = e => {
+      const isRead = e.target.value === 'read';
+      document.getElementById('t-ptype-field').style.display = isRead ? 'none' : '';
+      document.getElementById('t-ostyle-field').style.display = isRead ? 'none' : '';
+    };
+    // Clipboard paste for images (Ctrl+V) in teacher overlay
+    document.getElementById('teacher-overlay').addEventListener('paste', e => {
+      const items = e.clipboardData?.items;
+      if (!items) return;
+      for (const item of items) {
+        if (item.type.startsWith('image/')) {
+          e.preventDefault();
+          this.handleTeacherFile(item.getAsFile());
+          return;
+        }
+      }
+    });
+    // Class rules toggle
+    document.getElementById('t-rules-toggle').onclick = () => {
+      document.getElementById('t-rules-toggle').classList.toggle('open');
+      document.getElementById('t-rules-content').classList.toggle('open');
+    };
+    document.getElementById('t-add-example').onclick = () => this.addTeacherExample();
+    document.getElementById('t-save-rules').onclick = () => this.saveTeacherRules();
+    let _rulesSaveTimer;
+    document.getElementById('t-rules').addEventListener('input', () => {
+      clearTimeout(_rulesSaveTimer);
+      _rulesSaveTimer = setTimeout(() => this.saveTeacherRules(), 1500);
+    });
+    this.loadTeacherRules();
+
+    // Student panel
+    this._initStudent();
+
+    // PIN overlay handlers
+    document.getElementById('pin-cancel').onclick = () => {
+      document.getElementById('pin-overlay').style.display = 'none';
+      this._pinCallback = null;
+    };
+    document.getElementById('pin-ok').onclick = () => this._submitPin();
+    document.getElementById('pin-input').onkeydown = e => { if (e.key === 'Enter') this._submitPin(); };
+
+    // Theme toggle
+    this._initTheme();
+    document.getElementById('theme-toggle').onclick = () => this._toggleTheme();
+
+    // Panel resizer
+    this._initResizer();
+
+    this.renderAll();
+  }
+
+  // ── PIN code system ──
+  _requestPin(callback) {
+    const hasPin = !!localStorage.getItem('tm-teacher-pin');
+    const overlay = document.getElementById('pin-overlay');
+    const input = document.getElementById('pin-input');
+    const title = document.getElementById('pin-title');
+    const error = document.getElementById('pin-error');
+    if (!hasPin) {
+      title.textContent = 'Set Teacher PIN (first time)';
+      this._pinMode = 'set';
+    } else {
+      title.textContent = 'Enter Teacher PIN';
+      this._pinMode = 'verify';
+    }
+    input.value = '';
+    error.textContent = '';
+    overlay.style.display = 'flex';
+    this._pinCallback = callback;
+    setTimeout(() => input.focus(), 50);
+  }
+
+  _submitPin() {
+    const input = document.getElementById('pin-input');
+    const error = document.getElementById('pin-error');
+    const pin = input.value.trim();
+    if (!pin || pin.length < 3) { error.textContent = 'PIN must be at least 3 characters.'; return; }
+    if (this._pinMode === 'set') {
+      localStorage.setItem('tm-teacher-pin', this._hashPin(pin));
+      this._currentPin = pin;
+      document.getElementById('pin-overlay').style.display = 'none';
+      if (this._pinCallback) this._pinCallback();
+    } else {
+      const stored = localStorage.getItem('tm-teacher-pin');
+      if (this._hashPin(pin) === stored) {
+        this._currentPin = pin;
+        document.getElementById('pin-overlay').style.display = 'none';
+        // Decrypt and load API key now that we have the PIN
+        document.getElementById('t-api-key').value = this._loadApiKey();
+        if (this._pinCallback) this._pinCallback();
+      } else {
+        error.textContent = 'Incorrect PIN.';
+        input.value = '';
+        input.focus();
+      }
+    }
+  }
+
+  _hashPin(pin) {
+    // Simple hash for PIN verification (not for crypto, just to avoid storing plaintext PIN)
+    let h = 0;
+    for (let i = 0; i < pin.length; i++) { h = ((h << 5) - h + pin.charCodeAt(i)) | 0; }
+    return 'ph_' + (h >>> 0).toString(36);
+  }
+
+  // ── API key encryption ──
+  _appKey = 'TuR1nG_s1M'; // fixed key for app-level encryption (student features)
+
+  _xorEnc(str, key) {
+    return Array.from(str).map((c, i) => c.charCodeAt(0) ^ key.charCodeAt(i % key.length));
+  }
+  _xorDec(arr, key) {
+    return arr.map((c, i) => String.fromCharCode(c ^ key.charCodeAt(i % key.length))).join('');
+  }
+
+  _saveApiKey(key) {
+    if (!key) { localStorage.removeItem('tm-api-key-enc'); localStorage.removeItem('tm-api-key-app'); return; }
+    // Save PIN-encrypted copy (for teacher display)
+    if (this._currentPin) {
+      localStorage.setItem('tm-api-key-enc', JSON.stringify(this._xorEnc(key, this._currentPin)));
+    }
+    // Save app-encrypted copy (for student features — usable without PIN)
+    localStorage.setItem('tm-api-key-app', JSON.stringify(this._xorEnc(key, this._appKey)));
+    localStorage.removeItem('tm-api-key'); // remove old plaintext
+  }
+
+  _loadApiKey() {
+    // Try PIN-encrypted first (teacher has PIN)
+    const enc = localStorage.getItem('tm-api-key-enc');
+    if (enc && this._currentPin) {
+      try { return this._xorDec(JSON.parse(enc), this._currentPin); } catch(e) {}
+    }
+    // Fallback to old plaintext
+    return localStorage.getItem('tm-api-key') || '';
+  }
+
+  _getApiKeyForUse() {
+    // 1. Try embedded config (baked into the HTML for student distribution)
+    if (typeof __EMBEDDED_CONFIG__ === 'object' && __EMBEDDED_CONFIG__ && __EMBEDDED_CONFIG__.k) {
+      try { return this._xorDec(__EMBEDDED_CONFIG__.k, this._appKey); } catch(e) {}
+    }
+    // 2. Try PIN-decrypted (teacher is logged in)
+    if (this._currentPin) {
+      const enc = localStorage.getItem('tm-api-key-enc');
+      if (enc) try { return this._xorDec(JSON.parse(enc), this._currentPin); } catch(e) {}
+    }
+    // 3. Try app-encrypted from localStorage
+    const appEnc = localStorage.getItem('tm-api-key-app');
+    if (appEnc) try { return this._xorDec(JSON.parse(appEnc), this._appKey); } catch(e) {}
+    return localStorage.getItem('tm-api-key') || '';
+  }
+
+  // ── Export for students ──
+  _exportForStudents() {
+    const apiKey = this._getApiKeyForUse();
+    if (!apiKey) { alert('Please save an API key first.'); return; }
+
+    // Gather class rules (text only — images are too large to embed)
+    this.saveTeacherRules();
+    let rulesData = null;
+    try {
+      const raw = localStorage.getItem('tm-teacher-rules');
+      if (raw) {
+        const d = JSON.parse(raw);
+        // Strip images to keep file size reasonable
+        rulesData = {
+          rules: d.rules || '',
+          examples: (d.examples || []).map(ex => ({ question: ex.question || '', answer: ex.answer || '', qImage: null, aImage: null }))
+        };
+      }
+    } catch(e) {}
+
+    // Build embedded config
+    const config = {
+      k: this._xorEnc(apiKey, this._appKey),  // encrypted API key
+      r: rulesData                              // class rules
+    };
+
+    // Get the current HTML source
+    let html = document.documentElement.outerHTML;
+
+    // Replace the __EMBEDDED_CONFIG__ line
+    html = html.replace(
+      /var __EMBEDDED_CONFIG__\s*=\s*[^;]*;/,
+      'var __EMBEDDED_CONFIG__ = ' + JSON.stringify(config) + ';'
+    );
+
+    // Wrap in proper doctype
+    html = '<!DOCTYPE html>\n<html lang="en">' + html.substring(html.indexOf('<head'));
+
+    // Trigger download
+    const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'turing-simulator-student.html';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    alert('File downloaded! Share "turing-simulator-student.html" with your students.\n\nThe API key and class rules are embedded. Students can use all Student features without any setup.');
+  }
+
+  // ── Theme toggle ──
+  _initTheme() {
+    const saved = localStorage.getItem('tm-theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', saved);
+    this._updateThemeIcon(saved);
+  }
+
+  _toggleTheme() {
+    const current = document.documentElement.getAttribute('data-theme') || 'dark';
+    const next = current === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('tm-theme', next);
+    this._updateThemeIcon(next);
+  }
+
+  _updateThemeIcon(theme) {
+    document.getElementById('theme-toggle').innerHTML = theme === 'dark' ? '&#9788;' : '&#9790;';
+  }
+
+  // ── Panel resizer ──
+  _initResizer() {
+    const resizer = document.getElementById('panel-resizer');
+    const editorPanel = document.getElementById('editor-panel');
+    const simPanel = document.getElementById('simulator-panel');
+    const main = editorPanel.parentElement;
+    let startX, startEditorW, overlay;
+
+    const onMouseMove = (e) => {
+      e.preventDefault();
+      const dx = e.clientX - startX;
+      const totalW = main.clientWidth - resizer.offsetWidth;
+      const newEditorW = Math.max(250, Math.min(totalW - 250, startEditorW + dx));
+      const newSimW = totalW - newEditorW;
+      editorPanel.style.flex = 'none';
+      editorPanel.style.width = newEditorW + 'px';
+      simPanel.style.flex = 'none';
+      simPanel.style.width = newSimW + 'px';
+    };
+    const onMouseUp = () => {
+      resizer.classList.remove('active');
+      document.removeEventListener('mousemove', onMouseMove);
+      document.removeEventListener('mouseup', onMouseUp);
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+      // Remove overlay
+      if (overlay && overlay.parentNode) overlay.parentNode.removeChild(overlay);
+      overlay = null;
+    };
+    resizer.addEventListener('mousedown', (e) => {
+      e.preventDefault();
+      startX = e.clientX;
+      startEditorW = editorPanel.offsetWidth;
+      resizer.classList.add('active');
+      document.body.style.cursor = 'col-resize';
+      document.body.style.userSelect = 'none';
+      // Add transparent overlay to capture mouse events over SVG/iframes
+      overlay = document.createElement('div');
+      overlay.style.cssText = 'position:fixed;inset:0;z-index:9999;cursor:col-resize';
+      document.body.appendChild(overlay);
+      document.addEventListener('mousemove', onMouseMove);
+      document.addEventListener('mouseup', onMouseUp);
+    });
+  }
+
+  // ── Mode ──
+  setMode(mode) {
+    this.mode = mode;
+    this.transSourceId = null;
+    document.getElementById('mode-select').classList.toggle('active', mode === 'select');
+    document.getElementById('mode-add-state').classList.toggle('active', mode === 'addState');
+    document.getElementById('mode-add-trans').classList.toggle('active', mode === 'addTransition');
+    this.svg.className.baseVal = mode === 'addState' ? 'mode-add-state' : mode === 'addTransition' ? 'mode-add-trans' : '';
+    const hints = {
+      select: 'Click to select, drag to move, double-click to edit',
+      addState: 'Click on canvas to place a new state',
+      addTransition: 'Click source state, then click target state'
+    };
+    this.hint.textContent = hints[mode] || '';
+    this.renderDiagram();
+  }
+
+  // ── SVG Helpers ──
+  svgPt(e) {
+    const r = this.svg.getBoundingClientRect();
+    const sx = e.clientX - r.left, sy = e.clientY - r.top;
+    // Convert screen coords to SVG world coords (accounting for pan/zoom)
+    return { x: (sx - this._panX) / this._zoom, y: (sy - this._panY) / this._zoom };
+  }
+  svgScreenPt(e) {
+    const r = this.svg.getBoundingClientRect();
+    return { x: e.clientX - r.left, y: e.clientY - r.top };
+  }
+  _applySVGTransform() {
+    let g = this.svg.querySelector('#svg-world');
+    if (g) g.setAttribute('transform', `translate(${this._panX},${this._panY}) scale(${this._zoom})`);
+  }
+  _resetView() {
+    this._panX = 0; this._panY = 0; this._zoom = 1;
+    this._applySVGTransform();
+  }
+  stateAt(x, y) {
+    const R = 30;
+    return this.tm.states.find(s => Math.hypot(s.x - x, s.y - y) <= R);
+  }
+
+  // ── SVG Events ──
+  onSVGMouseDown(e) {
+    // Middle mouse or right-click → pan
+    if (e.button === 1 || e.button === 2) {
+      e.preventDefault();
+      this._panning = true;
+      this._panStart = this.svgScreenPt(e);
+      this._panStartX = this._panX; this._panStartY = this._panY;
+      return;
+    }
+    const pt = this.svgPt(e);
+    const state = this.stateAt(pt.x, pt.y);
+
+    if (this.mode === 'select') {
+      if (state) {
+        this.selectedStateId = state.id;
+        this.selectedTransId = null;
+        this.dragging = { stateId: state.id, ox: pt.x - state.x, oy: pt.y - state.y };
+        this.renderDiagram();
+      } else {
+        // Check if clicked a transition (use screen coords for label hit-test)
+        const sp = this.svgScreenPt(e);
+        const tid = this.transAtScreenPoint(sp.x, sp.y);
+        if (tid) {
+          this.selectedTransId = tid;
+          this.selectedStateId = null;
+        } else {
+          this.selectedStateId = null;
+          this.selectedTransId = null;
+          // Pan on empty area drag
+          this._panning = true;
+          this._panStart = this.svgScreenPt(e);
+          this._panStartX = this._panX; this._panStartY = this._panY;
+        }
+        this.renderDiagram();
+      }
+    } else if (this.mode === 'addState') {
+      const name = 'q' + this.stateCounter++;
+      this.tm.addState(name, pt.x, pt.y);
+      this.setMode('select');
+      this.renderAll();
+    } else if (this.mode === 'addTransition') {
+      if (state) {
+        if (!this.transSourceId) {
+          this.transSourceId = state.id;
+          this.selectedStateId = state.id;
+          this.hint.textContent = `Source: ${state.name} — now click target state`;
+          this.renderDiagram();
+        } else {
+          const fromId = this.transSourceId;
+          const toId = state.id;
+          this.showTransitionModal(null, fromId, toId);
+        }
+      }
+    }
+  }
+  onSVGMouseMove(e) {
+    if (this._panning && this._panStart) {
+      const sp = this.svgScreenPt(e);
+      this._panX = this._panStartX + (sp.x - this._panStart.x);
+      this._panY = this._panStartY + (sp.y - this._panStart.y);
+      this._applySVGTransform();
+      return;
+    }
+    if (!this.dragging) return;
+    const pt = this.svgPt(e);
+    const s = this.tm.getState(this.dragging.stateId);
+    if (s) {
+      s.x = pt.x - this.dragging.ox;
+      s.y = pt.y - this.dragging.oy;
+      this.renderDiagram();
+    }
+  }
+  onSVGMouseUp() { this.dragging = null; this._panning = false; this._panStart = null; }
+
+  onSVGDblClick(e) {
+    const pt = this.svgPt(e);
+    const state = this.stateAt(pt.x, pt.y);
+    if (state) {
+      this.showStateModal(state);
+    } else {
+      // Use screen coords for transition hit-test (labels use getBoundingClientRect)
+      const sp = this.svgScreenPt(e);
+      const tid = this.transAtScreenPoint(sp.x, sp.y);
+      if (tid) {
+        const tr = this.tm.transitions.find(t => t.id === tid);
+        if (tr) this.showTransitionModal(tr, tr.fromId, tr.toId);
+      }
+    }
+  }
+
+  transAtScreenPoint(sx, sy) {
+    // Hit-test transition labels using screen coordinates
+    const labels = this.svg.querySelectorAll('.trans-hit');
+    for (const el of labels) {
+      const r = el.getBoundingClientRect();
+      const sr = this.svg.getBoundingClientRect();
+      const lx = r.left - sr.left, ly = r.top - sr.top;
+      if (sx >= lx - 5 && sx <= lx + r.width + 5 && sy >= ly - 5 && sy <= ly + r.height + 5) {
+        return parseInt(el.dataset.tid);
+      }
+    }
+    return null;
+  }
+
+  // ── Delete ──
+  deleteSelected() {
+    if (this.selectedStateId) {
+      this.tm.removeState(this.selectedStateId);
+      this.selectedStateId = null;
+      this.renderAll();
+    } else if (this.selectedTransId) {
+      this.tm.removeTransition(this.selectedTransId);
+      this.selectedTransId = null;
+      this.renderAll();
+    }
+  }
+
+  // ── Rendering ──
+  renderAll() {
+    this.renderDiagram();
+    this.renderTape();
+    this.renderTransitionTable();
+    this.renderStatesList();
+    this.renderTestTable();
+    this.updateStatus();
+  }
+
+  renderDiagram() {
+    const R = 30;
+    const defs = `<defs>
+      <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+        <path d="M0 0 L10 5 L0 10 z" fill="#8888a0"/>
+      </marker>
+      <marker id="arrowActive" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+        <path d="M0 0 L10 5 L0 10 z" fill="#f59e0b"/>
+      </marker>
+      <marker id="arrowGreen" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+        <path d="M0 0 L10 5 L0 10 z" fill="#10b981"/>
+      </marker>
+    </defs>`;
+    let html = '';
+
+    // Group transitions by from-to pair
+    const groups = {};
+    this.tm.transitions.forEach(t => {
+      const key = `${t.fromId}-${t.toId}`;
+      if (!groups[key]) groups[key] = [];
+      groups[key].push(t);
+    });
+
+    const rendered = new Set();
+
+    // Render transitions
+    for (const [key, transitions] of Object.entries(groups)) {
+      if (rendered.has(key)) continue;
+      rendered.add(key);
+      const from = this.tm.getState(transitions[0].fromId);
+      const to = this.tm.getState(transitions[0].toId);
+      if (!from || !to) continue;
+
+      if (from.id === to.id) {
+        // Self-loop
+        html += this.renderSelfLoop(from, transitions);
+      } else {
+        const reverseKey = `${to.id}-${from.id}`;
+        const hasReverse = !!groups[reverseKey];
+        const offset = hasReverse ? 25 : 0;
+        html += this.renderArrow(from, to, offset, transitions);
+        if (hasReverse && !rendered.has(reverseKey)) {
+          rendered.add(reverseKey);
+          html += this.renderArrow(to, from, offset, groups[reverseKey]);
+        }
+      }
+    }
+
+    // Start arrow
+    const startState = this.tm.getStartState();
+    if (startState) {
+      const sx = startState.x - R - 35;
+      const sy = startState.y;
+      const ex = startState.x - R - 2;
+      html += `<path d="M${sx} ${sy} L${ex} ${sy}" class="start-arrow"/>`;
+    }
+
+    // Render states (on top)
+    this.tm.states.forEach(s => {
+      const isActive = s.id === this.tm.currentStateId && !this.tm.halted;
+      const isSelected = s.id === this.selectedStateId;
+      let cls = 'state-circle';
+      if (s.isAccept) cls += ' accept';
+      if (s.isReject) cls += ' reject';
+      if (isActive) cls += ' active';
+      if (isSelected) cls += ' state-selected';
+
+      html += `<circle cx="${s.x}" cy="${s.y}" r="${R}" class="${cls}" data-sid="${s.id}"/>`;
+      if (s.isAccept) {
+        html += `<circle cx="${s.x}" cy="${s.y}" r="${R - 5}" class="state-inner" data-sid="${s.id}"/>`;
+      }
+      html += `<text x="${s.x}" y="${s.y}" class="state-label" data-sid="${s.id}">${this.escSVG(s.name)}</text>`;
+    });
+
+    this.svg.innerHTML = defs + `<g id="svg-world" transform="translate(${this._panX},${this._panY}) scale(${this._zoom})">${html}</g>`;
+  }
+
+  renderArrow(from, to, offset, transitions) {
+    const R = 30;
+    const dx = to.x - from.x, dy = to.y - from.y;
+    const dist = Math.hypot(dx, dy);
+    const angle = Math.atan2(dy, dx);
+    const perpAngle = angle + Math.PI / 2;
+
+    let path, labelX, labelY;
+    if (offset === 0) {
+      const sx = from.x + R * Math.cos(angle), sy = from.y + R * Math.sin(angle);
+      const ex = to.x - R * Math.cos(angle), ey = to.y - R * Math.sin(angle);
+      path = `M${sx} ${sy} L${ex} ${ey}`;
+      labelX = (sx + ex) / 2 + 10 * Math.cos(perpAngle);
+      labelY = (sy + ey) / 2 + 10 * Math.sin(perpAngle);
+    } else {
+      const cpX = (from.x + to.x) / 2 + offset * Math.cos(perpAngle);
+      const cpY = (from.y + to.y) / 2 + offset * Math.sin(perpAngle);
+      const sAngle = Math.atan2(cpY - from.y, cpX - from.x);
+      const eAngle = Math.atan2(cpY - to.y, cpX - to.x);
+      const sx = from.x + R * Math.cos(sAngle), sy = from.y + R * Math.sin(sAngle);
+      const ex = to.x + R * Math.cos(eAngle), ey = to.y + R * Math.sin(eAngle);
+      path = `M${sx} ${sy} Q${cpX} ${cpY} ${ex} ${ey}`;
+      labelX = .25*sx + .5*cpX + .25*ex;
+      labelY = .25*sy + .5*cpY + .25*ey;
+    }
+
+    const isActive = transitions.some(t => t.id === this.activeTransId);
+    const label = transitions.map(t => `${this.dispSym(t.read)}\u2192${this.dispSym(t.write)},${t.direction}`).join(' | ');
+    const cls = 'trans-path' + (isActive ? ' active' : '');
+    const marker = isActive ? 'url(#arrowActive)' : 'url(#arrow)';
+    const tid = transitions[0].id;
+
+    let svg = `<path d="${path}" class="${cls}" marker-end="${marker}" data-tid="${tid}"/>`;
+    // Label background
+    const lw = label.length * 6.5 + 10, lh = 18;
+    svg += `<rect x="${labelX - lw/2}" y="${labelY - lh/2}" width="${lw}" height="${lh}" class="trans-label-bg trans-hit" data-tid="${tid}"/>`;
+    svg += `<text x="${labelX}" y="${labelY + 1}" class="trans-label">${this.escSVG(label)}</text>`;
+    return svg;
+  }
+
+  renderSelfLoop(state, transitions) {
+    const R = 30;
+    const sA = -Math.PI / 4, eA = -3 * Math.PI / 4;
+    const sx = state.x + R * Math.cos(sA), sy = state.y + R * Math.sin(sA);
+    const ex = state.x + R * Math.cos(eA), ey = state.y + R * Math.sin(eA);
+    const cp1x = state.x + 45, cp1y = state.y - 65;
+    const cp2x = state.x - 45, cp2y = state.y - 65;
+    const path = `M${sx} ${sy} C${cp1x} ${cp1y} ${cp2x} ${cp2y} ${ex} ${ey}`;
+    const labelX = state.x, labelY = state.y - 72;
+
+    const isActive = transitions.some(t => t.id === this.activeTransId);
+    const label = transitions.map(t => `${this.dispSym(t.read)}\u2192${this.dispSym(t.write)},${t.direction}`).join(' | ');
+    const cls = 'trans-path' + (isActive ? ' active' : '');
+    const marker = isActive ? 'url(#arrowActive)' : 'url(#arrow)';
+    const tid = transitions[0].id;
+
+    let svg = `<path d="${path}" class="${cls}" marker-end="${marker}" data-tid="${tid}"/>`;
+    const lw = label.length * 6.5 + 10, lh = 18;
+    svg += `<rect x="${labelX - lw/2}" y="${labelY - lh/2}" width="${lw}" height="${lh}" class="trans-label-bg trans-hit" data-tid="${tid}"/>`;
+    svg += `<text x="${labelX}" y="${labelY + 1}" class="trans-label">${this.escSVG(label)}</text>`;
+    return svg;
+  }
+
+  dispSym(s) { return s === this.tm.blank ? SymbolRenderer.display(this.tm.blank) : SymbolRenderer.display(s); }
+  escSVG(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+  // ── Tape ──
+  renderTape() {
+    const visible = 17;
+    const half = Math.floor(visible / 2);
+    let html = '';
+    for (let i = -half; i <= half; i++) {
+      const pos = this.tm.headPos + i;
+      const sym = this.tm.tape[pos] || this.tm.blank;
+      const isHead = i === 0;
+      const display = sym === this.tm.blank ? '' : this.escHTML(SymbolRenderer.display(sym));
+      html += `<div class="tape-cell${isHead ? ' head' : ''}" data-pos="${pos}">${display}</div>`;
+    }
+    this.tapeRow.innerHTML = html;
+  }
+
+  escHTML(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
+  // ── Transition Table ──
+  renderTransitionTable() {
+    const tbody = document.querySelector('#transition-table tbody');
+    if (this.tm.transitions.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="6" style="color:var(--muted);text-align:center;padding:12px">No transitions defined</td></tr>';
+      return;
+    }
+    tbody.innerHTML = this.tm.transitions.map(t => {
+      const from = this.tm.getState(t.fromId);
+      const to = this.tm.getState(t.toId);
+      return `<tr style="cursor:pointer" data-edit-tid="${t.id}">
+        <td>${from ? from.name : '?'}</td>
+        <td>${this.dispSym(t.read)}</td>
+        <td>${this.dispSym(t.write)}</td>
+        <td>${to ? to.name : '?'}</td>
+        <td>${t.direction}</td>
+        <td><button class="del-btn" data-tid="${t.id}" title="Delete">&times;</button></td>
+      </tr>`;
+    }).join('');
+    // Click row to edit transition
+    tbody.querySelectorAll('tr[data-edit-tid]').forEach(row => {
+      row.onclick = (e) => {
+        if (e.target.classList.contains('del-btn')) return; // don't edit on delete click
+        const tr = this.tm.transitions.find(t => t.id === parseInt(row.dataset.editTid));
+        if (tr) this.showTransitionModal(tr, tr.fromId, tr.toId);
+      };
+    });
+    tbody.querySelectorAll('.del-btn').forEach(btn => {
+      btn.onclick = (e) => {
+        e.stopPropagation();
+        this.tm.removeTransition(parseInt(btn.dataset.tid));
+        this.renderAll();
+      };
+    });
+  }
+
+  // ── States List ──
+  renderStatesList() {
+    const container = document.getElementById('states-list');
+    if (this.tm.states.length === 0) {
+      container.innerHTML = '<span style="color:var(--muted);font-size:.82rem;padding:4px">No states defined</span>';
+      return;
+    }
+    container.innerHTML = this.tm.states.map(s => {
+      let badge = '';
+      let borderColor = 'var(--panel-border)';
+      if (s.isStart) { badge += '<span style="color:var(--success);font-size:.7rem">START</span> '; borderColor = 'var(--success)'; }
+      if (s.isAccept) { badge += '<span style="color:var(--success);font-size:.7rem">ACC</span>'; borderColor = 'var(--success)'; }
+      if (s.isReject) { badge += '<span style="color:var(--danger);font-size:.7rem">REJ</span>'; borderColor = 'var(--danger)'; }
+      if (!s.isAccept && !s.isReject && !s.isStart) badge = '<span style="color:var(--muted);font-size:.7rem">normal</span>';
+      return `<button class="btn state-list-btn" data-sid="${s.id}" style="padding:3px 8px;font-size:.82rem;border-color:${borderColor};cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:1px;min-width:48px" title="Click to edit">
+        <b>${this.escHTML(s.name)}</b>
+        <span>${badge}</span>
+      </button>`;
+    }).join('');
+    container.querySelectorAll('.state-list-btn').forEach(btn => {
+      btn.onclick = () => {
+        const state = this.tm.getState(parseInt(btn.dataset.sid));
+        if (state) this.showStateModal(state);
+      };
+    });
+  }
+
+  // ── Status ──
+  updateStatus() {
+    const stateEl = document.getElementById('state-val');
+    const stepEl = document.getElementById('step-val');
+    const statusEl = document.getElementById('status-val');
+    const statusSpan = document.getElementById('status-span');
+
+    const cs = this.tm.getState(this.tm.currentStateId);
+    stateEl.textContent = cs ? cs.name : '-';
+    stepEl.textContent = this.tm.stepCount;
+
+    statusSpan.className = '';
+    if (this.tm.halted && this.tm.accepted) {
+      statusEl.textContent = 'Accepted';
+      statusSpan.className = 'status-accepted';
+    } else if (this.tm.halted && this.tm.rejected) {
+      statusEl.textContent = 'Rejected';
+      statusSpan.className = 'status-rejected';
+    } else if (this.running) {
+      statusEl.textContent = 'Running...';
+      statusSpan.className = 'status-running';
+    } else if (this.tm.halted) {
+      statusEl.textContent = 'Ready';
+    } else {
+      statusEl.textContent = 'Loaded';
+    }
+  }
+
+  // ── Trace Log ──
+  _clearTrace() {
+    document.getElementById('trace-log').innerHTML = '<span style="color:var(--muted)">Run or step through the machine to see the trace.</span>';
+    this._traceCount = 0;
+  }
+
+  _logStep() {
+    // Capture state BEFORE the step
+    const st = this.tm.getState(this.tm.currentStateId);
+    const sym = this.tm.readTape();
+    const tr = this.tm.transitions.find(t => t.fromId === this.tm.currentStateId && t.read === sym);
+    const stepNum = this.tm.stepCount + 1;
+    const stateName = st ? st.name : '?';
+    const readSym = this.dispSym(sym);
+
+    if (tr) {
+      const toSt = this.tm.getState(tr.toId);
+      const writeSym = this.dispSym(tr.write);
+      const dir = tr.direction;
+      const toName = toSt ? toSt.name : '?';
+      return { stepNum, text: `<b>${stateName}</b>: read <b>${this.escHTML(readSym)}</b> → write <b>${this.escHTML(writeSym)}</b>, ${dir}, goto <b>${toName}</b>`, halted: false };
+    } else {
+      const accepted = st && st.isAccept;
+      const status = accepted ? '<span style="color:var(--success)">ACCEPTED</span>' : '<span style="color:var(--danger)">REJECTED</span>';
+      return { stepNum, text: `<b>${stateName}</b>: read <b>${this.escHTML(readSym)}</b> → no transition — ${status}`, halted: true };
+    }
+  }
+
+  _appendTrace(entry) {
+    const log = document.getElementById('trace-log');
+    if (this._traceCount === 0) log.innerHTML = '';
+    if (this._traceCount < 500) { // cap at 500 entries to avoid DOM bloat
+      const div = document.createElement('div');
+      div.style.cssText = entry.halted ? 'color:var(--text);padding:1px 0;border-top:1px solid var(--panel-border);margin-top:2px' : 'color:var(--muted);padding:1px 0';
+      div.innerHTML = `<span style="color:var(--muted);min-width:32px;display:inline-block">${entry.stepNum}.</span> ${entry.text}`;
+      log.appendChild(div);
+    } else if (this._traceCount === 500) {
+      const div = document.createElement('div');
+      div.style.cssText = 'color:var(--warning);padding:2px 0';
+      div.textContent = '... trace truncated (500 steps shown)';
+      log.appendChild(div);
+    }
+    this._traceCount = (this._traceCount || 0) + 1;
+    // Auto-scroll
+    const body = document.getElementById('trace-body');
+    body.scrollTop = body.scrollHeight;
+  }
+
+  // ── Simulation Controls ──
+  loadInput() {
+    const raw = document.getElementById('tape-input').value;
+    if (!this.tm.getStartState()) { alert('Define a start state first.'); return; }
+    const input = this._ensureInputCompat(this._normalizeInputStr(raw));
+    this.tm.loadInput(input);
+    this.activeTransId = null;
+    this._clearTrace();
+    this.renderAll();
+  }
+
+  doStep() {
+    if (this.tm.halted && this.tm.stepCount === 0) this.loadInput();
+    if (this.tm.halted) return;
+    const entry = this._logStep();
+    const result = this.tm.step();
+    this._appendTrace(entry);
+    this.activeTransId = result && result.transId ? result.transId : null;
+    this.renderDiagram();
+    this.renderTape();
+    this.updateStatus();
+    if (this.activeTransId) {
+      setTimeout(() => { this.activeTransId = null; this.renderDiagram(); }, 300);
+    }
+  }
+
+  doRun() {
+    if (this.tm.halted && this.tm.stepCount === 0) this.loadInput();
+    if (this.tm.halted) return;
+    this.running = true;
+    document.getElementById('run-btn').disabled = true;
+    document.getElementById('pause-btn').disabled = false;
+    this.updateStatus();
+    this._runStep();
+  }
+
+  _runStep() {
+    if (!this.running || this.tm.halted) { this.doPause(); return; }
+    if (this.tm.stepCount > 200000) {
+      alert('Step limit (200000) reached. Machine may be in an infinite loop.');
+      this.doPause();
+      return;
+    }
+    const entry = this._logStep();
+    const result = this.tm.step();
+    this._appendTrace(entry);
+    this.activeTransId = result && result.transId ? result.transId : null;
+    this.renderDiagram();
+    this.renderTape();
+    this.updateStatus();
+    const speed = parseInt(document.getElementById('speed-slider').value);
+    const delay = Math.max(10, 500 - speed * 16);
+    this.runTimer = setTimeout(() => this._runStep(), delay);
+  }
+
+  doPause() {
+    this.running = false;
+    clearTimeout(this.runTimer);
+    document.getElementById('run-btn').disabled = false;
+    document.getElementById('pause-btn').disabled = true;
+    this.activeTransId = null;
+    this.renderDiagram();
+    this.updateStatus();
+  }
+
+  doReset() {
+    this.doPause();
+    this.tm.tape = {};
+    this.tm.headPos = 0;
+    this.tm.currentStateId = null;
+    this.tm.halted = true;
+    this.tm.accepted = false;
+    this.tm.rejected = false;
+    this.tm.stepCount = 0;
+    this.activeTransId = null;
+    this._clearTrace();
+    this.renderAll();
+  }
+
+  // ── Modals ──
+  showModal(title, bodyHTML, onOk) {
+    document.getElementById('modal-title').textContent = title;
+    document.getElementById('modal-body').innerHTML = bodyHTML;
+    document.getElementById('modal-overlay').classList.add('open');
+    this._modalOk = onOk;
+    document.getElementById('modal-ok').onclick = () => {
+      if (this._modalOk) this._modalOk();
+      this.hideModal();
+    };
+    // Focus first input
+    const firstInput = document.querySelector('#modal-body input[type=text], #modal-body select');
+    if (firstInput) setTimeout(() => firstInput.focus(), 50);
+    // Enter key submits
+    const inputs = document.querySelectorAll('#modal-body input[type=text]');
+    inputs.forEach(inp => {
+      inp.onkeydown = e => { if (e.key === 'Enter') document.getElementById('modal-ok').click(); };
+    });
+  }
+
+  hideModal() {
+    document.getElementById('modal-overlay').classList.remove('open');
+    this._modalOk = null;
+  }
+
+  showStateModal(state) {
+    const typeVal = state.isAccept ? 'accept' : state.isReject ? 'reject' : 'normal';
+    const html = `
+      <div class="modal-field">
+        <label>State Name</label>
+        <input type="text" id="m-name" value="${this.escHTML(state.name)}">
+      </div>
+      <div class="modal-field">
+        <label>State Type</label>
+        <select id="m-type">
+          <option value="normal" ${typeVal==='normal'?'selected':''}>Normal</option>
+          <option value="accept" ${typeVal==='accept'?'selected':''}>Accept (halting, double circle)</option>
+          <option value="reject" ${typeVal==='reject'?'selected':''}>Reject (halting)</option>
+        </select>
+      </div>
+      <div class="checkbox-row">
+        <label><input type="checkbox" id="m-start" ${state.isStart ? 'checked' : ''}> Start State</label>
+      </div>`;
+    this.showModal('Edit State: ' + state.name, html, () => {
+      state.name = document.getElementById('m-name').value || state.name;
+      const type = document.getElementById('m-type').value;
+      state.isAccept = type === 'accept';
+      state.isReject = type === 'reject';
+      const isStart = document.getElementById('m-start').checked;
+      if (isStart) {
+        this.tm.states.forEach(s => s.isStart = false);
+        state.isStart = true;
+      } else if (state.isStart && !isStart) {
+        state.isStart = false;
+      }
+      this.renderAll();
+    });
+  }
+
+  showTransitionModal(existing, fromId, toId) {
+    const from = this.tm.getState(fromId);
+    const to = this.tm.getState(toId);
+    const r = existing ? existing.read : '';
+    const w = existing ? existing.write : '';
+    const d = existing ? existing.direction : 'R';
+    // Build quick-pick buttons for common symbols
+    const blk = this.tm.blank;
+    const quickSyms = [
+      { label: SymbolRenderer.display(blk), value: blk, title: 'Blank' },
+      { label: '|-', value: '\u22a2', title: 'Start of tape (⊢)' },
+      { label: '\u0394', value: '\u0394', title: 'Triangle / Delta' },
+      { label: '$', value: '$', title: 'Dollar (output marker)' },
+      { label: '#', value: '#', title: 'Hash (separator)' },
+      { label: '0', value: '0', title: '0' },
+      { label: '1', value: '1', title: '1' },
+      { label: 'X', value: 'X', title: 'X (mark)' },
+    ];
+    const pickBtns = (targetId) => quickSyms.map(s =>
+      `<button type="button" class="btn sym-pick" data-target="${targetId}" data-val="${this.escHTML(s.value)}" title="${s.title}" style="padding:3px 7px;font-size:.9rem;min-width:28px;font-family:monospace">${this.escHTML(s.label)}</button>`
+    ).join('');
+    const html = `
+      <p style="color:var(--muted);font-size:.85rem;margin-bottom:12px">
+        ${from ? from.name : '?'} &rarr; ${to ? to.name : '?'}
+      </p>
+      <div class="modal-field-row">
+        <div class="modal-field">
+          <label>Read Symbol</label>
+          <input type="text" id="m-read" value="${this.escHTML(r)}" maxlength="1" placeholder="type or pick below">
+          <div style="display:flex;gap:3px;margin-top:5px;flex-wrap:wrap">${pickBtns('m-read')}</div>
+        </div>
+        <div class="modal-field">
+          <label>Write Symbol</label>
+          <input type="text" id="m-write" value="${this.escHTML(w)}" maxlength="1" placeholder="type or pick below">
+          <div style="display:flex;gap:3px;margin-top:5px;flex-wrap:wrap">${pickBtns('m-write')}</div>
+        </div>
+      </div>
+      <div class="modal-field">
+        <label>Direction</label>
+        <select id="m-dir">
+          <option value="R" ${d==='R'?'selected':''}>R (Right / ימין)</option>
+          <option value="L" ${d==='L'?'selected':''}>L (Left / שמאל)</option>
+        </select>
+      </div>`;
+    // After modal is shown, attach click handlers to quick-pick buttons
+    setTimeout(() => {
+      document.querySelectorAll('.sym-pick').forEach(btn => {
+        btn.onclick = () => {
+          const target = document.getElementById(btn.dataset.target);
+          if (target) { target.value = btn.dataset.val; target.focus(); }
+        };
+      });
+    }, 50);
+    this.showModal(existing ? 'Edit Transition' : 'Add Transition', html, () => {
+      let read = document.getElementById('m-read').value;
+      let write = document.getElementById('m-write').value;
+      const dir = document.getElementById('m-dir').value;
+      if (!read) read = this.tm.blank;
+      if (!write) write = this.tm.blank;
+      if (existing) {
+        existing.read = read;
+        existing.write = write;
+        existing.direction = dir;
+      } else {
+        this.tm.addTransition(fromId, toId, read, write, dir);
+      }
+      this.transSourceId = null;
+      this.setMode('select');
+      this.renderAll();
+    });
+  }
+
+  // ── Test Cases ──
+  addTestCase() {
+    const html = `
+      <div class="modal-field">
+        <label>Input String</label>
+        <input type="text" id="m-tinput" placeholder="e.g. 1011">
+      </div>
+      <div class="modal-field">
+        <label>Expected Result</label>
+        <select id="m-texpected">
+          <option value="accept">Accept</option>
+          <option value="reject">Reject</option>
+          <option value="halt">Halt (check tape output only)</option>
+        </select>
+      </div>
+      <div class="modal-field">
+        <label>Expected Tape Output (optional for accept/reject, required for halt)</label>
+        <input type="text" id="m-toutput" placeholder="e.g. 1100">
+      </div>`;
+    this.showModal('Add Test Case', html, () => {
+      const input = document.getElementById('m-tinput').value;
+      const expected = document.getElementById('m-texpected').value;
+      const expectedTape = document.getElementById('m-toutput').value;
+      this.testCases.push({ input, expected, expectedTape, result: null, tapeResult: null, status: 'pending' });
+      this.renderTestTable();
+    });
+  }
+
+  // Normalize a tape/input string: convert display-form symbols to their internal Unicode equivalents
+  _normalizeInputStr(s) {
+    if (!s) return '';
+    // |- (two ASCII chars) → ⊢ (single Unicode char U+22A2)
+    let r = s.replace(/\|-/g, '\u22a2');
+    return r;
+  }
+
+  // Ensure input has ⊢ prefix if the machine uses it, or strip it if the machine doesn't
+  _ensureInputCompat(input) {
+    if (!input) input = '';
+    const startsWithMarker = input.length > 0 && input[0] === '\u22a2';
+    const machineUsesMarker = this.tm.transitions.some(t => t.read === '\u22a2' || t.write === '\u22a2');
+    if (machineUsesMarker && !startsWithMarker) {
+      // Machine expects ⊢ but input doesn't have it — prepend it
+      return '\u22a2' + input;
+    }
+    // If machine doesn't use ⊢ and input has it — leave as-is, loadInput will skip past it
+    return input;
+  }
+
+  // Normalize tape string for comparison: strip blanks, markers, and normalize symbols
+  _normTape(s, blk) {
+    if (!s) return '';
+    if (!blk) blk = this.tm ? this.tm.blank : '\u25a1';
+    let r = s;
+    // Strip all blank-like characters
+    r = r.replace(/[\u25a1\u2610\u25fb\u25ab\u2b1c]/g, '');
+    if (blk && blk !== '\u25a1') r = r.replace(new RegExp(blk.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'), 'g'), '');
+    // Strip tape-start markers (⊢, ├, and leading |-)  — these are markers, not data
+    r = r.replace(/[\u22a2\u251c]/g, '');
+    r = r.replace(/^\|-/, '');
+    // △ ▷ and other geometric triangles ↔ Δ (Greek delta)
+    r = r.replace(/[\u25B2\u25B3\u25B6\u25B7\u25BC\u25BD\u25C0\u25C1\u25B5\u25B9\u25BF\u25BB\u25C3\u25C5\u2206]/g, '\u0394');
+    return r.trim();
+  }
+
+  // Smart tape comparison: handles both output styles (after-input and replace-input)
+  _compareTapes(actual, expected) {
+    const na = this._normTape(actual);
+    const ne = this._normTape(expected);
+    if (!ne) return true; // no expected tape = don't check
+    // 1. Strict match after normalization
+    if (na === ne) return true;
+    // 2. Expected has $result$ — extract result, compare with actual
+    //    e.g., expected="111#11$11111$" actual="11111"
+    const dollarExpMatch = ne.match(/\$([^$]+)\$/);
+    if (dollarExpMatch && na === dollarExpMatch[1]) return true;
+    // 3. Actual has $result$ — extract result, compare with expected
+    //    e.g., actual="111#11$11111$" expected="11111"
+    const dollarActMatch = na.match(/\$([^$]+)\$/);
+    if (dollarActMatch && ne === dollarActMatch[1]) return true;
+    // 4. Both have $ — compare the $ portions
+    if (dollarExpMatch && dollarActMatch && dollarExpMatch[1] === dollarActMatch[1]) return true;
+    return false;
+  }
+
+  runAllTests() {
+    const btn = document.getElementById('run-tests-btn');
+    try {
+      if (!this.tm.getStartState()) { alert('Define a start state first.'); return; }
+      if (this.testCases.length === 0) return;
+      btn.textContent = 'Running...'; btn.disabled = true;
+
+      this.testCases.forEach((tc, idx) => {
+        try {
+          const m = this.tm.clone();
+          const normalizedInput = this._ensureInputCompat(this._normalizeInputStr(tc.input || ''));
+          m.loadInput(normalizedInput);
+          let steps = 0;
+          while (!m.halted && steps < 50000) { m.step(); steps++; }
+          tc.result = m.accepted ? 'accept' : (m.rejected ? 'reject' : 'halt');
+          tc.tapeResult = m.getTapeString();
+          tc.steps = steps;
+          let exp = (tc.expected || 'accept').toString().toLowerCase().trim();
+          if (exp === 'halts' || exp === 'halted') exp = 'halt';
+          if (exp === 'accepted' || exp === 'accepts') exp = 'accept';
+          if (exp === 'rejected' || exp === 'rejects') exp = 'reject';
+          let pass;
+          if (exp === 'halt') {
+            pass = m.halted && steps < 50000;
+            if (tc.expectedTape && pass) pass = this._compareTapes(tc.tapeResult, tc.expectedTape);
+          } else if (exp === 'accept') {
+            pass = m.accepted || (m.halted && !m.rejected);
+            if (tc.expectedTape && pass) pass = this._compareTapes(tc.tapeResult, tc.expectedTape);
+          } else {
+            pass = m.rejected || (m.halted && !m.accepted);
+            if (tc.expectedTape && pass) pass = this._compareTapes(tc.tapeResult, tc.expectedTape);
+          }
+          tc._normActual = this._normTape(tc.tapeResult);
+          tc._normExpected = tc.expectedTape ? this._normTape(tc.expectedTape) : '';
+          tc.status = (!m.halted || steps >= 50000) ? 'timeout' : (pass ? 'pass' : 'fail');
+        } catch(e) {
+          tc.result = 'error'; tc.tapeResult = ''; tc.status = 'fail';
+          tc._normActual = 'ERROR: ' + e.message; tc._normExpected = '';
+          console.error('[RunAll] Test error:', e);
+        }
+      });
+      this.renderTestTable();
+    } catch(e) {
+      console.error('[RunAll] Fatal error:', e);
+      alert('Error running tests: ' + e.message);
+    } finally {
+      btn.textContent = 'Run All'; btn.disabled = false;
+    }
+  }
+
+  renderTestTable() {
+    const tbody = document.querySelector('#test-table tbody');
+    if (this.testCases.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="5" style="color:var(--muted);text-align:center;padding:12px">No test cases</td></tr>';
+      return;
+    }
+    tbody.innerHTML = this.testCases.map((tc, i) => {
+      const statusCls = tc.status === 'pass' ? 'test-pass' : tc.status === 'fail' ? 'test-fail' : tc.status === 'timeout' ? 'test-fail' : 'test-pending';
+      const statusText = tc.status === 'pass' ? 'PASS' : tc.status === 'fail' ? 'FAIL' : tc.status === 'timeout' ? 'LOOP' : '-';
+      // Expected column
+      let expectedText = tc.expected === 'halt' ? 'halt' : tc.expected;
+      if (tc.expectedTape) expectedText += ' \u2192 ' + this.escHTML(tc.expectedTape);
+      // Result column: show tape output prominently
+      let resultText = '-';
+      if (tc.result) {
+        resultText = tc.result;
+        if (tc.tapeResult) resultText += ' \u2192 ' + this.escHTML(tc.tapeResult);
+      }
+      // Show debug info on failure
+      let debugRow = '';
+      if (tc.status === 'fail' && tc.tapeResult != null) {
+        let debugMsg = '';
+        if (tc.expectedTape && tc._normExpected && tc._normActual) {
+          if (tc._normActual !== tc._normExpected) {
+            // Show char-by-char difference
+            let diff = '';
+            const maxLen = Math.max(tc._normActual.length, tc._normExpected.length);
+            for (let c = 0; c < maxLen; c++) {
+              const a = tc._normActual[c] || '', e = tc._normExpected[c] || '';
+              if (a !== e) { diff = `first diff at pos ${c}: got "${a||'(end)'}" expected "${e||'(end)'}"`; break; }
+            }
+            debugMsg = `<span style="color:var(--danger)">tape mismatch</span> ` +
+              `expected: "<b>${this.escHTML(tc._normExpected)}</b>" got: "<b>${this.escHTML(tc._normActual)}</b>"` +
+              (diff ? ` (${diff})` : '') + ` [${tc.steps} steps]`;
+          }
+        }
+        if (!debugMsg && tc.expected && tc.result && tc.result !== tc.expected) {
+          debugMsg = `expected <b>${tc.expected}</b> but got <b>${tc.result}</b> [${tc.steps} steps]`;
+        }
+        if (debugMsg) {
+          debugRow = `<tr><td colspan="5" style="color:var(--muted);font-size:.75rem;padding:2px 8px;border:none">${debugMsg}</td></tr>`;
+        }
+      }
+      return `<tr>
+        <td>${this.escHTML(tc.input) || '(empty)'}</td>
+        <td>${expectedText}</td>
+        <td>${resultText}</td>
+        <td class="${statusCls}">${statusText}</td>
+        <td style="white-space:nowrap"><button class="del-btn load-test-btn" data-ti="${i}" title="Load into simulator">&#9654;</button> <button class="del-btn" data-ti="${i}" title="Delete">&times;</button></td>
+      </tr>${debugRow}`;
+    }).join('');
+    // Load test into simulator
+    tbody.querySelectorAll('.load-test-btn').forEach(btn => {
+      btn.onclick = () => {
+        const tc = this.testCases[parseInt(btn.dataset.ti)];
+        if (tc) {
+          document.getElementById('tape-input').value = tc.input;
+          this.loadInput();
+        }
+      };
+    });
+    // Delete test
+    tbody.querySelectorAll('.del-btn:not(.load-test-btn)').forEach(btn => {
+      btn.onclick = () => {
+        this.testCases.splice(parseInt(btn.dataset.ti), 1);
+        this.renderTestTable();
+      };
+    });
+  }
+
+  // ── Clear / Presets ──
+  clearAll() {
+    this.tm = new TuringMachine();
+    this.stateCounter = 0;
+    this.selectedStateId = null;
+    this.selectedTransId = null;
+    this.testCases = [];
+    this.doPause();
+    this.renderAll();
+  }
+
+  loadPreset(name) {
+    this.clearAll();
+    const P = PRESETS[name];
+    if (!P) return;
+    this._loadMachineDef(P);
+  }
+
+  // Load a machine faithfully (no auto-fixes, no tests) — for student diagram upload
+  _loadMachineDefFaithful(P) {
+    this.tm = this._buildTMFromDef(P, true);
+    this.stateCounter = this.tm.states.length;
+    this.testCases = [];
+    if (P.input !== undefined) document.getElementById('tape-input').value = P.input;
+    this.renderAll();
+  }
+
+  _loadMachineDef(P) {
+    this.tm = this._buildTMFromDef(P);
+    this.stateCounter = this.tm.states.length;
+    if (P.tests) this.testCases = P.tests.map(t => {
+      let exp = (t.expected || 'accept').toString().toLowerCase().trim();
+      if (exp === 'halts' || exp === 'halted') exp = 'halt';
+      if (exp === 'accepted' || exp === 'accepts') exp = 'accept';
+      if (exp === 'rejected' || exp === 'rejects') exp = 'reject';
+      if (exp !== 'accept' && exp !== 'reject' && exp !== 'halt') exp = 'accept';
+      return {
+        input: t.input || '', expected: exp,
+        expectedTape: t.expectedTape || '', result: null, tapeResult: null, status: 'pending'
+      };
+    });
+    if (P.input !== undefined) document.getElementById('tape-input').value = P.input;
+    this.renderAll();
+  }
+
+  // ── Student Assistant ──
+  _initStudent() {
+    document.getElementById('student-btn').onclick = () => this.showStudent();
+    document.getElementById('student-close').onclick = () => this.hideStudent();
+    document.getElementById('s-close-btn').onclick = () => this.hideStudent();
+    document.getElementById('student-overlay').onclick = e => {
+      if (e.target === e.currentTarget) this.hideStudent();
+    };
+    document.getElementById('s-process').onclick = () => this.processStudent();
+
+    // Diagram image upload
+    document.getElementById('s-img-remove').onclick = () => this._removeStudentImage();
+    const dz = document.getElementById('s-dropzone');
+    const fi = document.getElementById('s-file');
+    dz.addEventListener('click', () => fi.click());
+    fi.onchange = e => this._handleStudentFile(e.target.files[0]);
+    dz.ondragover = e => { e.preventDefault(); dz.classList.add('dragover'); };
+    dz.ondragleave = () => dz.classList.remove('dragover');
+    dz.ondrop = e => { e.preventDefault(); dz.classList.remove('dragover');
+      if (e.dataTransfer.files[0]) this._handleStudentFile(e.dataTransfer.files[0]); };
+
+    // Question image upload
+    document.getElementById('s-q-img-remove').onclick = () => this._removeStudentQImage();
+    const qdz = document.getElementById('s-q-dropzone');
+    const qfi = document.getElementById('s-q-file');
+    qdz.addEventListener('click', () => qfi.click());
+    qfi.onchange = e => this._handleStudentQFile(e.target.files[0]);
+    qdz.ondragover = e => { e.preventDefault(); qdz.classList.add('dragover'); };
+    qdz.ondragleave = () => qdz.classList.remove('dragover');
+    qdz.ondrop = e => { e.preventDefault(); qdz.classList.remove('dragover');
+      if (e.dataTransfer.files[0]) this._handleStudentQFile(e.dataTransfer.files[0]); };
+
+    document.getElementById('s-mode').onchange = () => this._updateStudentUI();
+    this._updateStudentUI();
+
+    // Clipboard paste for images (Ctrl+V) — goes to the appropriate slot
+    document.getElementById('student-overlay').addEventListener('paste', e => {
+      const items = e.clipboardData?.items;
+      if (!items) return;
+      for (const item of items) {
+        if (item.type.startsWith('image/')) {
+          e.preventDefault();
+          const mode = document.getElementById('s-mode').value;
+          // In diagram mode: if no diagram yet, paste as diagram; otherwise paste as question image
+          if (mode === 'diagram' && !this._studentImageData) {
+            this._handleStudentFile(item.getAsFile());
+          } else {
+            this._handleStudentQFile(item.getAsFile());
+          }
+          return;
+        }
+      }
+    });
+  }
+
+  _updateStudentUI() {
+    const mode = document.getElementById('s-mode').value;
+    const qLabel = document.getElementById('s-question-label');
+    const diagramSection = document.getElementById('s-diagram-section');
+    const orLabel = document.getElementById('s-or-label');
+    if (mode === 'diagram') {
+      diagramSection.style.display = '';
+      orLabel.textContent = 'Question (optional — type or attach image to auto-generate tests)';
+      qLabel.textContent = 'Question text';
+    } else {
+      diagramSection.style.display = 'none';
+      orLabel.textContent = 'or attach question as image';
+      qLabel.textContent = 'Question / Description';
+    }
+  }
+
+  showStudent() {
+    document.getElementById('student-overlay').classList.add('open');
+    document.getElementById('s-status').className = 't-status';
+    document.getElementById('s-result').className = 's-result';
+  }
+  hideStudent() { document.getElementById('student-overlay').classList.remove('open'); }
+
+  _studentImageData = null; _studentFile = null;
+  _handleStudentFile(file) {
+    if (!file || !file.type.startsWith('image/')) return;
+    this._studentFile = file;
+    const reader = new FileReader();
+    reader.onload = e => {
+      this._studentImageData = e.target.result;
+      document.getElementById('s-img-tag').src = e.target.result;
+      document.getElementById('s-img-preview').classList.add('visible');
+      document.getElementById('s-dropzone').style.display = 'none';
+    };
+    reader.readAsDataURL(file);
+  }
+  _removeStudentImage() {
+    this._studentFile = null; this._studentImageData = null;
+    document.getElementById('s-img-tag').src = '';
+    document.getElementById('s-img-preview').classList.remove('visible');
+    document.getElementById('s-dropzone').style.display = '';
+    document.getElementById('s-file').value = '';
+  }
+
+  // Question image (separate from diagram image)
+  _studentQImageData = null; _studentQFile = null;
+  _handleStudentQFile(file) {
+    if (!file || !file.type.startsWith('image/')) return;
+    this._studentQFile = file;
+    const reader = new FileReader();
+    reader.onload = e => {
+      this._studentQImageData = e.target.result;
+      document.getElementById('s-q-img-tag').src = e.target.result;
+      document.getElementById('s-q-img-preview').classList.add('visible');
+      document.getElementById('s-q-dropzone').style.display = 'none';
+    };
+    reader.readAsDataURL(file);
+  }
+  _removeStudentQImage() {
+    this._studentQFile = null; this._studentQImageData = null;
+    document.getElementById('s-q-img-tag').src = '';
+    document.getElementById('s-q-img-preview').classList.remove('visible');
+    document.getElementById('s-q-dropzone').style.display = '';
+    document.getElementById('s-q-file').value = '';
+  }
+
+  async processStudent() {
+    const apiKey = this._getApiKeyForUse();
+    if (!apiKey) { alert('No API key configured. Ask your teacher to set it up.'); return; }
+
+    const mode = document.getElementById('s-mode').value;
+    const questionText = (document.getElementById('s-question')?.value || '').trim();
+    const hasDiagramImg = !!this._studentImageData;
+    const hasQuestionImg = !!this._studentQImageData;
+
+    if (mode === 'diagram' && !hasDiagramImg) { alert('Please upload an image of your diagram.'); return; }
+    if (mode !== 'diagram' && !questionText && !hasQuestionImg) { alert('Please enter a question or upload a question image.'); return; }
+
+    const statusEl = document.getElementById('s-status');
+    const resultEl = document.getElementById('s-result');
+    const processBtn = document.getElementById('s-process');
+    statusEl.className = 't-status visible loading';
+    statusEl.innerHTML = '<span class="spinner"></span> Thinking...';
+    resultEl.className = 's-result';
+    processBtn.disabled = true;
+
+    // Helper: add question image to content array
+    const _addQuestionImg = (content) => {
+      if (hasQuestionImg) {
+        content.push({ type: 'text', text: '[Question Image]:' });
+        content.push({ type: 'image', source: { type: 'base64', media_type: this._studentQFile.type, data: this._studentQImageData.split(',')[1] } });
+      }
+    };
+
+    try {
+      let systemPrompt, userText;
+      const content = [];
+
+      if (mode === 'diagram') {
+        // Strict diagram extraction — no fixes, no tests
+        systemPrompt = STUDENT_DIAGRAM_PROMPT;
+        const classCtx = this.getTeacherContext();
+        if (classCtx.text) systemPrompt += classCtx.text;
+        content.push({ type: 'text', text: '[Diagram Image]:' });
+        content.push({ type: 'image', source: { type: 'base64', media_type: this._studentFile.type, data: this._studentImageData.split(',')[1] } });
+        userText = 'Extract the Turing Machine EXACTLY as drawn in this diagram. Do not fix or add anything. Do not generate tests. Reproduce it faithfully.';
+      } else if (mode === 'hints') {
+        systemPrompt = HINTS_PROMPT;
+        const classCtx = this.getTeacherContext();
+        systemPrompt += (classCtx.text || '');
+        _addQuestionImg(content);
+        userText = hasQuestionImg && questionText ? 'The image shows the question. Additional context:\n' + questionText
+          : hasQuestionImg ? 'Give me hints for the question shown in the image.'
+          : questionText;
+      } else { // tests
+        systemPrompt = TESTS_PROMPT;
+        const classCtx = this.getTeacherContext();
+        systemPrompt += (classCtx.text || '');
+        _addQuestionImg(content);
+        userText = hasQuestionImg && questionText ? 'The image shows the question. Additional context:\n' + questionText
+          : hasQuestionImg ? 'Generate test cases for the question shown in the image.'
+          : questionText;
+      }
+
+      content.push({ type: 'text', text: userText });
+      const selectedModel = 'claude-sonnet-4-6'; // Use fast model for student features
+
+      const resp = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': apiKey,
+          'anthropic-version': '2023-06-01',
+          'anthropic-dangerous-direct-browser-access': 'true'
+        },
+        body: JSON.stringify({ model: selectedModel, max_tokens: 8000, temperature: 0.4, system: systemPrompt, messages: [{ role: 'user', content }] })
+      });
+      if (!resp.ok) {
+        const err = await resp.json().catch(() => ({}));
+        throw new Error(err.error?.message || `API error ${resp.status}`);
+      }
+      const data = await resp.json();
+      const textBlock = data.content.find(b => b.type === 'text');
+      const rawText = textBlock ? textBlock.text : data.content[data.content.length - 1].text;
+
+      if (mode === 'diagram') {
+        // Parse and load — exact extraction, no tests
+        const machine = this._extractMachineJSON(rawText);
+        if (!machine.states || !machine.states.length) throw new Error('Could not extract states from diagram.');
+        this.clearAll();
+        this._loadMachineDefFaithful(machine);
+
+        // If the student also provided a question (text or image), auto-generate test cases
+        const hasQuestion = questionText || hasQuestionImg;
+        if (hasQuestion) {
+          statusEl.innerHTML = `<span class="spinner"></span> Diagram loaded (${machine.states.length} states). Generating test cases...`;
+          const testContent = [];
+          const classCtx = this.getTeacherContext();
+          let testSysPrompt = TESTS_PROMPT;
+          if (classCtx.text) testSysPrompt += classCtx.text;
+          if (hasQuestionImg) {
+            testContent.push({ type: 'text', text: '[Question Image]:' });
+            testContent.push({ type: 'image', source: { type: 'base64', media_type: this._studentQFile.type, data: this._studentQImageData.split(',')[1] } });
+          }
+          let testUserText = hasQuestionImg && questionText ? 'The image shows the question. Additional context:\n' + questionText
+            : hasQuestionImg ? 'Generate test cases for the question shown in the image.'
+            : questionText;
+          testContent.push({ type: 'text', text: testUserText });
+          const testResp = await fetch('https://api.anthropic.com/v1/messages', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
+            body: JSON.stringify({ model: 'claude-sonnet-4-6', max_tokens: 8000, temperature: 0.4, system: testSysPrompt, messages: [{ role: 'user', content: testContent }] })
+          });
+          if (testResp.ok) {
+            const testData = await testResp.json();
+            const testTextBlock = testData.content.find(b => b.type === 'text');
+            const testRaw = testTextBlock ? testTextBlock.text : '';
+            try {
+              const testJson = this._extractMachineJSON(testRaw);
+              if (testJson.tests && testJson.tests.length) {
+                testJson.tests.forEach(t => {
+                  let exp = (t.expected || 'accept').toString().toLowerCase().trim();
+                  if (exp === 'halts' || exp === 'halted') exp = 'halt';
+                  if (exp === 'accepted' || exp === 'accepts') exp = 'accept';
+                  if (exp === 'rejected' || exp === 'rejects') exp = 'reject';
+                  this.testCases.push({ input: t.input || '', expected: exp, expectedTape: t.expectedTape || '', result: null, tapeResult: null, status: 'pending' });
+                });
+                this.renderTestTable();
+                this.runAllTests();
+                statusEl.className = 't-status visible success';
+                statusEl.textContent = `Diagram loaded! ${machine.states.length} states, ${machine.transitions.length} transitions. ${testJson.tests.length} test cases generated and run.`;
+              }
+            } catch(e) { /* no valid test JSON, that's ok */ }
+          }
+          if (this.testCases.length === 0) {
+            statusEl.className = 't-status visible success';
+            statusEl.textContent = `Diagram loaded! ${machine.states.length} states, ${machine.transitions.length} transitions. Could not auto-generate tests — add them manually.`;
+          }
+        } else {
+          statusEl.className = 't-status visible success';
+          statusEl.textContent = `Diagram loaded! ${machine.states.length} states, ${machine.transitions.length} transitions. Add a question next time to auto-generate tests.`;
+        }
+        setTimeout(() => this.hideStudent(), 3000);
+      } else if (mode === 'hints') {
+        statusEl.className = 't-status visible success';
+        statusEl.textContent = 'Here are some hints:';
+        resultEl.className = 's-result visible';
+        resultEl.innerHTML = this._formatMarkdown(rawText);
+      } else { // tests
+        statusEl.className = 't-status visible success';
+        statusEl.textContent = 'Test cases generated:';
+        resultEl.className = 's-result visible';
+        resultEl.innerHTML = this._formatMarkdown(rawText);
+        // Try to extract test cases from JSON if present
+        try {
+          const json = this._extractMachineJSON(rawText);
+          if (json.tests && json.tests.length) {
+            json.tests.forEach(t => {
+              let exp = (t.expected || 'accept').toString().toLowerCase().trim();
+              if (exp === 'halts' || exp === 'halted') exp = 'halt';
+              if (exp === 'accepted' || exp === 'accepts') exp = 'accept';
+              if (exp === 'rejected' || exp === 'rejects') exp = 'reject';
+              this.testCases.push({ input: t.input || '', expected: exp, expectedTape: t.expectedTape || '', result: null, tapeResult: null, status: 'pending' });
+            });
+            this.renderTestTable();
+            statusEl.textContent = `${json.tests.length} test cases added to the Test Cases panel!`;
+          }
+        } catch(e) { /* no JSON tests found, just show text */ }
+      }
+    } catch(err) {
+      statusEl.className = 't-status visible error';
+      statusEl.textContent = 'Error: ' + err.message;
+    } finally {
+      processBtn.disabled = false;
+    }
+  }
+
+  _formatMarkdown(text) {
+    // Simple markdown → HTML: bold, headers, lists, code
+    return text
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+      .replace(/^### (.+)$/gm, '<h4>$1</h4>')
+      .replace(/^## (.+)$/gm, '<h4>$1</h4>')
+      .replace(/^# (.+)$/gm, '<h4>$1</h4>')
+      .replace(/^- (.+)$/gm, '<li>$1</li>')
+      .replace(/^(\d+)\. (.+)$/gm, '<li>$1. $2</li>')
+      .replace(/`([^`]+)`/g, '<code style="background:var(--card);padding:1px 4px;border-radius:3px">$1</code>')
+      .replace(/\n/g, '<br>');
+  }
+
+  // ── Teacher Assistant ──
+  showTeacher() {
+    document.getElementById('teacher-overlay').classList.add('open');
+    document.getElementById('t-status').className = 't-status';
+    document.getElementById('t-desc').className = 't-desc';
+  }
+  hideTeacher() {
+    this.saveTeacherRules();
+    document.getElementById('teacher-overlay').classList.remove('open');
+  }
+
+  handleTeacherFile(file) {
+    if (!file || !file.type.startsWith('image/')) return;
+    this._teacherFile = file;
+    const reader = new FileReader();
+    reader.onload = e => {
+      this._teacherImageData = e.target.result;
+      document.getElementById('t-img-tag').src = e.target.result;
+      document.getElementById('t-img-preview').classList.add('visible');
+      document.getElementById('t-dropzone').style.display = 'none';
+    };
+    reader.readAsDataURL(file);
+  }
+
+  removeTeacherImage() {
+    this._teacherFile = null;
+    this._teacherImageData = null;
+    document.getElementById('t-img-tag').src = '';
+    document.getElementById('t-img-preview').classList.remove('visible');
+    document.getElementById('t-dropzone').style.display = '';
+    document.getElementById('t-file').value = '';
+  }
+
+  // ── Teacher Rules & Examples ──
+  _teacherExamples = [];
+
+  loadTeacherRules() {
+    let saved = null;
+    // Try embedded config first (baked into HTML for student distribution)
+    if (typeof __EMBEDDED_CONFIG__ === 'object' && __EMBEDDED_CONFIG__ && __EMBEDDED_CONFIG__.r) {
+      saved = JSON.stringify(__EMBEDDED_CONFIG__.r);
+    }
+    // Then try localStorage
+    if (!saved) {
+      try { saved = localStorage.getItem('tm-teacher-rules'); } catch(e) {}
+    }
+    if (saved) {
+      try {
+        const data = JSON.parse(saved);
+        if (data.rules) document.getElementById('t-rules').value = data.rules;
+        this._teacherExamples = (data.examples || []).map(ex => ({
+          question: ex.question || '', answer: ex.answer || '',
+          qImage: ex.qImage || null, aImage: ex.aImage || null
+        }));
+      } catch(e) { /* corrupt data */ }
+    }
+    this.renderTeacherExamples();
+  }
+
+  saveTeacherRules() {
+    this._readExamplesFromDOM();
+    const data = {
+      rules: document.getElementById('t-rules').value,
+      examples: this._teacherExamples.map(ex => ({
+        question: ex.question, answer: ex.answer,
+        qImage: ex.qImage, aImage: ex.aImage
+      }))
+    };
+    // Try saving with images first; if too large, save without images
+    try {
+      localStorage.setItem('tm-teacher-rules', JSON.stringify(data));
+    } catch(e) {
+      // Images too large — save rules and text-only examples
+      const lite = {
+        rules: data.rules,
+        examples: data.examples.map(ex => ({ question: ex.question, answer: ex.answer, qImage: null, aImage: null }))
+      };
+      try {
+        localStorage.setItem('tm-teacher-rules', JSON.stringify(lite));
+        alert('Saved rules and text, but images were too large for browser storage. They will be kept for this session only.');
+      } catch(e2) {
+        alert('Could not save to browser storage.');
+        return;
+      }
+    }
+    const btn = document.getElementById('t-save-rules');
+    btn.textContent = 'Saved!'; setTimeout(() => btn.textContent = 'Save Rules & Examples', 1500);
+  }
+
+  addTeacherExample() {
+    this._readExamplesFromDOM();
+    this._teacherExamples.push({ question: '', answer: '', qImage: null, aImage: null });
+    this.renderTeacherExamples();
+  }
+
+  removeTeacherExample(idx) {
+    this._readExamplesFromDOM();
+    this._teacherExamples.splice(idx, 1);
+    this.renderTeacherExamples();
+  }
+
+  _readExamplesFromDOM() {
+    const pairs = document.querySelectorAll('.t-example-pair');
+    this._teacherExamples = Array.from(pairs).map((p, i) => {
+      const prev = this._teacherExamples[i] || {};
+      return {
+        question: p.querySelector('.t-ex-q').value,
+        answer: p.querySelector('.t-ex-a').value,
+        qImage: prev.qImage || null,
+        aImage: prev.aImage || null
+      };
+    });
+  }
+
+  handleExampleImage(idx, which, file) {
+    if (!file || !file.type.startsWith('image/')) return;
+    this._readExamplesFromDOM();
+    const reader = new FileReader();
+    reader.onload = e => {
+      const ex = this._teacherExamples[idx];
+      if (!ex) return;
+      if (which === 'q') { ex.qImage = { data: e.target.result, type: file.type, name: file.name }; }
+      else { ex.aImage = { data: e.target.result, type: file.type, name: file.name }; }
+      this.renderTeacherExamples();
+    };
+    reader.readAsDataURL(file);
+  }
+
+  removeExampleImage(idx, which) {
+    this._readExamplesFromDOM();
+    const ex = this._teacherExamples[idx];
+    if (!ex) return;
+    if (which === 'q') ex.qImage = null; else ex.aImage = null;
+    this.renderTeacherExamples();
+  }
+
+  renderTeacherExamples() {
+    const container = document.getElementById('t-examples-list');
+    container.innerHTML = this._teacherExamples.map((ex, i) => {
+      const qImgHtml = ex.qImage
+        ? `<img src="${ex.qImage.data}" class="t-ex-img-preview" alt="Q image">
+           <div class="t-ex-img-row"><span class="t-ex-img-name">${this.escHTML(ex.qImage.name)}</span>
+           <button class="btn btn-danger" onclick="app.removeExampleImage(${i},'q')">Remove</button></div>`
+        : `<div class="t-ex-img-row"><input type="file" accept="image/*" id="t-ex-qf-${i}">
+           <button class="btn" onclick="document.getElementById('t-ex-qf-${i}').click()">Attach Image</button>
+           <span class="t-ex-img-name">or paste question as image</span></div>`;
+      const aImgHtml = ex.aImage
+        ? `<img src="${ex.aImage.data}" class="t-ex-img-preview" alt="A image">
+           <div class="t-ex-img-row"><span class="t-ex-img-name">${this.escHTML(ex.aImage.name)}</span>
+           <button class="btn btn-danger" onclick="app.removeExampleImage(${i},'a')">Remove</button></div>`
+        : `<div class="t-ex-img-row"><input type="file" accept="image/*" id="t-ex-af-${i}">
+           <button class="btn" onclick="document.getElementById('t-ex-af-${i}').click()">Attach Image</button>
+           <span class="t-ex-img-name">or paste answer as image</span></div>`;
+      return `
+      <div class="t-example-pair">
+        <div class="t-ex-header">
+          <span>Example ${i + 1} — Question</span>
+          <button onclick="app.removeTeacherExample(${i})" title="Remove">&times;</button>
+        </div>
+        <textarea class="t-ex-q" placeholder="Type the question here (or attach an image below)...">${this.escHTML(ex.question)}</textarea>
+        ${qImgHtml}
+        <div class="t-ex-header"><span>Example ${i + 1} — Correct Answer</span></div>
+        <textarea class="t-ex-a" placeholder="Describe the correct solution (states, transitions, examples)...&#10;Or attach an image of the answer below.">${this.escHTML(ex.answer)}</textarea>
+        ${aImgHtml}
+      </div>`;
+    }).join('');
+    // Attach file input listeners
+    this._teacherExamples.forEach((_, i) => {
+      const qf = document.getElementById(`t-ex-qf-${i}`);
+      const af = document.getElementById(`t-ex-af-${i}`);
+      if (qf) qf.onchange = e => this.handleExampleImage(i, 'q', e.target.files[0]);
+      if (af) af.onchange = e => this.handleExampleImage(i, 'a', e.target.files[0]);
+    });
+  }
+
+  getTeacherContext() {
+    this._readExamplesFromDOM();
+    const rules = document.getElementById('t-rules').value.trim();
+    const examples = this._teacherExamples.filter(e => e.question.trim() || e.answer.trim() || e.qImage || e.aImage);
+    if (!rules && examples.length === 0) return { text: '', images: [] };
+
+    let ctx = '\n\n=== CLASS-SPECIFIC RULES AND NOTATION ===\n';
+    const images = []; // {data, type, label} for API content blocks
+    if (rules) {
+      ctx += 'The user\'s class uses these specific conventions. You MUST follow them:\n' + rules + '\n\n';
+    }
+    if (examples.length > 0) {
+      ctx += 'Here are example question-answer pairs from the user\'s class. Study them carefully — you must match the style, notation, and approach:\n\n';
+      examples.forEach((ex, i) => {
+        ctx += `--- EXAMPLE ${i + 1} ---\n`;
+        if (ex.question.trim()) ctx += `QUESTION: ${ex.question.trim()}\n`;
+        if (ex.qImage) {
+          ctx += `[See attached image: Example ${i + 1} Question Image]\n`;
+          images.push({ data: ex.qImage.data.split(',')[1], type: ex.qImage.type, label: `Example ${i+1} Question` });
+        }
+        if (ex.answer.trim()) ctx += `CORRECT ANSWER: ${ex.answer.trim()}\n`;
+        if (ex.aImage) {
+          ctx += `[See attached image: Example ${i + 1} Answer Image]\n`;
+          images.push({ data: ex.aImage.data.split(',')[1], type: ex.aImage.type, label: `Example ${i+1} Answer` });
+        }
+        ctx += '\n';
+      });
+      ctx += 'Replicate the same style of solution shown in these examples.\n';
+    }
+    ctx += '=== END CLASS RULES ===\n';
+    return { text: ctx, images };
+  }
+
+  // Build a TuringMachine from a definition (without touching UI)
+  _buildTMFromDef(P, faithful = false) {
+    const tm = new TuringMachine();
+    // Set custom blank symbol if provided by AI (from class rules)
+    if (P.blank && typeof P.blank === 'string' && P.blank.length === 1) {
+      tm.blank = P.blank;
+    }
+    // Only treat unambiguous values as blank — NOT 'B','b','_' which may be real tape symbols
+    const isBlank = v => v === null || v === undefined || v === '' || v === ' '
+      || v === 'blank' || v === 'BLANK'
+      || v === '\\u25a1' || v === '\u25a1' || v === '\u2610' || v === '\u25fb'
+      || v === '\u25ab' || v === '\u2b1c'
+      || (P.blank && v === P.blank);
+    P.states.forEach(s => {
+      const st = tm.addState(s.name, s.x || 150, s.y || 150);
+      st.isStart = !!s.isStart;
+      st.isAccept = !!s.isAccept;
+      st.isReject = !!s.isReject;
+    });
+    // Helper: find state by name with fuzzy matching fallback
+    const findState = (name) => {
+      if (!name) return null;
+      return tm.states.find(s => s.name === name)
+        || tm.states.find(s => s.name.toLowerCase() === name.toLowerCase())
+        || tm.states.find(s => s.name.replace(/[_\s-]/g, '').toLowerCase() === name.replace(/[_\s-]/g, '').toLowerCase());
+    };
+    P.transitions.forEach(t => {
+      const from = findState(t.from || t.fromState);
+      const to = findState(t.to || t.toState);
+      if (from && to) {
+        let read = t.read, write = t.write;
+        if (isBlank(read)) read = tm.blank;
+        if (isBlank(write)) write = tm.blank;
+        // Normalize direction: English, Hebrew, and other forms → "R" or "L"
+        let dir = t.dir || t.direction || t.move || 'R';
+        if (typeof dir === 'string') {
+          dir = dir.trim().replace(/[\u200e\u200f\u200b\u00a0]/g, ''); // strip invisible unicode chars
+          const dl = dir.toLowerCase();
+          // Hebrew detection — check if string contains Hebrew chars for right/left
+          if (/ימין|ימינה/.test(dir) || dir === 'י' || dir === 'ר') dir = 'R';
+          else if (/שמאל|שמאלה/.test(dir) || dir === 'ש') dir = 'L';
+          // English
+          else if (dl === 'r' || dl.startsWith('right')) dir = 'R';
+          else if (dl === 'l' || dl.startsWith('left')) dir = 'L';
+          // Single char that looks like R or L
+          else if (dl[0] === 'r') dir = 'R';
+          else if (dl[0] === 'l') dir = 'L';
+        }
+        if (dir !== 'L' && dir !== 'R') dir = 'R';
+        // Ensure read/write are single characters
+        if (typeof read === 'string' && read.length > 1 && read !== tm.blank) read = read[0];
+        if (typeof write === 'string' && write.length > 1 && write !== tm.blank) write = write[0];
+        tm.addTransition(from.id, to.id, read, write, dir);
+      }
+    });
+    if (!faithful) {
+      // Context-aware: only normalize 'B','b','_' to blank if they don't appear in any test input
+      const inputChars = new Set();
+      (P.tests || []).forEach(tc => { for (const c of (tc.input || '')) inputChars.add(c); });
+      if (P.input) for (const c of P.input) inputChars.add(c);
+      for (const suspect of ['B', 'b', '_']) {
+        if (!inputChars.has(suspect) && tm.transitions.some(tr => tr.read === suspect || tr.write === suspect)) {
+          tm.transitions.forEach(tr => {
+            if (tr.read === suspect) tr.read = tm.blank;
+            if (tr.write === suspect) tr.write = tm.blank;
+          });
+        }
+      }
+      // Auto-fix: remove transitions FROM accept/reject states (they should be halt states)
+      tm.transitions = tm.transitions.filter(t => {
+        const from = tm.getState(t.fromId);
+        return from && !from.isAccept && !from.isReject;
+      });
+      // Auto-fix: remove duplicate transitions (same state + same read symbol)
+      const seen = new Set();
+      tm.transitions = tm.transitions.filter(t => {
+        const key = `${t.fromId}-${t.read}`;
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
+    }
+    return tm;
+  }
+
+  // Verify a machine definition against its own tests, with step-by-step trace for failures
+  _verifyMachineDef(P) {
+    const tests = P.tests || [];
+    if (tests.length === 0) return { allPass: true, failCount: 0, total: 0, details: '' };
+    const tm = this._buildTMFromDef(P);
+    const normTape = s => this._normTape(s, tm.blank);
+    let failCount = 0;
+    const lines = [];
+    const vmUsesMarker = tm.transitions.some(t => t.read === '\u22a2' || t.write === '\u22a2');
+    tests.forEach((tc, i) => {
+      const m = tm.clone();
+      let input = this._normalizeInputStr(tc.input || '');
+      // Auto-prepend ⊢ if machine uses it but input doesn't have it
+      if (vmUsesMarker && input.length > 0 && input[0] !== '\u22a2') input = '\u22a2' + input;
+      m.loadInput(input);
+      // Collect trace for failing tests (first 30 steps)
+      const trace = [];
+      let steps = 0;
+      while (!m.halted && steps < 50000) {
+        if (steps < 30) {
+          const st = m.getState(m.currentStateId);
+          const sym = m.readTape();
+          const tr = m.transitions.find(t => t.fromId === m.currentStateId && t.read === sym);
+          if (tr) {
+            const toSt = m.getState(tr.toId);
+            trace.push(`${st?.name}: read '${sym}' -> write '${tr.write}', ${tr.direction}, goto ${toSt?.name}`);
+          } else {
+            trace.push(`${st?.name}: read '${sym}' -> NO TRANSITION (halt)`);
+          }
+        }
+        m.step(); steps++;
+      }
+      const result = m.accepted ? 'accept' : (m.rejected ? 'reject' : 'halt');
+      const tapeOut = m.getTapeString();
+      let exp = (tc.expected || 'accept').toString().toLowerCase().trim();
+      if (exp === 'halts' || exp === 'halted') exp = 'halt';
+      if (exp === 'accepted' || exp === 'accepts') exp = 'accept';
+      if (exp === 'rejected' || exp === 'rejects') exp = 'reject';
+      if (exp !== 'accept' && exp !== 'reject' && exp !== 'halt') exp = 'accept';
+      let pass;
+      if (exp === 'halt') {
+        pass = m.halted && steps < 50000;
+        if (tc.expectedTape && pass) pass = this._compareTapes(tapeOut, tc.expectedTape);
+      } else if (exp === 'accept') {
+        pass = m.accepted || (m.halted && !m.rejected);
+        if (tc.expectedTape && pass) pass = this._compareTapes(tapeOut, tc.expectedTape);
+      } else {
+        pass = m.rejected || (m.halted && !m.accepted);
+        if (tc.expectedTape && pass) pass = this._compareTapes(tapeOut, tc.expectedTape);
+      }
+      if (!m.halted || steps >= 50000) pass = false;
+      if (!pass) {
+        failCount++;
+        let d = `FAIL test ${i+1}: input="${input}" expected=${exp}`;
+        if (tc.expectedTape) d += ` tape="${tc.expectedTape}"`;
+        d += ` => got ${result} tape="${tapeOut}" (${steps} steps)`;
+        if (steps >= 50000) d += ' [INFINITE LOOP]';
+        if (trace.length > 0) d += '\n  Trace: ' + trace.join(' | ');
+        lines.push(d);
+      } else {
+        lines.push(`PASS test ${i+1}`);
+      }
+    });
+    return { allPass: failCount === 0, failCount, total: tests.length, details: lines.join('\n') };
+  }
+
+  // Extract and parse machine JSON from AI response text
+  _extractMachineJSON(rawText) {
+    let rawJson;
+    // Find ALL fenced JSON blocks and pick the one with "states" and "transitions"
+    const fencedAll = [...rawText.matchAll(/```(?:json)?\s*(\{[\s\S]*?\})\s*```/g)];
+    if (fencedAll.length > 0) {
+      // Prefer the block that looks like a machine definition
+      const machineBlock = fencedAll.find(m => /\"states\"/.test(m[1]) && /\"transitions\"/.test(m[1]));
+      rawJson = machineBlock ? machineBlock[1] : fencedAll[fencedAll.length - 1][1];
+    } else {
+      const allMatches = [];
+      let depth = 0, start = -1;
+      for (let i = 0; i < rawText.length; i++) {
+        if (rawText[i] === '{') { if (depth === 0) start = i; depth++; }
+        else if (rawText[i] === '}') { depth--; if (depth === 0 && start >= 0) { allMatches.push(rawText.substring(start, i + 1)); start = -1; } }
+      }
+      // Prefer the block containing "states" and "transitions", fallback to longest
+      const machineBlock = allMatches.find(m => /\"states\"/.test(m) && /\"transitions\"/.test(m));
+      rawJson = machineBlock || allMatches.sort((a, b) => b.length - a.length)[0];
+    }
+    if (!rawJson) throw new Error('No JSON found in AI response.\n\nResponse:\n' + rawText.substring(0, 600));
+    try { return JSON.parse(rawJson); } catch(e1) {
+      let fixed = rawJson.replace(/\/\/[^\n]*/g, '').replace(/,\s*([\]}])/g, '$1')
+        .replace(/[\x00-\x1f]/g, m => m === '\n' ? '\\n' : m === '\t' ? '\\t' : m === '\r' ? '\\r' : '');
+      try { return JSON.parse(fixed); } catch(e2) {
+        throw new Error('JSON parse error: ' + e1.message + '\n\nExcerpt:\n' + rawJson.substring(0, 600));
+      }
+    }
+  }
+
+  async processTeacher() {
+    const apiKey = this._getApiKeyForUse();
+    if (!apiKey) { alert('Please enter your Anthropic API key in the Teacher panel.'); return; }
+
+    const questionText = document.getElementById('t-question').value.trim();
+    const hasImage = !!this._teacherImageData;
+    if (!questionText && !hasImage) { alert('Please enter a question or upload an image.'); return; }
+
+    const statusEl = document.getElementById('t-status');
+    const descEl = document.getElementById('t-desc');
+    const processBtn = document.getElementById('t-process');
+
+    statusEl.className = 't-status visible loading';
+    statusEl.innerHTML = '<span class="spinner"></span> Analyzing with Claude...';
+    descEl.className = 't-desc';
+    processBtn.disabled = true;
+
+    try {
+      // Auto-save rules whenever processing
+      this.saveTeacherRules();
+
+      const mode = document.getElementById('t-mode').value;
+      const problemType = document.getElementById('t-ptype').value;
+      const outputStyle = document.getElementById('t-ostyle').value;
+      let systemPrompt = mode === 'solve' ? buildSolvePrompt(problemType, outputStyle) : READ_PROMPT;
+
+      // Build user message content
+      const content = [];
+
+      // 1. Add example images from class rules (so they appear first for context)
+      const classCtx = this.getTeacherContext();
+      if (classCtx.images && classCtx.images.length > 0) {
+        classCtx.images.forEach(img => {
+          content.push({ type: 'text', text: `[${img.label}]:` });
+          content.push({ type: 'image', source: { type: 'base64', media_type: img.type, data: img.data } });
+        });
+      }
+
+      // 2. Add the question image
+      if (hasImage) {
+        content.push({ type: 'text', text: '[Question Image]:' });
+        content.push({
+          type: 'image',
+          source: { type: 'base64', media_type: this._teacherFile.type, data: this._teacherImageData.split(',')[1] }
+        });
+      }
+
+      // 3. Build user message — keep it SHORT and focused (system msg has all instructions)
+      // Inject class rules into system prompt
+      systemPrompt += (classCtx.text || '');
+
+      let userText = '';
+      if (hasImage && questionText) {
+        userText = 'The image shows the question. Additional context:\n\n' + questionText;
+      } else if (hasImage) {
+        userText = 'Build the Turing Machine for the question shown in the image. Read all text, labels, arrows, and symbols carefully.';
+      } else {
+        userText = questionText;
+      }
+      userText += '\n\nFirst think step-by-step about the algorithm, trace through each test case mentally to verify, then output the JSON object inside a ```json code block.';
+      content.push({ type: 'text', text: userText });
+
+      const selectedModel = document.getElementById('t-model').value;
+
+      // Helper to call Claude API
+      const callAPI = async (msgs) => {
+        const resp = await fetch('https://api.anthropic.com/v1/messages', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-api-key': apiKey,
+            'anthropic-version': '2023-06-01',
+            'anthropic-dangerous-direct-browser-access': 'true'
+          },
+          body: JSON.stringify({ model: selectedModel, max_tokens: 16000, temperature: 0.3, system: systemPrompt, messages: msgs })
+        });
+        if (!resp.ok) {
+          const err = await resp.json().catch(() => ({}));
+          throw new Error(err.error?.message || `API error ${resp.status}`);
+        }
+        const data = await resp.json();
+        const textBlock = data.content.find(b => b.type === 'text');
+        return textBlock ? textBlock.text : data.content[data.content.length - 1].text;
+      };
+
+      // First attempt
+      let rawText = await callAPI([{ role: 'user', content }]);
+      let machine = this._extractMachineJSON(rawText);
+      if (!machine.states || !machine.states.length) throw new Error('AI returned no states.');
+      if (!machine.transitions || !machine.transitions.length) throw new Error('AI returned no transitions.');
+
+      // Auto-verify and retry up to 3 times if tests fail
+      const MAX_RETRIES = 5;
+      let messages = [{ role: 'user', content }, { role: 'assistant', content: rawText }];
+
+      for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+        const vr = this._verifyMachineDef(machine);
+        if (vr.allPass) break;
+
+        statusEl.innerHTML = `<span class="spinner"></span> ${vr.failCount}/${vr.total} tests failed. Auto-fixing (attempt ${attempt + 1}/${MAX_RETRIES})...`;
+
+        // Show the AI its own machine so it can fix it
+        const transTable = machine.transitions.map(t =>
+          `  \u03b4(${t.from||t.fromState}, "${t.read}") = (${t.to||t.toState}, "${t.write}", ${t.dir||t.direction})`
+        ).join('\n');
+        const fixMsg = `I ran your Turing Machine in a step-by-step simulator and it has bugs. ${vr.failCount} out of ${vr.total} tests FAILED.
+
+YOUR MACHINE:
+States: ${machine.states.map(s => s.name + (s.isStart?' [START]':'') + (s.isAccept?' [ACCEPT]':'') + (s.isReject?' [REJECT]':'')).join(', ')}
+
+Transitions:
+${transTable}
+
+DETAILED SIMULATION RESULTS (each step shows: state, read symbol, action):
+${vr.details}
+
+DEBUGGING INSTRUCTIONS:
+1. For each FAIL, read the trace carefully. At which step does the machine diverge from correct behavior?
+2. Common bugs: missing transition for blank symbol, wrong write symbol, wrong L/R direction, wrong target state.
+3. After fixing, mentally TRACE each test case step-by-step with your corrected transitions.
+4. Make sure every non-halting state handles ALL symbols it can encounter (including the blank symbol).
+5. Use "accept"/"reject"/"halt" (lowercase) for expected values.
+6. IMPORTANT: "expectedTape" must be the FULL tape (all non-blank chars) when halted — including preserved input, delimiters, and output. If the machine preserves input and appends output, expectedTape must include both.
+
+IMPORTANT: You MUST output the COMPLETE corrected machine as a JSON object inside a \`\`\`json code block.
+Include ALL states, ALL transitions, and ALL tests. Do NOT just describe the fix — output the full JSON.
+Do NOT omit any transitions. Do NOT output only analysis text.`;
+
+        messages.push({ role: 'user', content: fixMsg });
+        rawText = await callAPI(messages);
+        messages.push({ role: 'assistant', content: rawText });
+
+        try {
+          const fixed = this._extractMachineJSON(rawText);
+          if (fixed.states && fixed.states.length && fixed.transitions && fixed.transitions.length) {
+            machine = fixed;
+          }
+        } catch(e) {
+          // AI responded with analysis but no JSON — ask again more forcefully
+          messages.push({ role: 'user', content: 'You did not output a JSON block. I need the COMPLETE corrected machine as a JSON object inside a ```json code block. Output ONLY the JSON, no other text.' });
+          rawText = await callAPI(messages);
+          messages.push({ role: 'assistant', content: rawText });
+          try {
+            const fixed = this._extractMachineJSON(rawText);
+            if (fixed.states && fixed.states.length && fixed.transitions && fixed.transitions.length) {
+              machine = fixed;
+            }
+          } catch(e2) { /* still no JSON, continue with current machine */ }
+        }
+      }
+
+      // Load final machine into simulator
+      this.clearAll();
+      this._loadMachineDef(machine);
+
+      // Check final test results
+      const finalResult = this._verifyMachineDef(machine);
+      if (finalResult.allPass) {
+        statusEl.className = 't-status visible success';
+        statusEl.textContent = `Machine loaded! ${machine.states.length} states, ${machine.transitions.length} transitions \u2014 all ${finalResult.total} tests pass.`;
+      } else {
+        statusEl.className = 't-status visible error';
+        statusEl.textContent = `Machine loaded (${machine.states.length} states) but ${finalResult.failCount}/${finalResult.total} tests still fail. Try a different model or rephrase the question.`;
+      }
+
+      if (machine.description) {
+        descEl.className = 't-desc visible';
+        descEl.innerHTML = '<strong>Description:</strong> ' + this.escHTML(machine.description);
+      }
+
+      this.runAllTests();
+      setTimeout(() => this.hideTeacher(), 3000);
+
+    } catch (err) {
+      statusEl.className = 't-status visible error';
+      statusEl.textContent = 'Error: ' + err.message;
+    } finally {
+      processBtn.disabled = false;
+    }
+  }
+}
+
+// ══════════════════════════════════════════════════════════
+//  TEACHER PROMPTS
+// ══════════════════════════════════════════════════════════
+// System message — establishes role and output format firmly
+const TM_SYSTEM_BASE = `You are an expert in Theory of Computation specializing in Turing Machines.
+You design CORRECT Turing Machines for the standard single-tape model.
+
+MODEL:
+- A finite set of states, one start state, accept/reject states (halting states)
+- An infinite tape of cells, each holding one symbol. Default blank symbol is \u25a1 (Unicode \\u25a1).
+- A read/write head positioned on one cell
+- Transitions: (current state, read symbol) \u2192 (new state, write symbol, move L or R)
+- Machine halts when it enters an accept or reject state, OR when no transition matches (implicit reject)
+
+DESIGN PROCESS (you MUST follow this):
+1. Describe the algorithm in plain English \u2014 what each state does
+2. List ALL states with their purpose
+3. For each non-halting state, list what happens for EVERY symbol the head might encounter (including the blank symbol)
+4. TRACE through EVERY test case step-by-step: write (state, tape, head-position) at each step
+5. If any trace gives wrong results, fix the transitions and re-trace
+6. Output the final JSON inside a \`\`\`json code block
+
+NEVER output programming code (Python, Java, C, etc). Design TURING MACHINES only.
+
+CLASS SYMBOL CONVENTIONS:
+If the CLASS RULES specify custom symbols, you MUST use them:
+- If class says "triangle" or "delta" for blank/empty cell → use \u0394 (Greek capital delta) as blank in all transitions. Set "blank":"\u0394" in JSON.
+- If class says "|-" or "turnstile" for start of tape → use \u22a2 as the first tape symbol. Include it at the start of all test inputs.
+- If class uses specific symbols for separators (#, $, etc.) → use those exact characters.
+- If NO class rules are given, use \u25a1 as the default blank symbol.
+
+JSON SCHEMA (every field is required):
+{
+  "type": "function" or "language",
+  "description": "string",
+  "blank": "blank symbol character (default \u25a1, or class-specified symbol like \u0394)",
+  "input": "example input string",
+  "states": [{"name":"string","x":number,"y":number,"isStart":bool,"isAccept":bool,"isReject":bool}],
+  "transitions": [{"from":"stateName","to":"stateName","read":"symbol","write":"symbol","dir":"R or L"}],
+  "tests": [{"input":"string","expected":"accept or reject or halt","expectedTape":"string"}]
+}
+
+CRITICAL RULES:
+- Blank symbol: use the class-specified blank symbol, or "\u25a1" if no class rules. NEVER use "B", "_", " ", or "blank".
+- Each "read" and "write" value must be EXACTLY ONE CHARACTER.
+- One state must have isStart:true. Accept: isAccept:true. Reject: isReject:true.
+- Do NOT create transitions FROM accept or reject states \u2014 they are halting states.
+- Deterministic: at most one transition per (state, symbol) pair.
+- Layout: x in 80-600, y in 60-350, spread out.
+- Include 3-5 test cases including edge cases.
+- Test "expected" values MUST be exactly: "accept", "reject", or "halt" (all lowercase, no other variants).
+- For every non-halting state, you MUST define a transition for EVERY symbol the head can encounter including the blank symbol.
+- VERIFY: After designing, trace EVERY test case step-by-step. If ANY trace fails, fix transitions BEFORE outputting JSON.
+
+COMMON MISTAKES TO AVOID:
+- Forgetting blank transitions: if a state scans the tape, it WILL eventually hit the blank symbol. Handle it!
+- Off-by-one: after scanning right to blank, the head is ON the blank, not on the last data symbol.
+- Missing rewind: multi-pass algorithms must move the head back to start between passes.
+- Transitions from halt states: accept/reject states must have NO outgoing transitions.
+- Wrong direction after write: double-check L vs R for each transition.`;
+
+const FUNCTION_SUFFIX_BASE = `
+PROBLEM TYPE: FUNCTION (compute output on tape).
+After computing, halt by entering an accept state (isAccept:true). Set "type":"function".
+Tests: use "expected":"halt" with "expectedTape" showing the correct tape when the machine halts.
+
+CRITICAL — "expectedTape" must be the FULL tape contents (all non-blank characters) when the machine halts, NOT just the output/result portion.
+The simulator reads the entire tape and strips only blank symbols. Everything else (input, delimiters, output markers, results) must be included.
+
+IMPORTANT:
+- Make sure the machine actually WRITES the correct output symbols.
+- If the algorithm needs multiple passes, rewind the head to the start after each pass.
+- Think carefully about what the FULL tape looks like when the machine halts, then write that as expectedTape.
+- Follow the class rules for where/how output is written.`;
+
+const FUNCTION_AFTER_SUFFIX = FUNCTION_SUFFIX_BASE + `
+
+OUTPUT STYLE: Write output AFTER the input.
+- The input must be PRESERVED on the tape. Do NOT erase or modify it.
+- Write the result AFTER the input, between $ delimiters (or as specified in class rules).
+- The machine should: scan past the input → write $ → write the result → write $ → halt.
+- Example: input "|-111#11" (3+2 in unary) → final tape: "|-111#11$11111$"
+  So expectedTape = "|-111#11$11111$"
+- The blank cells after the input are where you write the output.
+
+EXAMPLE — add two unary numbers (output after input):
+Input tape: ⊢111#11  (3+2)
+Final tape: ⊢111#11$11111$  (input preserved, result 5 between $)
+`;
+
+const FUNCTION_REPLACE_SUFFIX = FUNCTION_SUFFIX_BASE + `
+
+OUTPUT STYLE: Replace input with output (in-place computation).
+- The machine modifies the tape in place. The input IS transformed into the output.
+- When halted, the tape contains ONLY the result (and possibly the tape-start marker).
+- Example: input "1011" (binary increment) → final tape: "1100"
+  So expectedTape = "1100"
+
+EXAMPLE — increment a binary number by 1 (in-place):
+Input tape: 1011
+Final tape: 1100
+`;
+
+const FUNCTION_AUTO_SUFFIX = FUNCTION_SUFFIX_BASE + `
+
+OUTPUT STYLE: Determine from the class rules or question which style to use:
+- If class rules mention writing output after input, between $ signs, or preserving input → use the "output after input" style. Keep input intact, write result after it.
+  Example: "|-111#11" → "|-111#11$11111$"
+- If the question says to compute/transform in place, or no specific format is mentioned → replace input with output.
+  Example: "1011" → "1100"
+- When in doubt and class rules mention $, #, or |- → use "output after input" style.
+`;
+
+// Legacy constant for backward compat
+const FUNCTION_SUFFIX = FUNCTION_AUTO_SUFFIX + `
+EXAMPLE \u2014 increment a binary number by 1 (input is replaced in place):
+\`\`\`json
+{"type":"function","description":"Increments a binary number by 1","input":"1011","states":[{"name":"goRight","x":100,"y":150,"isStart":true,"isAccept":false,"isReject":false},{"name":"add","x":280,"y":150,"isStart":false,"isAccept":false,"isReject":false},{"name":"done","x":460,"y":150,"isStart":false,"isAccept":true,"isReject":false}],"transitions":[{"from":"goRight","to":"goRight","read":"0","write":"0","dir":"R"},{"from":"goRight","to":"goRight","read":"1","write":"1","dir":"R"},{"from":"goRight","to":"add","read":"\u25a1","write":"\u25a1","dir":"L"},{"from":"add","to":"add","read":"1","write":"0","dir":"L"},{"from":"add","to":"done","read":"0","write":"1","dir":"L"},{"from":"add","to":"done","read":"\u25a1","write":"1","dir":"L"}],"tests":[{"input":"1011","expected":"halt","expectedTape":"1100"},{"input":"111","expected":"halt","expectedTape":"1000"},{"input":"0","expected":"halt","expectedTape":"1"},{"input":"1","expected":"halt","expectedTape":"10"}]}
+\`\`\``;
+
+const LANGUAGE_SUFFIX = `
+PROBLEM TYPE: LANGUAGE (accept or reject input).
+The machine ACCEPTS strings in the language (halt in accept state) and REJECTS strings not in it (halt in reject state).
+Tape output doesn't matter. Set "type":"language". Tests: use "expected":"accept" or "expected":"reject".
+
+IMPORTANT:
+- Every non-halting state must handle ALL symbols it might encounter, including \u25a1.
+- For complex languages, use a multi-pass approach: mark symbols, rewind, scan again.
+
+EXAMPLE \u2014 accepts binary strings with even number of 1s:
+\`\`\`json
+{"type":"language","description":"Accepts binary strings with even number of 1s","input":"1100","states":[{"name":"even","x":150,"y":150,"isStart":true,"isAccept":false,"isReject":false},{"name":"odd","x":350,"y":150,"isStart":false,"isAccept":false,"isReject":false},{"name":"acc","x":250,"y":300,"isStart":false,"isAccept":true,"isReject":false},{"name":"rej","x":450,"y":300,"isStart":false,"isAccept":false,"isReject":true}],"transitions":[{"from":"even","to":"even","read":"0","write":"0","dir":"R"},{"from":"even","to":"odd","read":"1","write":"1","dir":"R"},{"from":"even","to":"acc","read":"\u25a1","write":"\u25a1","dir":"R"},{"from":"odd","to":"odd","read":"0","write":"0","dir":"R"},{"from":"odd","to":"even","read":"1","write":"1","dir":"R"},{"from":"odd","to":"rej","read":"\u25a1","write":"\u25a1","dir":"R"}],"tests":[{"input":"1100","expected":"accept"},{"input":"10","expected":"reject"},{"input":"","expected":"accept"},{"input":"1","expected":"reject"},{"input":"11","expected":"accept"}]}
+\`\`\``;
+
+const AUTO_SUFFIX = `
+Determine the problem type from the question:
+- COMPUTE/CALCULATE/CONVERT/TRANSFORM/OUTPUT → type "function" (tape output matters)
+- RECOGNIZE/DECIDE/CHECK/ACCEPT/REJECT → type "language" (accept/reject matters)
+` + FUNCTION_SUFFIX + '\n' + LANGUAGE_SUFFIX;
+
+function buildSolvePrompt(problemType, outputStyle) {
+  let s = TM_SYSTEM_BASE + '\n';
+  if (problemType === 'function') {
+    if (outputStyle === 'after') s += FUNCTION_AFTER_SUFFIX;
+    else if (outputStyle === 'replace') s += FUNCTION_REPLACE_SUFFIX;
+    else s += FUNCTION_AUTO_SUFFIX;
+  } else if (problemType === 'language') {
+    s += LANGUAGE_SUFFIX;
+  } else {
+    // Auto-detect: include both function styles and language
+    if (outputStyle === 'after') s += FUNCTION_AFTER_SUFFIX;
+    else if (outputStyle === 'replace') s += FUNCTION_REPLACE_SUFFIX;
+    else s += FUNCTION_AUTO_SUFFIX;
+    s += '\n' + LANGUAGE_SUFFIX;
+  }
+  return s;
+}
+
+const READ_PROMPT = TM_SYSTEM_BASE + `
+
+MODE: Extract a Turing Machine from a diagram image.
+
+TRANSITION LABEL FORMAT on arrows:
+  read/write, Direction  OR  read→write, Direction
+- "read" = symbol before / or →, "write" = symbol after / or →
+- Direction: R/L, Right/Left, or Hebrew ימין(=R)/שמאל(=L)
+- If only "read, Direction" with no write, assume write = read
+- Always output "dir":"R" or "dir":"L" in JSON regardless of source language.
+
+CRITICAL — "from", "to", and "dir" are THREE SEPARATE THINGS:
+- "from" = state at the TAIL of the arrow (where it originates)
+- "to" = state at the HEAD of the arrow (where the arrowhead points)
+- "dir" = tape head movement direction from the LABEL (R or L) — NOT the arrow's visual direction!
+
+RULES:
+1. Every state (circle) → extract name, identify start (incoming arrow from nothing or labeled start/התחלה), accept (double circle or labeled accept/מקבל), reject (labeled reject/דוחה).
+2. Every transition (arrow):
+   - "from" = state at arrow tail, "to" = state at arrowhead
+   - Parse label for read, write, dir (tape head direction, not arrow direction)
+3. Use EXACT state names from diagram. Do NOT invent transitions.
+4. Approximate state positions for layout (x: 80-700, y: 60-400).
+` + AUTO_SUFFIX;
+
+const STUDENT_DIAGRAM_PROMPT = `You extract Turing Machines from diagram images. Output ONLY what you see — nothing more.
+
+ABSOLUTE RULES:
+- Extract ONLY states and transitions that are VISIBLE in the image.
+- Do NOT add, fix, invent, or complete any transitions.
+- Do NOT generate test cases.
+- If something is unclear, skip it rather than guess.
+
+HOW TO READ A TRANSITION ARROW:
+Each arrow has a label like: read/write, Direction (e.g., "a/b, R" or "1/0, L")
+- "from" = state at the TAIL of the arrow (where it starts)
+- "to" = state at the ARROWHEAD (where it points)
+- "read" = symbol before the /
+- "write" = symbol after the /
+- "dir" = tape head direction from the label: R=right, L=left
+  Hebrew: ימין=R, שמאל=L
+- The arrow's visual direction in the diagram is NOT the same as "dir". "dir" is always from the label text.
+
+HOW TO IDENTIFY STATES:
+- Start state: has an incoming arrow from nowhere, or labeled start/התחלה
+- Accept state: double circle, or labeled accept/מקבל
+- Reject state: labeled reject/דוחה
+- Extract EXACT names as written
+
+OUTPUT a JSON object in a \`\`\`json block:
+{
+  "description": "what the diagram shows",
+  "blank": "blank symbol (default □, or Δ if triangles used)",
+  "states": [{"name":"str","x":number,"y":number,"isStart":bool,"isAccept":bool,"isReject":bool}],
+  "transitions": [{"from":"name","to":"name","read":"sym","write":"sym","dir":"R or L"}]
+}
+Use x: 80-700, y: 60-400 for positions. "dir" must be "R" or "L". No "tests" field.`;
+
+// ── Student Prompts ──
+const HINTS_PROMPT = `You are a Theory of Computation tutor helping a student design a Turing Machine.
+The student will give you a problem. Your job is to guide them WITHOUT giving the full solution.
+
+RULES:
+- Do NOT output a complete Turing Machine definition or JSON.
+- Do NOT list all transitions.
+- Instead, help the student THINK through the problem:
+
+1. Restate the problem clearly.
+2. Ask guiding questions: "What should happen when the head reads X?", "How will you know when to stop?"
+3. Suggest a high-level algorithm in 3-5 numbered steps (e.g., "scan right to find the delimiter").
+4. Warn about common pitfalls for this type of problem.
+5. If relevant, suggest what states they might need and their PURPOSE (but not the full transition table).
+6. Give ONE small worked example trace showing the first few steps.
+
+Keep your response concise and encouraging. Use markdown formatting.`;
+
+const TESTS_PROMPT = `You are a Theory of Computation expert helping a student test their Turing Machine.
+The student will describe a problem. Generate a comprehensive set of test cases they can use to verify their solution.
+
+OUTPUT FORMAT — you MUST output a JSON object inside a \`\`\`json code block:
+{
+  "tests": [
+    {"input": "string", "expected": "accept or reject or halt", "expectedTape": "string (for function-type)", "explanation": "why this test matters"}
+  ]
+}
+
+RULES:
+- Generate 6-10 test cases covering:
+  - Basic/simple cases
+  - Edge cases (empty input, single character, etc.)
+  - Boundary cases
+  - Cases that should be accepted AND rejected (for language problems)
+  - Cases that test common mistakes (off-by-one, missing blank handling, etc.)
+- For each test, include a brief "explanation" of what it tests.
+- Use "expected": "accept", "reject", or "halt" (all lowercase).
+- If class rules specify custom symbols (like a specific blank symbol or tape-start marker), use them in test inputs.
+  For example, if class uses |- for tape start and unary numbers: input should be "|-111#11" not "111#11".
+
+CRITICAL — "expectedTape" for function-type problems:
+- "expectedTape" must be the FULL tape contents (all non-blank characters) when the machine halts.
+- The simulator compares expectedTape against ALL non-blank symbols remaining on the tape.
+- If the machine PRESERVES the input and writes the output elsewhere (e.g., between $ signs after the input), expectedTape must include BOTH the input and the output.
+  Example: input "|-111#11", machine writes sum between $: expectedTape = "|-111#11$11111$"
+- If the machine REPLACES the input with the output, expectedTape is just the output.
+  Example: input "1011", machine increments in place: expectedTape = "1100"
+- Follow the class rules for output format.
+
+Also write a brief text summary above the JSON explaining the testing strategy.`;
+
+// ══════════════════════════════════════════════════════════
+//  PRESETS
+// ══════════════════════════════════════════════════════════
+const B = '\u25a1'; // blank symbol
+const PRESETS = {
+  'binary-inc': {
+    input: '1011',
+    states: [
+      { name: 'q0', x: 120, y: 180, isStart: true },
+      { name: 'q1', x: 300, y: 180 },
+      { name: 'q2', x: 480, y: 180 },
+      { name: 'done', x: 480, y: 60, isAccept: true },
+    ],
+    transitions: [
+      { from: 'q0', to: 'q0', read: '0', write: '0', dir: 'R' },
+      { from: 'q0', to: 'q0', read: '1', write: '1', dir: 'R' },
+      { from: 'q0', to: 'q1', read: B, write: B, dir: 'L' },
+      { from: 'q1', to: 'q2', read: '0', write: '1', dir: 'L' },
+      { from: 'q1', to: 'q1', read: '1', write: '0', dir: 'L' },
+      { from: 'q1', to: 'q2', read: B, write: '1', dir: 'L' },
+      { from: 'q2', to: 'q2', read: '0', write: '0', dir: 'L' },
+      { from: 'q2', to: 'q2', read: '1', write: '1', dir: 'L' },
+      { from: 'q2', to: 'done', read: B, write: B, dir: 'R' },
+    ],
+    tests: [
+      { input: '1011', expected: 'accept', expectedTape: '1100' },
+      { input: '111', expected: 'accept', expectedTape: '1000' },
+      { input: '0', expected: 'accept', expectedTape: '1' },
+      { input: '1', expected: 'accept', expectedTape: '10' },
+    ]
+  },
+  'palindrome': {
+    input: 'abba',
+    states: [
+      { name: 'q0', x: 80, y: 150, isStart: true },
+      { name: 'qA', x: 220, y: 80 },
+      { name: 'qB', x: 220, y: 220 },
+      { name: 'qAR', x: 380, y: 80 },
+      { name: 'qBR', x: 380, y: 220 },
+      { name: 'qL', x: 530, y: 150 },
+      { name: 'acc', x: 320, y: 320, isAccept: true },
+      { name: 'rej', x: 530, y: 320, isReject: true },
+    ],
+    transitions: [
+      // Read first symbol
+      { from: 'q0', to: 'qA', read: 'a', write: B, dir: 'R' },
+      { from: 'q0', to: 'qB', read: 'b', write: B, dir: 'R' },
+      { from: 'q0', to: 'acc', read: B, write: B, dir: 'R' },
+      // Move right to end (a)
+      { from: 'qA', to: 'qA', read: 'a', write: 'a', dir: 'R' },
+      { from: 'qA', to: 'qA', read: 'b', write: 'b', dir: 'R' },
+      { from: 'qA', to: 'qAR', read: B, write: B, dir: 'L' },
+      // Move right to end (b)
+      { from: 'qB', to: 'qB', read: 'a', write: 'a', dir: 'R' },
+      { from: 'qB', to: 'qB', read: 'b', write: 'b', dir: 'R' },
+      { from: 'qB', to: 'qBR', read: B, write: B, dir: 'L' },
+      // Check last symbol (a)
+      { from: 'qAR', to: 'qL', read: 'a', write: B, dir: 'L' },
+      { from: 'qAR', to: 'rej', read: 'b', write: 'b', dir: 'R' },
+      { from: 'qAR', to: 'acc', read: B, write: B, dir: 'R' },
+      // Check last symbol (b)
+      { from: 'qBR', to: 'rej', read: 'a', write: 'a', dir: 'R' },
+      { from: 'qBR', to: 'qL', read: 'b', write: B, dir: 'L' },
+      { from: 'qBR', to: 'acc', read: B, write: B, dir: 'R' },
+      // Move left to start
+      { from: 'qL', to: 'qL', read: 'a', write: 'a', dir: 'L' },
+      { from: 'qL', to: 'qL', read: 'b', write: 'b', dir: 'L' },
+      { from: 'qL', to: 'q0', read: B, write: B, dir: 'R' },
+    ],
+    tests: [
+      { input: 'abba', expected: 'accept' },
+      { input: 'aba', expected: 'accept' },
+      { input: 'abab', expected: 'reject' },
+      { input: 'a', expected: 'accept' },
+      { input: '', expected: 'accept' },
+    ]
+  },
+  'ones-complement': {
+    input: '10110',
+    states: [
+      { name: 'q0', x: 150, y: 150, isStart: true },
+      { name: 'done', x: 400, y: 150, isAccept: true },
+    ],
+    transitions: [
+      { from: 'q0', to: 'q0', read: '0', write: '1', dir: 'R' },
+      { from: 'q0', to: 'q0', read: '1', write: '0', dir: 'R' },
+      { from: 'q0', to: 'done', read: B, write: B, dir: 'L' },
+    ],
+    tests: [
+      { input: '10110', expected: 'accept', expectedTape: '01001' },
+      { input: '0000', expected: 'accept', expectedTape: '1111' },
+      { input: '1111', expected: 'accept', expectedTape: '0000' },
+    ]
+  }
+};
+
+// ══════════════════════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════════════════════
+const app = new App();
+</script>
+</body>
+</html>

@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Turing Machine Simulator — Test Suite</title>
+<style>
+body { font-family: monospace; background: #1a1a2e; color: #e8e8f0; padding: 20px; }
+h1 { color: #a78bfa; margin-bottom: 10px; }
+h2 { color: #06b6d4; margin: 18px 0 6px; font-size: 1rem; }
+.pass { color: #10b981; } .fail { color: #ef4444; font-weight: bold; }
+.summary { margin-top: 20px; padding: 12px; border: 2px solid; border-radius: 8px; font-size: 1.1rem; }
+.summary.all-pass { border-color: #10b981; color: #10b981; }
+.summary.has-fail { border-color: #ef4444; color: #ef4444; }
+pre { background: #12122a; padding: 6px 10px; border-radius: 4px; overflow-x: auto; }
+</style>
+</head>
+<body>
+<h1>Turing Machine Simulator — Test Suite</h1>
+<div id="results"></div>
+<div id="summary"></div>
+
+<script>
+// ══════════════════════════════════════════════════════════
+// Minimal TuringMachine class (copied from index.html for testing)
+// ══════════════════════════════════════════════════════════
+class TuringMachine {
+  constructor() {
+    this.states = [];
+    this.transitions = [];
+    this.tape = {};
+    this.headPos = 0;
+    this.currentStateId = null;
+    this.halted = true;
+    this.accepted = false;
+    this.rejected = false;
+    this.stepCount = 0;
+    this.blank = '\u25a1';
+    this._nextId = 1;
+  }
+  _id() { return this._nextId++; }
+  getState(id) { return this.states.find(s => s.id === id); }
+  getStartState() { return this.states.find(s => s.isStart); }
+  addState(name, x, y) {
+    const s = { id: this._id(), name, x, y, isStart: this.states.length === 0, isAccept: false, isReject: false };
+    this.states.push(s); return s;
+  }
+  removeState(id) {
+    this.states = this.states.filter(s => s.id !== id);
+    this.transitions = this.transitions.filter(t => t.fromId !== id && t.toId !== id);
+  }
+  addTransition(fromId, toId, read, write, direction) {
+    const t = { id: this._id(), fromId, toId, read, write, direction };
+    this.transitions.push(t); return t;
+  }
+  removeTransition(id) { this.transitions = this.transitions.filter(t => t.id !== id); }
+
+  loadInput(input) {
+    this.tape = {};
+    for (let i = 0; i < input.length; i++) this.tape[i] = input[i];
+    this.stepCount = 0;
+    this.halted = false;
+    this.accepted = false;
+    this.rejected = false;
+    const start = this.getStartState();
+    this.currentStateId = start ? start.id : null;
+    if (!start) { this.halted = true; this.headPos = 0; return; }
+    const firstSym = this.tape[0];
+    if (firstSym === '\u22a2' && start) {
+      const hasStartTransition = this.transitions.some(t => t.fromId === start.id && t.read === '\u22a2');
+      this.headPos = hasStartTransition ? 0 : 1;
+    } else {
+      this.headPos = 0;
+    }
+  }
+
+  readTape() { return this.tape[this.headPos] || this.blank; }
+
+  step() {
+    if (this.halted) return null;
+    const sym = this.readTape();
+    const tr = this.transitions.find(t => t.fromId === this.currentStateId && t.read === sym);
+    if (!tr) {
+      this.halted = true;
+      const st = this.getState(this.currentStateId);
+      this.accepted = st ? st.isAccept : false;
+      this.rejected = !this.accepted;
+      return { halted: true, accepted: this.accepted };
+    }
+    const result = { read: sym, write: tr.write, direction: tr.direction,
+      fromId: tr.fromId, toId: tr.toId, transId: tr.id };
+    this.tape[this.headPos] = tr.write;
+    this.currentStateId = tr.toId;
+    this.headPos += tr.direction === 'R' ? 1 : -1;
+    this.stepCount++;
+    const ns = this.getState(this.currentStateId);
+    if (ns && (ns.isAccept || ns.isReject)) {
+      this.halted = true; this.accepted = ns.isAccept; this.rejected = ns.isReject;
+      result.halted = true; result.accepted = this.accepted;
+    }
+    return result;
+  }
+
+  getTapeString() {
+    const keys = Object.keys(this.tape).map(Number).sort((a,b) => a - b);
+    if (keys.length === 0) return '';
+    let s = '';
+    for (let i = keys[0]; i <= keys[keys.length-1]; i++) {
+      const c = this.tape[i] || this.blank;
+      if (c !== this.blank) s += c;
+    }
+    return s;
+  }
+
+  clone() {
+    const m = new TuringMachine();
+    m.states = JSON.parse(JSON.stringify(this.states));
+    m.transitions = JSON.parse(JSON.stringify(this.transitions));
+    m.blank = this.blank;
+    m._nextId = this._nextId;
+    return m;
+  }
+}
+
+// ══════════════════════════════════════════════════════════
+// Helpers from App (for normalization tests)
+// ══════════════════════════════════════════════════════════
+function normalizeInputStr(s) {
+  if (!s) return '';
+  return s.replace(/\|-/g, '\u22a2');
+}
+
+function normTape(s, blk) {
+  if (!s) return '';
+  if (!blk) blk = '\u25a1';
+  let r = s;
+  // Strip blanks
+  r = r.replace(/[\u25a1\u2610\u25fb\u25ab\u2b1c]/g, '');
+  if (blk && blk !== '\u25a1') r = r.replace(new RegExp(blk.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'), 'g'), '');
+  // Strip tape-start markers entirely (⊢, ├, leading |-)
+  r = r.replace(/[\u22a2\u251c]/g, '');
+  r = r.replace(/^\|-/, '');
+  // Normalize triangles → Δ
+  r = r.replace(/[\u25B2\u25B3\u25B6\u25B7\u25BC\u25BD\u25C0\u25C1\u25B5\u25B9\u25BF\u25BB\u25C3\u25C5\u2206]/g, '\u0394');
+  return r.trim();
+}
+
+// Smart tape comparison (same as _compareTapes in index.html)
+function compareTapes(actual, expected) {
+  const na = normTape(actual);
+  const ne = normTape(expected);
+  if (!ne) return true;
+  if (na === ne) return true;
+  const dollarExpMatch = ne.match(/\$([^$]+)\$/);
+  if (dollarExpMatch && na === dollarExpMatch[1]) return true;
+  const dollarActMatch = na.match(/\$([^$]+)\$/);
+  if (dollarActMatch && ne === dollarActMatch[1]) return true;
+  if (dollarExpMatch && dollarActMatch && dollarExpMatch[1] === dollarActMatch[1]) return true;
+  return false;
+}
+
+function ensureInputCompat(input, transitions) {
+  if (!input) input = '';
+  const startsWithMarker = input.length > 0 && input[0] === '\u22a2';
+  const machineUsesMarker = transitions.some(t => t.read === '\u22a2' || t.write === '\u22a2');
+  if (machineUsesMarker && !startsWithMarker) return '\u22a2' + input;
+  return input;
+}
+
+// ══════════════════════════════════════════════════════════
+// Test Framework
+// ══════════════════════════════════════════════════════════
+let _passed = 0, _failed = 0, _results = '';
+
+function section(name) { _results += `<h2>${name}</h2>`; }
+
+function assert(desc, condition, detail) {
+  if (condition) {
+    _passed++;
+    _results += `<div class="pass">✓ ${desc}</div>`;
+  } else {
+    _failed++;
+    _results += `<div class="fail">✗ ${desc}${detail ? ' — ' + detail : ''}</div>`;
+  }
+}
+
+function assertEqual(desc, actual, expected) {
+  assert(desc, actual === expected, `expected "${expected}", got "${actual}"`);
+}
+
+function runToHalt(tm, maxSteps) {
+  let steps = 0;
+  while (!tm.halted && steps < (maxSteps || 50000)) { tm.step(); steps++; }
+  return steps;
+}
+
+// Build a simple TM for testing
+function buildBinaryIncrementTM() {
+  const tm = new TuringMachine();
+  const q0 = tm.addState('goRight', 100, 150); q0.isStart = true;
+  const q1 = tm.addState('add', 280, 150);
+  const q2 = tm.addState('done', 460, 150); q2.isAccept = true;
+  tm.addTransition(q0.id, q0.id, '0', '0', 'R');
+  tm.addTransition(q0.id, q0.id, '1', '1', 'R');
+  tm.addTransition(q0.id, q1.id, tm.blank, tm.blank, 'L');
+  tm.addTransition(q1.id, q1.id, '1', '0', 'L');
+  tm.addTransition(q1.id, q2.id, '0', '1', 'L');
+  tm.addTransition(q1.id, q2.id, tm.blank, '1', 'L');
+  return tm;
+}
+
+function buildPalindromeTM() {
+  const B = '\u25a1';
+  const tm = new TuringMachine();
+  const q0 = tm.addState('q0', 80, 150); q0.isStart = true;
+  const qA = tm.addState('qA', 220, 80);
+  const qB = tm.addState('qB', 220, 220);
+  const qAR = tm.addState('qAR', 380, 80);
+  const qBR = tm.addState('qBR', 380, 220);
+  const qL = tm.addState('qL', 530, 150);
+  const acc = tm.addState('acc', 320, 320); acc.isAccept = true;
+  const rej = tm.addState('rej', 530, 320); rej.isReject = true;
+  tm.addTransition(q0.id, qA.id, 'a', B, 'R');
+  tm.addTransition(q0.id, qB.id, 'b', B, 'R');
+  tm.addTransition(q0.id, acc.id, B, B, 'R');
+  tm.addTransition(qA.id, qA.id, 'a', 'a', 'R');
+  tm.addTransition(qA.id, qA.id, 'b', 'b', 'R');
+  tm.addTransition(qA.id, qAR.id, B, B, 'L');
+  tm.addTransition(qB.id, qB.id, 'a', 'a', 'R');
+  tm.addTransition(qB.id, qB.id, 'b', 'b', 'R');
+  tm.addTransition(qB.id, qBR.id, B, B, 'L');
+  tm.addTransition(qAR.id, qL.id, 'a', B, 'L');
+  tm.addTransition(qAR.id, rej.id, 'b', 'b', 'R');
+  tm.addTransition(qAR.id, acc.id, B, B, 'R');
+  tm.addTransition(qBR.id, rej.id, 'a', 'a', 'R');
+  tm.addTransition(qBR.id, qL.id, 'b', B, 'L');
+  tm.addTransition(qBR.id, acc.id, B, B, 'R');
+  tm.addTransition(qL.id, qL.id, 'a', 'a', 'L');
+  tm.addTransition(qL.id, qL.id, 'b', 'b', 'L');
+  tm.addTransition(qL.id, q0.id, B, B, 'R');
+  return tm;
+}
+
+// TM with ⊢ tape start marker — start state reads ⊢
+function buildMarkerTM_readsMarker() {
+  const tm = new TuringMachine();
+  tm.blank = '\u0394'; // Δ
+  const q0 = tm.addState('q0', 100, 150); q0.isStart = true;
+  const q1 = tm.addState('q1', 300, 150);
+  const qAcc = tm.addState('acc', 500, 150); qAcc.isAccept = true;
+  tm.addTransition(q0.id, q1.id, '\u22a2', '\u22a2', 'R'); // reads ⊢
+  tm.addTransition(q1.id, q1.id, '1', '1', 'R');
+  tm.addTransition(q1.id, qAcc.id, '\u0394', '\u0394', 'R');
+  return tm;
+}
+
+// TM with ⊢ on tape but start state does NOT read ⊢
+function buildMarkerTM_skipsMarker() {
+  const tm = new TuringMachine();
+  tm.blank = '\u0394';
+  const q0 = tm.addState('q0', 100, 150); q0.isStart = true;
+  const qAcc = tm.addState('acc', 300, 150); qAcc.isAccept = true;
+  tm.addTransition(q0.id, q0.id, '1', '1', 'R');
+  tm.addTransition(q0.id, qAcc.id, '\u0394', '\u0394', 'R');
+  return tm;
+}
+
+// ══════════════════════════════════════════════════════════
+// TESTS
+// ══════════════════════════════════════════════════════════
+
+// ── TuringMachine Core ──
+section('TuringMachine — Constructor & State Management');
+{
+  const tm = new TuringMachine();
+  assert('New TM is halted', tm.halted);
+  assert('New TM has no states', tm.states.length === 0);
+  const s = tm.addState('q0', 100, 100);
+  assertEqual('First state is start', s.isStart, true);
+  const s2 = tm.addState('q1', 200, 100);
+  assertEqual('Second state is not start', s2.isStart, false);
+  assertEqual('getState finds by id', tm.getState(s.id).name, 'q0');
+  assertEqual('getStartState returns q0', tm.getStartState().name, 'q0');
+  tm.removeState(s.id);
+  assert('removeState removes state', tm.states.length === 1);
+}
+
+section('TuringMachine — Transitions');
+{
+  const tm = new TuringMachine();
+  const q0 = tm.addState('q0', 100, 100);
+  const q1 = tm.addState('q1', 200, 100);
+  const tr = tm.addTransition(q0.id, q1.id, 'a', 'b', 'R');
+  assertEqual('Transition has correct read', tr.read, 'a');
+  assertEqual('Transition has correct write', tr.write, 'b');
+  assertEqual('Transition has correct direction', tr.direction, 'R');
+  tm.removeTransition(tr.id);
+  assert('removeTransition removes it', tm.transitions.length === 0);
+}
+
+section('TuringMachine — loadInput');
+{
+  const tm = new TuringMachine();
+  const q0 = tm.addState('q0', 100, 100);
+  tm.loadInput('abc');
+  assertEqual('Tape[0] = a', tm.tape[0], 'a');
+  assertEqual('Tape[1] = b', tm.tape[1], 'b');
+  assertEqual('Tape[2] = c', tm.tape[2], 'c');
+  assertEqual('Head at 0', tm.headPos, 0);
+  assert('Not halted', !tm.halted);
+  assert('Not accepted', !tm.accepted);
+
+  // Empty input
+  tm.loadInput('');
+  assertEqual('Empty input: head at 0', tm.headPos, 0);
+  assertEqual('Empty input: readTape returns blank', tm.readTape(), tm.blank);
+}
+
+section('TuringMachine — loadInput with ⊢ marker');
+{
+  // Machine reads ⊢ from start state
+  const tm1 = buildMarkerTM_readsMarker();
+  tm1.loadInput('\u22a2111');
+  assertEqual('Reads ⊢: head at 0 (on ⊢)', tm1.headPos, 0);
+  assertEqual('Reads ⊢: readTape = ⊢', tm1.readTape(), '\u22a2');
+
+  // Machine does NOT read ⊢ from start state
+  const tm2 = buildMarkerTM_skipsMarker();
+  tm2.loadInput('\u22a2111');
+  assertEqual('Skips ⊢: head at 1 (on first data)', tm2.headPos, 1);
+  assertEqual('Skips ⊢: readTape = 1', tm2.readTape(), '1');
+
+  // No ⊢ in input
+  const tm3 = buildMarkerTM_skipsMarker();
+  tm3.loadInput('111');
+  assertEqual('No ⊢: head at 0', tm3.headPos, 0);
+}
+
+section('TuringMachine — step()');
+{
+  const tm = new TuringMachine();
+  const q0 = tm.addState('q0', 100, 100);
+  const q1 = tm.addState('q1', 200, 100); q1.isAccept = true;
+  tm.addTransition(q0.id, q1.id, 'a', 'b', 'R');
+  tm.loadInput('a');
+  const result = tm.step();
+  assertEqual('Step: wrote b', tm.tape[0], 'b');
+  assertEqual('Step: moved right', tm.headPos, 1);
+  assertEqual('Step: now in q1', tm.getState(tm.currentStateId).name, 'q1');
+  assert('Step: halted (accept state)', tm.halted);
+  assert('Step: accepted', tm.accepted);
+}
+
+section('TuringMachine — step() Left direction');
+{
+  const tm = new TuringMachine();
+  const q0 = tm.addState('q0', 100, 100);
+  const q1 = tm.addState('q1', 200, 100);
+  tm.addTransition(q0.id, q1.id, 'a', 'b', 'L');
+  tm.loadInput('a');
+  assertEqual('Before step: head at 0', tm.headPos, 0);
+  assertEqual('Before step: state is q0', tm.getState(tm.currentStateId).name, 'q0');
+  tm.step();
+  assertEqual('After L step: head at -1', tm.headPos, -1);
+  assertEqual('After L step: state is q1 (NOT q0)', tm.getState(tm.currentStateId).name, 'q1');
+  assertEqual('After L step: tape[0] = b (written)', tm.tape[0], 'b');
+}
+
+section('TuringMachine — step() no transition (halt)');
+{
+  const tm = new TuringMachine();
+  const q0 = tm.addState('q0', 100, 100);
+  tm.loadInput('x');
+  tm.step(); // no transition for 'x'
+  assert('Halted', tm.halted);
+  assert('Rejected (no accept state)', tm.rejected);
+  assert('Not accepted', !tm.accepted);
+}
+
+section('TuringMachine — Binary Increment');
+{
+  const tests = [
+    { input: '1011', expected: '1100' },
+    { input: '111', expected: '1000' },
+    { input: '0', expected: '1' },
+    { input: '1', expected: '10' },
+    { input: '0000', expected: '0001' },
+  ];
+  tests.forEach(tc => {
+    const tm = buildBinaryIncrementTM();
+    tm.loadInput(tc.input);
+    runToHalt(tm);
+    assertEqual(`BinInc "${tc.input}" → "${tc.expected}"`, tm.getTapeString(), tc.expected);
+    assert(`BinInc "${tc.input}" accepted`, tm.accepted);
+  });
+}
+
+section('TuringMachine — Palindrome');
+{
+  const tests = [
+    { input: 'abba', accept: true },
+    { input: 'aba', accept: true },
+    { input: 'abab', accept: false },
+    { input: 'a', accept: true },
+    { input: '', accept: true },
+    { input: 'bb', accept: true },
+    { input: 'ab', accept: false },
+  ];
+  tests.forEach(tc => {
+    const tm = buildPalindromeTM();
+    tm.loadInput(tc.input);
+    runToHalt(tm);
+    assert(`Palindrome "${tc.input}" → ${tc.accept ? 'accept' : 'reject'}`,
+      tc.accept ? tm.accepted : tm.rejected);
+  });
+}
+
+section('TuringMachine — clone()');
+{
+  const tm = buildBinaryIncrementTM();
+  tm.loadInput('101');
+  tm.step(); tm.step();
+  const cl = tm.clone();
+  assertEqual('Clone has same states count', cl.states.length, tm.states.length);
+  assertEqual('Clone has same transitions count', cl.transitions.length, tm.transitions.length);
+  assertEqual('Clone has same blank', cl.blank, tm.blank);
+  // Clone should be independent
+  cl.loadInput('11');
+  runToHalt(cl);
+  assertEqual('Clone runs independently', cl.getTapeString(), '100');
+  // Original should be unaffected
+  assertEqual('Original tape unchanged', tm.tape[0], '1');
+}
+
+section('TuringMachine — getTapeString');
+{
+  const tm = new TuringMachine();
+  tm.blank = '\u25a1';
+  tm.tape = { 0: '1', 1: '\u25a1', 2: '0', 3: '1' };
+  assertEqual('getTapeString strips blanks', tm.getTapeString(), '101');
+  tm.tape = {};
+  assertEqual('Empty tape returns empty', tm.getTapeString(), '');
+  tm.tape = { 0: '\u25a1', 1: '\u25a1' };
+  assertEqual('All-blank tape returns empty', tm.getTapeString(), '');
+}
+
+section('TuringMachine — ⊢ marker integration');
+{
+  // Machine that reads ⊢ then accepts all 1s
+  const tm1 = buildMarkerTM_readsMarker();
+  tm1.loadInput('\u22a2111');
+  runToHalt(tm1);
+  assert('Marker TM (reads ⊢): accepted', tm1.accepted);
+
+  // Machine that skips ⊢, accepts all 1s
+  const tm2 = buildMarkerTM_skipsMarker();
+  tm2.loadInput('\u22a2111');
+  runToHalt(tm2);
+  assert('Marker TM (skips ⊢): accepted', tm2.accepted);
+
+  // Same machine without ⊢ in input
+  const tm3 = buildMarkerTM_skipsMarker();
+  tm3.loadInput('111');
+  runToHalt(tm3);
+  assert('Marker TM (no ⊢ in input): accepted', tm3.accepted);
+}
+
+// ── Normalization ──
+section('normalizeInputStr');
+{
+  assertEqual('|- → ⊢', normalizeInputStr('|-111'), '\u22a2111');
+  assertEqual('Multiple |-', normalizeInputStr('|-a|-b'), '\u22a2a\u22a2b');
+  assertEqual('No |-', normalizeInputStr('abc'), 'abc');
+  assertEqual('Empty string', normalizeInputStr(''), '');
+  assertEqual('Undefined → empty', normalizeInputStr(undefined), '');
+  assertEqual('Null → empty', normalizeInputStr(null), '');
+}
+
+section('normTape — blank stripping');
+{
+  assertEqual('Strips □', normTape('a\u25a1b'), 'ab');
+  assertEqual('Custom blank Δ stripped', normTape('a\u0394b', '\u0394'), 'ab');
+  assertEqual('Empty → empty', normTape(''), '');
+  assertEqual('Null → empty', normTape(null), '');
+}
+
+section('normTape — ⊢ tape marker stripping');
+{
+  // ⊢ is stripped entirely (it's a marker, not data)
+  assertEqual('⊢ stripped from start', normTape('\u22a2abc'), 'abc');
+  assertEqual('|- stripped from start', normTape('|-abc'), 'abc');
+  assertEqual('├ stripped', normTape('\u251cabc'), 'abc');
+  assertEqual('No marker: unchanged', normTape('abc'), 'abc');
+}
+
+section('normTape — triangle normalization');
+{
+  assertEqual('△ → Δ', normTape('\u25b3abc'), '\u0394abc');
+  assertEqual('▷ → Δ', normTape('\u25b7abc'), '\u0394abc');
+}
+
+section('normTape — OUTPUT STYLE: output after input');
+{
+  // Machine preserves input, writes result after it between $
+  // Both with and without ⊢ should normalize to the same thing
+  const withMarker = normTape('\u22a2111#11$11111$');
+  const withAsciiMarker = normTape('|-111#11$11111$');
+  const withoutMarker = normTape('111#11$11111$');
+  assertEqual('⊢ version matches no-marker', withMarker, withoutMarker);
+  assertEqual('|- version matches no-marker', withAsciiMarker, withoutMarker);
+  assertEqual('Result is correct', withoutMarker, '111#11$11111$');
+}
+
+section('normTape — OUTPUT STYLE: replace input (in-place)');
+{
+  // Machine replaces input with output
+  // Actual tape may have ⊢ prepended by _ensureInputCompat, expected tape doesn't
+  const actualWithMarker = normTape('\u22a21100');  // machine has ⊢ on tape
+  const expectedNoMarker = normTape('1100');         // AI generated expected without ⊢
+  assertEqual('In-place: ⊢1100 matches 1100', actualWithMarker, expectedNoMarker);
+  assertEqual('In-place: both normalize to 1100', actualWithMarker, '1100');
+
+  // Also test when expected HAS the marker
+  const expectedWithMarker = normTape('|-1100');
+  assertEqual('In-place: |-1100 also matches', expectedWithMarker, '1100');
+}
+
+section('ensureInputCompat');
+{
+  const markerTransitions = [{ read: '\u22a2', write: '\u22a2' }];
+  const noMarkerTransitions = [{ read: '1', write: '0' }];
+
+  assertEqual('Prepends ⊢ when machine uses it', ensureInputCompat('111', markerTransitions), '\u22a2111');
+  assertEqual('No change when input already has ⊢', ensureInputCompat('\u22a2111', markerTransitions), '\u22a2111');
+  assertEqual('No change when machine has no ⊢', ensureInputCompat('111', noMarkerTransitions), '111');
+  assertEqual('Empty input with marker', ensureInputCompat('', markerTransitions), '\u22a2');
+  assertEqual('Null input', ensureInputCompat(null, noMarkerTransitions), '');
+}
+
+section('compareTapes — both output styles');
+{
+  // Style 1: output after input (with $ delimiters)
+  assert('After-input: exact match', compareTapes('\u22a2111#11$11111$', '|-111#11$11111$'));
+  assert('After-input: both normalized same', compareTapes('111#11$11111$', '111#11$11111$'));
+
+  // Style 2: replace input (in-place)
+  assert('Replace: exact match', compareTapes('1100', '1100'));
+  assert('Replace: with ⊢ vs without', compareTapes('\u22a21100', '1100'));
+
+  // Cross-style: expected is after-input but actual is just the result
+  assert('Cross: expected="111#11$11111$" actual="11111"', compareTapes('11111', '111#11$11111$'));
+  assert('Cross: expected="⊢111#11$11111$" actual="11111"', compareTapes('11111', '\u22a2111#11$11111$'));
+
+  // Cross-style: expected is just result but actual is after-input
+  assert('Cross: actual="111#11$11111$" expected="11111"', compareTapes('111#11$11111$', '11111'));
+
+  // Should NOT match when results differ
+  assert('Different results: fail', !compareTapes('11111', '111#11$1111$'));
+  assert('Different results: fail 2', !compareTapes('1100', '1010'));
+
+  // Empty expected = always pass
+  assert('Empty expected', compareTapes('anything', ''));
+  assert('Null expected', compareTapes('anything', null));
+}
+
+section('Step direction correctness');
+{
+  // Verify L moves head left and R moves head right, independent of state change
+  const tm = new TuringMachine();
+  const q0 = tm.addState('q0', 100, 100);
+  const q1 = tm.addState('q1', 200, 100);
+  const q2 = tm.addState('q2', 300, 100);
+  // q0 --a/a,R--> q1
+  tm.addTransition(q0.id, q1.id, 'a', 'a', 'R');
+  // q1 --b/b,L--> q2  (move LEFT, go to q2, NOT back to q0)
+  tm.addTransition(q1.id, q2.id, 'b', 'b', 'L');
+
+  tm.loadInput('ab');
+  // Step 1: read 'a', move R, goto q1
+  tm.step();
+  assertEqual('After R: head at 1', tm.headPos, 1);
+  assertEqual('After R: state = q1', tm.getState(tm.currentStateId).name, 'q1');
+
+  // Step 2: read 'b', move L, goto q2 (NOT q0!)
+  tm.step();
+  assertEqual('After L: head at 0', tm.headPos, 0);
+  assertEqual('After L: state = q2 (not q0)', tm.getState(tm.currentStateId).name, 'q2');
+}
+
+// ══════════════════════════════════════════════════════════
+// Results
+// ══════════════════════════════════════════════════════════
+document.getElementById('results').innerHTML = _results;
+const total = _passed + _failed;
+const summaryEl = document.getElementById('summary');
+summaryEl.className = 'summary ' + (_failed === 0 ? 'all-pass' : 'has-fail');
+summaryEl.textContent = `${_passed}/${total} tests passed` + (_failed > 0 ? `, ${_failed} FAILED` : ' — ALL PASS');
+document.title = (_failed === 0 ? '✓' : '✗') + ` Tests: ${_passed}/${total}`;
+</script>
+</body>
+</html>
