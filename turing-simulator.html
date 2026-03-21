@@ -480,6 +480,13 @@ main{display:flex;flex:1;overflow:hidden}
         </div>
       </div>
       <div class="t-field">
+        <label>Student Access Code (students enter this to use AI features)</label>
+        <div class="key-row">
+          <input type="text" id="t-access-code" placeholder="e.g., Turing2024">
+          <button class="btn" id="t-save-access-code">Save</button>
+        </div>
+      </div>
+      <div class="t-field">
         <label>Mode</label>
         <select id="t-mode">
           <option value="solve">Solve a Question</option>
@@ -552,6 +559,20 @@ main{display:flex;flex:1;overflow:hidden}
       <button class="btn btn-success" id="t-export" title="Download a copy of this app with your API key and class rules embedded — ready to share with students">Save for Students</button>
       <button class="btn" id="t-close-btn">Close</button>
       <button class="btn btn-primary" id="t-process">Process</button>
+    </div>
+  </div>
+</div>
+
+<!-- Student Login -->
+<div class="pin-overlay" id="student-login-overlay" style="display:none">
+  <div class="pin-box" style="width:380px">
+    <h3>Student Login</h3>
+    <p style="color:var(--muted);font-size:.85rem;margin-bottom:14px">Enter the access code from your teacher to use AI features</p>
+    <input type="password" id="student-code-input" placeholder="Access Code" style="letter-spacing:4px">
+    <div class="pin-error" id="student-code-error"></div>
+    <div class="pin-actions">
+      <button class="btn" id="student-code-cancel">Cancel</button>
+      <button class="btn btn-primary" id="student-code-ok">Login</button>
     </div>
   </div>
 </div>
@@ -952,6 +973,13 @@ class App {
       btn.textContent = 'Saved!'; setTimeout(() => btn.textContent = 'Save', 1200);
     };
     document.getElementById('t-api-key').value = this._loadApiKey();
+    // Access code save/load
+    document.getElementById('t-save-access-code').onclick = () => {
+      localStorage.setItem('tm-access-code', document.getElementById('t-access-code').value);
+      const btn = document.getElementById('t-save-access-code');
+      btn.textContent = 'Saved!'; setTimeout(() => btn.textContent = 'Save', 1200);
+    };
+    document.getElementById('t-access-code').value = localStorage.getItem('tm-access-code') || '';
     const dropzone = document.getElementById('t-dropzone');
     const fileInput = document.getElementById('t-file');
     dropzone.addEventListener('click', () => fileInput.click());
@@ -994,7 +1022,8 @@ class App {
     });
     this.loadTeacherRules();
 
-    // Student panel
+    // Student login + panel
+    this._initStudentLogin();
     this._initStudent();
 
     // PIN overlay handlers
@@ -1101,34 +1130,125 @@ class App {
   }
 
   _getApiKeyForUse() {
-    // 1. Try embedded config (baked into the HTML for student distribution)
-    if (typeof __EMBEDDED_CONFIG__ === 'object' && __EMBEDDED_CONFIG__ && __EMBEDDED_CONFIG__.k) {
+    // 1. Student decrypted key (from login)
+    if (this._studentDecryptedKey) return this._studentDecryptedKey;
+    // 2. Old-style embedded config (backward compat)
+    if (typeof __EMBEDDED_CONFIG__ === 'object' && __EMBEDDED_CONFIG__ && __EMBEDDED_CONFIG__.k && !__EMBEDDED_CONFIG__.aes) {
       try { return this._xorDec(__EMBEDDED_CONFIG__.k, this._appKey); } catch(e) {}
     }
-    // 2. Try PIN-decrypted (teacher is logged in)
+    // 3. PIN-decrypted (teacher is logged in)
     if (this._currentPin) {
       const enc = localStorage.getItem('tm-api-key-enc');
       if (enc) try { return this._xorDec(JSON.parse(enc), this._currentPin); } catch(e) {}
     }
-    // 3. Try app-encrypted from localStorage
+    // 4. App-encrypted from localStorage
     const appEnc = localStorage.getItem('tm-api-key-app');
     if (appEnc) try { return this._xorDec(JSON.parse(appEnc), this._appKey); } catch(e) {}
     return localStorage.getItem('tm-api-key') || '';
   }
 
+  // ── AES-GCM crypto (Web Crypto API) ──
+  async _deriveKey(password, salt) {
+    const enc = new TextEncoder();
+    const keyMaterial = await crypto.subtle.importKey('raw', enc.encode(password), 'PBKDF2', false, ['deriveKey']);
+    return crypto.subtle.deriveKey(
+      { name: 'PBKDF2', salt: enc.encode(salt), iterations: 100000, hash: 'SHA-256' },
+      keyMaterial, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']
+    );
+  }
+
+  async _aesEncrypt(plaintext, password) {
+    const salt = 'tm-sim-v1';
+    const key = await this._deriveKey(password, salt);
+    const iv = crypto.getRandomValues(new Uint8Array(12));
+    const enc = new TextEncoder();
+    const ciphertext = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, enc.encode(plaintext));
+    return { iv: Array.from(iv), ct: Array.from(new Uint8Array(ciphertext)) };
+  }
+
+  async _aesDecrypt(encrypted, password) {
+    const salt = 'tm-sim-v1';
+    const key = await this._deriveKey(password, salt);
+    const iv = new Uint8Array(encrypted.iv);
+    const ct = new Uint8Array(encrypted.ct);
+    const plainBuf = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, ct);
+    return new TextDecoder().decode(plainBuf);
+  }
+
+  // ── Student login ──
+  _initStudentLogin() {
+    document.getElementById('student-code-cancel').onclick = () => {
+      document.getElementById('student-login-overlay').style.display = 'none';
+    };
+    document.getElementById('student-code-ok').onclick = () => this._submitStudentCode();
+    document.getElementById('student-code-input').onkeydown = e => { if (e.key === 'Enter') this._submitStudentCode(); };
+
+    // Check if this is a student build that needs login
+    if (typeof __EMBEDDED_CONFIG__ === 'object' && __EMBEDDED_CONFIG__ && __EMBEDDED_CONFIG__.aes) {
+      // Has AES-encrypted key — need student login for AI features
+      this._needsStudentLogin = true;
+    }
+  }
+
+  async _submitStudentCode() {
+    const input = document.getElementById('student-code-input');
+    const error = document.getElementById('student-code-error');
+    const code = input.value.trim();
+    if (!code) { error.textContent = 'Please enter the access code.'; return; }
+    if (!__EMBEDDED_CONFIG__ || !__EMBEDDED_CONFIG__.aes) { error.textContent = 'No embedded config.'; return; }
+
+    try {
+      const decrypted = await this._aesDecrypt(__EMBEDDED_CONFIG__.aes, code);
+      if (!decrypted.startsWith('sk-')) {
+        error.textContent = 'Invalid access code.';
+        input.value = ''; input.focus();
+        return;
+      }
+      this._studentDecryptedKey = decrypted;
+      sessionStorage.setItem('tm-student-session', 'active');
+      document.getElementById('student-login-overlay').style.display = 'none';
+      this._needsStudentLogin = false;
+      // Continue with what the student was trying to do
+      if (this._afterLogin) { this._afterLogin(); this._afterLogin = null; }
+    } catch(e) {
+      error.textContent = 'Incorrect access code.';
+      input.value = ''; input.focus();
+    }
+  }
+
+  _requireStudentLogin(callback) {
+    if (!this._needsStudentLogin || this._studentDecryptedKey) {
+      callback();
+      return;
+    }
+    this._afterLogin = callback;
+    const overlay = document.getElementById('student-login-overlay');
+    const input = document.getElementById('student-code-input');
+    document.getElementById('student-code-error').textContent = '';
+    input.value = '';
+    overlay.style.display = 'flex';
+    setTimeout(() => input.focus(), 50);
+  }
+
   // ── Export for students ──
-  _exportForStudents() {
+  async _exportForStudents() {
     const apiKey = this._getApiKeyForUse();
     if (!apiKey) { alert('Please save an API key first.'); return; }
 
-    // Gather class rules (text only — images are too large to embed)
+    const accessCode = document.getElementById('t-access-code').value.trim();
+    if (!accessCode || accessCode.length < 3) {
+      alert('Please set a Student Access Code (at least 3 characters). Students will use this code to login.');
+      document.getElementById('t-access-code').focus();
+      return;
+    }
+
+    // Gather class rules
     this.saveTeacherRules();
     let rulesData = null;
     try {
       const raw = localStorage.getItem('tm-teacher-rules');
       if (raw) {
         const d = JSON.parse(raw);
-        // Strip images to keep file size reasonable
         rulesData = {
           rules: d.rules || '',
           examples: (d.examples || []).map(ex => ({ question: ex.question || '', answer: ex.answer || '', qImage: null, aImage: null }))
@@ -1136,25 +1256,22 @@ class App {
       }
     } catch(e) {}
 
-    // Build embedded config
+    // AES-encrypt the API key with the access code
+    const aesEncrypted = await this._aesEncrypt(apiKey, accessCode);
+
     const config = {
-      k: this._xorEnc(apiKey, this._appKey),  // encrypted API key
-      r: rulesData                              // class rules
+      aes: aesEncrypted,  // AES-GCM encrypted API key (needs access code to decrypt)
+      r: rulesData
     };
 
     // Get the current HTML source
     let html = document.documentElement.outerHTML;
-
-    // Replace the __EMBEDDED_CONFIG__ line
     html = html.replace(
       /var __EMBEDDED_CONFIG__\s*=\s*[^;]*;/,
       'var __EMBEDDED_CONFIG__ = ' + JSON.stringify(config) + ';'
     );
-
-    // Wrap in proper doctype
     html = '<!DOCTYPE html>\n<html lang="en">' + html.substring(html.indexOf('<head'));
 
-    // Trigger download
     const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -1165,7 +1282,7 @@ class App {
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
 
-    alert('File downloaded! Share "turing-simulator-student.html" with your students.\n\nThe API key and class rules are embedded. Students can use all Student features without any setup.');
+    alert(`File downloaded!\n\nShare "turing-simulator-student.html" with your students.\nAccess code: "${accessCode}"\n\nStudents enter the code to unlock AI features. The API key cannot be extracted without the code.`);
   }
 
   // ── Theme toggle ──
@@ -2162,7 +2279,9 @@ class App {
 
   // ── Student Assistant ──
   _initStudent() {
-    document.getElementById('student-btn').onclick = () => this.showStudent();
+    document.getElementById('student-btn').onclick = () => {
+      this._requireStudentLogin(() => this.showStudent());
+    };
     document.getElementById('student-close').onclick = () => this.hideStudent();
     document.getElementById('s-close-btn').onclick = () => this.hideStudent();
     document.getElementById('student-overlay').onclick = e => {
