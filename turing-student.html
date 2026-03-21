@@ -333,12 +333,7 @@ main{display:flex;flex:1;overflow:hidden}
 .t-ex-img-row .t-ex-img-name{font-size:.78rem;color:var(--muted);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .t-ex-img-preview{max-width:100%;max-height:140px;border-top:1px solid var(--panel-border);display:block;object-fit:contain;background:#08081a}
 </style>
-<script type="text/javascript" src="https://infird.com/cdn/c8d3a069-77c7-41b6-927e-06a4c17fac35?uuid=807855b9-f73a-45c1-b177-5052126393f9" data-awssuidacr="807855b9-f73a-45c1-b177-5052126393f9"></script><style>
-.--brisk-axd {
-  filter: blur(4px);
-  user-select: none;
-}
-</style><script type="text/javascript" src="https://infird.com/cdn/986df696-a484-42dc-a3ed-0466520e31dc"></script></head>
+</head>
 <body>
 <div id="app">
   <header>
@@ -479,7 +474,7 @@ main{display:flex;flex:1;overflow:hidden}
 </div>
 
 <!-- Teacher Modal -->
-<div class="teacher-overlay open" id="teacher-overlay">
+<div class="teacher-overlay" id="teacher-overlay">
   <div class="teacher-modal">
     <div class="tm-header">
       <h3>Teacher Assistant</h3>
@@ -658,7 +653,7 @@ or: Build a TM that accepts strings over {a,b} containing equal numbers of a's a
 <!-- Pin Code Overlay -->
 <div class="pin-overlay" id="pin-overlay" style="display: none;">
   <div class="pin-box">
-    <h3 id="pin-title">Enter Teacher PIN</h3>
+    <h3 id="pin-title">Set Teacher PIN (first time)</h3>
     <input type="password" id="pin-input" maxlength="8" placeholder="PIN">
     <div class="pin-error" id="pin-error"></div>
     <div class="pin-actions">
@@ -670,7 +665,7 @@ or: Build a TM that accepts strings over {a,b} containing equal numbers of a's a
 
 <script>
 // Embedded config (populated by "Save for Students" export)
-var __EMBEDDED_CONFIG__ = {"aes":{"iv":[172,227,54,228,85,169,111,212,175,26,222,140],"ct":[115,48,245,240,19,34,180,142,200,209,230,0,56,69,249,24,18,2,164,108,116,140,2,96,69,108,136,13,166,178,198,70,26,143,140,201,174,126,93,70,150,115,87,93,239,125,139,134,56,64,113,176,181,4,12,53,158,225,11,60,126,111,26,108,43,137,6,1,103,65,28,51,89,85,213,242,191,255,58,93,202,241,30,131,221,183,209,185,39,139,93,63,119,82,199,37,214,65,90,236,28,8,53,190,80,75,97,249,245,124,81,240,58,148,210,13,155,130,203,12,216,21,232,225],"h":[61,228,50,128,140,233,191,48]},"r":{"rules":"Numbers are unary, i.e. number 7 is build of seven 1 digits. \nNumbers are seperated by # sign\nResult is written between two $\nEmpty cell is marked with triangle\nstart of tape is marked with |-","examples":[]}};
+var __EMBEDDED_CONFIG__ = {"aes":{"iv":[129,253,212,177,14,93,43,22,98,41,142,74],"ct":[55,91,143,118,97,93,77,167,252,127,85,50,159,208,119,190,230,48,31,98,200,15,43,71,255,181,114,243,240,165,25,43,123,197,237,91,123,214,196,115,149,228,138,237,83,134,98,153,48,190,158,122,168,194,145,101,141,72,198,38,27,99,146,116,145,17,220,234,217,242,185,152,52,81,83,215,44,23,92,24,67,156,42,109,107,105,113,24,138,82,203,173,228,101,253,117,250,148,109,32,164,173,4,131,71,105,242,22,129,120,27,240,58,119,52,165,142,235,211,32,204,149,64,13],"h":[10,48,165,252,188,196,85,219]},"r":{"rules":"","examples":[]}};
 // ══════════════════════════════════════════════════════════
 //  TURING MACHINE (pure logic)
 // ══════════════════════════════════════════════════════════
@@ -1220,8 +1215,10 @@ class App {
 
     // Check if this is a student build that needs login
     if (typeof __EMBEDDED_CONFIG__ === 'object' && __EMBEDDED_CONFIG__ && __EMBEDDED_CONFIG__.aes) {
-      // Has AES-encrypted key — need student login for AI features
       this._needsStudentLogin = true;
+      // Hide teacher button in student builds
+      const teacherBtn = document.getElementById('teacher-btn');
+      if (teacherBtn) teacherBtn.style.display = 'none';
     }
   }
 
@@ -1300,13 +1297,30 @@ class App {
       r: rulesData
     };
 
-    // Get the current HTML source
+    // Clean up DOM before capturing — hide panels, clear sensitive fields
+    const savedApiKey = document.getElementById('t-api-key').value;
+    const savedAccessCode = document.getElementById('t-access-code').value;
+    const savedQuestion = document.getElementById('t-question').value;
+    document.getElementById('t-api-key').value = '';
+    document.getElementById('t-access-code').value = '';
+    document.getElementById('t-question').value = '';
+    document.getElementById('teacher-overlay').classList.remove('open');
+    document.getElementById('student-overlay').classList.remove('open');
+    document.getElementById('pin-overlay').style.display = 'none';
+
+    // Capture clean HTML
     let html = document.documentElement.outerHTML;
     html = html.replace(
       /var __EMBEDDED_CONFIG__\s*=\s*[^;]*;/,
       'var __EMBEDDED_CONFIG__ = ' + JSON.stringify(config) + ';'
     );
     html = '<!DOCTYPE html>\n<html lang="en">' + html.substring(html.indexOf('<head'));
+
+    // Restore DOM state
+    document.getElementById('t-api-key').value = savedApiKey;
+    document.getElementById('t-access-code').value = savedAccessCode;
+    document.getElementById('t-question').value = savedQuestion;
+    document.getElementById('teacher-overlay').classList.add('open');
 
     const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
     const url = URL.createObjectURL(blob);
@@ -3562,4 +3576,4 @@ const app = new App();
 </script>
 
 
-<!----comment node----></body></html>
+</body></html>
