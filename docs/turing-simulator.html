@@ -1197,8 +1197,10 @@ class App {
 
     // Check if this is a student build that needs login
     if (typeof __EMBEDDED_CONFIG__ === 'object' && __EMBEDDED_CONFIG__ && __EMBEDDED_CONFIG__.aes) {
-      // Has AES-encrypted key — need student login for AI features
       this._needsStudentLogin = true;
+      // Hide teacher button in student builds
+      const teacherBtn = document.getElementById('teacher-btn');
+      if (teacherBtn) teacherBtn.style.display = 'none';
     }
   }
 
@@ -1295,10 +1297,6 @@ class App {
       'var __EMBEDDED_CONFIG__ = ' + JSON.stringify(config) + ';'
     );
     html = '<!DOCTYPE html>\n<html lang="en">' + html.substring(html.indexOf('<head'));
-
-    // Remove Teacher button and teacher overlay from student version
-    html = html.replace(/<button[^>]*id="teacher-btn"[^>]*>.*?<\/button>/g, '');
-    html = html.replace(/<div[^>]*class="teacher-overlay"[^>]*>[\s\S]*?<\/div>\s*<\/div>\s*<\/div>/g, '');
 
     // Restore DOM state
     document.getElementById('t-api-key').value = savedApiKey;
