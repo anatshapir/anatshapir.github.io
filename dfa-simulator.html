@@ -1334,9 +1334,9 @@ class App {
   _hideStudent(){document.getElementById('student-overlay').classList.remove('open');}
   _updateStudentUI(){ const mode=document.getElementById('s-mode').value; document.getElementById('s-diagram-section').style.display=mode==='diagram'?'':'none'; document.getElementById('s-question-label').textContent=mode==='diagram'?'Question (optional)':'Question / Description'; }
 
-  async _callAPI(sysPrompt, content, model) {
+  async _callAPI(sysPrompt, content, model, temperature) {
     const apiKey=this._getApiKeyForUse(); if(!apiKey) throw new Error('No API key configured.');
-    const resp=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:model||'claude-sonnet-4-6',max_tokens:8000,temperature:0.3,system:sysPrompt,messages:[{role:'user',content}]})});
+    const resp=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:model||'claude-sonnet-4-6',max_tokens:8000,temperature:temperature??0.3,system:sysPrompt,messages:[{role:'user',content}]})});
     if(!resp.ok){const err=await resp.json().catch(()=>({}));throw new Error(err.error?.message||`API error ${resp.status}`);}
     const data=await resp.json();const tb=data.content.find(b=>b.type==='text');return tb?tb.text:data.content[data.content.length-1].text;
   }
@@ -1363,7 +1363,7 @@ class App {
       (machine.transitions||[]).forEach(t=>{const f=this.dfa.states.find(s=>s.name===t.from),to=this.dfa.states.find(s=>s.name===t.to);if(f&&to)this.dfa.addTransition(f.id,to.id,t.symbol);});
       if(machine.alphabet)this.dfa.alphabet=machine.alphabet;
       this.stateCounter=this.dfa.states.length;
-      if(machine.tests)this.testCases=machine.tests.map(t=>({input:t.input||'',expected:(t.expected||'reject').toLowerCase(),result:null,status:'pending'}));
+      if(machine.tests)this.testCases=machine.tests.map(t=>{const inp=t.input||'';const m=this.dfa.clone();m.loadInput(inp);m.run();return{input:inp,expected:m.accepted?'accept':'reject',result:null,status:'pending'};});
       this.renderAll();this.runAllTests();
       statusEl.className='t-status visible success';statusEl.textContent=`DFA loaded! ${this.dfa.states.length} states, ${this.dfa.transitions.length} transitions.`;
       setTimeout(()=>this._hideTeacher(),2000);
@@ -1382,7 +1382,7 @@ class App {
       const content=[];let sysPrompt,userText;
       if(mode==='diagram'){
         sysPrompt=DFA_READ_PROMPT;content.push({type:'text',text:'[Diagram]:'});content.push({type:'image',source:{type:'base64',media_type:this._studentImg.type,data:this._studentImg.data.split(',')[1]}});
-        userText='Extract the DFA exactly as drawn.';
+        userText='Extract the DFA EXACTLY as drawn. Do NOT add any states or transitions that are not visible in the image. Do NOT complete or fix the DFA.';
       }else if(mode==='hints'){
         sysPrompt=DFA_HINTS_PROMPT;if(hasQImg){content.push({type:'text',text:'[Question]:'});content.push({type:'image',source:{type:'base64',media_type:this._studentQImg.type,data:this._studentQImg.data.split(',')[1]}});}
         userText=hasQImg&&q?'Image shows the question.\n'+q:hasQImg?'Give hints for this.':q;
@@ -1391,25 +1391,35 @@ class App {
         userText=hasQImg&&q?'Image shows the question.\n'+q:hasQImg?'Generate tests.':q;
       }
       content.push({type:'text',text:userText});
-      const raw=await this._callAPI(sysPrompt,content);
+      const raw=await this._callAPI(sysPrompt,content,undefined,mode==='diagram'?0:undefined);
       if(mode==='diagram'){
         const machine=this._extractJSON(raw);if(!machine.states)throw new Error('Could not extract DFA.');
         this.clearAll();
         machine.states.forEach(s=>{const st=this.dfa.addState(s.name,s.x||150,s.y||150);st.isStart=!!s.isStart;st.isAccept=!!s.isAccept;});
         (machine.transitions||[]).forEach(t=>{const f=this.dfa.states.find(s=>s.name===t.from),to=this.dfa.states.find(s=>s.name===t.to);if(f&&to)this.dfa.addTransition(f.id,to.id,t.symbol);});
         if(machine.alphabet)this.dfa.alphabet=machine.alphabet;this.stateCounter=this.dfa.states.length;
-        if(q||hasQImg){statusEl.innerHTML='<span class="spinner"></span> Generating tests...';
-          const tc=[];if(hasQImg){tc.push({type:'text',text:'[Q]:'});tc.push({type:'image',source:{type:'base64',media_type:this._studentQImg.type,data:this._studentQImg.data.split(',')[1]}});}
-          tc.push({type:'text',text:q||'Generate tests.'});
-          try{const tr=await this._callAPI(DFA_TESTS_PROMPT,tc);const tj=this._extractJSON(tr);if(tj.tests)tj.tests.forEach(t=>this.testCases.push({input:t.input||'',expected:(t.expected||'reject').toLowerCase(),result:null,status:'pending'}));this.renderTestTable();this.runAllTests();}catch(e){}}
         this.renderAll();statusEl.className='t-status visible success';statusEl.textContent=`DFA loaded! ${this.dfa.states.length} states.`;setTimeout(()=>this._hideStudent(),2500);
       }else if(mode==='hints'){
         statusEl.className='t-status visible success';statusEl.textContent='Hints:';resultEl.className='s-result visible';
         resultEl.innerHTML=raw.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/^### (.+)$/gm,'<h4>$1</h4>').replace(/^- (.+)$/gm,'<li>$1</li>').replace(/`([^`]+)`/g,'<code>$1</code>').replace(/\n/g,'<br>');
       }else{
-        statusEl.className='t-status visible success';statusEl.textContent='Tests:';resultEl.className='s-result visible';
-        resultEl.innerHTML=raw.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>');
-        try{const tj=this._extractJSON(raw);if(tj.tests){tj.tests.forEach(t=>this.testCases.push({input:t.input||'',expected:(t.expected||'reject').toLowerCase(),result:null,status:'pending'}));this.renderTestTable();statusEl.textContent=`${tj.tests.length} tests added!`;}}catch(e){}
+        try{const tj=this._extractJSON(raw);
+          if(tj.clarification){
+            statusEl.className='t-status visible error';statusEl.textContent='Clarification needed:';resultEl.className='s-result visible';
+            resultEl.innerHTML=tj.clarification.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+          }else if(tj.tests){
+            const hasStart=!!this.dfa.getStartState();
+            tj.tests.forEach(t=>{const inp=t.input||'';let exp=(t.expected||'reject').toLowerCase();if(hasStart){try{const m=this.dfa.clone();m.loadInput(inp);m.run();exp=m.accepted?'accept':'reject';}catch(e){}}this.testCases.push({input:inp,expected:exp,result:null,status:'pending'});});
+            this.renderTestTable();
+            statusEl.className='t-status visible success';statusEl.textContent=`${tj.tests.length} tests added!`;resultEl.className='s-result';
+          }else{
+            statusEl.className='t-status visible success';statusEl.textContent='Response:';resultEl.className='s-result visible';
+            resultEl.innerHTML=raw.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+          }
+        }catch(e){
+          statusEl.className='t-status visible success';statusEl.textContent='Response:';resultEl.className='s-result visible';
+          resultEl.innerHTML=raw.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+        }
       }
     }catch(err){statusEl.className='t-status visible error';statusEl.textContent='Error: '+err.message;}
     finally{btn.disabled=false;}
@@ -1463,19 +1473,23 @@ RULES:
 - Include 5-8 test cases with edge cases (empty string, single char, etc.).
 - Layout: x in 80-600, y in 60-350, spread out.`;
 
-const DFA_READ_PROMPT = `You extract DFA diagrams from images with 100% fidelity.
-Output ONLY what you see — no corrections, no additions.
+const DFA_READ_PROMPT = `You transcribe DFA diagrams from images. Output ONLY what is VISIBLE — zero additions.
 
-RULES:
-- "from" = state at arrow TAIL, "to" = state at ARROWHEAD
-- Transition labels show the input symbol (e.g., "0", "1", "a,b" for multiple symbols)
-- Start state: incoming arrow from nowhere
-- Accept state: double circle
-- Do NOT invent transitions. Do NOT add tests.
+STEP 1 — Inventory (write this out before the JSON):
+• Count every circle (state). List each name and whether it has a double border (accept) or incoming arrow from nowhere (start).
+• Count every arrow. For each, write: source → target, label.
+• These counts are your ground truth.
 
-OUTPUT a JSON in a \`\`\`json block:
-{"description":"...","alphabet":["0","1"],"states":[{"name":"str","x":num,"y":num,"isStart":bool,"isAccept":bool}],"transitions":[{"from":"name","to":"name","symbol":"char"}]}
-For labels with multiple symbols like "a,b", output separate transitions for each symbol.`;
+STEP 2 — Output JSON in a \`\`\`json block matching your inventory EXACTLY:
+{"description":"...","alphabet":[...],"states":[{"name":"str","x":num,"y":num,"isStart":bool,"isAccept":bool}],"transitions":[{"from":"name","to":"name","symbol":"char"}]}
+
+STRICT RULES:
+- Number of states in JSON MUST equal number of circles you counted.
+- Number of transitions in JSON MUST equal number of arrows you counted (split "a,b" labels into separate transitions).
+- Do NOT add missing transitions, dead states, trap states, or self-loops that are not drawn.
+- Do NOT "complete" or "fix" the DFA in any way.
+- "from" = arrow tail, "to" = arrowhead.
+- If unsure about something, OMIT it.`;
 
 const DFA_HINTS_PROMPT = `You are a Theory of Computation tutor helping a student design a DFA.
 Help them THINK through the problem WITHOUT giving the full solution.
@@ -1491,11 +1505,27 @@ RULES:
 5. Give ONE small example trace.
 Keep it concise and encouraging. Use markdown.`;
 
-const DFA_TESTS_PROMPT = `Generate test cases for a DFA problem.
+const DFA_TESTS_PROMPT = `You help students test their DFA by generating test input strings.
+
+IMPORTANT: If the question or description is unclear, ambiguous, or you are not sure what language the DFA should accept, respond with:
+\`\`\`json
+{"clarification":"Explain what is unclear and ask the student a specific question to clarify."}
+\`\`\`
+
+If the question IS clear, generate test input strings. Do NOT determine accept/reject — that will be computed by simulating the student's DFA.
+
 Output a JSON in a \`\`\`json block:
-{"tests":[{"input":"string","expected":"accept or reject","explanation":"why"}]}
-Generate 6-10 tests covering: empty string, single chars, basic accept/reject, edge cases, tricky cases.
-Use "accept" or "reject" (lowercase). Include explanation for each.`;
+{"tests":[{"input":"string"}]}
+
+Generate 8-12 diverse test inputs:
+- Empty string ""
+- Single characters from the alphabet
+- Short strings (2-3 chars)
+- Medium strings (4-6 chars)
+- Edge cases and tricky boundary cases
+- Use ONLY symbols from the alphabet described in the question
+
+Do NOT include "expected" fields.`;
 
 const PRESETS = {
   'even-zeros': {
