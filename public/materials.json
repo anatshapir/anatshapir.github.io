@@ -424,6 +424,18 @@
       ],
       "linkUrl": "turing-student.html",
       "icon": "/icons/1774120689984_turing.png"
+    },
+    {
+      "id": "הרצת-מודלים",
+      "title": "הרצת מודלים",
+      "description": "",
+      "category": "teaching",
+      "path": [
+        "מדעי הנתונים",
+        "מודלים"
+      ],
+      "linkUrl": "/Mastering_Model_Generalization.pdf",
+      "icon": "📄"
     }
   ]
 }
