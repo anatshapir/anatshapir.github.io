@@ -55,6 +55,10 @@
     "חישוביות/מודלים": {
       "icon": "⚙️",
       "color": "from-emerald-50 to-teal-50 border-emerald-200"
+    },
+    "מבני נתונים": {
+      "icon": "📚",
+      "color": "from-amber-50 to-yellow-50 border-amber-200"
     }
   },
   "materials": [
@@ -436,6 +440,17 @@
       ],
       "linkUrl": "/Mastering_Model_Generalization.pdf",
       "icon": "📄"
+    },
+    {
+      "id": "בוחן-עצים",
+      "title": "בוחן עצים",
+      "description": "",
+      "category": "teaching",
+      "path": [
+        "מבני נתונים"
+      ],
+      "linkUrl": "binary_trees_quiz.html/",
+      "icon": "🌳"
     }
   ]
 }
