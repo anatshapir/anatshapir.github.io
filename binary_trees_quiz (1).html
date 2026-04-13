@@ -1,0 +1,1784 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>בוחן עצים בינאריים — Java</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/tokyo-night-dark.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/java.min.js"></script>
+<style>
+:root {
+  --bg:        #0d1117;
+  --surface:   #161b22;
+  --surface2:  #1c2333;
+  --border:    #30363d;
+  --accent:    #58a6ff;
+  --accent2:   #3fb950;
+  --warn:      #f85149;
+  --gold:      #d29922;
+  --text:      #e6edf3;
+  --muted:     #8b949e;
+  --code-bg:   #0d1117;
+  --radius:    10px;
+  --mono:      'JetBrains Mono', monospace;
+  --sans:      'Heebo', sans-serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: var(--sans);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  line-height: 1.7;
+}
+
+/* ── HEADER ── */
+.quiz-header {
+  background: linear-gradient(135deg, #161b22 0%, #1c2333 100%);
+  border-bottom: 1px solid var(--border);
+  padding: 32px 40px 24px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  backdrop-filter: blur(10px);
+}
+.quiz-header h1 {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: -0.5px;
+}
+.quiz-header p { color: var(--muted); font-size: .9rem; margin-top: 4px; }
+
+.progress-bar-wrap {
+  margin-top: 16px;
+  height: 4px;
+  background: var(--border);
+  border-radius: 99px;
+  overflow: hidden;
+}
+.progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+  border-radius: 99px;
+  transition: width .4s ease;
+  width: 0%;
+}
+.progress-label {
+  font-size: .8rem;
+  color: var(--muted);
+  margin-top: 6px;
+  display: flex;
+  justify-content: space-between;
+}
+
+/* ── LAYOUT ── */
+.quiz-body {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 40px 24px 100px;
+}
+
+/* ── SECTION CARD ── */
+.q-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin-bottom: 28px;
+  overflow: hidden;
+  transition: border-color .2s;
+}
+.q-card:hover { border-color: #444c56; }
+.q-card.answered { border-color: var(--accent2); }
+.q-card.answered .q-header { background: rgba(63,185,80,.07); }
+
+.q-header {
+  padding: 18px 24px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.q-num {
+  background: var(--accent);
+  color: #000;
+  font-weight: 700;
+  font-size: .78rem;
+  padding: 3px 10px;
+  border-radius: 99px;
+  white-space: nowrap;
+}
+.q-title {
+  font-weight: 600;
+  font-size: 1rem;
+  flex: 1;
+}
+.q-pts {
+  color: var(--gold);
+  font-size: .82rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.q-body { padding: 20px 24px; }
+
+/* ── CODE BLOCK ── */
+.code-wrap {
+  direction: ltr;
+  text-align: left;
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  margin-bottom: 20px;
+  overflow: hidden;
+  min-width: 0;
+  max-width: 100%;
+}
+.code-label {
+  background: var(--surface2);
+  border-bottom: 1px solid var(--border);
+  padding: 6px 14px;
+  font-family: var(--mono);
+  font-size: .75rem;
+  color: var(--muted);
+  direction: ltr;
+  text-align: left;
+  white-space: nowrap;
+}
+.code-wrap pre {
+  margin: 0 !important;
+  border-radius: 0 !important;
+  background: var(--code-bg) !important;
+  font-size: .75rem !important;
+  line-height: 1.6 !important;
+  overflow-x: auto !important;
+  -webkit-overflow-scrolling: touch;
+  max-width: 100%;
+  white-space: pre !important;
+}
+.code-wrap code {
+  font-family: var(--mono) !important;
+  white-space: pre !important;
+  word-break: normal !important;
+  overflow-wrap: normal !important;
+}
+
+/* ── TREE BLOCK ── */
+.tree-wrap {
+  direction: ltr;
+  text-align: left;
+  background: #0a0e14;
+  border: 1px solid #2a3440;
+  border-right: 3px solid var(--gold);
+  border-radius: 8px;
+  padding: 14px 16px;
+  margin-bottom: 20px;
+  font-family: var(--mono);
+  font-size: .78rem;
+  line-height: 1.8;
+  color: #cdd9e5;
+  white-space: pre;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  max-width: 100%;
+}
+.tree-label {
+  font-size: .75rem;
+  color: var(--gold);
+  margin-bottom: 8px;
+  font-weight: 600;
+  letter-spacing: .05em;
+  direction: rtl;
+}
+
+/* ── QUESTION TEXT ── */
+.q-text {
+  font-size: .97rem;
+  margin-bottom: 16px;
+  color: var(--text);
+  font-weight: 500;
+}
+.sub-q {
+  margin-bottom: 24px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--border);
+}
+.sub-q:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+
+/* ── MCQ / TF ── */
+.choices { display: flex; flex-direction: column; gap: 8px; }
+.choice-label {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all .15s;
+  font-size: .93rem;
+}
+.choice-label:hover {
+  background: var(--surface2);
+  border-color: var(--accent);
+}
+.choice-label input[type=radio] {
+  margin-top: 3px;
+  accent-color: var(--accent);
+  flex-shrink: 0;
+}
+.choice-label.correct-ans {
+  background: rgba(63,185,80,.1);
+  border-color: var(--accent2);
+  color: var(--accent2);
+}
+.choice-label.wrong-ans {
+  background: rgba(248,81,73,.1);
+  border-color: var(--warn);
+  color: var(--warn);
+}
+
+/* ── OPEN QUESTION ── */
+.open-q textarea {
+  width: 100%;
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: .85rem;
+  padding: 12px 14px;
+  resize: vertical;
+  min-height: 120px;
+  direction: ltr;
+  text-align: left;
+  line-height: 1.6;
+  transition: border-color .2s;
+}
+.open-q textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+.open-note {
+  font-size: .8rem;
+  color: var(--muted);
+  margin-top: 6px;
+  font-style: italic;
+}
+
+/* ── FEEDBACK ── */
+.feedback-box {
+  display: none;
+  margin-top: 12px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: .88rem;
+  font-weight: 500;
+}
+.feedback-box.correct {
+  background: rgba(63,185,80,.12);
+  border: 1px solid var(--accent2);
+  color: var(--accent2);
+}
+.feedback-box.wrong {
+  background: rgba(248,81,73,.1);
+  border: 1px solid var(--warn);
+  color: #ff6b6b;
+}
+
+/* ── BUTTONS ── */
+.btn-check {
+  margin-top: 12px;
+  background: var(--accent);
+  color: #000;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 20px;
+  font-family: var(--sans);
+  font-size: .88rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity .15s, transform .1s;
+}
+.btn-check:hover { opacity: .85; transform: translateY(-1px); }
+.btn-check:active { transform: translateY(0); }
+.btn-check:disabled { opacity: .4; cursor: default; transform: none; }
+
+/* ── SUBMIT ── */
+.submit-section {
+  text-align: center;
+  padding: 40px 0;
+}
+.btn-submit {
+  background: linear-gradient(135deg, var(--accent), #388bfd);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  padding: 16px 48px;
+  font-family: var(--sans);
+  font-size: 1.1rem;
+  font-weight: 700;
+  cursor: pointer;
+  letter-spacing: .5px;
+  transition: all .2s;
+  box-shadow: 0 4px 24px rgba(88,166,255,.3);
+}
+.btn-submit:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(88,166,255,.4); }
+
+/* ── SCORE PANEL ── */
+.score-panel {
+  display: none;
+  background: linear-gradient(135deg, var(--surface), var(--surface2));
+  border: 1px solid var(--accent);
+  border-radius: 16px;
+  padding: 40px;
+  text-align: center;
+  margin-bottom: 40px;
+}
+.score-panel .big-score {
+  font-size: 4rem;
+  font-weight: 700;
+  color: var(--accent);
+  line-height: 1;
+}
+.score-panel .score-label {
+  font-size: 1rem;
+  color: var(--muted);
+  margin-top: 8px;
+}
+.score-panel .score-note {
+  margin-top: 16px;
+  font-size: .9rem;
+  color: var(--gold);
+  border: 1px solid var(--gold);
+  border-radius: 8px;
+  padding: 8px 16px;
+  display: inline-block;
+}
+
+/* ── SECTION DIVIDER ── */
+.section-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 36px 0 20px;
+  color: var(--muted);
+  font-size: .8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+}
+.section-divider::before, .section-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+/* ── TREE SVG ── */
+.tree-svg-wrap {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+.tree-svg-wrap svg {
+  max-width: 100%;
+}
+circle { stroke-width: 2; }
+.tree-node-circle { fill: #1c2333; stroke: var(--accent); }
+.tree-node-text { fill: var(--text); font-family: var(--mono); font-size: 13px; text-anchor: middle; dominant-baseline: central; }
+.tree-edge { stroke: #444c56; stroke-width: 1.5; fill: none; }
+
+/* ── MOBILE RESPONSIVE ── */
+@media (max-width: 640px) {
+  .quiz-header {
+    padding: 14px 14px 10px;
+    position: relative;
+  }
+  .quiz-header h1 { font-size: 1.05rem; }
+  .quiz-body { padding: 12px 10px 80px; }
+
+  .q-card { margin-bottom: 14px; border-radius: 8px; }
+  .q-header { padding: 11px 12px; flex-wrap: wrap; gap: 8px; }
+  .q-title  { font-size: .85rem; }
+  .q-pts    { font-size: .76rem; }
+  .q-body   { padding: 12px 10px; }
+
+  /* קוד וגלילה */
+  .code-wrap pre  { font-size: .68rem !important; padding: 8px 10px !important; }
+  .code-wrap code { font-size: .68rem !important; }
+  .tree-wrap      { font-size: .68rem; padding: 8px 10px; line-height: 1.65; }
+  .code-label     { font-size: .68rem; padding: 4px 10px; }
+
+  /* אפשרויות */
+  .choice-label { font-size: .82rem; padding: 8px 10px; gap: 9px; }
+  .q-text       { font-size: .9rem; }
+
+  /* textarea */
+  .open-q textarea { font-size: .76rem; min-height: 90px; }
+
+  /* פרטי תלמיד — עמודה אחת */
+  .student-grid { grid-template-columns: 1fr !important; }
+
+  /* כפתור */
+  .btn-submit { font-size: .92rem; padding: 13px 24px; width: 90%; }
+
+  /* ניקוד */
+  .score-panel { padding: 20px 14px; }
+  .score-panel .big-score { font-size: 2.8rem; }
+
+  /* רמז גלילה */
+  .scroll-hint { display: block !important; }
+}
+
+.scroll-hint {
+  display: none;
+  font-size: .68rem;
+  color: var(--muted);
+  text-align: left;
+  direction: ltr;
+  padding: 2px 10px 5px;
+  font-style: italic;
+}
+</style>
+</head>
+<body>
+
+<div class="quiz-header">
+  <h1>🌳 בוחן עצים בינאריים — Java</h1>
+  <p>אוסף שאלות | ד"ר יבגני קנל · עיצוב תוכנה מבוסס עצמים</p>
+  <div class="progress-bar-wrap"><div class="progress-bar" id="progressBar"></div></div>
+  <div class="progress-label">
+    <span id="progressText">0 / 20 שאלות</span>
+    <span id="scorePreview">ניקוד: 0</span>
+  </div>
+</div>
+
+<div class="quiz-body">
+
+<!-- ══════════════════════════════════════════
+     שאלה 1
+══════════════════════════════════════════ -->
+<div class="q-card" id="card-1">
+  <div class="q-header">
+    <span class="q-num">שאלה 1</span>
+    <span class="q-title">what1 / what2 / what3</span>
+    <span class="q-pts">30 נק'</span>
+  </div>
+  <div class="q-body">
+    <div class="code-wrap">
+      <div class="code-label">Java · what1 / what2 / what3</div>
+      <pre><code class="language-java">public static Node&lt;Integer&gt; what1(BinNode&lt;Integer&gt; bt) {
+    Node&lt;Integer&gt; lst = new Node&lt;Integer&gt;();
+    what2(bt, lst);
+    return lst;
+}
+
+public static void what2(BinNode&lt;Integer&gt; bt, Node&lt;Integer&gt; lst) {
+    if (bt != null) {
+        int x = bt.getValue();
+        if (what3(bt.getLeft(), x) &amp;&amp; what3(bt.getRight(), x))
+            lst = new Node&lt;Integer&gt;(x, lst);
+        what2(bt.getLeft(), lst);
+        what2(bt.getRight(), lst);
+    }
+}
+
+public static boolean what3(BinNode&lt;Integer&gt; bt, int x) {
+    if (bt == null)         return true;
+    if (bt.getValue() == x) return false;
+    return what3(bt.getLeft(), x) &amp;&amp; what3(bt.getRight(), x);
+}</code></pre>
+    </div>
+
+    <div class="tree-label">🌳 עץ bt לשאלות א–ד:</div>
+    <div class="tree-wrap">         3
+       /   \
+      3     10
+     / \   /  \
+    1   3  9    7
+       /  /      \
+      2  7        10</div>
+
+    <!-- 1א -->
+    <div class="sub-q" id="q1a">
+      <div class="q-text">א. מה מבצעת <code>what3(bt, x)</code>?</div>
+      <div class="choices">
+        <label class="choice-label"><input type="radio" name="q1a" value="0"> בודקת אם x מופיע לפחות פעם אחת בתת-העץ bt</label>
+        <label class="choice-label"><input type="radio" name="q1a" value="1"> בודקת אם x <strong>אינו מופיע</strong> בשום מקום בתת-העץ bt (מחזירה true אם x לא קיים)</label>
+        <label class="choice-label"><input type="radio" name="q1a" value="2"> בודקת אם x גדול מכל הערכים בתת-העץ</label>
+        <label class="choice-label"><input type="radio" name="q1a" value="3"> בודקת אם x שווה לערך השורש</label>
+      </div>
+      <button class="btn-check" onclick="checkMCQ('q1a',1,5)">בדיקה</button>
+      <div class="feedback-box" id="fb-q1a"></div>
+    </div>
+
+    <!-- 1ב -->
+    <div class="sub-q" id="q1b">
+      <div class="q-text">ב. מה יהיה הפלט של <code>System.out.println(what1(bt))</code> עבור העץ הנתון?<br><small style="color:var(--muted)">(שימי לב לאופן שבו Java מעבירה פרמטרים)</small></div>
+      <div class="choices">
+        <label class="choice-label"><input type="radio" name="q1b" value="0"> רשימה עם הערכים: 3, 10</label>
+        <label class="choice-label"><input type="radio" name="q1b" value="1"> רשימה ריקה — lst הוא משתנה מקומי ב-what2; הקצאת <code>lst = new …</code> אינה משנה את lst של הקורא</label>
+        <label class="choice-label"><input type="radio" name="q1b" value="2"> רשימה עם הערך: 9 בלבד</label>
+        <label class="choice-label"><input type="radio" name="q1b" value="3"> שגיאת ריצה — NullPointerException</label>
+      </div>
+      <button class="btn-check" onclick="checkMCQ('q1b',1,10)">בדיקה</button>
+      <div class="feedback-box" id="fb-q1b"></div>
+    </div>
+
+    <!-- 1ג -->
+    <div class="sub-q" id="q1c">
+      <div class="q-text">ג. מה what1 <em>מנסה</em> לבצע, ומה הבעיה בה?</div>
+      <div class="choices">
+        <label class="choice-label"><input type="radio" name="q1c" value="0"> מנסה לבנות רשימה של צמתים שערכם אינו מופיע בתת-עציהם; אך בשל <em>pass-by-value</em> ב-Java — הרשימה תמיד ריקה</label>
+        <label class="choice-label"><input type="radio" name="q1c" value="1"> מחשבת את עומק העץ — ועובדת נכון</label>
+        <label class="choice-label"><input type="radio" name="q1c" value="2"> מוצאת צמתים עם שני ילדים — ועובדת נכון</label>
+        <label class="choice-label"><input type="radio" name="q1c" value="3"> אינה מתקמפלת בגלל שגיאת טיפוסים</label>
+      </div>
+      <button class="btn-check" onclick="checkMCQ('q1c',0,10)">בדיקה</button>
+      <div class="feedback-box" id="fb-q1c"></div>
+    </div>
+
+    <!-- 1ד -->
+    <div class="sub-q" id="q1d">
+      <div class="q-text">ד. מה תחזיר what1(bt) אם כל הערכים ב-bt שונים זה מזה?</div>
+      <div class="choices">
+        <label class="choice-label"><input type="radio" name="q1d" value="0"> רשימה עם כל הצמתים שאינם עלים</label>
+        <label class="choice-label"><input type="radio" name="q1d" value="1"> רשימה עם כל הצמתים בעץ</label>
+        <label class="choice-label"><input type="radio" name="q1d" value="2"> רשימה ריקה — אותה בעיית pass-by-value</label>
+        <label class="choice-label"><input type="radio" name="q1d" value="3"> רשימה עם השורש בלבד</label>
+      </div>
+      <button class="btn-check" onclick="checkMCQ('q1d',2,5)">בדיקה</button>
+      <div class="feedback-box" id="fb-q1d"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     שאלה 2
+══════════════════════════════════════════ -->
+<div class="q-card" id="card-2">
+  <div class="q-header">
+    <span class="q-num">שאלה 2</span>
+    <span class="q-title">secret — מספרים שליליים/חיוביים</span>
+    <span class="q-pts">30 נק'</span>
+  </div>
+  <div class="q-body">
+    <div class="code-wrap">
+      <div class="code-label">Java · secret</div>
+      <pre><code class="language-java">public static boolean secret(BinNode&lt;Integer&gt; bt) {
+    if (bt.getLeft() == null &amp;&amp; bt.getRight() == null)
+        return true;
+    if (bt.getLeft() == null || bt.getRight() == null)
+        return false;
+    if (bt.getLeft().getValue() &gt; 0)  return false;
+    if (bt.getRight().getValue() &lt; 0) return false;
+    return secret(bt.getLeft()) &amp;&amp; secret(bt.getRight());
+}</code></pre>
+    </div>
+
+    <div class="sub-q" id="q2t1">
+      <div class="q-text">א. עץ 1 — מה תחזיר secret?</div>
+      <div class="tree-wrap">    -10
+   /    \
+ -15     20
+ /  \
+-3   30</div>
+      <div class="choices">
+        <label class="choice-label"><input type="radio" name="q2t1" value="0"> true</label>
+        <label class="choice-label"><input type="radio" name="q2t1" value="1"> false</label>
+      </div>
+      <button class="btn-check" onclick="checkMCQ('q2t1',0,5)">בדיקה</button>
+      <div class="feedback-box" id="fb-q2t1"></div>
+    </div>
+
+    <div class="sub-q" id="q2t2">
+      <div class="q-text">א. עץ 2 — מה תחזיר secret?</div>
+      <div class="tree-wrap">  2
+ / \
+1   20
+     \
+     30</div>
+      <div class="choices">
+        <label class="choice-label"><input type="radio" name="q2t2" value="0"> true</label>
+        <label class="choice-label"><input type="radio" name="q2t2" value="1"> false</label>
+      </div>
+      <button class="btn-check" onclick="checkMCQ('q2t2',1,5)">בדיקה</button>
+      <div class="feedback-box" id="fb-q2t2"></div>
+    </div>
+
+    <div class="sub-q" id="q2t3">
+      <div class="q-text">א. עץ 3 — מה תחזיר secret?</div>
+      <div class="tree-wrap">   30
+  /  \
+-20   15</div>
+      <div class="choices">
+        <label class="choice-label"><input type="radio" name="q2t3" value="0"> true</label>
+        <label class="choice-label"><input type="radio" name="q2t3" value="1"> false</label>
+      </div>
+      <button class="btn-check" onclick="checkMCQ('q2t3',0,5)">בדיקה</button>
+      <div class="feedback-box" id="fb-q2t3"></div>
+    </div>
+
+    <div class="sub-q" id="q2t4">
+      <div class="q-text">א. עץ 4 — מה תחזיר secret?</div>
+      <div class="tree-wrap">  1
+ / \
+2   3</div>
+      <div class="choices">
+        <label class="choice-label"><input type="radio" name="q2t4" value="0"> true</label>
+        <label class="choice-label"><input type="radio" name="q2t4" value="1"> false</label>
+      </div>
+      <button class="btn-check" onclick="checkMCQ('q2t4',1,5)">בדיקה</button>
+      <div class="feedback-box" id="fb-q2t4"></div>
+    </div>
+
+    <div class="sub-q" id="q2b">
+      <div class="q-text">ב. מה מבצע האלגוריתם secret באופן כללי?</div>
+      <div class="choices">
+        <label class="choice-label"><input type="radio" name="q2b" value="0"> בודקת אם העץ הוא BST</label>
+        <label class="choice-label"><input type="radio" name="q2b" value="1"> בודקת אם כל הצמתים שליליים</label>
+        <label class="choice-label"><input type="radio" name="q2b" value="2"> בודקת אם העץ הוא עץ בינארי מלא (full) שבו לכל צומת פנימי: הילד השמאלי ≤ 0 והילד הימני ≥ 0, ותנאי זה מתקיים רקורסיבית</label>
+        <label class="choice-label"><input type="radio" name="q2b" value="3"> בודקת אם סכום ענף שמאל שלילי וסכום ענף ימין חיובי</label>
+      </div>
+      <button class="btn-check" onclick="checkMCQ('q2b',2,5)">בדיקה</button>
+      <div class="feedback-box" id="fb-q2b"></div>
+    </div>
+
+    <div class="sub-q" id="q2c1">
+      <div class="q-text">ג. טענה 1: "קיים עץ bt המכיל <strong>רק ערכים חיוביים</strong>, כך שsecret(bt) תחזיר אמת"</div>
+      <div class="choices">
+        <label class="choice-label"><input type="radio" name="q2c1" value="0"> נכון</label>
+        <label class="choice-label"><input type="radio" name="q2c1" value="1"> לא נכון</label>
+      </div>
+      <button class="btn-check" onclick="checkMCQ('q2c1',1,3)">בדיקה</button>
+      <div class="feedback-box" id="fb-q2c1"></div>
+    </div>
+
+    <div class="sub-q" id="q2c2">
+      <div class="q-text">ג. טענה 2: "לא קיים עץ bt שלא מכיל ערכים חיוביים (כל ערכיו ≤ 0), כך שsecret(bt) תחזיר אמת"</div>
+      <div class="choices">
+        <label class="choice-label"><input type="radio" name="q2c2" value="0"> נכון</label>
+        <label class="choice-label"><input type="radio" name="q2c2" value="1"> לא נכון</label>
+      </div>
+      <button class="btn-check" onclick="checkMCQ('q2c2',1,2)">בדיקה</button>
+      <div class="feedback-box" id="fb-q2c2"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     שאלה 3
+══════════════════════════════════════════ -->
+<div class="q-card" id="card-3">
+  <div class="q-header">
+    <span class="q-num">שאלה 3</span>
+    <span class="q-title">result + sod</span>
+    <span class="q-pts">30 נק'</span>
+  </div>
+  <div class="q-body">
+    <div class="code-wrap">
+      <div class="code-label">Java · result + sod</div>
+      <pre><code class="language-java">public static boolean result(BinNode&lt;Integer&gt; bt, int a, int b) {
+    if (bt == null) return false;
+    if (bt.getValue() == a)
+        return sod(bt.getLeft(), b) || sod(bt.getRight(), b);
+    return result(bt.getLeft(), a, b) || result(bt.getRight(), a, b);
+}
+
+public static boolean sod(BinNode&lt;Integer&gt; bt, int k) {
+    if (bt == null) return false;
+    int x = bt.getValue();
+    if (x == k)   return true;
+    return sod(bt.getLeft(), k) || sod(bt.getRight(), k);
+}</code></pre>
+    </div>
+    <div class="scroll-hint">← גלול ימינה לקוד המלא</div>
+    <div class="tree-label">🌳 העץ bt:</div>
+    <div class="tree-wrap">      6
+     / \
+    3   5
+       / \
+      9   8
+     /
+    4</div>
+
+    <div class="sub-q" id="q3a">
+      <div class="q-text">א. מה מבצעת <code>sod(bt, k)</code>?</div>
+      <div class="choices">
+        <label class="choice-label"><input type="radio" name="q3a" value="0"> בודקת אם k הוא ערך השורש</label>
+        <label class="choice-label"><input type="radio" name="q3a" value="1"> בודקת אם k מופיע בתת-העץ bt (חיפוש רקורסיבי בכל הצמתים)</label>
+        <label class="choice-label"><input type="radio" name="q3a" value="2"> מחשבת את סכום כל הצמתים בתת-העץ</label>
+        <label class="choice-label"><input type="radio" name="q3a" value="3"> בודקת אם k גדול מכל הצמתים</label>
+      </div>
+      <button class="btn-check" onclick="checkMCQ('q3a',1,5)">בדיקה</button>
+      <div class="feedback-box" id="fb-q3a"></div>
+    </div>
+
+    <div class="sub-q" id="q3b">
+      <div class="q-text">ב. מה יחזיר <code>result(bt, 5, 4)</code> עבור העץ הנתון?</div>
+      <div class="choices">
+        <label class="choice-label"><input type="radio" name="q3b" value="0"> true — כי 5 קיים בעץ, ו-4 קיים בתת-העץ של 5 (דרך הצומת 9)</label>
+        <label class="choice-label"><input type="radio" name="q3b" value="1"> false — כי 4 אינו ילד ישיר של 5</label>
+        <label class="choice-label"><input type="radio" name="q3b" value="2"> false — כי 5 אינו השורש</label>
+        <label class="choice-label"><input type="radio" name="q3b" value="3"> true — כי גם 5 וגם 4 קיימים בעץ</label>
+      </div>
+      <button class="btn-check" onclick="checkMCQ('q3b',0,10)">בדיקה</button>
+      <div class="feedback-box" id="fb-q3b"></div>
+    </div>
+
+    <div class="sub-q" id="q3d">
+      <div class="q-text">ד. מה מבצעת <code>result(bt, a, b)</code> באופן כללי?</div>
+      <div class="choices">
+        <label class="choice-label"><input type="radio" name="q3d" value="0"> בודקת אם b הוא צאצא של הצומת המכיל את a (a מופיע בעץ וb נמצא בתת-העץ שמתחתיו)</label>
+        <label class="choice-label"><input type="radio" name="q3d" value="1"> בודקת אם a הוא צאצא של b</label>
+        <label class="choice-label"><input type="radio" name="q3d" value="2"> בודקת אם a ו-b נמצאים על אותו מסלול מהשורש</label>
+        <label class="choice-label"><input type="radio" name="q3d" value="3"> בודקת אם a ו-b מופיעים בעץ (ללא קשר למיקום)</label>
+      </div>
+      <button class="btn-check" onclick="checkMCQ('q3d',0,10)">בדיקה</button>
+      <div class="feedback-box" id="fb-q3d"></div>
+    </div>
+
+    <div class="sub-q open-q">
+      <div class="q-text">ג. שנו את <strong>המבנה</strong> (לא התוכן!) של העץ כך שresult(bt,5,4) תחזיר ערך הפוך לסעיף ב'.</div>
+      <textarea placeholder="תארי את העץ החדש: מי הילד הימני/שמאלי של כל צומת..."></textarea>
+      <div class="open-note">⭐ שאלה פתוחה — ניקוד ידני (5 נק')</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     שאלה 4
+══════════════════════════════════════════ -->
+<div class="q-card" id="card-4">
+  <div class="q-header">
+    <span class="q-num">שאלה 4</span>
+    <span class="q-title">what — סכום מסלול מקסימלי</span>
+    <span class="q-pts">10 נק'</span>
+  </div>
+  <div class="q-body">
+    <div class="code-wrap">
+      <div class="code-label">Java · what</div>
+      <pre><code class="language-java">public static int what(BinNode&lt;Integer&gt; bt) {
+    if (bt == null) return 0;
+    int x1 = what(bt.getLeft());
+    int x2 = what(bt.getRight());
+    if (x1 &gt; x2) return x1 + bt.getValue();
+    return x2 + bt.getValue();
+}</code></pre>
+    </div>
+    <div class="scroll-hint">← גלול ימינה לקוד המלא</div>
+    <div class="tree-label">🌳 העץ bt:</div>
+    <div class="tree-wrap">              9
+           /     \
+          4       1
+        /   \       \
+       8     6       8
+                   /   \
+                 10     9
+                 /
+                2</div>
+
+    <div class="sub-q" id="q4">
+      <div class="q-text">ערכו מעקב: מה תחזיר <code>what(bt)</code> עבור העץ הנתון?</div>
+      <div class="choices">
+        <label class="choice-label"><input type="radio" name="q4" value="0"> 21</label>
+        <label class="choice-label"><input type="radio" name="q4" value="1"> 30</label>
+        <label class="choice-label"><input type="radio" name="q4" value="2"> 27</label>
+        <label class="choice-label"><input type="radio" name="q4" value="3"> 25</label>
+      </div>
+      <button class="btn-check" onclick="checkMCQ('q4',1,10)">בדיקה</button>
+      <div class="feedback-box" id="fb-q4"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     שאלה 5
+══════════════════════════════════════════ -->
+<div class="q-card" id="card-5">
+  <div class="q-header">
+    <span class="q-num">שאלה 5</span>
+    <span class="q-title">what — שרשרת יורדת</span>
+    <span class="q-pts">25 נק'</span>
+  </div>
+  <div class="q-body">
+    <div class="code-wrap">
+      <div class="code-label">Java · what</div>
+      <pre><code class="language-java">public static boolean what(BinNode&lt;Integer&gt; bt) {
+    if (bt.getLeft() == null &amp;&amp; bt.getRight() == null)
+        return true;
+    if (bt.getLeft() == null) {
+        if (bt.getValue() &gt;= bt.getRight().getValue())
+            return what(bt.getRight());
+        return false;
+    }
+    if (bt.getRight() == null)
+        return bt.getValue() &gt;= bt.getLeft().getValue()
+               &amp;&amp; what(bt.getLeft());
+    return false;
+}</code></pre>
+    </div>
+
+    <div class="sub-q" id="q5t1">
+      <div class="q-text">א. עץ 1 — מה תחזיר what?</div>
+      <div class="tree-wrap">  30
+    \
+    20
+      \
+      15</div>
+      <div class="choices">
+        <label class="choice-label"><input type="radio" name="q5t1" value="0"> true</label>
+        <label class="choice-label"><input type="radio" name="q5t1" value="1"> false</label>
+      </div>
+      <button class="btn-check" onclick="checkMCQ('q5t1',0,5)">בדיקה</button>
+      <div class="feedback-box" id="fb-q5t1"></div>
+    </div>
+
+    <div class="sub-q" id="q5t2">
+      <div class="q-text">א. עץ 2 — מה תחזיר what?</div>
+      <div class="tree-wrap">  10
+    \
+    20</div>
+      <div class="choices">
+        <label class="choice-label"><input type="radio" name="q5t2" value="0"> true</label>
+        <label class="choice-label"><input type="radio" name="q5t2" value="1"> false</label>
+      </div>
+      <button class="btn-check" onclick="checkMCQ('q5t2',1,5)">בדיקה</button>
+      <div class="feedback-box" id="fb-q5t2"></div>
+    </div>
+
+    <div class="sub-q" id="q5t3">
+      <div class="q-text">א. עץ 3 — מה תחזיר what?</div>
+      <div class="tree-wrap">   20
+  /  \
+-3   30</div>
+      <div class="choices">
+        <label class="choice-label"><input type="radio" name="q5t3" value="0"> true</label>
+        <label class="choice-label"><input type="radio" name="q5t3" value="1"> false</label>
+      </div>
+      <button class="btn-check" onclick="checkMCQ('q5t3',1,5)">בדיקה</button>
+      <div class="feedback-box" id="fb-q5t3"></div>
+    </div>
+
+    <div class="sub-q" id="q5c">
+      <div class="q-text">ג. תארי את העץ שעבורו <code>what(bt)</code> מחזירה אמת:</div>
+      <div class="choices">
+        <label class="choice-label"><input type="radio" name="q5c" value="0"> עץ ממוין בסדר עולה (BST)</label>
+        <label class="choice-label"><input type="radio" name="q5c" value="1"> שרשרת שבה לכל צומת לכל היותר ילד אחד, וכל צומת ≥ ילדו (שרשרת "יורדת")</label>
+        <label class="choice-label"><input type="radio" name="q5c" value="2"> עץ שכל הצמתים חיוביים</label>
+        <label class="choice-label"><input type="radio" name="q5c" value="3"> עץ שבו כל ילד שמאלי גדול מאביו</label>
+      </div>
+      <button class="btn-check" onclick="checkMCQ('q5c',1,10)">בדיקה</button>
+      <div class="feedback-box" id="fb-q5c"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     שאלה 6
+══════════════════════════════════════════ -->
+<div class="q-card" id="card-6">
+  <div class="q-header">
+    <span class="q-num">שאלה 6</span>
+    <span class="q-title">what + doWhat — ספירת קשתות</span>
+    <span class="q-pts">30 נק'</span>
+  </div>
+  <div class="q-body">
+    <div class="code-wrap">
+      <div class="code-label">Java · doWhat + what</div>
+      <pre><code class="language-java">public static void doWhat(BinNode&lt;Integer&gt; bt) {
+    if (bt != null) {
+        int x = what(bt);
+        bt.setValue(x);
+        doWhat(bt.getLeft());
+        doWhat(bt.getRight());
+    }
+}
+
+public static int what(BinNode&lt;Integer&gt; bt) {
+    if (bt.getLeft() == null &amp;&amp; bt.getRight() == null)
+        return 0;
+    if (bt.getLeft() != null &amp;&amp; bt.getRight() != null)
+        return 2 + what(bt.getLeft()) + what(bt.getRight());
+    if (bt.getLeft() != null)
+        return 1 + what(bt.getLeft());
+    return 1 + what(bt.getRight());
+}</code></pre>
+    </div>
+    <div class="scroll-hint">← גלול ימינה לקוד המלא</div>
+    <div class="tree-label">🌳 העץ bt:</div>
+    <div class="tree-wrap">         -1
+        /    \
+       3      0
+      / \      \
+     0  -4     -4
+    / \
+  -5  -4</div>
+
+    <div class="sub-q" id="q6a">
+      <div class="q-text">א. מה תחזיר <code>what(bt)</code> עבור שורש -1?</div>
+      <div class="choices">
+        <label class="choice-label"><input type="radio" name="q6a" value="0"> 6</label>
+        <label class="choice-label"><input type="radio" name="q6a" value="1"> 7</label>
+        <label class="choice-label"><input type="radio" name="q6a" value="2"> 8</label>
+        <label class="choice-label"><input type="radio" name="q6a" value="3"> 5</label>
+      </div>
+      <button class="btn-check" onclick="checkMCQ('q6a',1,10)">בדיקה</button>
+      <div class="feedback-box" id="fb-q6a"></div>
+    </div>
+
+    <div class="sub-q" id="q6b">
+      <div class="q-text">ב. מהי טענת היציאה של <code>what</code>?</div>
+      <div class="choices">
+        <label class="choice-label"><input type="radio" name="q6b" value="0"> מחזירה את עומק תת-העץ (מספר רמות)</label>
+        <label class="choice-label"><input type="radio" name="q6b" value="1"> מחזירה את מספר הקשתות בתת-העץ (= מספר צמתים פחות 1)</label>
+        <label class="choice-label"><input type="radio" name="q6b" value="2"> מחזירה את סכום ערכי הצמתים</label>
+        <label class="choice-label"><input type="radio" name="q6b" value="3"> מחזירה את מספר העלים</label>
+      </div>
+      <button class="btn-check" onclick="checkMCQ('q6b',1,10)">בדיקה</button>
+      <div class="feedback-box" id="fb-q6b"></div>
+    </div>
+
+    <div class="sub-q" id="q6d">
+      <div class="q-text">ד. מהי טענת היציאה של <code>doWhat</code>?</div>
+      <div class="choices">
+        <label class="choice-label"><input type="radio" name="q6d" value="0"> כל צומת מכיל את עומק תת-העץ שמתחתיו</label>
+        <label class="choice-label"><input type="radio" name="q6d" value="1"> כל צומת מכיל את מספר הקשתות בתת-העץ שמתחתיו</label>
+        <label class="choice-label"><input type="radio" name="q6d" value="2"> כל צומת מכיל את סכום ערכי ילדיו</label>
+        <label class="choice-label"><input type="radio" name="q6d" value="3"> כל צומת מכיל את ערכו כפול 2</label>
+      </div>
+      <button class="btn-check" onclick="checkMCQ('q6d',1,5)">בדיקה</button>
+      <div class="feedback-box" id="fb-q6d"></div>
+    </div>
+
+    <div class="sub-q open-q">
+      <div class="q-text">ג. ציירי את העץ לאחר זימון doWhat(bt). רשמי ערך כל צומת בסדר pre-order.</div>
+      <textarea placeholder="שורש: ?, שמאל: ?, ימין: ?..."></textarea>
+      <div class="open-note">⭐ שאלה פתוחה — ניקוד ידני (5 נק')</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     שאלה 7
+══════════════════════════════════════════ -->
+<div class="q-card" id="card-7">
+  <div class="q-header">
+    <span class="q-num">שאלה 7</span>
+    <span class="q-title">what — תכונת Max-Heap + 8 משפטים</span>
+    <span class="q-pts">50 נק'</span>
+  </div>
+  <div class="q-body">
+    <div class="code-wrap">
+      <div class="code-label">Java · what</div>
+      <pre><code class="language-java">public static boolean what(BinNode&lt;Integer&gt; bt) {
+    if (bt == null) return true;
+    int x = bt.getValue();
+    if ((bt.getLeft()  != null &amp;&amp; bt.getLeft().getValue()  &gt;= x) ||
+        (bt.getRight() != null &amp;&amp; bt.getRight().getValue() &gt;= x))
+        return false;
+    return what(bt.getLeft()) &amp;&amp; what(bt.getRight());
+}</code></pre>
+    </div>
+
+    <div class="sub-q open-q">
+      <div class="q-text">א. ציירי עץ עם לפחות 8 צמתים שעבורו what מחזירה <strong>אמת</strong>.</div>
+      <textarea placeholder="למשל: שורש 10, ילד שמאל 7, ילד ימין 5..."></textarea>
+      <div class="open-note">⭐ שאלה פתוחה — ניקוד ידני (5 נק')</div>
+    </div>
+
+    <div class="sub-q open-q">
+      <div class="q-text">ב. ציירי עץ עם לפחות 8 צמתים שעבורו what מחזירה <strong>שקר</strong>.</div>
+      <textarea placeholder="למשל: שורש 5, ילד שמאל 10..."></textarea>
+      <div class="open-note">⭐ שאלה פתוחה — ניקוד ידני (5 נק')</div>
+    </div>
+
+    <div class="sub-q" id="q7g">
+      <div class="q-text">ג. טענת היציאה של הפעולה:</div>
+      <div class="choices">
+        <label class="choice-label"><input type="radio" name="q7g" value="0"> מחזירה true אם ורק אם העץ הוא BST</label>
+        <label class="choice-label"><input type="radio" name="q7g" value="1"> מחזירה true אם ורק אם כל צומת גדול בחמור מכל אחד מבניו הישירים (תכונת Max-Heap)</label>
+        <label class="choice-label"><input type="radio" name="q7g" value="2"> מחזירה true אם ורק אם כל הצמתים חיוביים</label>
+        <label class="choice-label"><input type="radio" name="q7g" value="3"> מחזירה true אם ורק אם העץ מאוזן</label>
+      </div>
+      <button class="btn-check" onclick="checkMCQ('q7g',1,5)">בדיקה</button>
+      <div class="feedback-box" id="fb-q7g"></div>
+    </div>
+
+    <div class="section-divider">משפטי נכון / לא נכון</div>
+
+    <div class="sub-q" id="q7d1">
+      <div class="q-text">ד.1 אם בשורש הופיע המספר 13, לא יוכל להופיע 13 בשום מקום אחר בעץ.</div>
+      <div class="choices">
+        <label class="choice-label"><input type="radio" name="q7d1" value="0"> נכון</label>
+        <label class="choice-label"><input type="radio" name="q7d1" value="1"> לא נכון</label>
+      </div>
+      <button class="btn-check" onclick="checkMCQ('q7d1',0,5)">בדיקה</button>
+      <div class="feedback-box" id="fb-q7d1"></div>
+    </div>
+
+    <div class="sub-q" id="q7d2">
+      <div class="q-text">ד.2 אם בשורש הופיע 13, 13 יכול להופיע שוב רק כבנו <strong>הימני</strong> של השורש.</div>
+      <div class="choices">
+        <label class="choice-label"><input type="radio" name="q7d2" value="0"> נכון</label>
+        <label class="choice-label"><input type="radio" name="q7d2" value="1"> לא נכון</label>
+      </div>
+      <button class="btn-check" onclick="checkMCQ('q7d2',1,5)">בדיקה</button>
+      <div class="feedback-box" id="fb-q7d2"></div>
+    </div>
+
+    <div class="sub-q" id="q7d6">
+      <div class="q-text">ד.6 לא יתכנו שני אחים (siblings) בעלי אותו ערך בעץ שעבורו what מחזירה true.</div>
+      <div class="choices">
+        <label class="choice-label"><input type="radio" name="q7d6" value="0"> נכון</label>
+        <label class="choice-label"><input type="radio" name="q7d6" value="1"> לא נכון</label>
+      </div>
+      <button class="btn-check" onclick="checkMCQ('q7d6',1,5)">בדיקה</button>
+      <div class="feedback-box" id="fb-q7d6"></div>
+    </div>
+
+    <div class="sub-q" id="q7d7">
+      <div class="q-text">ד.7 אם אין בעץ אף בן ימני (עץ "שרוך" שמאלי), סריקה תחילית (pre-order) תדפיס ערכים ממוינים מהגדול לקטן.</div>
+      <div class="choices">
+        <label class="choice-label"><input type="radio" name="q7d7" value="0"> נכון</label>
+        <label class="choice-label"><input type="radio" name="q7d7" value="1"> לא נכון</label>
+      </div>
+      <button class="btn-check" onclick="checkMCQ('q7d7',0,5)">בדיקה</button>
+      <div class="feedback-box" id="fb-q7d7"></div>
+    </div>
+
+    <div class="sub-q" id="q7d8">
+      <div class="q-text">ד.8 סריקת העץ בסדר תוכי (in-order) לא תדפיס ערכים ממוינים.</div>
+      <div class="choices">
+        <label class="choice-label"><input type="radio" name="q7d8" value="0"> נכון</label>
+        <label class="choice-label"><input type="radio" name="q7d8" value="1"> לא נכון</label>
+      </div>
+      <button class="btn-check" onclick="checkMCQ('q7d8',0,5)">בדיקה</button>
+      <div class="feedback-box" id="fb-q7d8"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     שאלה 8
+══════════════════════════════════════════ -->
+<div class="q-card" id="card-8">
+  <div class="q-header">
+    <span class="q-num">שאלה 8</span>
+    <span class="q-title">doWhat — מחסנית / הדפסת מסלול</span>
+    <span class="q-pts">25 נק'</span>
+  </div>
+  <div class="q-body">
+    <div class="code-wrap">
+      <div class="code-label">Java · doWhat עם מחסנית</div>
+      <pre><code class="language-java">public static void doWhat(BinNode&lt;Integer&gt; bt, int data) {
+    Stack&lt;Integer&gt; stk = new Stack&lt;Integer&gt;();
+    doWhat(bt, stk, data);
+}
+public static void doWhat(BinNode&lt;Integer&gt; bt,
+                           Stack&lt;Integer&gt; stk, int data) {
+    if (bt != null) {
+        int x = bt.getValue();
+        if (x == data) {
+            System.out.print(x + " ");
+            while (!stk.isEmpty()) {
+                x = stk.pop();
+                System.out.print(x + " ");
+            }
+            System.out.println();
+        } else {
+            stk.push(x);
+            doWhat(bt.getLeft(), stk, data);
+            if (!stk.isEmpty()) doWhat(bt.getRight(), stk, data);
+            if (!stk.isEmpty()) stk.pop();
+        }
+    }
+}</code></pre>
+    </div>
+    <div class="scroll-hint">← גלול ימינה לקוד המלא</div>
+    <div class="tree-label">🌳 העץ bt:</div>
+    <div class="tree-wrap">      1
+     / \
+    2   6
+   / \    \
+  3   4    7
+       \
+        5</div>
+
+    <div class="sub-q" id="q8a">
+      <div class="q-text">1. מה יהיה הפלט עבור <code>doWhat(bt, 3)</code>?</div>
+      <div class="choices">
+        <label class="choice-label"><input type="radio" name="q8a" value="0"> 3 2 1</label>
+        <label class="choice-label"><input type="radio" name="q8a" value="1"> 1 2 3</label>
+        <label class="choice-label"><input type="radio" name="q8a" value="2"> 3 1 2</label>
+        <label class="choice-label"><input type="radio" name="q8a" value="3"> 3 2</label>
+      </div>
+      <button class="btn-check" onclick="checkMCQ('q8a',0,5)">בדיקה</button>
+      <div class="feedback-box" id="fb-q8a"></div>
+    </div>
+
+    <div class="sub-q" id="q8b">
+      <div class="q-text">2. מה יהיה הפלט עבור <code>doWhat(bt, 7)</code>?</div>
+      <div class="choices">
+        <label class="choice-label"><input type="radio" name="q8b" value="0"> 7 6 1</label>
+        <label class="choice-label"><input type="radio" name="q8b" value="1"> 1 6 7</label>
+        <label class="choice-label"><input type="radio" name="q8b" value="2"> 7 1 6</label>
+        <label class="choice-label"><input type="radio" name="q8b" value="3"> 7 6</label>
+      </div>
+      <button class="btn-check" onclick="checkMCQ('q8b',0,5)">בדיקה</button>
+      <div class="feedback-box" id="fb-q8b"></div>
+    </div>
+
+    <div class="sub-q" id="q8c">
+      <div class="q-text">3. מה יהיה הפלט עבור <code>doWhat(bt, 10)</code>?</div>
+      <div class="choices">
+        <label class="choice-label"><input type="radio" name="q8c" value="0"> 10</label>
+        <label class="choice-label"><input type="radio" name="q8c" value="1"> אין פלט — 10 אינו בעץ</label>
+        <label class="choice-label"><input type="radio" name="q8c" value="2"> שגיאת ריצה</label>
+        <label class="choice-label"><input type="radio" name="q8c" value="3"> 0</label>
+      </div>
+      <button class="btn-check" onclick="checkMCQ('q8c',1,5)">בדיקה</button>
+      <div class="feedback-box" id="fb-q8c"></div>
+    </div>
+
+    <div class="sub-q" id="q8d">
+      <div class="q-text">4. מה המשימה שמבצעת doWhat?</div>
+      <div class="choices">
+        <label class="choice-label"><input type="radio" name="q8d" value="0"> מדפיסה את כל הצמתים בסדר תחילי</label>
+        <label class="choice-label"><input type="radio" name="q8d" value="1"> מדפיסה את המסלול מהשורש אל הצומת הנחפש, בסדר הפוך (מהצומת לשורש)</label>
+        <label class="choice-label"><input type="radio" name="q8d" value="2"> מדפיסה את כל הצמתים ברמה שבה נמצא הצומת הנחפש</label>
+        <label class="choice-label"><input type="radio" name="q8d" value="3"> מדפיסה את ערך הצומת הנחפש בלבד</label>
+      </div>
+      <button class="btn-check" onclick="checkMCQ('q8d',1,10)">בדיקה</button>
+      <div class="feedback-box" id="fb-q8d"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     שאלות 9–20 (מקוצרות ונכונות)
+══════════════════════════════════════════ -->
+
+<div class="q-card" id="card-9">
+  <div class="q-header">
+    <span class="q-num">שאלה 9</span>
+    <span class="q-title">doWhat — ממוצע + עומק</span>
+    <span class="q-pts">20 נק'</span>
+  </div>
+  <div class="q-body">
+    <div class="code-wrap">
+      <div class="code-label">Java · doWhat עם 2 מחסניות</div>
+      <pre><code class="language-java">public static void doWhat(BinNode&lt;Integer&gt; bt) {
+    BinNode&lt;Integer&gt; temp = bt;
+    Stack&lt;BinNode&lt;Integer&gt;&gt; s1 = new Stack&lt;&gt;();
+    Stack&lt;Integer&gt; s2 = new Stack&lt;&gt;();
+    int m=0; double a=0; int lev=0; int lvl=lev;
+    s1.push(temp); s2.push(lev);
+    while (!s1.isEmpty()) {
+        temp = s1.pop(); lev = s2.pop();
+        if (lvl &lt; lev) lvl = lev;
+        m++;
+        a = (a*(m-1) + temp.getValue()) / m;
+        if (temp.getLeft()  != null) { s1.push(temp.getLeft());  s2.push(lev+1); }
+        if (temp.getRight() != null) { s1.push(temp.getRight()); s2.push(lev+1); }
+    }
+    System.out.println(a+" "+m+" "+lvl+" "+lev);
+}</code></pre>
+    </div>
+    <div class="scroll-hint">← גלול ימינה לקוד המלא</div>
+    <div class="tree-label">🌳 העץ bt (10 צמתים, סכום=38):</div>
+    <div class="tree-wrap">           4           (רמה 0)
+          / \
+         1   1         (רמה 1)
+        / \ / \
+      10  6  1  7      (רמה 2)
+         / \    \
+        1   1    6     (רמה 3)</div>
+
+    <div class="sub-q" id="q9a">
+      <div class="q-text">א. מה יהיה הפלט?</div>
+      <div class="choices">
+        <label class="choice-label"><input type="radio" name="q9a" value="0"> 3.8 10 3 2</label>
+        <label class="choice-label"><input type="radio" name="q9a" value="1"> 3.8 10 3 3</label>
+        <label class="choice-label"><input type="radio" name="q9a" value="2"> 4.0 10 3 2</label>
+        <label class="choice-label"><input type="radio" name="q9a" value="3"> 3.5 10 3 1</label>
+      </div>
+      <button class="btn-check" onclick="checkMCQ('q9a',0,10)">בדיקה</button>
+      <div class="feedback-box" id="fb-q9a"></div>
+    </div>
+
+    <div class="sub-q open-q">
+      <div class="q-text">ב. הסבירי את תפקידי המשתנים: <code>a, m, lvl, lev</code></div>
+      <textarea placeholder="a = ...&#10;m = ...&#10;lvl = ...&#10;lev = ..."></textarea>
+      <div class="open-note">⭐ שאלה פתוחה — ניקוד ידני (10 נק')</div>
+    </div>
+  </div>
+</div>
+
+<div class="q-card" id="card-10">
+  <div class="q-header">
+    <span class="q-num">שאלה 10</span>
+    <span class="q-title">mystery — סריקה תוכית איטרטיבית</span>
+    <span class="q-pts">10 נק'</span>
+  </div>
+  <div class="q-body">
+    <div class="code-wrap">
+      <div class="code-label">Java · mystery</div>
+      <pre><code class="language-java">public static void mystery(BinNode&lt;Integer&gt; bt) {
+    BinNode&lt;Integer&gt; node = bt;
+    Stack&lt;BinNode&lt;Integer&gt;&gt; stk = new Stack&lt;&gt;();
+    do {
+        while (node != null) {
+            stk.push(node);
+            node = node.getLeft();
+        }
+        if (!stk.isEmpty()) {
+            node = stk.pop();
+            System.out.print(node.getValue() + " ");
+            node = node.getRight();
+        }
+    } while (!stk.isEmpty() || node != null);
+}</code></pre>
+    </div>
+    <div class="sub-q" id="q10">
+      <div class="q-text">מהי טענת היציאה של mystery?</div>
+      <div class="choices">
+        <label class="choice-label"><input type="radio" name="q10" value="0"> מדפיסה בסדר תחילי (pre-order)</label>
+        <label class="choice-label"><input type="radio" name="q10" value="1"> מדפיסה בסדר תוכי (in-order: שמאל, שורש, ימין)</label>
+        <label class="choice-label"><input type="radio" name="q10" value="2"> מדפיסה בסדר סופי (post-order)</label>
+        <label class="choice-label"><input type="radio" name="q10" value="3"> מדפיסה לפי רמות (BFS)</label>
+      </div>
+      <button class="btn-check" onclick="checkMCQ('q10',1,10)">בדיקה</button>
+      <div class="feedback-box" id="fb-q10"></div>
+    </div>
+  </div>
+</div>
+
+<!-- שאלות 11–20: שאלות פתוחות + MCQ נבחרות -->
+
+<div class="q-card" id="card-11">
+  <div class="q-header"><span class="q-num">שאלה 11</span><span class="q-title">עץ-משולשים-ימניים</span><span class="q-pts">25 נק'</span></div>
+  <div class="q-body">
+    <div class="sub-q" id="q11mc">
+      <div class="q-text">מהי ההגדרה הנכונה של עץ-משולשים-ימניים?</div>
+      <div class="choices">
+        <label class="choice-label"><input type="radio" name="q11mc" value="0"> עץ שכל הצמתים הימניים הם עלים</label>
+        <label class="choice-label"><input type="radio" name="q11mc" value="1"> צומת יחיד, או עץ שבו לכל בן ימני יש בדיוק שני בנים, וכל בן שמאלי הוא עלה</label>
+        <label class="choice-label"><input type="radio" name="q11mc" value="2"> עץ שכל הערכים הימניים גדולים מהשמאליים</label>
+        <label class="choice-label"><input type="radio" name="q11mc" value="3"> עץ בינארי שכל הרמות מלאות</label>
+      </div>
+      <button class="btn-check" onclick="checkMCQ('q11mc',1,5)">בדיקה</button>
+      <div class="feedback-box" id="fb-q11mc"></div>
+    </div>
+    <div class="sub-q open-q">
+      <div class="q-text">א. כתבי פעולה פנימית ב-BinNode המחזירה true אם העץ הוא עץ-משולשים-ימניים.</div>
+      <textarea placeholder="public boolean isRightTriangle() { ... }"></textarea>
+      <div class="open-note">⭐ ניקוד ידני (10 נק')</div>
+    </div>
+    <div class="sub-q open-q">
+      <div class="q-text">ב. כתבי פעולה חיצונית המקבלת עץ bt ומחזירה true אם הוא עץ-משולשים-ימניים.</div>
+      <textarea placeholder="public static boolean isRightTriangle(BinNode bt) { ... }"></textarea>
+      <div class="open-note">⭐ ניקוד ידני (10 נק')</div>
+    </div>
+  </div>
+</div>
+
+<div class="q-card" id="card-12">
+  <div class="q-header"><span class="q-num">שאלה 12</span><span class="q-title">הדפסת בנים יחידים L/R</span><span class="q-pts">25 נק'</span></div>
+  <div class="q-body">
+    <div class="tree-label">🌳 העץ:</div>
+    <div class="tree-wrap">        6
+       / \
+      9   7
+     /   / \
+    3   8   20
+   /   /   /
+  4  34   2
+           \
+           14
+             \
+             22</div>
+    <div class="sub-q" id="q12b">
+      <div class="q-text">ב. מה הפלט עבור העץ הנתון?</div>
+      <div class="choices">
+        <label class="choice-label"><input type="radio" name="q12b" value="0"> L3  L4  L34  L2  R14  R22</label>
+        <label class="choice-label"><input type="radio" name="q12b" value="1"> L3  L4  L34  L2  R22</label>
+        <label class="choice-label"><input type="radio" name="q12b" value="2"> R3  L4  L34  L2  R14  R22</label>
+        <label class="choice-label"><input type="radio" name="q12b" value="3"> L4  L34  L2  R14  R22</label>
+      </div>
+      <button class="btn-check" onclick="checkMCQ('q12b',0,10)">בדיקה</button>
+      <div class="feedback-box" id="fb-q12b"></div>
+    </div>
+    <div class="sub-q open-q">
+      <div class="q-text">א. כתבי פעולה שמדפיסה בנים יחידים עם L/R.</div>
+      <textarea placeholder="public static void printSingleChildren(BinNode bt) { ... }"></textarea>
+      <div class="open-note">⭐ ניקוד ידני (15 נק')</div>
+    </div>
+  </div>
+</div>
+
+<div class="q-card" id="card-13">
+  <div class="q-header"><span class="q-num">שאלה 13</span><span class="q-title">עץ פורח + עץ שטוח</span><span class="q-pts">30 נק'</span></div>
+  <div class="q-body">
+    <div class="sub-q" id="q13a">
+      <div class="q-text">מה נכון לגבי עץ פורח?</div>
+      <div class="choices">
+        <label class="choice-label"><input type="radio" name="q13a" value="0"> לכל צומת יש שני בנים וכל צומת גדול מבניו</label>
+        <label class="choice-label"><input type="radio" name="q13a" value="1"> לכל צומת שאינו עלה יש בדיוק שני בנים, וכל אב קטן בחמור מכל אחד מבניו</label>
+        <label class="choice-label"><input type="radio" name="q13a" value="2"> לכל צומת בן אחד בלבד</label>
+        <label class="choice-label"><input type="radio" name="q13a" value="3"> כל הצמתים חיוביים</label>
+      </div>
+      <button class="btn-check" onclick="checkMCQ('q13a',1,5)">בדיקה</button>
+      <div class="feedback-box" id="fb-q13a"></div>
+    </div>
+    <div class="sub-q" id="q13c">
+      <div class="q-text">ג. האם קיים עץ "שטוח" שאינו "פורח"?</div>
+      <div class="choices">
+        <label class="choice-label"><input type="radio" name="q13c" value="0"> כן, קיים</label>
+        <label class="choice-label"><input type="radio" name="q13c" value="1"> לא קיים</label>
+      </div>
+      <button class="btn-check" onclick="checkMCQ('q13c',0,5)">בדיקה</button>
+      <div class="feedback-box" id="fb-q13c"></div>
+    </div>
+    <div class="sub-q" id="q13d">
+      <div class="q-text">ד. האם קיים עץ "פורח" שאינו "שטוח"?</div>
+      <div class="choices">
+        <label class="choice-label"><input type="radio" name="q13d" value="0"> כן, קיים</label>
+        <label class="choice-label"><input type="radio" name="q13d" value="1"> לא קיים — כל עץ פורח הוא תמיד גם שטוח</label>
+      </div>
+      <button class="btn-check" onclick="checkMCQ('q13d',1,5)">בדיקה</button>
+      <div class="feedback-box" id="fb-q13d"></div>
+    </div>
+    <div class="sub-q open-q">
+      <div class="q-text">א. כתבי פעולה שמחזירה true אם bt הוא "עץ פורח".</div>
+      <textarea placeholder="public static boolean isBlooming(BinNode bt) { ... }"></textarea>
+      <div class="open-note">⭐ ניקוד ידני (8 נק')</div>
+    </div>
+    <div class="sub-q open-q">
+      <div class="q-text">ב. כתבי פעולה שמחזירה true אם bt הוא "עץ שטוח".</div>
+      <textarea placeholder="public static boolean isFlat(BinNode bt) { ... }"></textarea>
+      <div class="open-note">⭐ ניקוד ידני (7 נק')</div>
+    </div>
+  </div>
+</div>
+
+<div class="q-card" id="card-14">
+  <div class="q-header"><span class="q-num">שאלה 14</span><span class="q-title">ערכים ב-t1 שלא ב-t2</span><span class="q-pts">20 נק'</span></div>
+  <div class="q-body">
+    <div class="sub-q open-q">
+      <div class="q-text">כתבי פעולה המקבלת t1 ו-t2 ומחזירה רשימה של כל הערכים המופיעים ב-t1 ולא ב-t2. כל ערך יופיע פעם אחת.</div>
+      <textarea placeholder="public static Node diff(BinNode t1, BinNode t2) { ... }"></textarea>
+      <div class="open-note">⭐ ניקוד ידני (20 נק')</div>
+    </div>
+  </div>
+</div>
+
+<div class="q-card" id="card-15">
+  <div class="q-header"><span class="q-num">שאלה 15</span><span class="q-title">עץ משובץ</span><span class="q-pts">35 נק'</span></div>
+  <div class="q-body">
+    <div class="sub-q" id="q15a">
+      <div class="q-text">מהי ההגדרה הנכונה של עץ משובץ?</div>
+      <div class="choices">
+        <label class="choice-label"><input type="radio" name="q15a" value="0"> עץ שכל הערכים שונים זה מזה</label>
+        <label class="choice-label"><input type="radio" name="q15a" value="1"> עלה, או צומת עם שני בנים שערכי שלושתם שונים זה מזה, וכל בן הוא שורש של עץ משובץ</label>
+        <label class="choice-label"><input type="radio" name="q15a" value="2"> עץ שבו כל צומת קטן מבניו</label>
+        <label class="choice-label"><input type="radio" name="q15a" value="3"> עץ שבו לכל צומת יש בדיוק שני בנים</label>
+      </div>
+      <button class="btn-check" onclick="checkMCQ('q15a',1,5)">בדיקה</button>
+      <div class="feedback-box" id="fb-q15a"></div>
+    </div>
+    <div class="sub-q" id="q15b">
+      <div class="q-text">ב. האם ניתן לבנות עץ משובץ שערכיו יכולים להיות 1 או 2 בלבד?</div>
+      <div class="choices">
+        <label class="choice-label"><input type="radio" name="q15b" value="0"> כן</label>
+        <label class="choice-label"><input type="radio" name="q15b" value="1"> לא — כי כל שלישייה (אב+שני בנים) חייבת 3 ערכים שונים</label>
+      </div>
+      <button class="btn-check" onclick="checkMCQ('q15b',1,5)">בדיקה</button>
+      <div class="feedback-box" id="fb-q15b"></div>
+    </div>
+    <div class="sub-q open-q">
+      <div class="q-text">ג. ממשי את areEqualSons ו-isEqualToFather.</div>
+      <textarea placeholder="boolean areEqualSons(BinNode bt) { ... }&#10;boolean isEqualToFather(BinNode bt) { ... }"></textarea>
+      <div class="open-note">⭐ ניקוד ידני (10 נק')</div>
+    </div>
+    <div class="sub-q open-q">
+      <div class="q-text">ד. כתבי פעולה שמחזירה true אם bt הוא עץ משובץ (השתמשי בפעולות הנתונות).</div>
+      <textarea placeholder="public static boolean isEmbedded(BinNode bt) { ... }"></textarea>
+      <div class="open-note">⭐ ניקוד ידני (15 נק')</div>
+    </div>
+  </div>
+</div>
+
+<div class="q-card" id="card-16">
+  <div class="q-header"><span class="q-num">שאלה 16</span><span class="q-title">מציאת דוד בעץ</span><span class="q-pts">25 נק'</span></div>
+  <div class="q-body">
+    <div class="tree-label">🌳 דוגמה לדוד:</div>
+    <div class="tree-wrap">      1
+     / \
+    2   6
+   / \    \
+  3   4    7
+       \
+        5
+// דוד(5)=3  |  דוד(3)=דוד(4)=6  |  דוד(7)=2</div>
+    <div class="sub-q" id="q16mc">
+      <div class="q-text">מהו "דוד" של צומת בעץ?</div>
+      <div class="choices">
+        <label class="choice-label"><input type="radio" name="q16mc" value="0"> האח הישיר של הצומת</label>
+        <label class="choice-label"><input type="radio" name="q16mc" value="1"> הצומת האח של אביו הישיר (uncle = parent's sibling)</label>
+        <label class="choice-label"><input type="radio" name="q16mc" value="2"> הסב (grandparent) של הצומת</label>
+        <label class="choice-label"><input type="radio" name="q16mc" value="3"> הצאצא הימני הרחוק ביותר</label>
+      </div>
+      <button class="btn-check" onclick="checkMCQ('q16mc',1,5)">בדיקה</button>
+      <div class="feedback-box" id="fb-q16mc"></div>
+    </div>
+    <div class="sub-q open-q">
+      <div class="q-text">ממשי את <code>isUncle(BinNode bt, int data)</code>.</div>
+      <textarea placeholder="public static BinNode isUncle(BinNode&lt;Integer&gt; bt, int data) { ... }"></textarea>
+      <div class="open-note">⭐ ניקוד ידני (20 נק')</div>
+    </div>
+  </div>
+</div>
+
+<div class="q-card" id="card-17">
+  <div class="q-header"><span class="q-num">שאלה 17</span><span class="q-title">עץ מתכונת</span><span class="q-pts">25 נק'</span></div>
+  <div class="q-body">
+    <div class="tree-wrap">עץ מתכונת = עלה
+               OR
+שורש שערכו > רמתו, ואחד מבניו הוא שורש של עץ מתכונת
+והשני (אם קיים) — לא.
+
+עץ א:    עץ ב:          עץ ג:
+   5        4               9
+  / \      / \             / \
+ 5   1     2   5           1   2
+           / \ / \         / \   \
+          3  2 8           3   2   3</div>
+    <div class="sub-q open-q">
+      <div class="q-text">א. עבור כל אחד מ-3 העצים: האם עץ מתכונת? הסבירי.</div>
+      <textarea placeholder="עץ א: ...&#10;עץ ב: ...&#10;עץ ג: ..."></textarea>
+      <div class="open-note">⭐ ניקוד ידני (10 נק')</div>
+    </div>
+    <div class="sub-q open-q">
+      <div class="q-text">ב. כתבי פעולה המחזירה true אם bt הוא עץ מתכונת.</div>
+      <textarea placeholder="public static boolean isPattern(BinNode bt, int level) { ... }"></textarea>
+      <div class="open-note">⭐ ניקוד ידני (15 נק')</div>
+    </div>
+  </div>
+</div>
+
+<div class="q-card" id="card-18">
+  <div class="q-header"><span class="q-num">שאלה 18</span><span class="q-title">isSpecial — ערך ≤ עומק</span><span class="q-pts">20 נק'</span></div>
+  <div class="q-body">
+    <div class="code-wrap">
+      <div class="code-label">Java · isSpecial</div>
+      <pre><code class="language-java">public static boolean isSpecial(BinNode&lt;Integer&gt; bt, int x) {
+    if (bt == null)         return true;
+    if (bt.getValue() &gt; x) return false;
+    return isSpecial(bt.getLeft(),  x+1)
+        &amp;&amp; isSpecial(bt.getRight(), x+1);
+}
+// מוזמנת עם x = 0</code></pre>
+    </div>
+    <div class="sub-q" id="q18b">
+      <div class="q-text">ב. מה מטרת הפעולה <code>isSpecial(bt, 0)</code>?</div>
+      <div class="choices">
+        <label class="choice-label"><input type="radio" name="q18b" value="0"> בודקת אם כל הערכים בעץ שליליים</label>
+        <label class="choice-label"><input type="radio" name="q18b" value="1"> בודקת אם ערך כל צומת ≤ רמתו בעץ (depth)</label>
+        <label class="choice-label"><input type="radio" name="q18b" value="2"> בודקת אם העץ ממוין בסדר עולה</label>
+        <label class="choice-label"><input type="radio" name="q18b" value="3"> בודקת אם סכום כל הצמתים שלילי</label>
+      </div>
+      <button class="btn-check" onclick="checkMCQ('q18b',1,10)">בדיקה</button>
+      <div class="feedback-box" id="fb-q18b"></div>
+    </div>
+    <div class="sub-q open-q">
+      <div class="q-text">א. תני דוגמה לעץ עם לפחות 6 איברים שעבורו isSpecial(bt, 0) מחזירה true.</div>
+      <textarea placeholder="שורש: 0, ילד שמאל: 1, ילד ימין: 1..."></textarea>
+      <div class="open-note">⭐ ניקוד ידני (10 נק')</div>
+    </div>
+  </div>
+</div>
+
+<div class="q-card" id="card-19">
+  <div class="q-header"><span class="q-num">שאלה 19</span><span class="q-title">עץ חיפוש שרשרת</span><span class="q-pts">10 נק'</span></div>
+  <div class="q-body">
+    <div class="sub-q" id="q19i">
+      <div class="q-text">i. הוכנסה סדרת מספרים ל-BST והתקבל עץ-שרשרת-<strong>שמאלי</strong> (כל הצמתים הם בנים שמאליים). מה ניתן לומר על הסדרה?</div>
+      <div class="choices">
+        <label class="choice-label"><input type="radio" name="q19i" value="0"> הסדרה ממוינת בסדר עולה קפדני</label>
+        <label class="choice-label"><input type="radio" name="q19i" value="1"> הסדרה ממוינת בסדר יורד קפדני</label>
+        <label class="choice-label"><input type="radio" name="q19i" value="2"> הסדרה אקראית</label>
+        <label class="choice-label"><input type="radio" name="q19i" value="3"> כל הערכים שווים</label>
+      </div>
+      <button class="btn-check" onclick="checkMCQ('q19i',1,5)">בדיקה</button>
+      <div class="feedback-box" id="fb-q19i"></div>
+    </div>
+    <div class="sub-q" id="q19ii">
+      <div class="q-text">ii. הוכנסה סדרת מספרים ל-BST והתקבל עץ-שרשרת-<strong>ימני</strong>. מה ניתן לומר?</div>
+      <div class="choices">
+        <label class="choice-label"><input type="radio" name="q19ii" value="0"> הסדרה ממוינת בסדר עולה קפדני</label>
+        <label class="choice-label"><input type="radio" name="q19ii" value="1"> הסדרה ממוינת בסדר יורד קפדני</label>
+        <label class="choice-label"><input type="radio" name="q19ii" value="2"> הסדרה אקראית</label>
+        <label class="choice-label"><input type="radio" name="q19ii" value="3"> כל הערכים שווים</label>
+      </div>
+      <button class="btn-check" onclick="checkMCQ('q19ii',0,5)">בדיקה</button>
+      <div class="feedback-box" id="fb-q19ii"></div>
+    </div>
+  </div>
+</div>
+
+<div class="q-card" id="card-20">
+  <div class="q-header"><span class="q-num">שאלה 20</span><span class="q-title">בדיקה אם BST</span><span class="q-pts">30 נק'</span></div>
+  <div class="q-body">
+    <div class="sub-q" id="q20mc">
+      <div class="q-text">מה הדרך הנכונה לבדוק אם עץ בינארי הוא BST?</div>
+      <div class="choices">
+        <label class="choice-label"><input type="radio" name="q20mc" value="0"> לבדוק שלכל צומת: ילד שמאלי &lt; הצומת &lt; ילד ימני (בדיקה מקומית בלבד)</label>
+        <label class="choice-label"><input type="radio" name="q20mc" value="1"> לבדוק שסריקה תוכית (in-order) מייצרת סדרה עולה קפדנית</label>
+        <label class="choice-label"><input type="radio" name="q20mc" value="2"> לבדוק שהשורש גדול מכל הצמתים בתת-עץ שמאלו בלבד</label>
+        <label class="choice-label"><input type="radio" name="q20mc" value="3"> בדיקה מקומית (א) לבד אינה מספיקה — צריך לבדוק גבולות min/max רקורסיבית לכל תת-עץ</label>
+      </div>
+      <button class="btn-check" onclick="checkMCQ('q20mc',3,10)">בדיקה</button>
+      <div class="feedback-box" id="fb-q20mc"></div>
+    </div>
+    <div class="sub-q open-q">
+      <div class="q-text">כתבי פעולה חיצונית שמחזירה true אם bt הוא BST.</div>
+      <textarea placeholder="public static boolean isBST(BinNode&lt;Integer&gt; bt) { ... }"></textarea>
+      <div class="open-note">⭐ ניקוד ידני (20 נק')</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ STUDENT INFO + SUBMIT ══ -->
+<div class="submit-section">
+
+  <!-- פרטי תלמיד -->
+  <div class="q-card" style="text-align:right; margin-bottom:24px;">
+    <div class="q-header">
+      <span class="q-num">📋</span>
+      <span class="q-title">פרטי תלמיד — חובה למלא לפני הגשה</span>
+    </div>
+    <div class="q-body student-grid" style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+      <div>
+        <label style="font-size:.85rem; color:var(--muted); display:block; margin-bottom:6px;">שם מלא *</label>
+        <input type="text" id="studentName" placeholder="שם פרטי ושם משפחה"
+          style="width:100%; background:var(--code-bg); border:1px solid var(--border);
+                 border-radius:8px; color:var(--text); font-family:var(--sans);
+                 font-size:.95rem; padding:10px 12px; direction:rtl;">
+      </div>
+      <div>
+        <label style="font-size:.85rem; color:var(--muted); display:block; margin-bottom:6px;">ת"ז / מספר תלמיד</label>
+        <input type="text" id="studentId" placeholder="123456789"
+          style="width:100%; background:var(--code-bg); border:1px solid var(--border);
+                 border-radius:8px; color:var(--text); font-family:var(--sans);
+                 font-size:.95rem; padding:10px 12px; direction:ltr; text-align:left;">
+      </div>
+      <div>
+        <label style="font-size:.85rem; color:var(--muted); display:block; margin-bottom:6px;">כיתה</label>
+        <input type="text" id="studentClass" placeholder='י"א 3'
+          style="width:100%; background:var(--code-bg); border:1px solid var(--border);
+                 border-radius:8px; color:var(--text); font-family:var(--sans);
+                 font-size:.95rem; padding:10px 12px; direction:rtl;">
+      </div>
+    </div>
+  </div>
+
+  <!-- לוח ניקוד -->
+  <div class="score-panel" id="scorePanel">
+    <div class="big-score" id="finalScore">0</div>
+    <div class="score-label">מתוך <span id="maxAuto">0</span> נקודות אוטומטיות</div>
+    <div class="score-note" id="openNote"></div>
+    <div id="sendStatus" style="margin-top:16px; font-size:.9rem;"></div>
+  </div>
+
+  <button class="btn-submit" onclick="submitQuiz()">📊 הגש בוחן ושלח תוצאות</button>
+</div>
+
+</div><!-- /quiz-body -->
+
+<script>
+// ── ניקוד גלובלי ──
+var autoScore = 0;
+var maxAutoScore = 0;
+var answeredMCQ = new Set();
+
+// ── בדיקת MCQ בודד ──
+function checkMCQ(qid, correctIdx, pts) {
+  var radios = document.querySelectorAll('input[name="' + qid + '"]');
+  var selected = -1;
+  radios.forEach(function(r, i) { if (r.checked) selected = parseInt(r.value); });
+
+  if (selected === -1) return;
+
+  var fb = document.getElementById('fb-' + qid);
+  var labels = document.querySelectorAll('input[name="' + qid + '"]');
+
+  // disable
+  radios.forEach(function(r) { r.disabled = true; });
+  document.querySelector('button[onclick="checkMCQ(\'' + qid + '\',' + correctIdx + ',' + pts + ')"]').disabled = true;
+
+  // highlight
+  labels.forEach(function(r) {
+    var lbl = r.parentElement;
+    if (parseInt(r.value) === correctIdx) lbl.classList.add('correct-ans');
+    else if (r.checked) lbl.classList.add('wrong-ans');
+  });
+
+  fb.style.display = 'block';
+  if (selected === correctIdx) {
+    fb.className = 'feedback-box correct';
+    fb.textContent = '✓ נכון! +' + pts + ' נקודות';
+    if (!answeredMCQ.has(qid)) {
+      autoScore += pts;
+      answeredMCQ.add(qid);
+    }
+  } else {
+    fb.className = 'feedback-box wrong';
+    fb.textContent = '✗ לא נכון. התשובה הנכונה מסומנת בירוק.';
+  }
+
+  if (!answeredMCQ.has(qid)) {
+    maxAutoScore += pts;
+    answeredMCQ.add(qid);
+  }
+
+  updateProgress();
+}
+
+// ── עדכון פרוגרס ──
+function updateProgress() {
+  var answered = document.querySelectorAll('input[type=radio]:disabled').length > 0;
+  var cards = document.querySelectorAll('.q-card');
+  var done = 0;
+  cards.forEach(function(c) {
+    var anyDisabled = c.querySelectorAll('input:disabled').length > 0;
+    var anyText = Array.from(c.querySelectorAll('textarea')).some(function(t) { return t.value.trim().length > 0; });
+    if (anyDisabled || anyText) { done++; c.classList.add('answered'); }
+  });
+  var pct = (done / 20) * 100;
+  document.getElementById('progressBar').style.width = pct + '%';
+  document.getElementById('progressText').textContent = done + ' / 20 שאלות';
+  document.getElementById('scorePreview').textContent = 'ניקוד אוטומטי: ' + autoScore;
+}
+
+// textarea progress
+document.querySelectorAll('textarea').forEach(function(ta) {
+  ta.addEventListener('input', updateProgress);
+});
+
+// ══════════════════════════════════════════
+//  ⚠️  הכניסי כאן את ה-URL של ה-Web App
+//  לאחר Deploy ב-Apps Script
+// ══════════════════════════════════════════
+var BACKEND_URL = 'YOUR_APPS_SCRIPT_URL_HERE';
+
+// ── הגשה ──
+function submitQuiz() {
+  var name = document.getElementById('studentName').value.trim();
+  if (!name) {
+    alert('נא למלא שם מלא לפני הגשה');
+    document.getElementById('studentName').focus();
+    return;
+  }
+
+  // ── איסוף נתונים ──
+  var openFilled = 0, openTotal = 0;
+  var openAnswers = {};
+  document.querySelectorAll('.open-q textarea').forEach(function(ta, i) {
+    openTotal++;
+    var val = ta.value.trim();
+    if (val.length > 10) {
+      openFilled++;
+      openAnswers['open_' + (i+1)] = val.substring(0, 2000); // חיתוך ל-2000 תווים
+    }
+  });
+
+  // איסוף תשובות MCQ
+  var mcqAnswers = {};
+  document.querySelectorAll('.q-card').forEach(function(card) {
+    card.querySelectorAll('input[type=radio]:checked').forEach(function(r) {
+      var lbl = r.parentElement;
+      mcqAnswers[r.name] = lbl.textContent.trim().substring(0, 200);
+    });
+  });
+
+  var maxAuto = calcMaxAuto();
+  var payload = {
+    studentName:  name,
+    studentId:    document.getElementById('studentId').value.trim(),
+    studentClass: document.getElementById('studentClass').value.trim(),
+    autoScore:    autoScore,
+    maxAutoScore: maxAuto,
+    openFilled:   openFilled,
+    openTotal:    openTotal,
+    mcqAnswers:   mcqAnswers,
+    openAnswers:  openAnswers
+  };
+
+  // ── הצג לוח ניקוד ──
+  var panel = document.getElementById('scorePanel');
+  panel.style.display = 'block';
+  document.getElementById('finalScore').textContent = autoScore;
+  document.getElementById('maxAuto').textContent = maxAuto;
+  document.getElementById('openNote').textContent =
+    '📝 ' + openFilled + '/' + openTotal + ' שאלות פתוחות מולאו — יבדקו ידנית';
+
+  // ── שליחה לשרת ──
+  var statusEl = document.getElementById('sendStatus');
+
+  if (BACKEND_URL === 'YOUR_APPS_SCRIPT_URL_HERE') {
+    statusEl.innerHTML = '<span style="color:var(--gold)">⚠️ כתובת השרת לא הוגדרה — הנתונים לא נשלחו. ראי הוראות בקובץ ה-Script.</span>';
+    panel.scrollIntoView({ behavior: 'smooth' });
+    return;
+  }
+
+  statusEl.innerHTML = '<span style="color:var(--muted)">⏳ שולח נתונים...</span>';
+  panel.scrollIntoView({ behavior: 'smooth' });
+
+  fetch(BACKEND_URL, {
+    method: 'POST',
+    mode: 'no-cors',   // Apps Script דורש no-cors
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  })
+  .then(function() {
+    statusEl.innerHTML =
+      '<span style="color:var(--accent2)">✅ הנתונים נשלחו בהצלחה ל-Google Sheets!</span>';
+  })
+  .catch(function(err) {
+    statusEl.innerHTML =
+      '<span style="color:var(--warn)">❌ שגיאה בשליחה: ' + err.message + '</span>';
+  });
+}
+
+function calcMaxAuto() {
+  // סכום כל הנקודות האוטומטיות האפשריות
+  var total = 0;
+  var seen = new Set();
+  document.querySelectorAll('button.btn-check').forEach(function(btn) {
+    var m = btn.getAttribute('onclick').match(/checkMCQ\('([^']+)',(\d+),(\d+)\)/);
+    if (m && !seen.has(m[1])) {
+      seen.add(m[1]);
+      total += parseInt(m[3]);
+    }
+  });
+  return total;
+}
+
+// ── Syntax Highlighting ──
+document.addEventListener('DOMContentLoaded', function() {
+  document.querySelectorAll('pre code').forEach(function(block) {
+    hljs.highlightElement(block);
+  });
+  updateProgress();
+});
+</script>
+
+</body>
+</html>
