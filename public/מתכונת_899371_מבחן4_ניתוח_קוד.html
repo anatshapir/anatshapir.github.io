@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="he">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>מבחן 4 — ניתוח קוד והבנת אלגוריתמים — מדעי המחשב 899371</title>
+<style>
+:root { --blue:#1f4e79; --green:#0f7b0f; --red:#b40000; --orange:#d96a00; --gray:#888; --bg:#fafafa; --card:#ffffff; --border:#ddd; --code-bg:#f4f4f4; --code-border:#cccccc; --highlight:#fff8e1; }
+* { box-sizing: border-box; }
+body { font-family:'David','Arial Hebrew',Arial,sans-serif; background:var(--bg); margin:0; padding:0; color:#222; line-height:1.6; }
+.container { max-width:900px; margin:0 auto; padding:20px; }
+h1,h2,h3 { color:var(--blue); }
+h1 { font-size:28px; text-align:center; }
+h2 { font-size:22px; }
+h3 { font-size:18px; }
+code,pre { direction:ltr; unicode-bidi:isolate; font-family:'Consolas','Monaco',monospace; background:var(--code-bg); }
+code { padding:1px 5px; border-radius:3px; font-size:0.9em; }
+pre { padding:12px; border:1px solid var(--code-border); border-radius:4px; overflow-x:auto; text-align:left; margin:12px 0; white-space:pre; }
+.card { background:var(--card); border:1px solid var(--border); border-radius:8px; padding:24px; margin:20px 0; box-shadow:0 2px 4px rgba(0,0,0,0.04); }
+button { font-family:inherit; font-size:16px; padding:10px 24px; border:none; border-radius:6px; cursor:pointer; background:var(--blue); color:white; transition:background 0.2s; }
+button:hover { background:#163d5e; }
+button:disabled { background:#aaa; cursor:not-allowed; }
+button.secondary { background:var(--gray); }
+button.danger { background:var(--red); }
+button.warning { background:var(--orange); }
+input[type="text"],input[type="number"] { font-family:inherit; font-size:16px; padding:8px 12px; border:1px solid var(--border); border-radius:4px; direction:rtl; }
+input[type="number"] { direction:ltr; text-align:left; }
+.options { list-style:none; padding:0; }
+.option { padding:12px 16px; margin:6px 0; border:1px solid var(--border); border-radius:6px; cursor:pointer; transition:background 0.15s; display:flex; align-items:flex-start; gap:10px; }
+.option:hover { background:#f8f8f8; }
+.option input { margin-top:4px; flex-shrink:0; }
+.option-text { flex:1; }
+.option.selected { background:#e6f0f8; border-color:var(--blue); }
+pre select { font-family:'Consolas',monospace; font-size:0.95em; padding:1px 4px; margin:0 2px; border:1px solid var(--blue); border-radius:3px; background:#e6f0f8; direction:ltr; }
+.exam-header { position:sticky; top:0; background:var(--card); border-bottom:2px solid var(--blue); padding:12px 20px; display:flex; justify-content:space-between; align-items:center; z-index:100; box-shadow:0 2px 4px rgba(0,0,0,0.04); margin-bottom:20px; }
+.timer { font-family:monospace; font-size:20px; font-weight:bold; color:var(--blue); direction:ltr; unicode-bidi:isolate; }
+.timer.warning { color:var(--orange); }
+.timer.danger { color:var(--red); }
+.progress-info { color:var(--gray); font-size:14px; }
+.nav-buttons { display:flex; justify-content:space-between; gap:12px; margin-top:24px; flex-wrap:wrap; }
+.nav-mini { display:flex; flex-wrap:wrap; gap:4px; margin-top:12px; padding:12px; background:#f4f4f4; border-radius:6px; }
+.nav-btn { padding:6px 10px; font-size:13px; border:1px solid var(--border); background:white; color:#333; cursor:pointer; border-radius:4px; min-width:36px; }
+.nav-btn.answered { background:#d4edda; border-color:var(--green); }
+.nav-btn.current { background:var(--blue); color:white; border-color:var(--blue); }
+.score-big { font-size:64px; font-weight:bold; text-align:center; color:var(--blue); margin:20px 0; }
+.score-percent { font-size:24px; color:var(--gray); }
+.result-question { border-right:4px solid var(--gray); padding:16px 20px; margin:12px 0; background:#f8f8f8; border-radius:4px; }
+.result-question.correct { border-right-color:var(--green); background:#f0f9f0; }
+.result-question.wrong { border-right-color:var(--red); background:#faf0f0; }
+.result-explanation { background:var(--highlight); padding:12px 16px; border-radius:4px; margin-top:12px; font-size:0.95em; }
+.tag { display:inline-block; padding:2px 10px; background:var(--blue); color:white; border-radius:12px; font-size:12px; margin-left:8px; }
+.section-title { font-weight:bold; color:var(--blue); border-bottom:1px solid var(--border); padding-bottom:8px; margin-top:24px; }
+.warning-box { background:#fff3cd; border:1px solid #ffeaa7; border-radius:6px; padding:12px 16px; margin:16px 0; }
+.info-list { background:#e8f4f8; border:1px solid #b3d9e8; border-radius:6px; padding:16px 20px; margin:16px 0; }
+.info-list ul { margin:8px 0; padding-right:24px; }
+.info-list li { margin:6px 0; }
+.danger-box { background:#f8d7da; border:1px solid #f5c6cb; border-radius:6px; padding:16px 20px; margin:16px 0; color:#721c24; }
+.exceeded-warning { background:var(--red); color:white; padding:12px 16px; border-radius:6px; margin:12px 0; font-weight:bold; text-align:center; }
+@media (max-width:600px) { .container { padding:10px; } .card { padding:16px; } button { padding:12px 16px; font-size:14px; } }
+</style>
+</head>
+<body>
+<div class="container" id="app">
+    <div id="screen-start" class="card">
+        <h1>מבחן 4 — ניתוח קוד והבנת אלגוריתמים</h1>
+        <h3 style="text-align:center; color:var(--gray); margin-top:-10px;">מצא-באג, השלמת קוד, איכות קוד, השוואת מימושים, טענות יציאה</h3>
+        <div id="resume-area" style="display:none;">
+            <div class="warning-box">
+                <strong>נמצא מבחן פתוח קודם</strong>
+                <p id="resume-info"></p>
+                <div style="margin-top:12px;">
+                    <button onclick="resumeExam()">המשך מבחן (יישמר זמן ההתחלה המקורי)</button>
+                    <button onclick="discardAndStart()" class="warning">ביטול והתחלה מחדש</button>
+                </div>
+            </div>
+        </div>
+        <div id="new-attempt-warning" style="display:none;">
+            <div class="danger-box"><strong>שים לב:</strong> כבר ניגשת למבחן הזה <span id="prev-attempts"></span> פעמים בעבר. כל ניסיון מתועד בקובץ הסיכום שיישלח למורה.</div>
+        </div>
+        <div class="info-list">
+            <strong>על המבחן:</strong>
+            <ul>
+                <li><strong>26 שאלות</strong> — מבחן ממוקד בנושא</li>
+                <li>נושא המבחן: מצא-באג, השלמת קוד, איכות קוד, השוואת מימושים, טענות יציאה</li>
+                <li>משך זמן מוקצב: <strong>60 דקות</strong></li>
+                <li>אם תרענן את הדף — תוכל להמשיך מאותו מקום, אבל הזמן <strong>ממשיך לרוץ</strong> (לא מתחיל מ-0)</li>
+                <li>אם הזמן יסתיים — המבחן יוגש אוטומטית עם התשובות שמילאת</li>
+            </ul>
+        </div>
+        <div class="warning-box">
+            <strong>חשוב לדעת:</strong>
+            <ul style="margin:8px 0;">
+                <li>קובץ הסיכום שתורידי בסיום מתעד <strong>זמן התחלה אמיתי</strong>, <strong>זמן סיום אמיתי</strong>, ו<strong>מספר רענונים</strong></li>
+                <li>אם הזמן יחרוג מ-60 דקות — תופיע הערה ברורה בקובץ</li>
+                <li>חזרה למבחן אחרי שהוגש = ניסיון חדש (גם זה מתועד)</li>
+                <li>בסוף הקובץ יש <strong>חתימה דיגיטלית</strong> — שינוי ידני של הקובץ יקלקל אותה</li>
+            </ul>
+        </div>
+        <div style="margin:30px 0;">
+            <label style="display:block; margin-bottom:8px; font-weight:bold;">שם מלא (יופיע בקובץ הסיכום):</label>
+            <input type="text" id="student-name" style="width:100%; max-width:400px;" placeholder="שם פרטי ושם משפחה" autocomplete="off">
+        </div>
+        <div style="text-align:center;">
+            <button id="btn-start" onclick="startExam()" style="font-size:18px; padding:14px 36px;">התחלת המבחן ⏱</button>
+        </div>
+    </div>
+    <div id="screen-exam" style="display:none;">
+        <div class="exam-header">
+            <div><strong>שאלה <span id="current-num">1</span> מתוך <span id="total-num">30</span></strong> <span class="progress-info" id="section-name"></span></div>
+            <div class="timer" id="timer">110:00</div>
+        </div>
+        <div class="card">
+            <div id="question-container"></div>
+            <div class="nav-buttons">
+                <button onclick="prevQuestion()" id="btn-prev">הקודמת</button>
+                <button onclick="nextQuestion()" id="btn-next">הבאה ←</button>
+            </div>
+            <div class="nav-mini" id="nav-mini"></div>
+            <div style="text-align:center; margin-top:20px;">
+                <button onclick="confirmSubmit()" class="danger">סיום והגשת המבחן</button>
+            </div>
+        </div>
+    </div>
+    <div id="screen-result" style="display:none;">
+        <div class="card">
+            <h1>תוצאות המבחן</h1>
+            <div id="time-warning"></div>
+            <div id="result-summary"></div>
+            <div style="text-align:center; margin:30px 0;">
+                <button onclick="downloadSummary()">📥 הורדת קובץ סיכום (להעברה למורה)</button>
+                <button onclick="toggleDetails()" class="secondary">הצג/הסתר תשובות מפורטות</button>
+                <button onclick="startNewAttempt()" class="warning">התחלת ניסיון חדש (לתרגול בלבד)</button>
+            </div>
+            <div id="result-details" style="display:none;"></div>
+        </div>
+    </div>
+</div>
+<script>
+const QUESTIONS = [{"id": "m1_findmin_properties", "type": "multianswer", "topic": "multi-answer", "difficulty": "medium", "stem": "לפניכם הפעולה <code>findMin</code>:", "code": "public static int findMin(int[] arr)\n{\n    int min = arr[0];\n    for (int i = 1; i < arr.length; i++)\n    {\n        if (arr[i] < min)\n            min = arr[i];\n    }\n    return min;\n}", "question": "סמנו את <strong>כל</strong> המשפטים הנכונים לגבי הפעולה:", "options": [{"text": "הפעולה מחזירה את הערך הקטן ביותר במערך", "correct": true, "feedback": "נכון: זוהי בדיוק הפעולה של הפעולה — חיפוש מינימום."}, {"text": "הפעולה תזרוק חריגה אם המערך ריק", "correct": true, "feedback": "נכון: arr[0] על מערך באורך 0 זורק ArrayIndexOutOfBoundsException."}, {"text": "אם נאתחל <code>min = 0</code> במקום <code>arr[0]</code>, הפעולה תעבוד נכון על כל קלט", "correct": false, "feedback": "שגוי: אם כל איברי המערך גדולים מ-0 (למשל {5,7,3}), הפעולה תחזיר 0 — שאינו במערך."}, {"text": "הפעולה תעבוד נכון על מערך באורך 1", "correct": true, "feedback": "נכון: min מאותחל ל-arr[0], הלולאה לא רצה כלל (i=1 לא <1), מוחזר arr[0]."}, {"text": "אם נחליף את <code>&lt;</code> ב-<code>&lt;=</code>, הפעולה תחזיר את האיבר הראשון של המינימום (השמאלי ביותר)", "correct": false, "feedback": "שגוי: עם <= הפעולה תעדכן גם בתיקו, אז תחזיר את ההופעה ה-אחרונה של המינימום (הימנית ביותר)."}], "explanation": "הנכונים: (1) הפעולה אכן מוצאת מינימום, (2) קריסה על מערך ריק, (4) עובד על מערך באורך 1. השגויים: (3) אתחול ב-0 נכשל כשכל הערכים חיוביים, (5) <= יביא להופעה ה-אחרונה, לא הראשונה.", "part": "פרק 2", "section": "שאלה 6: ניתוח קוד והבנת אלגוריתמים", "category": "פרק 2/שאלה 6: ניתוח קוד והבנת אלגוריתמים"}, {"id": "m2_compare_two_ops", "type": "multianswer", "topic": "multi-answer", "difficulty": "hard", "stem": "לפניכם שתי פעולות הסופרות את מספר ההופעות של ערך במערך:", "code": "// פעולה A\npublic static int countA(int[] arr, int x) {\n    int cnt = 0;\n    for (int i = 0; i < arr.length; i++)\n        if (arr[i] == x)\n            cnt++;\n    return cnt;\n}\n\n// פעולה B\npublic static int countB(int[] arr, int x) {\n    for (int i = 0; i < arr.length; i++)\n        if (arr[i] == x)\n            return 1;\n    return 0;\n}", "question": "סמנו את <strong>כל</strong> המשפטים הנכונים:", "options": [{"text": "עבור מערך שאינו מכיל את x בכלל, שתי הפעולות מחזירות את אותו ערך", "correct": true, "feedback": "נכון: A מחזירה 0 (cnt לא עודכן), B מחזירה 0 (return 0 בסוף). זהה."}, {"text": "עבור מערך שמכיל את x פעם אחת בדיוק, שתי הפעולות מחזירות את אותו ערך", "correct": true, "feedback": "נכון: A מחזירה 1 (cnt=1), B מחזירה 1 (יוצאת מיד אחרי המציאה). זהה."}, {"text": "עבור מערך שמכיל את x פעמיים או יותר, שתי הפעולות מחזירות את אותו ערך", "correct": false, "feedback": "שגוי: A מחזירה את המספר האמיתי (≥2), B תמיד מחזירה 1 גם עבור הופעות מרובות."}, {"text": "פעולה B שקולה לפעולה <code>contains</code> שמחזירה <code>boolean</code>", "correct": true, "feedback": "נכון: B מחזירה 1 אם x קיים ו-0 אחרת — שקול בוליאני (קיים/לא קיים), לא ספירה אמיתית."}, {"text": "פעולה A תמיד תעבוד יותר זמן מפעולה B", "correct": false, "feedback": "שגוי: רק במקרה הראשון; אם x לא קיים, שתיהן עוברות את כל המערך. אם x ראשון, B יוצאת מיד ו-A עוברת הכל."}], "explanation": "הפעולות שונות במהותן: A סופרת אמיתית, B בודקת קיום (מחזירה 1 או 0). הן זהות רק כאשר יש 0 או 1 הופעות. (5) שגוי כי B יכולה לעבוד גם יותר זמן (אם x לא קיים — שתיהן עוברות הכל).", "part": "פרק 2", "section": "שאלה 6: ניתוח קוד והבנת אלגוריתמים", "category": "פרק 2/שאלה 6: ניתוח קוד והבנת אלגוריתמים"}, {"id": "m3_string_method", "type": "multianswer", "topic": "multi-answer", "difficulty": "medium", "stem": "לפניכם הפעולה <code>process</code>:", "code": "public static String process(String s)\n{\n    String result = \"\";\n    for (int i = 0; i < s.length(); i++)\n    {\n        char c = s.charAt(i);\n        if (c >= '0' && c <= '9')\n            result = result + c;\n    }\n    return result;\n}", "question": "סמנו את <strong>כל</strong> המשפטים הנכונים:", "options": [{"text": "הפעולה משאירה רק ספרות במחרוזת", "correct": true, "feedback": "נכון: התנאי בודק אם התו הוא ספרה ('0'-'9')."}, {"text": "אם נכניס <code>\"abc\"</code>, הפעולה תזרוק חריגה", "correct": false, "feedback": "שגוי: אין ספרות, התנאי לא מתקיים אף פעם, הפעולה תחזיר מחרוזת ריקה."}, {"text": "עבור <code>\"a1b2c3\"</code> הפעולה תחזיר <code>\"123\"</code>", "correct": true, "feedback": "נכון: רק הספרות 1, 2, 3 משורשרות בסדר שלהן."}, {"text": "הפעולה משנה את <code>s</code>", "correct": false, "feedback": "שגוי: ב-Java מחרוזות immutable. s לא משתנה — נוצרת מחרוזת חדשה."}, {"text": "עבור מחרוזת ריקה הפעולה תחזיר מחרוזת ריקה", "correct": true, "feedback": "נכון: הלולאה לא רצה כלל (length=0), result נשאר ריק."}], "explanation": "הפעולה מסננת ספרות בלבד ומחזירה אותן כמחרוזת חדשה. השגויים: (2) לא זורקת חריגה — מחזירה ריק; (4) מחרוזות immutable ב-Java.", "part": "פרק 2", "section": "שאלה 6: ניתוח קוד והבנת אלגוריתמים", "category": "פרק 2/שאלה 6: ניתוח קוד והבנת אלגוריתמים"}, {"id": "m5_algorithm_understanding", "type": "multianswer", "topic": "multi-answer", "difficulty": "hard", "stem": "לפניכם פעולה הפועלת על מערך:", "code": "public static int mystery(int[] arr)\n{\n    int a = arr[0];\n    int b = arr[0];\n    for (int i = 1; i < arr.length; i++)\n    {\n        if (arr[i] > a)\n            a = arr[i];\n        if (arr[i] < b)\n            b = arr[i];\n    }\n    return a - b;\n}", "question": "סמנו את <strong>כל</strong> המשפטים הנכונים:", "options": [{"text": "הפעולה מחזירה את ההפרש בין האיבר הגדול לקטן ביותר במערך", "correct": true, "feedback": "נכון: a מתעדכן למקסימום, b למינימום, מוחזר ההפרש."}, {"text": "הפעולה תמיד מחזירה ערך אי-שלילי (≥0)", "correct": true, "feedback": "נכון: a הוא המקסימום, b הוא המינימום, אז a >= b תמיד, אז a-b >= 0."}, {"text": "עבור מערך שכל איבריו זהים, הפעולה תחזיר 0", "correct": true, "feedback": "נכון: max=min=הערך, ההפרש 0."}, {"text": "עבור מערך באורך 1, הפעולה תחזיר את הערך עצמו", "correct": false, "feedback": "שגוי: a=b=arr[0], אז a-b=0, לא הערך עצמו."}, {"text": "ניתן לחסוך לולאה אחת על ידי שילוב שני התנאים ב-<code>else if</code>", "correct": false, "feedback": "שגוי טכנית: אם נחליף <code>if/if</code> ב-<code>if/else if</code>, האיבר הראשון שיגדל מ-a יבטל את הבדיקה אם הוא גם קטן מ-b — אבל אם הוא גדול מ-a הוא כבר לא יכול להיות קטן מ-b ההתחלתי (שהוא arr[0]=a), כי a גדל. אז בפועל הפעולה תעבוד נכון. עם זאת, לא 'חסכון של לולאה' — זוהי כבר לולאה אחת!"}], "explanation": "הפעולה מחשבת טווח (range) של מערך. הנכונים: (1)-(3). שגוי (4): מערך באורך 1 מחזיר 0. שגוי (5): זוהי כבר לולאה אחת.", "part": "פרק 2", "section": "שאלה 6: ניתוח קוד והבנת אלגוריתמים", "category": "פרק 2/שאלה 6: ניתוח קוד והבנת אלגוריתמים"}, {"id": "m6_trace_complex", "type": "multianswer", "topic": "multi-answer", "difficulty": "hard", "stem": "לפניכם פעולה הפועלת על שני מערכים:", "code": "public static int howMany(int[] a, int[] b)\n{\n    int cnt = 0;\n    for (int i = 0; i < a.length; i++)\n    {\n        boolean found = false;\n        for (int j = 0; j < b.length && !found; j++)\n        {\n            if (a[i] == b[j])\n                found = true;\n        }\n        if (found)\n            cnt++;\n    }\n    return cnt;\n}", "question": "סמנו את <strong>כל</strong> המשפטים הנכונים:", "options": [{"text": "הפעולה סופרת כמה איברים של <code>a</code> מופיעים גם ב-<code>b</code>", "correct": true, "feedback": "נכון: לכל איבר ב-a בודקים אם הוא ב-b, וסופרים."}, {"text": "אם איבר ב-<code>a</code> מופיע פעמיים, הוא נספר פעמיים ב-<code>cnt</code>", "correct": true, "feedback": "נכון: הלולאה החיצונית עוברת על כל איבר ב-a בנפרד; הופעות כפולות ב-a נספרות בנפרד."}, {"text": "אם איבר ב-<code>b</code> מופיע פעמיים, ההתאמה תיספר פעמיים", "correct": false, "feedback": "שגוי: !found עוצר את החיפוש מיד אחרי ההתאמה הראשונה ב-b. אינה משנה אם יש כפילות ב-b."}, {"text": "אם <code>b</code> ריק, הפעולה תחזיר 0", "correct": true, "feedback": "נכון: הלולאה הפנימית לא רצה (b.length=0), found נשאר false, cnt לא מתעדכן."}, {"text": "אם <code>a</code> ריק, הפעולה תזרוק חריגה", "correct": false, "feedback": "שגוי: אם a ריק, הלולאה החיצונית לא רצה כלל, cnt=0 מוחזר. אין גישה לאינדקס לא חוקי."}], "explanation": "הפעולה סופרת חיתוך מסוג חד-כיווני (כמה איברים של a יש ב-b, עם כפילות ב-a). השגויים: (3) !found מונע ספירה כפולה; (5) לולאה ריקה לא זורקת חריגה.", "part": "פרק 2", "section": "שאלה 6: ניתוח קוד והבנת אלגוריתמים", "category": "פרק 2/שאלה 6: ניתוח קוד והבנת אלגוריתמים"}, {"id": "c1_sum_even", "type": "cloze", "topic": "Cloze", "difficulty": "medium", "stem": "השלימו את הפעולה <code>sumEven</code> שמחזירה את סכום האיברים הזוגיים במערך:", "code_template": "public static int sumEven(int[] arr) {\n    int sum = 0;\n    for (int i = 0; [[GAP1]]; i++) {\n        if ([[GAP2]]) {\n            [[GAP3]]\n        }\n    }\n    return sum;\n}", "gaps": [{"label": "GAP1", "hint": "תנאי הלולאה", "options": [{"text": "i < arr.length", "correct": true, "feedback": "נכון — מעבר על כל איברי המערך."}, {"text": "i <= arr.length", "correct": false, "feedback": "שגוי — יגרום ל-ArrayIndexOutOfBoundsException בסוף."}, {"text": "i < arr.length - 1", "correct": false, "feedback": "שגוי — האיבר האחרון לא ייבדק."}, {"text": "i > 0", "correct": false, "feedback": "שגוי — לולאה אינסופית (i גדל)."}]}, {"label": "GAP2", "hint": "בדיקת זוגיות", "options": [{"text": "arr[i] % 2 == 0", "correct": true, "feedback": "נכון — בודק שהאיבר מתחלק ב-2."}, {"text": "i % 2 == 0", "correct": false, "feedback": "שגוי — זה בודק אם האינדקס זוגי, לא הערך."}, {"text": "arr[i] / 2 == 0", "correct": false, "feedback": "שגוי — חלוקת מספר ב-2 שווה 0 רק עבור 0 או 1."}, {"text": "arr[i] == 2", "correct": false, "feedback": "שגוי — זה בודק שהאיבר הוא 2, לא שהוא זוגי."}]}, {"label": "GAP3", "hint": "הוספה לסכום", "options": [{"text": "sum += arr[i];", "correct": true, "feedback": "נכון — מוסיף את הערך הזוגי לסכום."}, {"text": "sum = arr[i];", "correct": false, "feedback": "שגוי — דורס את הסכום במקום להוסיף."}, {"text": "sum += i;", "correct": false, "feedback": "שגוי — מוסיף את האינדקס, לא את הערך."}, {"text": "sum++;", "correct": false, "feedback": "שגוי — סופר את מספר הזוגיים, לא סוכם אותם."}]}], "explanation": "הפעולה הנכונה: סורקת את כל המערך (i<arr.length), בודקת שהערך זוגי (arr[i]%2==0), ומוסיפה את הערך לסכום (sum += arr[i]).", "part": "פרק 2", "section": "שאלה 6: ניתוח קוד והבנת אלגוריתמים", "category": "פרק 2/שאלה 6: ניתוח קוד והבנת אלגוריתמים"}, {"id": "c2_find_max", "type": "cloze", "topic": "Cloze", "difficulty": "easy", "stem": "השלימו את הפעולה <code>findMax</code> שמחזירה את הערך המקסימלי במערך (נניח שהמערך לא ריק):", "code_template": "public static int findMax(int[] arr) {\n    int max = [[GAP1]];\n    for (int i = 1; i < arr.length; i++) {\n        if ([[GAP2]]) {\n            [[GAP3]]\n        }\n    }\n    return max;\n}", "gaps": [{"label": "GAP1", "hint": "אתחול max", "options": [{"text": "arr[0]", "correct": true, "feedback": "נכון — אתחול לערך הראשון במערך מבטיח התחלה תקינה."}, {"text": "0", "correct": false, "feedback": "שגוי — אם כל הערכים שליליים, תוחזר 0 (שאינו במערך)."}, {"text": "-1", "correct": false, "feedback": "שגוי — אם כל הערכים קטנים מ-(-1), תוחזר תוצאה לא נכונה."}, {"text": "arr.length", "correct": false, "feedback": "שגוי — זה אורך המערך, לא ערך מתוכו."}]}, {"label": "GAP2", "hint": "תנאי עדכון", "options": [{"text": "arr[i] > max", "correct": true, "feedback": "נכון — מעדכן רק כשמוצאים ערך גדול יותר."}, {"text": "arr[i] >= max", "correct": false, "feedback": "שגוי טכנית: יעבוד נכון, אבל פחות יעיל (עדכון גם בתיקו)."}, {"text": "arr[i] < max", "correct": false, "feedback": "שגוי — זה יחפש מינימום, לא מקסימום."}, {"text": "max > arr[0]", "correct": false, "feedback": "שגוי — תנאי קבוע, לא תלוי ב-arr[i]."}]}, {"label": "GAP3", "hint": "עדכון max", "options": [{"text": "max = arr[i];", "correct": true, "feedback": "נכון — שומר את הערך החדש כמקסימום."}, {"text": "max++;", "correct": false, "feedback": "שגוי — רק מגדיל את max ב-1, לא לערך החדש."}, {"text": "arr[i] = max;", "correct": false, "feedback": "שגוי — הופך את הכיוון, מקלקל את המערך."}, {"text": "return arr[i];", "correct": false, "feedback": "שגוי — מחזיר את ההופעה הראשונה הגדולה, לא ממש מקסימום."}]}], "explanation": "אלגוריתם מקסימום סטנדרטי: אתחול ב-arr[0], עדכון אם נמצא ערך גדול יותר.", "part": "פרק 2", "section": "שאלה 6: ניתוח קוד והבנת אלגוריתמים", "category": "פרק 2/שאלה 6: ניתוח קוד והבנת אלגוריתמים"}, {"id": "c3_palindrome", "type": "cloze", "topic": "Cloze", "difficulty": "medium", "stem": "השלימו את הפעולה <code>isPalindrome</code> שבודקת אם מחרוזת היא פלינדרום (נקראת אותו דבר מימין ומשמאל):", "code_template": "public static boolean isPalindrome(String s) {\n    int n = s.length();\n    for (int i = 0; [[GAP1]]; i++) {\n        if ([[GAP2]]) {\n            [[GAP3]]\n        }\n    }\n    return true;\n}", "gaps": [{"label": "GAP1", "hint": "תנאי הלולאה", "options": [{"text": "i < n / 2", "correct": true, "feedback": "נכון — די לבדוק חצי מהמחרוזת; השני נבדק דרכו."}, {"text": "i < n", "correct": false, "feedback": "שגוי טכנית — עובד אבל מבצע כפליים יותר עבודה (כל זוג נבדק פעמיים)."}, {"text": "i <= n / 2", "correct": false, "feedback": "שגוי במחרוזת אורך זוגי — יבדוק את האמצע שאינו קיים."}, {"text": "i < n - 1", "correct": false, "feedback": "שגוי — יחזור על בדיקות מיותרות ויכול ליצור שגיאה."}]}, {"label": "GAP2", "hint": "השוואת תווים", "options": [{"text": "s.charAt(i) != s.charAt(n - 1 - i)", "correct": true, "feedback": "נכון — אם תו במיקום i אינו זהה לתו המקביל מהסוף, לא פלינדרום."}, {"text": "s.charAt(i) == s.charAt(n - i)", "correct": false, "feedback": "שגוי — n-i ייתן IndexOutOfBounds בקצה."}, {"text": "s.charAt(i) != s.charAt(i + 1)", "correct": false, "feedback": "שגוי — משווה שכנים, לא תווים מקבילים."}, {"text": "s.charAt(i) > s.charAt(n - 1 - i)", "correct": false, "feedback": "שגוי — השוואה לפי גדל, לא שוויון."}]}, {"label": "GAP3", "hint": "פעולה אם לא תואם", "options": [{"text": "return false;", "correct": true, "feedback": "נכון — מצאנו אי-התאמה, אין צורך להמשיך."}, {"text": "break;", "correct": false, "feedback": "שגוי — break רק יוצא מהלולאה, אבל הפעולה ממשיכה ל-return true בסוף."}, {"text": "return true;", "correct": false, "feedback": "שגוי — הפוך לחלוטין; דווקא במציאת אי-התאמה לא פלינדרום."}, {"text": "continue;", "correct": false, "feedback": "שגוי — ממשיך, אבל הבדיקה כבר נכשלה."}]}], "explanation": "פעולה זו משווה תווים מהקצוות פנימה. די לבדוק עד חצי המחרוזת. אם נמצאת אי-התאמה — החזרה מיידית של false. אחרת — true בסוף.", "part": "פרק 2", "section": "שאלה 6: ניתוח קוד והבנת אלגוריתמים", "category": "פרק 2/שאלה 6: ניתוח קוד והבנת אלגוריתמים"}, {"id": "c5_count_chars", "type": "cloze", "topic": "Cloze", "difficulty": "easy", "stem": "השלימו את הפעולה <code>countSpaces</code> שמחזירה כמה רווחים יש במחרוזת:", "code_template": "public static int countSpaces(String s) {\n    int cnt = [[GAP1]];\n    for (int i = 0; i < s.length(); i++) {\n        if ([[GAP2]]) {\n            [[GAP3]]\n        }\n    }\n    return cnt;\n}", "gaps": [{"label": "GAP1", "hint": "אתחול מונה", "options": [{"text": "0", "correct": true, "feedback": "נכון — סופרים מ-0."}, {"text": "1", "correct": false, "feedback": "שגוי — יספור פתאום רווח אחד מיותר."}, {"text": "s.length()", "correct": false, "feedback": "שגוי — מתחיל מאורך המחרוזת ולא מ-0."}, {"text": "-1", "correct": false, "feedback": "שגוי — תוצאה תהיה -1 + מספר רווחים אמיתי."}]}, {"label": "GAP2", "hint": "זיהוי רווח", "options": [{"text": "s.charAt(i) == ' '", "correct": true, "feedback": "נכון — משווה את התו לרווח."}, {"text": "s.charAt(i) == \" \"", "correct": false, "feedback": "שגוי — char מושווה לסטרינג. Java לא תרשה."}, {"text": "s == ' '", "correct": false, "feedback": "שגוי — משווה את כל המחרוזת לרווח."}, {"text": "i == ' '", "correct": false, "feedback": "שגוי — משווה אינדקס int לתו."}]}, {"label": "GAP3", "hint": "הגדלת מונה", "options": [{"text": "cnt++;", "correct": true, "feedback": "נכון — מגדיל את המונה ב-1."}, {"text": "cnt = i;", "correct": false, "feedback": "שגוי — דורס את המונה במיקום הנוכחי."}, {"text": "cnt = cnt + s.length();", "correct": false, "feedback": "שגוי — מוסיף את אורך המחרוזת, לא 1."}, {"text": "return cnt;", "correct": false, "feedback": "שגוי — חוזר אחרי הרווח הראשון בלי לסיים את הספירה."}]}], "explanation": "תבנית ספירה סטנדרטית: אתחול מונה ב-0, מעבר על המחרוזת, הגדלת המונה כשעומדים בתנאי.", "part": "פרק 2", "section": "שאלה 6: ניתוח קוד והבנת אלגוריתמים", "category": "פרק 2/שאלה 6: ניתוח קוד והבנת אלגוריתמים"}, {"id": "b1_init_bug", "type": "multichoice", "topic": "מצא את הבאג", "difficulty": "medium", "stem": "לפניכם פעולה שאמורה למצוא את הערך המקסימלי במערך:", "code": "public static int findMax(int[] arr) {\n    int max = 0;                                  // שורה 1\n    for (int i = 0; i < arr.length; i++) {        // שורה 2\n        if (arr[i] > max)                         // שורה 3\n            max = arr[i];                         // שורה 4\n    }\n    return max;                                   // שורה 5\n}", "question": "באיזה תרחיש הפעולה תחזיר תוצאה שגויה?", "options": [{"text": "מערך ריק", "correct": false, "feedback": "תרחיש זה לא חושף את הבאג הספציפי הזה — הפעולה תחזיר 0, שזה הערך השגוי לכל מערך לא מוצלח. אבל יש בעיה ייחודית למקרה אחר."}, {"text": "מערך עם איבר יחיד חיובי", "correct": false, "feedback": "שגוי: עבור {7}, התנאי 7>0 מתקיים, max=7, התשובה נכונה."}, {"text": "מערך שכל איבריו שליליים", "correct": true, "feedback": "נכון! זהו הבאג: max=0 כברירת מחדל. אם כל הערכים שליליים, אף אחד לא גדול מ-0, max נשאר 0 — אבל 0 לא במערך! התיקון: <code>int max = arr[0];</code>."}, {"text": "מערך ממוין", "correct": false, "feedback": "שגוי: מיון לא משפיע על מציאת מקסימום."}, {"text": "מערך עם איברים חוזרים", "correct": false, "feedback": "שגוי: חזרות לא מקלקלות את האלגוריתם."}], "explanation": "הבאג: אתחול max=0 מניח שיהיה לפחות איבר אחד חיובי. אם כל המערך שלילי (למשל {-5,-3,-8}), אף איבר לא גדול מ-0, הפעולה תחזיר 0 שאינו במערך. התיקון: <code>int max = arr[0];</code> ולהתחיל מ-i=1.", "part": "פרק 2", "section": "שאלה 6: ניתוח קוד והבנת אלגוריתמים", "category": "פרק 2/שאלה 6: ניתוח קוד והבנת אלגוריתמים"}, {"id": "b2_condition_bug", "type": "multichoice", "topic": "מצא את הבאג", "difficulty": "medium", "stem": "לפניכם פעולה שאמורה לבדוק אם איבר קיים במערך:", "code": "public static boolean contains(int[] arr, int target) {\n    for (int i = 0; i < arr.length; i++) {\n        if (arr[i] == target)\n            return true;\n        else\n            return false;\n    }\n    return false;\n}", "question": "מה הבאג בפעולה?", "options": [{"text": "הלולאה צריכה להיות <code>i <= arr.length</code>", "correct": false, "feedback": "שגוי: זה לא הבאג, אדרבא — i<=arr.length יגרום ל-ArrayIndexOutOfBoundsException."}, {"text": "ה-<code>else</code> גורם לפעולה להחזיר false אחרי הבדיקה הראשונה בלבד", "correct": true, "feedback": "נכון! אם arr[0] אינו target, נכנסים מיד ל-else ומחזירים false — בלי לבדוק את שאר המערך. התיקון: להסיר את ה-else."}, {"text": "צריך להחזיר 0 או 1 במקום boolean", "correct": false, "feedback": "שגוי: זה עניין סגנוני, לא באג. boolean הוא סוג מתאים לשאלה כן/לא."}, {"text": "חסר <code>break</code> אחרי <code>return true</code>", "correct": false, "feedback": "שגוי: return יוצא מהפעולה לחלוטין, אין צורך ב-break."}, {"text": "אין באג, הפעולה נכונה", "correct": false, "feedback": "שגוי: יש באג ברור — ה-else מקצר את החיפוש."}], "explanation": "הבאג: ה-else גורם להחזרת false כבר אחרי בדיקת האיבר הראשון, בלי לבדוק את שאר המערך. עבור {1,2,3} ו-target=3, הפעולה תחזיר false במקום true. התיקון: להסיר את ה-else (return false האחרון מספיק).", "part": "פרק 2", "section": "שאלה 6: ניתוח קוד והבנת אלגוריתמים", "category": "פרק 2/שאלה 6: ניתוח קוד והבנת אלגוריתמים"}, {"id": "b4_offbyone_bug", "type": "multichoice", "topic": "מצא את הבאג", "difficulty": "medium", "stem": "לפניכם פעולה שאמורה לבדוק אם מערך ממוין בסדר עולה ממש:", "code": "public static boolean isSorted(int[] arr) {\n    for (int i = 0; i <= arr.length - 1; i++) {\n        if (arr[i] >= arr[i + 1])\n            return false;\n    }\n    return true;\n}", "question": "מהי הבעיה בפעולה?", "options": [{"text": "התנאי <code>>=</code> צריך להיות <code>></code>", "correct": false, "feedback": "שגוי: >= נכון כאן — אם arr[i]>=arr[i+1] המערך לא ממוין-עולה-ממש."}, {"text": "בלולאה i מגיע ל-<code>arr.length - 1</code>, וגישה ל-<code>arr[i+1]</code> תחרוג מהמערך", "correct": true, "feedback": "נכון! כשי=arr.length-1, גישה ל-arr[i+1] = arr[arr.length] חורגת מהמערך. התיקון: <code>i < arr.length - 1</code> (קטן ממש)."}, {"text": "ההחזרה צריכה להיות הפוכה (true במקום false)", "correct": false, "feedback": "שגוי: אם מוצאים אי-מיון, החזרה false היא הנכונה."}, {"text": "צריך גם לבדוק שכל הערכים חיוביים", "correct": false, "feedback": "שגוי: הפעולה לא דורשת חיוביות, רק מיון."}, {"text": "המערך צריך להיות מטיפוס <code>Integer[]</code>", "correct": false, "feedback": "שגוי: int[] תקין לחלוטין להשוואות."}], "explanation": "באג off-by-one קלאסי: עם <=, i מגיע ל-arr.length-1, אז arr[i+1] חורג מהמערך. התיקון: < (חזק). או לחילופין: <code>for (int i = 1; i < arr.length; i++) if (arr[i-1] >= arr[i]) return false;</code>.", "part": "פרק 2", "section": "שאלה 6: ניתוח קוד והבנת אלגוריתמים", "category": "פרק 2/שאלה 6: ניתוח קוד והבנת אלגוריתמים"}, {"id": "q20_choose_correct_code", "topic": "מערכים", "difficulty": "hard", "stem": "רוצים לכתוב פעולה <code>secondMax</code> שמקבלת מערך של מספרים שונים זה מזה וגודלו לפחות 2, ומחזירה את הערך השני בגודלו (השני אחרי המקסימום).", "code": null, "question": "איזו פעולה מבין הבאות תפעל נכון על כל קלט חוקי?", "options": [{"text": "<pre dir=\"ltr\" style=\"text-align:left;font-family:Consolas,monospace;background:#f4f4f4;padding:6px;border:1px solid #ccc;direction:ltr;unicode-bidi:isolate;\">int max = arr[0];\nint second = arr[1];\nfor (int i = 0; i &lt; arr.length; i++)\n    if (arr[i] &gt; max) max = arr[i];\nfor (int i = 0; i &lt; arr.length; i++)\n    if (arr[i] &gt; second &amp;&amp; arr[i] &lt; max) second = arr[i];\nreturn second;</pre>", "correct": true, "feedback": "נכון! שני סריקות: ראשונה מוצאת max, שנייה מוצאת את הגדול שעדיין קטן מ-max. עובד על כל קלט חוקי."}, {"text": "<pre dir=\"ltr\" style=\"text-align:left;font-family:Consolas,monospace;background:#f4f4f4;padding:6px;border:1px solid #ccc;direction:ltr;unicode-bidi:isolate;\">int max = arr[0];\nint second = arr[0];\nfor (int i = 1; i &lt; arr.length; i++) {\n    if (arr[i] &gt; max) { second = max; max = arr[i]; }\n}\nreturn second;</pre>", "correct": false, "feedback": "שגוי: אם הערך השני בגודלו מופיע אחרי המקסימום, הוא לעולם לא ייכנס ל-second כי התנאי arr[i]>max לא מתקיים. לדוגמה: {5,1,3} — max=5, אבל 3 לא יישמר."}, {"text": "<pre dir=\"ltr\" style=\"text-align:left;font-family:Consolas,monospace;background:#f4f4f4;padding:6px;border:1px solid #ccc;direction:ltr;unicode-bidi:isolate;\">int second = arr[0];\nfor (int i = 1; i &lt; arr.length; i++)\n    if (arr[i] &gt; second) second = arr[i];\nreturn second;</pre>", "correct": false, "feedback": "שגוי: הקוד מחזיר את המקסימום, לא את השני בגודלו."}, {"text": "<pre dir=\"ltr\" style=\"text-align:left;font-family:Consolas,monospace;background:#f4f4f4;padding:6px;border:1px solid #ccc;direction:ltr;unicode-bidi:isolate;\">int max = arr[0], second = -1;\nfor (int i = 1; i &lt; arr.length; i++) {\n    if (arr[i] &gt; max) max = arr[i];\n    else if (arr[i] &gt; second) second = arr[i];\n}\nreturn second;</pre>", "correct": false, "feedback": "שגוי: אתחול second=-1 נכשל אם כל הערכים שליליים. למשל {-5,-3,-2} יחזיר -2 אבל לא בטוח שזה השני בגודלו אם המקסימום הוא -2."}, {"text": "<pre dir=\"ltr\" style=\"text-align:left;font-family:Consolas,monospace;background:#f4f4f4;padding:6px;border:1px solid #ccc;direction:ltr;unicode-bidi:isolate;\">int max = arr[0], second = arr[1];\nif (second &gt; max) { int t = max; max = second; second = t; }\nfor (int i = 2; i &lt; arr.length; i++)\n    if (arr[i] &gt; max) max = arr[i];\nreturn second;</pre>", "correct": false, "feedback": "שגוי: second לא מתעדכן בלולאה. אם בערך באינדקס 5 גדול מ-second הנוכחי אבל לא מ-max, הוא לא יישמר."}], "explanation": "הפעולה הראשונה היא היחידה שעובדת על כל קלט: היא מבצעת שתי סריקות נפרדות — הראשונה מוצאת את המקסימום, השנייה מוצאת את הערך הגדול ביותר שעדיין קטן ממנו.", "part": "פרק 2", "section": "שאלה 6: ניתוח קוד והבנת אלגוריתמים", "category": "פרק 2/שאלה 6: ניתוח קוד והבנת אלגוריתמים"}, {"id": "m4_new_array_props", "type": "multianswer", "topic": "multi-answer", "difficulty": "medium", "stem": "לפניכם הפעולה <code>process</code>:", "code": "public static int process(int[] arr)\n{\n    int x = 0;\n    for (int i = 0; i < arr.length; i++)\n    {\n        if (arr[i] > 0)\n            x += arr[i];\n        else if (arr[i] < 0)\n            x -= arr[i];\n    }\n    return x;\n}", "question": "סמנו את <strong>כל</strong> המשפטים הנכונים:", "options": [{"text": "הפעולה מחזירה את סכום הערכים המוחלטים של איברי המערך", "correct": true, "feedback": "נכון: חיוביים מתווספים כמו שהם, שליליים מתחסרים — כלומר ערכם המוחלט מתווסף."}, {"text": "אם כל איברי המערך הם 0, הפעולה תחזיר 0", "correct": true, "feedback": "נכון: שני התנאים (>0 ו-<0) לא מתקיימים על 0, הסכום נשאר 0."}, {"text": "הפעולה תמיד תחזיר ערך אי-שלילי", "correct": true, "feedback": "נכון: אנחנו תמיד מוסיפים ערכים מוחלטים (חיוביים), אז התוצאה תמיד >= 0."}, {"text": "עבור מערך עם מספרים שליליים בלבד, הפעולה תחזיר את סכומם (שלילי)", "correct": false, "feedback": "שגוי: התנאי השני (else if arr[i] < 0) מבצע x -= arr[i] — חיסור של מספר שלילי = חיבור. התוצאה חיובית."}, {"text": "החלפת <code>else if</code> ב-<code>if</code> תשנה את התוצאה", "correct": false, "feedback": "שגוי: התנאים מבחינתם בלעדיים (>0 ו-<0 לא יכולים להתקיים יחד). else if או if נפרד — אותו דבר."}], "explanation": "הפעולה מחשבת סכום ערכים מוחלטים. לחיוביים מתווסף הערך עצמו, לשליליים מתחסר הערך (=מתווסף הערך המוחלט). השגויים: (4) שלילי-מינוס-שלילי=חיובי; (5) התנאים בלעדיים אז else מיותר.", "part": "פרק 2", "section": "שאלה 6: ניתוח קוד והבנת אלגוריתמים", "category": "פרק 2/שאלה 6: ניתוח קוד והבנת אלגוריתמים"}, {"id": "m7_new_string_props", "type": "multianswer", "topic": "multi-answer", "difficulty": "medium", "stem": "לפניכם הפעולה <code>transform</code>:", "code": "public static String transform(String s)\n{\n    String result = \"\";\n    for (int i = 0; i < s.length(); i++)\n    {\n        char c = s.charAt(i);\n        if (c >= 'a' && c <= 'z')\n            result = result + (char)(c - 32);\n        else\n            result = result + c;\n    }\n    return result;\n}", "question": "סמנו את <strong>כל</strong> המשפטים הנכונים:", "options": [{"text": "הפעולה הופכת את כל האותיות הקטנות לגדולות", "correct": true, "feedback": "נכון: c-32 מעביר אות קטנה (a-z) לאות גדולה תואמת (A-Z) בקוד ASCII."}, {"text": "עבור <code>\"abc XYZ\"</code> הפעולה תחזיר <code>\"ABC XYZ\"</code>", "correct": true, "feedback": "נכון: a→A, b→B, c→C; הרווח ו-XYZ נשארים כמו שהם (כי הם לא בטווח 'a'-'z')."}, {"text": "אם נסיר את ה-<code>else</code>, התוצאה תהיה זהה", "correct": false, "feedback": "שגוי: בלי else, תווים שאינם אותיות קטנות לא יתווספו ל-result. למשל 'XYZ' היה נעלם."}, {"text": "הפעולה תעבוד נכון על מחרוזת ריקה", "correct": true, "feedback": "נכון: הלולאה לא רצה, result נשאר ריק."}, {"text": "<code>(char)(c - 32)</code> יעבוד גם על אותיות גדולות והופך אותן לקטנות", "correct": false, "feedback": "שגוי: c-32 על אות גדולה (כמו 'A'=65) ייתן 33 — שזה תו '!' לא 'a'. כדי להפוך גדולה לקטנה צריך +32."}], "explanation": "הפעולה ממירה אותיות קטנות לגדולות (a→A) ומשאירה כל היתר ללא שינוי. ההפרש בין אותיות קטנות לגדולות ב-ASCII הוא 32 (a=97, A=65).", "part": "פרק 2", "section": "שאלה 6: ניתוח קוד והבנת אלגוריתמים", "category": "פרק 2/שאלה 6: ניתוח קוד והבנת אלגוריתמים"}, {"id": "c4_new_search_value", "type": "cloze", "topic": "Cloze", "difficulty": "medium", "stem": "השלימו את הפעולה <code>indexOf</code> שמחזירה את <strong>אינדקס</strong> ההופעה הראשונה של ערך במערך, או -1 אם לא נמצא:", "code_template": "public static int indexOf(int[] arr, int target) {\n    for (int i = 0; i < arr.length; i++) {\n        if ([[GAP1]]) {\n            [[GAP2]]\n        }\n    }\n    [[GAP3]]\n}", "gaps": [{"label": "GAP1", "hint": "תנאי התאמה", "options": [{"text": "arr[i] == target", "correct": true, "feedback": "נכון — משווה את האיבר במיקום i ל-target."}, {"text": "arr == target", "correct": false, "feedback": "שגוי — משווה את הפניית המערך ל-int."}, {"text": "i == target", "correct": false, "feedback": "שגוי — משווה אינדקס לערך המבוקש."}, {"text": "arr[i] = target", "correct": false, "feedback": "שגוי — הצבה, לא השוואה (== במקום =)."}]}, {"label": "GAP2", "hint": "פעולה אם נמצא", "options": [{"text": "return i;", "correct": true, "feedback": "נכון — מחזיר את האינדקס של ההופעה הראשונה."}, {"text": "return target;", "correct": false, "feedback": "שגוי — מחזיר את הערך המבוקש, לא את האינדקס."}, {"text": "return arr[i];", "correct": false, "feedback": "שגוי — מחזיר את הערך עצמו, לא את האינדקס."}, {"text": "break;", "correct": false, "feedback": "שגוי — יוצא מהלולאה אבל לא מחזיר את האינדקס."}]}, {"label": "GAP3", "hint": "החזרה אם לא נמצא", "options": [{"text": "return -1;", "correct": true, "feedback": "נכון — מוסכמה: -1 משמש כאינדיקציה ל'לא נמצא'."}, {"text": "return 0;", "correct": false, "feedback": "שגוי — 0 הוא אינדקס תקין, יתבלבל עם הצלחה."}, {"text": "return arr.length;", "correct": false, "feedback": "שגוי — לא יבדיל בין הצלחה לכישלון."}, {"text": "return target;", "correct": false, "feedback": "שגוי — לא יבדיל בין הצלחה לכישלון."}]}], "explanation": "תבנית חיפוש ליניארי סטנדרטית: עוברים על המערך, מחזירים אינדקס בהופעה הראשונה. אם הלולאה הסתיימה בלי מציאה — return -1.", "part": "פרק 2", "section": "שאלה 6: ניתוח קוד והבנת אלגוריתמים", "category": "פרק 2/שאלה 6: ניתוח קוד והבנת אלגוריתמים"}, {"id": "c6_new_reverse_string", "type": "cloze", "topic": "Cloze", "difficulty": "medium", "stem": "השלימו את הפעולה <code>reverse</code> שמחזירה את המחרוזת בסדר הפוך:", "code_template": "public static String reverse(String s) {\n    String result = \"\";\n    for (int i = [[GAP1]]; [[GAP2]]; i--) {\n        [[GAP3]]\n    }\n    return result;\n}", "gaps": [{"label": "GAP1", "hint": "ערך התחלתי של i", "options": [{"text": "s.length() - 1", "correct": true, "feedback": "נכון — מתחיל מהתו האחרון (אינדקס length-1)."}, {"text": "s.length()", "correct": false, "feedback": "שגוי — אינדקס length חורג מהמחרוזת."}, {"text": "0", "correct": false, "feedback": "שגוי — i-- מ-0 ייכנס למספרים שליליים."}, {"text": "1", "correct": false, "feedback": "שגוי — מתחיל מאינדקס 1, ידלג על האחרון."}]}, {"label": "GAP2", "hint": "תנאי המשך לולאה", "options": [{"text": "i >= 0", "correct": true, "feedback": "נכון — ממשיך עד שאינדקס 0 נכלל."}, {"text": "i > 0", "correct": false, "feedback": "שגוי — האות הראשונה (אינדקס 0) לא תיכלל."}, {"text": "i < s.length()", "correct": false, "feedback": "שגוי — תנאי לסריקה קדימה, לא אחורה."}, {"text": "i != 0", "correct": false, "feedback": "שגוי — מקביל ל-i>0 כאן (כי i יורד), לא יכלול את אינדקס 0."}]}, {"label": "GAP3", "hint": "הוספת תו", "options": [{"text": "result = result + s.charAt(i);", "correct": true, "feedback": "נכון — מוסיף תווים בסדר הפוך לתוצאה."}, {"text": "result = s.charAt(i) + result;", "correct": false, "feedback": "שגוי טכנית — יבנה את המחרוזת בסדר הנכון (לא הפוך)! בשילוב עם הלולאה ההפוכה, יקבל את המחרוזת המקורית."}, {"text": "result = s.charAt(i);", "correct": false, "feedback": "שגוי — דורס את result בכל שלב, ישאר רק התו הראשון."}, {"text": "s.charAt(i) += result;", "correct": false, "feedback": "שגוי — תחביר לא תקין, charAt לא ניתן להשמה."}]}], "explanation": "להיפוך מחרוזת: סורקים מהאחרון (length-1) לראשון (0), ומוסיפים כל תו לסוף result. שילוב נכון: לולאה אחורה + הוספה לסוף = היפוך.", "part": "פרק 2", "section": "שאלה 6: ניתוח קוד והבנת אלגוריתמים", "category": "פרק 2/שאלה 6: ניתוח קוד והבנת אלגוריתמים"}, {"id": "b3_new_loop_bug", "type": "multichoice", "topic": "מצא את הבאג", "difficulty": "medium", "stem": "לפניכם פעולה שאמורה להחזיר את הערך הראשון במערך שמופיע יותר מפעם אחת. אם אין כפילויות — מחזירה -1:", "code": "public static int firstDup(int[] arr) {\n    for (int i = 0; i < arr.length; i++) {\n        for (int j = 0; j < arr.length; j++) {\n            if (arr[i] == arr[j])\n                return arr[i];\n        }\n    }\n    return -1;\n}", "question": "מה הבאג בפעולה?", "options": [{"text": "<code>j</code> צריך להתחיל מ-<code>i + 1</code>", "correct": true, "feedback": "נכון! עם j=0, כל איבר מושווה לעצמו (כש-j=i), והתנאי מתקיים מיד. הפעולה תחזיר תמיד את arr[0]. התיקון: <code>for (int j = i + 1; ...)</code>."}, {"text": "צריך להוסיף תנאי <code>i != j</code>", "correct": false, "feedback": "טכנית זה גם פתרון נכון, אבל פחות יעיל — j יעבור גם על מיקומים לפני i (שכבר נבדקו). הפתרון העדיף הוא <code>j = i + 1</code>."}, {"text": "הלולאה החיצונית צריכה להיות <code>i < arr.length - 1</code>", "correct": false, "feedback": "שגוי: זה ימנע מהאיבר האחרון להישוות לקודמים, אבל לא יפתור את הבעיה העיקרית."}, {"text": "<code>return -1</code> צריך להיות בתוך הלולאה", "correct": false, "feedback": "שגוי: return -1 חייב להיות אחרי שכל ההשוואות נבדקו, כלומר אחרי הלולאה."}, {"text": "אין באג", "correct": false, "feedback": "שגוי: הפעולה תחזיר תמיד את arr[0] בגלל ההשוואה לעצמו."}], "explanation": "הבאג: כש-j=0 ו-i=0, arr[0]==arr[0] תמיד נכון, מוחזר arr[0]. הפעולה לא בודקת כפילויות אמיתיות. התיקון: לולאה פנימית מתחילה מ-i+1 (משווה רק לאיברים שלא נבדקו).", "part": "פרק 2", "section": "שאלה 6: ניתוח קוד והבנת אלגוריתמים", "category": "פרק 2/שאלה 6: ניתוח קוד והבנת אלגוריתמים"}, {"id": "b5_new_array_bug", "type": "multichoice", "topic": "מצא את הבאג", "difficulty": "hard", "stem": "לפניכם פעולה שאמורה להזיז את כל איברי המערך מקום אחד שמאלה (האיבר הראשון נמחק, האחרון נשאר):", "code": "public static void shiftLeft(int[] arr) {\n    for (int i = 0; i < arr.length; i++) {\n        arr[i] = arr[i + 1];\n    }\n}", "question": "מה הבאג בפעולה?", "options": [{"text": "תהיה חריגה <code>ArrayIndexOutOfBoundsException</code> כש-<code>i</code> מגיע ל-<code>arr.length - 1</code>", "correct": true, "feedback": "נכון! כש-i=arr.length-1, הגישה ל-arr[i+1] = arr[arr.length] חורגת מהמערך. התיקון: <code>i < arr.length - 1</code>."}, {"text": "צריך להתחיל מ-<code>i = 1</code>", "correct": false, "feedback": "שגוי: התחלה מ-1 לא פותרת את בעיית החריגה בסוף."}, {"text": "האיבר האחרון יידרס", "correct": false, "feedback": "טכנית האיבר האחרון אכן יידרס, אבל זה תוצאה צפויה של 'הזזה שמאלה'. הבעיה האמיתית היא החריגה מהמערך."}, {"text": "צריך להשתמש ב-<code>arr[i + 1] = arr[i]</code>", "correct": false, "feedback": "שגוי: זוהי הזזה ימינה, לא שמאלה. גם זה תיגרום לבעיות (דריסה שגויה)."}, {"text": "אין באג, הפעולה תקינה", "correct": false, "feedback": "שגוי: יש בעיית חריגה ברורה."}], "explanation": "באג off-by-one: כש-i=arr.length-1, arr[i+1] חורג מהמערך. התיקון: <code>i < arr.length - 1</code>. כך הלולאה תפעיל עד למיקום השני מהסוף, וההצבה האחרונה תעדכן את arr[length-2] = arr[length-1].", "part": "פרק 2", "section": "שאלה 6: ניתוח קוד והבנת אלגוריתמים", "category": "פרק 2/שאלה 6: ניתוח קוד והבנת אלגוריתמים"}, {"id": "a1_postcondition_choice", "type": "multichoice", "topic": "הבנת אלגוריתמים", "difficulty": "medium", "stem": "לפניכם פעולה:", "code": "public static int op(int[] arr) {\n    int x = arr[0];\n    int y = 0;\n    for (int i = 0; i < arr.length; i++) {\n        if (arr[i] >= x) {\n            x = arr[i];\n            y = i;\n        }\n    }\n    return y;\n}", "question": "איזו טענת יציאה (postcondition) מתארת בצורה הנכונה ביותר את הערך המוחזר?", "options": [{"text": "הערך המקסימלי במערך", "correct": false, "feedback": "שגוי: זהו x, אבל הפעולה מחזירה את y."}, {"text": "האינדקס של ההופעה הראשונה של המקסימום", "correct": false, "feedback": "שגוי: התנאי >= (לא >) מעדכן y גם בתיקו, אז יישמר האחרון."}, {"text": "האינדקס של ההופעה האחרונה של המקסימום", "correct": true, "feedback": "נכון! >= מעדכן y בכל פעם שמוצאים ערך גדול או שווה למקסימום הנוכחי. אם המקסימום מופיע כמה פעמים, y ייעדכן לכל הופעה — והאחרונה תישמר."}, {"text": "מספר האיברים השווים למקסימום", "correct": false, "feedback": "שגוי: y שומר אינדקס, לא ספירה."}, {"text": "סכום האינדקסים של המקסימום", "correct": false, "feedback": "שגוי: y מקבל הצבה (y = i), לא נסכם."}], "explanation": "השאלה דקה: התנאי >= מעדכן y גם כשמוצאים ערך **שווה** למקסימום הנוכחי. עבור {3, 7, 2, 7, 5}, x ו-y יתעדכנו: i=0 (x=3,y=0), i=1 (x=7,y=1), i=3 (x=7,y=3 — שווה, מעדכן!). מוחזר y=3 — האינדקס האחרון של המקסימום.", "part": "פרק 2", "section": "שאלה 6: ניתוח קוד והבנת אלגוריתמים", "category": "פרק 2/שאלה 6: ניתוח קוד והבנת אלגוריתמים"}, {"id": "a2_compare_implementations", "type": "multichoice", "topic": "הבנת אלגוריתמים", "difficulty": "hard", "stem": "לפניכם שתי פעולות שאמורות לבדוק אם מערך מכיל איבר כפול:", "code": "// פעולה A\npublic static boolean hasDupA(int[] arr) {\n    for (int i = 0; i < arr.length; i++)\n        for (int j = i + 1; j < arr.length; j++)\n            if (arr[i] == arr[j])\n                return true;\n    return false;\n}\n\n// פעולה B\npublic static boolean hasDupB(int[] arr) {\n    for (int i = 1; i < arr.length; i++)\n        if (arr[i] == arr[i - 1])\n            return true;\n    return false;\n}", "question": "מתי שתי הפעולות מחזירות תוצאות שונות?", "options": [{"text": "כאשר המערך ממוין", "correct": false, "feedback": "שגוי: במערך ממוין הכפילויות (אם יש) הן בהכרח שכנות, אז B תמצא אותן."}, {"text": "כאשר יש כפילויות לא-שכנות (למשל arr = {3, 5, 3})", "correct": true, "feedback": "נכון! פעולה A בודקת כל זוג אפשרי ותמצא את הכפילות. פעולה B בודקת רק שכנים — תפספס את {3,5,3} (3 לא שכן ל-3)."}, {"text": "כאשר המערך ריק", "correct": false, "feedback": "שגוי: על מערך ריק שתיהן יחזירו false (אין מה לבדוק)."}, {"text": "כאשר כל האיברים זהים", "correct": false, "feedback": "שגוי: שתיהן יחזירו true. A תמצא ההשוואה הראשונה ב-(0,1), B תמצא ב-(0,1) הראשון."}, {"text": "אף פעם — שתי הפעולות שקולות לחלוטין", "correct": false, "feedback": "שגוי: יש מקרים בהם הן נבדלות (כפילויות לא-שכנות)."}], "explanation": "פעולה A בודקת **כל זוג אפשרי** של איברים — מוצאת כל כפילות. פעולה B בודקת רק **שכנים** — תפספס כפילויות שאינן צמודות (כמו {3,5,3}). פעולה B שקולה ל-A רק אם המערך ממוין (כי אז כל כפילות הופכת לשכנה).", "part": "פרק 2", "section": "שאלה 6: ניתוח קוד והבנת אלגוריתמים", "category": "פרק 2/שאלה 6: ניתוח קוד והבנת אלגוריתמים"}, {"id": "a3_algorithm_property", "type": "multichoice", "topic": "הבנת אלגוריתמים", "difficulty": "medium", "stem": "לפניכם פעולה הפועלת על מערך של מספרים שלמים:", "code": "public static int[] transform(int[] arr) {\n    int[] result = new int[arr.length];\n    result[0] = arr[0];\n    for (int i = 1; i < arr.length; i++) {\n        result[i] = result[i - 1] + arr[i];\n    }\n    return result;\n}", "question": "איזה משפט מתאר בצורה הנכונה ביותר את המערך המוחזר?", "options": [{"text": "<code>result[i]</code> שווה ל-<code>arr[i]</code> כפול <code>i</code>", "correct": false, "feedback": "שגוי: אין כפל בקוד, יש חיבור מצטבר."}, {"text": "<code>result[i]</code> הוא סכום האיברים של <code>arr</code> מאינדקס 0 עד <code>i</code> (כולל)", "correct": true, "feedback": "נכון! כל איבר ב-result הוא הסכום המצטבר של arr מהתחלה עד אותו מיקום. למשל arr={2,3,1,4} → result={2,5,6,10}."}, {"text": "<code>result</code> הוא <code>arr</code> בסדר הפוך", "correct": false, "feedback": "שגוי: אין היפוך בקוד."}, {"text": "<code>result[i]</code> שווה ל-<code>arr[i]</code> פלוס <code>arr[i-1]</code>", "correct": false, "feedback": "שגוי: זה היה התוצאה אם היינו עושים result[i] = arr[i] + arr[i-1]. אבל הקוד עושה result[i] = result[i-1] + arr[i], שכולל את כל הסכום המצטבר."}, {"text": "<code>result[i]</code> שווה ל-<code>arr.length - i</code>", "correct": false, "feedback": "שגוי: אין קשר לאורך המערך."}], "explanation": "זוהי תבנית 'סכום מצטבר' (prefix sum): result[0]=arr[0], result[i] = result[i-1]+arr[i] = arr[0]+arr[1]+...+arr[i]. שימושית לחישוב סכום של תת-מערך ביעילות.", "part": "פרק 2", "section": "שאלה 6: ניתוח קוד והבנת אלגוריתמים", "category": "פרק 2/שאלה 6: ניתוח קוד והבנת אלגוריתמים"}, {"id": "a4_when_returns", "type": "multichoice", "topic": "הבנת אלגוריתמים", "difficulty": "hard", "stem": "לפניכם פעולה:", "code": "public static int mystery(String s) {\n    int x = 0;\n    for (int i = 0; i < s.length(); i++) {\n        if (s.charAt(i) == '(')\n            x++;\n        else if (s.charAt(i) == ')')\n            x--;\n        if (x < 0)\n            return -1;\n    }\n    return x;\n}", "question": "באיזה מקרה הפעולה מחזירה 0?", "options": [{"text": "כאשר המחרוזת ריקה בלבד", "correct": false, "feedback": "שגוי: מחרוזת ריקה אכן תחזיר 0, אבל יש עוד מקרים."}, {"text": "כאשר מספר הסוגריים הפותחים שווה למספר הסוגריים הסוגרים, וכל סוגר סוגר מופיע אחרי הפותח שלו", "correct": true, "feedback": "נכון! הפעולה בודקת תקינות סוגריים. x סופר את האיזון — בכל פעם שיש יותר סוגרים סוגרים מפותחים, מחזירה -1. אם הסכום הסופי 0 = איזון מושלם."}, {"text": "כאשר אין סוגריים במחרוזת", "correct": false, "feedback": "טכנית נכון (תחזיר 0 כי x לא ישתנה), אבל זוהי רק אחת מהאפשרויות."}, {"text": "כאשר יש בדיוק סוגר אחד מכל סוג", "correct": false, "feedback": "שגוי: \"()\" יחזיר 0, אבל \")(\" יחזיר -1. הסדר חשוב."}, {"text": "כאשר המחרוזת מסתיימת בסוגר סוגר", "correct": false, "feedback": "שגוי: זה תנאי לא מספיק. למשל \"(()\" מסתיים בסוגר סוגר אבל יחזיר 1."}], "explanation": "הפעולה בודקת תקינות סוגריים (matched parentheses). x סופר את 'עומק הקינון'. כל סוגר פותח מעלה ב-1, כל סוגר סוגר מוריד. אם x<0 בכל שלב — סוגר ללא פותח, פסול (-1). אם הסכום בסוף 0 — איזון מושלם. למשל '(())' תחזיר 0 ✓, '()(' תחזיר 1 (חסר סוגר), ')(' תחזיר -1.", "part": "פרק 2", "section": "שאלה 6: ניתוח קוד והבנת אלגוריתמים", "category": "פרק 2/שאלה 6: ניתוח קוד והבנת אלגוריתמים"}, {"id": "n2_new_numerical_array", "type": "numerical", "topic": "Numerical", "difficulty": "hard", "stem": "לפניכם פעולה:", "code": "public static int compute(int[] arr) {\n    int result = 0;\n    for (int i = 0; i < arr.length; i++) {\n        if (i % 2 == 0)\n            result += arr[i] * 2;\n        else\n            result -= arr[i];\n    }\n    return result;\n}", "question": "מה תחזיר הקריאה <code>compute(arr)</code> עבור <code>arr = {5, 3, 8, 4, 7, 2, 10}</code>?", "correct_answer": 51, "tolerance": 0, "explanation": "מעקב לפי אינדקס: i=0 (זוגי): result += 5*2 = 10. i=1: result -= 3 → 7. i=2: result += 8*2 = 23. i=3: result -= 4 → 19. i=4: result += 7*2 → 33. i=5: result -= 2 → 31. i=6: result += 10*2 → 51. תשובה: 51.", "part": "פרק 2", "section": "שאלה 6: ניתוח קוד והבנת אלגוריתמים", "category": "פרק 2/שאלה 6: ניתוח קוד והבנת אלגוריתמים"}, {"id": "code_quality_efficiency", "type": "multianswer", "topic": "איכות קוד", "difficulty": "hard", "category": "פרק 2/שאלה 6: ניתוח קוד והבנת אלגוריתמים", "part": "פרק 2", "section": "שאלה 6: ניתוח קוד והבנת אלגוריתמים", "stem": "שני התלמידים פתרו את אותה משימה: <strong>החזרת מספר הפעמים שהערך המקסימלי מופיע במערך</strong>. שני הפתרונות נכונים ומחזירים את אותה תוצאה. בדקו את ההבדלים ביניהם:", "code": "// פתרון א'\npublic static int countMax(int[] arr)\n{\n    int max = arr[0];\n    for (int i = 0; i < arr.length; i++)\n    {\n        if (arr[i] > max)\n            max = arr[i];\n    }\n    int count = 0;\n    for (int i = 0; i < arr.length; i++)\n    {\n        if (arr[i] == max)\n            count = count + 1;\n    }\n    return count;\n}\n\n// פתרון ב'\npublic static int countMax(int[] arr)\n{\n    int max = arr[0];\n    int count = 1;\n    for (int i = 1; i < arr.length; i++)\n    {\n        if (arr[i] > max)\n        {\n            max = arr[i];\n            count = 1;\n        }\n        else if (arr[i] == max)\n            count++;\n    }\n    return count;\n}", "question": "סמנו את <strong>כל</strong> הטענות הנכונות:", "options": [{"text": "פתרון א' עובר על המערך פעמיים, ופתרון ב' עובר עליו פעם אחת בלבד", "correct": true, "feedback": "נכון. פתרון א' משתמש בשתי לולאות נפרדות (אחת למציאת המקסימום, אחת לספירה). פתרון ב' עושה את שתי המשימות במעבר אחד."}, {"text": "פתרון ב' יעיל יותר כי הוא מבצע פחות מעברים על המערך", "correct": true, "feedback": "נכון. למערך בגודל n: פתרון א' מבצע כ-2n בדיקות, פתרון ב' מבצע כ-n. עבור מערכים גדולים זה הבדל ממשי."}, {"text": "<code>count = count + 1</code> בפתרון א' אפשר לכתוב בצורה תמציתית יותר כ-<code>count++</code>", "correct": true, "feedback": "נכון. <code>count++</code> תמציתי וקריא יותר, ומבטא בדיוק את אותה פעולה."}, {"text": "שני הפתרונות מחזירים תוצאות שונות עבור מערך שכל איבריו שווים", "correct": false, "feedback": "שגוי. עבור {5,5,5} שניהם מחזירים 3. הפתרונות שקולים פונקציונלית לכל קלט."}, {"text": "פתרון ב' שגוי כי הוא מתחיל את הלולאה מאינדקס 1 ולא מ-0", "correct": false, "feedback": "שגוי. דווקא נכון להתחיל מ-1: max כבר אותחל ל-arr[0] ו-count ל-1, כך שאיבר 0 כבר נספר. התחלה מ-1 מונעת ספירה כפולה של האיבר הראשון."}], "explanation": "שני הפתרונות נכונים, אבל פתרון ב' יעיל ותמציתי יותר: מעבר אחד במקום שניים, ו-<code>count++</code> במקום <code>count = count + 1</code>. זיהוי לולאות/מעברים מיותרים הוא מיומנות חשובה — קוד שעושה את אותה עבודה במעבר אחד עדיף. שימו לב: 'יעיל יותר' לא אומר 'נכון יותר' — שני הפתרונות מחזירים את אותה תוצאה."}, {"id": "code_quality_style", "type": "multianswer", "topic": "איכות קוד", "difficulty": "medium", "category": "פרק 2/שאלה 6: ניתוח קוד והבנת אלגוריתמים", "part": "פרק 2", "section": "שאלה 6: ניתוח קוד והבנת אלגוריתמים", "stem": "לפניכם פעולה שמחזירה <code>true</code> אם קיים במערך איבר שערכו כפול מקודמו. הפעולה <strong>נכונה</strong>, אך כתובה בצורה מסורבלת. בדקו את ההערות לגבי שיפור הקוד:", "code": "public static boolean hasDouble(int[] arr)\n{\n    boolean found = false;\n    for (int i = 1; i < arr.length; i++)\n    {\n        if ((arr[i] == arr[i-1] * 2) == true)\n        {\n            found = true;\n        }\n    }\n    if (found == true)\n        return true;\n    else\n        return false;\n}", "question": "סמנו את <strong>כל</strong> הטענות הנכונות לגבי שיפור הקוד:", "options": [{"text": "הבדיקה <code>(arr[i] == arr[i-1] * 2) == true</code> מיותרת — אפשר פשוט <code>arr[i] == arr[i-1] * 2</code>", "correct": true, "feedback": "נכון. ביטוי בוליאני כבר מחזיר true/false — השוואה ל-<code>== true</code> מיותרת לחלוטין."}, {"text": "הקטע <code>if (found == true) return true; else return false;</code> אפשר להחליף ב-<code>return found;</code>", "correct": true, "feedback": "נכון. <code>found</code> כבר בוליאני, אז אפשר להחזיר אותו ישירות. זה מקצר 4 שורות לשורה אחת."}, {"text": "אפשר לייעל: ברגע שמוצאים התאמה אפשר לעשות <code>return true</code> מיד, בלי להמשיך את הלולאה", "correct": true, "feedback": "נכון. אין צורך להמשיך לסרוק אחרי שמצאנו — <code>return true</code> מיד חוסך מעבר מיותר על שאר המערך."}, {"text": "הקוד שגוי כי הלולאה מתחילה מ-1 במקום מ-0", "correct": false, "feedback": "שגוי. נכון להתחיל מ-1: הפעולה משווה כל איבר לקודמו (arr[i-1]), ולאיבר 0 אין קודם. התחלה מ-0 הייתה גורמת לחריגה מהמערך (arr[-1])."}, {"text": "צריך להוסיף בדיקת <code>arr.length > 0</code> כי אחרת הקוד יקרוס על מערך ריק", "correct": false, "feedback": "שגוי. על מערך ריק הלולאה (i=1; i<0) פשוט לא תרוץ, ו-found יישאר false. אין קריסה."}], "explanation": "הקוד נכון אך מסורבל בשלושה אופנים: (1) <code>== true</code> מיותר על ביטוי שכבר בוליאני; (2) <code>if (found) return true; else return false;</code> זהה ל-<code>return found;</code>; (3) אפשר <code>return true</code> מיד במציאה במקום להמשיך לסרוק. הגרסה הנקייה: <code>for(...) if (arr[i]==arr[i-1]*2) return true; return false;</code> — חצי מהשורות, קריא יותר, ויעיל יותר."}];
+const STORAGE_KEY = 'metukonet_899371_code_analysis_state';
+const HISTORY_KEY = 'metukonet_899371_code_analysis_history';
+const TIME_LIMIT_MS = 60 * 60 * 1000;
+
+let state = null;
+let timerInterval = null;
+let resultData = null;
+
+function loadState() {
+    try { const raw = localStorage.getItem(STORAGE_KEY); return raw ? JSON.parse(raw) : null; }
+    catch (e) { return null; }
+}
+function saveState() {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+    catch (e) { console.warn('Failed to save:', e); }
+}
+function loadHistory() {
+    try { const raw = localStorage.getItem(HISTORY_KEY); return raw ? JSON.parse(raw) : []; }
+    catch (e) { return []; }
+}
+function appendHistory(entry) {
+    const history = loadHistory();
+    history.push(entry);
+    try { localStorage.setItem(HISTORY_KEY, JSON.stringify(history)); }
+    catch (e) { console.warn('Failed:', e); }
+}
+
+window.addEventListener('load', () => {
+    const existing = loadState();
+    if (existing && !existing.ended) {
+        const elapsed = Date.now() - new Date(existing.startTime).getTime();
+        if (elapsed >= TIME_LIMIT_MS) {
+            state = existing;
+            state.endTime = new Date(new Date(existing.startTime).getTime() + TIME_LIMIT_MS).toISOString();
+            state.ended = true;
+            state.autoSubmitted = true;
+            saveState();
+            showResults();
+        } else {
+            state = existing;
+            state.refreshes = (state.refreshes || 0) + 1;
+            saveState();
+            showResumeOption(elapsed);
+        }
+    } else if (existing && existing.ended) {
+        showNewAttemptWarning();
+    }
+});
+
+function showResumeOption(elapsed) {
+    const remainingMin = Math.floor((TIME_LIMIT_MS - elapsed) / 60000);
+    const elapsedMin = Math.floor(elapsed / 60000);
+    document.getElementById('resume-area').style.display = 'block';
+    document.getElementById('resume-info').innerHTML = `התחלת את המבחן לפני ${elapsedMin} דקות. נותרו <strong>${remainingMin} דקות</strong>. שם: <strong>${escapeHtml(state.name || 'לא צוין')}</strong>.`;
+    document.getElementById('btn-start').style.display = 'none';
+}
+
+function showNewAttemptWarning() {
+    const history = loadHistory();
+    if (history.length > 0) {
+        document.getElementById('new-attempt-warning').style.display = 'block';
+        document.getElementById('prev-attempts').textContent = history.length;
+    }
+}
+
+function startExam() {
+    const name = document.getElementById('student-name').value.trim();
+    if (!name) { alert('נא להזין שם מלא לפני התחלת המבחן'); return; }
+    const selected = selectQuestions();
+    state = {
+        name: name,
+        startTime: new Date().toISOString(),
+        endTime: null,
+        selectedIds: selected.map(q => q.id),
+        answers: {},
+        current: 0,
+        refreshes: 0,
+        ended: false,
+        autoSubmitted: false,
+        attemptNumber: loadHistory().length + 1
+    };
+    saveState();
+    document.getElementById('screen-start').style.display = 'none';
+    document.getElementById('screen-exam').style.display = 'block';
+    document.getElementById('total-num').textContent = selected.length;
+    renderQuestion();
+    startTimer();
+}
+
+function resumeExam() {
+    document.getElementById('screen-start').style.display = 'none';
+    document.getElementById('screen-exam').style.display = 'block';
+    document.getElementById('total-num').textContent = state.selectedIds.length;
+    renderQuestion();
+    startTimer();
+}
+
+function discardAndStart() {
+    if (!confirm('האם לבטל את המבחן הפתוח ולהתחיל מחדש? המעבר הזה יתועד בקובץ הסיכום.')) return;
+    if (state) {
+        appendHistory({ name: state.name, startTime: state.startTime, discardedAt: new Date().toISOString(), discarded: true });
+    }
+    localStorage.removeItem(STORAGE_KEY);
+    location.reload();
+}
+
+function startNewAttempt() {
+    if (!confirm('התחלת ניסיון חדש לתרגול. הציון הקודם נשמר בהיסטוריה. להמשיך?')) return;
+    if (state) {
+        appendHistory({ name: state.name, startTime: state.startTime, endTime: state.endTime, attemptNumber: state.attemptNumber, refreshes: state.refreshes, autoSubmitted: state.autoSubmitted, elapsed: new Date(state.endTime) - new Date(state.startTime) });
+    }
+    localStorage.removeItem(STORAGE_KEY);
+    location.reload();
+}
+
+function getSelectedQuestions() { return state.selectedIds.map(id => QUESTIONS.find(q => q.id === id)).filter(Boolean); }
+
+function selectQuestions() {
+    // כל 73 השאלות, ממוינות לפי פרק→שאלה. בתוך כל קטגוריה — סדר אקראי.
+    const order = [
+        'פרק 1/שאלה 1: מעקב על קוד',
+        'פרק 1/שאלה 2: מספרים וספרות',
+        'פרק 1/שאלה 3: מערכים ומחרוזות',
+        'פרק 2/שאלה 4: עצמים — מחלקה בודדת',
+        'פרק 2/שאלה 5: עצמים — מערך אובייקטים',
+        'פרק 2/שאלה 6: ניתוח קוד והבנת אלגוריתמים'
+    ];
+    const byCat = {};
+    QUESTIONS.forEach(q => { const cat = q.category || q.topic; if (!byCat[cat]) byCat[cat] = []; byCat[cat].push(q); });
+    const result = [];
+    order.forEach(cat => {
+        const pool = byCat[cat] || [];
+        const shuffled = [...pool].sort(() => Math.random() - 0.5);
+        result.push(...shuffled);
+    });
+    return result;
+}
+
+function startTimer() {
+    if (timerInterval) clearInterval(timerInterval);
+    timerInterval = setInterval(updateTimer, 1000);
+    updateTimer();
+}
+
+function updateTimer() {
+    const elapsed = Date.now() - new Date(state.startTime).getTime();
+    const remaining = TIME_LIMIT_MS - elapsed;
+    if (remaining <= 0) {
+        clearInterval(timerInterval);
+        state.endTime = new Date().toISOString();
+        state.ended = true;
+        state.autoSubmitted = true;
+        saveState();
+        alert('הזמן הסתיים. המבחן יוגש אוטומטית.');
+        showResults();
+        return;
+    }
+    const minutes = Math.floor(remaining / 60000);
+    const seconds = Math.floor((remaining % 60000) / 1000);
+    const timer = document.getElementById('timer');
+    timer.textContent = `${String(minutes).padStart(2,'0')}:${String(seconds).padStart(2,'0')}`;
+    if (remaining < 10*60*1000) timer.className = 'timer danger';
+    else if (remaining < 20*60*1000) timer.className = 'timer warning';
+    else timer.className = 'timer';
+}
+
+function renderQuestion() {
+    const selected = getSelectedQuestions();
+    const q = selected[state.current];
+    if (!q) return;
+    document.getElementById('current-num').textContent = state.current + 1;
+    document.getElementById('section-name').textContent = ' | ' + (q.section || q.category || '');
+    const container = document.getElementById('question-container');
+    let html = '';
+    if (q.stem) html += `<div class="stem">${q.stem}</div>`;
+    if (q.code) html += `<pre dir="ltr">${escapeHtml(q.code)}</pre>`;
+    if (q.question) html += `<div class="q" style="margin:16px 0;"><strong>השאלה:</strong> ${q.question}</div>`;
+    const type = q.type || 'multichoice';
+    const qid = `q${state.current}`;
+    if (type === 'multichoice') {
+        html += '<ul class="options">';
+        q.options.forEach((opt, i) => {
+            const checked = (state.answers[qid] === i) ? 'checked' : '';
+            const selectedCls = (state.answers[qid] === i) ? 'selected' : '';
+            html += `<li class="option ${selectedCls}" onclick="selectMC(${i})"><input type="radio" name="${qid}" value="${i}" ${checked} onclick="event.stopPropagation()"><div class="option-text">${opt.text}</div></li>`;
+        });
+        html += '</ul>';
+    } else if (type === 'multianswer') {
+        html += '<p style="color:var(--gray); font-size:0.9em;">סמנו את <strong>כל</strong> התשובות הנכונות.</p>';
+        html += '<ul class="options">';
+        const currentAns = state.answers[qid] || [];
+        q.options.forEach((opt, i) => {
+            const checked = currentAns.includes(i) ? 'checked' : '';
+            const selectedCls = currentAns.includes(i) ? 'selected' : '';
+            html += `<li class="option ${selectedCls}" onclick="selectMA(${i})"><input type="checkbox" name="${qid}" value="${i}" ${checked} onclick="event.stopPropagation()"><div class="option-text">${opt.text}</div></li>`;
+        });
+        html += '</ul>';
+    } else if (type === 'cloze') {
+        let code = q.code_template;
+        const currentAns = state.answers[qid] || {};
+        q.gaps.forEach((gap, gi) => {
+            let sel = `<select onchange="selectCloze(${gi}, this.value)"><option value="">-- בחר --</option>`;
+            gap.options.forEach((opt, oi) => {
+                const s = (currentAns[gi] === oi) ? 'selected' : '';
+                sel += `<option value="${oi}" ${s}>${escapeHtml(opt.text)}</option>`;
+            });
+            sel += '</select>';
+            code = code.replace(`[[${gap.label}]]`, sel);
+        });
+        let escapedCode = escapeHtml(code).replace(/&lt;select/g, '<select').replace(/&lt;\/select&gt;/g, '</select>').replace(/&lt;option/g, '<option').replace(/&lt;\/option&gt;/g, '</option>');
+        html += `<pre dir="ltr">${escapedCode}</pre>`;
+        q.gaps.forEach((gap, gi) => { html += `<p style="color:var(--gray); font-size:0.9em;"><strong>[[ ${gi+1} ]]</strong> ${gap.hint}</p>`; });
+    } else if (type === 'numerical') {
+        const val = state.answers[qid] !== undefined ? state.answers[qid] : '';
+        html += `<div style="margin:20px 0;"><label><strong>תשובה (מספר שלם):</strong></label><br><input type="number" id="${qid}-input" value="${val}" onchange="selectNum(this.value)" style="font-size:24px; width:200px; padding:10px;"></div>`;
+    }
+    container.innerHTML = html;
+    document.getElementById('btn-prev').disabled = (state.current === 0);
+    document.getElementById('btn-next').disabled = (state.current === state.selectedIds.length - 1);
+    renderNavMini();
+}
+
+function selectMC(i) { state.answers[`q${state.current}`] = i; saveState(); renderQuestion(); }
+function selectMA(i) {
+    const qid = `q${state.current}`;
+    if (!state.answers[qid]) state.answers[qid] = [];
+    const idx = state.answers[qid].indexOf(i);
+    if (idx >= 0) state.answers[qid].splice(idx, 1); else state.answers[qid].push(i);
+    saveState(); renderQuestion();
+}
+function selectCloze(gi, oi) {
+    const qid = `q${state.current}`;
+    if (!state.answers[qid]) state.answers[qid] = {};
+    state.answers[qid][gi] = oi === '' ? undefined : parseInt(oi);
+    saveState(); renderNavMini();
+}
+function selectNum(v) { state.answers[`q${state.current}`] = v === '' ? undefined : parseInt(v); saveState(); renderNavMini(); }
+
+function escapeHtml(t) { if (t === undefined || t === null) return ''; return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function nextQuestion() { if (state.current < state.selectedIds.length - 1) { state.current++; saveState(); renderQuestion(); window.scrollTo(0,0); } }
+function prevQuestion() { if (state.current > 0) { state.current--; saveState(); renderQuestion(); window.scrollTo(0,0); } }
+function goTo(idx) { state.current = idx; saveState(); renderQuestion(); window.scrollTo(0,0); }
+
+function renderNavMini() {
+    const selected = getSelectedQuestions();
+    const container = document.getElementById('nav-mini');
+    let html = '<strong style="margin-left:8px;">ניווט:</strong>';
+    selected.forEach((q, i) => {
+        const qid = `q${i}`;
+        const isAnswered = isQuestionAnswered(qid, q);
+        let cls = 'nav-btn';
+        if (i === state.current) cls += ' current';
+        else if (isAnswered) cls += ' answered';
+        html += `<button class="${cls}" onclick="goTo(${i})">${i+1}</button>`;
+    });
+    container.innerHTML = html;
+}
+
+function isQuestionAnswered(qid, q) {
+    const ans = state.answers[qid];
+    if (ans === undefined || ans === null) return false;
+    const type = q.type || 'multichoice';
+    if (type === 'multianswer') return ans.length > 0;
+    if (type === 'cloze') return Object.keys(ans).length === q.gaps.length;
+    return true;
+}
+
+function confirmSubmit() {
+    const selected = getSelectedQuestions();
+    const unanswered = selected.filter((q, i) => !isQuestionAnswered(`q${i}`, q)).length;
+    let msg = 'האם להגיש את המבחן?';
+    if (unanswered > 0) msg = `יש ${unanswered} שאלות שלא ענית עליהן. ${msg}`;
+    if (confirm(msg)) {
+        if (timerInterval) clearInterval(timerInterval);
+        state.endTime = new Date().toISOString();
+        state.ended = true;
+        saveState();
+        showResults();
+    }
+}
+
+function scoreExam() {
+    const selected = getSelectedQuestions();
+    let totalScore = 0, totalMax = 0;
+    const details = [];
+    selected.forEach((q, i) => {
+        const qid = `q${i}`;
+        const ans = state.answers[qid];
+        const type = q.type || 'multichoice';
+        let score = 0, max = 1, userAnsText = '', correctText = '', isCorrect = false;
+        if (type === 'multichoice') {
+            const correctIdx = q.options.findIndex(o => o.correct);
+            isCorrect = (ans === correctIdx);
+            score = isCorrect ? 1 : 0;
+            userAnsText = (ans !== undefined && ans !== null) ? q.options[ans].text : '(לא נענה)';
+            correctText = q.options[correctIdx].text;
+        } else if (type === 'multianswer') {
+            const correctIdxs = q.options.map((o, i) => o.correct ? i : -1).filter(i => i >= 0);
+            const userIdxs = ans || [];
+            const nCorrect = correctIdxs.length;
+            const nWrong = q.options.length - nCorrect;
+            const cf = 1 / nCorrect;
+            const wf = -1 / Math.max(nWrong, 1);
+            let s = 0;
+            userIdxs.forEach(i => { if (q.options[i].correct) s += cf; else s += wf; });
+            score = Math.max(0, Math.min(1, s));
+            isCorrect = (score === 1);
+            userAnsText = userIdxs.map(i => q.options[i].text.replace(/<[^>]+>/g, '')).join('; ') || '(לא נענה)';
+            correctText = correctIdxs.map(i => q.options[i].text.replace(/<[^>]+>/g, '')).join('; ');
+        } else if (type === 'cloze') {
+            const userAns = ans || {};
+            let cc = 0;
+            q.gaps.forEach((gap, gi) => {
+                const ci = gap.options.findIndex(o => o.correct);
+                if (userAns[gi] === ci) cc++;
+            });
+            score = cc / q.gaps.length;
+            isCorrect = (score === 1);
+            userAnsText = q.gaps.map((gap, gi) => { const u = userAns[gi]; return `[${gi+1}] ` + (u !== undefined ? gap.options[u].text : '(לא נענה)'); }).join(' | ');
+            correctText = q.gaps.map((gap, gi) => { const c = gap.options.findIndex(o => o.correct); return `[${gi+1}] ${gap.options[c].text}`; }).join(' | ');
+        } else if (type === 'numerical') {
+            isCorrect = (ans !== undefined && ans !== null && Math.abs(ans - q.correct_answer) <= (q.tolerance || 0));
+            score = isCorrect ? 1 : 0;
+            userAnsText = (ans !== undefined) ? String(ans) : '(לא נענה)';
+            correctText = String(q.correct_answer);
+        }
+        totalScore += score; totalMax += max;
+        details.push({ q, score, max, userAnsText, correctText, isCorrect });
+    });
+    return { totalScore, totalMax, details };
+}
+
+function showResults() {
+    document.getElementById('screen-start').style.display = 'none';
+    document.getElementById('screen-exam').style.display = 'none';
+    document.getElementById('screen-result').style.display = 'block';
+    resultData = scoreExam();
+    renderResults(resultData);
+    window.scrollTo(0,0);
+}
+
+function renderResults({ totalScore, totalMax, details }) {
+    const percent = Math.round(100 * totalScore / totalMax);
+    const startMs = new Date(state.startTime).getTime();
+    const endMs = new Date(state.endTime).getTime();
+    const elapsedMin = Math.round((endMs - startMs) / 60000);
+    const exceeded = (endMs - startMs) > TIME_LIMIT_MS + 60000;
+    const refreshes = state.refreshes || 0;
+    const attemptNumber = state.attemptNumber || 1;
+    let warning = '';
+    if (state.autoSubmitted) warning += `<div class="exceeded-warning">⏱ הזמן הסתיים — המבחן הוגש אוטומטית</div>`;
+    if (exceeded) warning += `<div class="exceeded-warning">⚠️ זמן המבחן בפועל: ${elapsedMin} דקות — חריגה מהזמן המוקצב (110)</div>`;
+    if (refreshes > 0) warning += `<div class="warning-box">📝 המבחן רוענן ${refreshes} פעמים במהלך הפתירה (תועד בקובץ הסיכום)</div>`;
+    if (attemptNumber > 1) warning += `<div class="warning-box">🔄 זהו ניסיון מספר ${attemptNumber} של המבחן (ניסיונות קודמים תועדו)</div>`;
+    document.getElementById('time-warning').innerHTML = warning;
+    let summary = `<div class="score-big">${totalScore.toFixed(1)} / ${totalMax}</div><div class="score-percent">ציון: ${percent}%</div><div style="text-align:center; margin:20px 0; color:var(--gray);"><strong>${escapeHtml(state.name)}</strong> | משך אמיתי: ${elapsedMin} דקות | תאריך: ${new Date().toLocaleDateString('he-IL')}</div><h3 class="section-title">פילוח לפי קטגוריה</h3>`;
+    const byCat = {};
+    details.forEach(d => { const cat = d.q.category || d.q.topic; if (!byCat[cat]) byCat[cat] = { score:0, max:0 }; byCat[cat].score += d.score; byCat[cat].max += d.max; });
+    summary += '<table style="width:100%; border-collapse:collapse;"><tr style="background:#e8f4f8;"><th style="padding:8px; text-align:right; border:1px solid var(--border);">קטגוריה</th><th style="padding:8px; border:1px solid var(--border);">ניקוד</th><th style="padding:8px; border:1px solid var(--border);">%</th></tr>';
+    Object.entries(byCat).forEach(([cat, { score, max }]) => { const p = Math.round(100 * score / max); summary += `<tr><td style="padding:8px; border:1px solid var(--border);">${cat}</td><td style="padding:8px; text-align:center; border:1px solid var(--border);">${score.toFixed(1)} / ${max}</td><td style="padding:8px; text-align:center; border:1px solid var(--border);">${p}%</td></tr>`; });
+    summary += '</table>';
+    document.getElementById('result-summary').innerHTML = summary;
+    let detailsHtml = '<h3 class="section-title">פירוט תשובות</h3>';
+    details.forEach((d, i) => {
+        const cls = d.isCorrect ? 'correct' : (d.score > 0 ? '' : 'wrong');
+        const icon = d.isCorrect ? '✓' : (d.score > 0 ? '◐' : '✗');
+        detailsHtml += `<div class="result-question ${cls}"><strong>${icon} שאלה ${i+1}</strong> <span class="tag">${d.q.section || d.q.category || ''}</span><span style="float:left; color:var(--gray);">${d.score.toFixed(2)} / ${d.max}</span><div style="margin-top:8px;">${d.q.stem || ''}</div>${d.q.code ? `<pre dir="ltr">${escapeHtml(d.q.code)}</pre>` : ''}${d.q.question ? `<div><strong>השאלה:</strong> ${d.q.question}</div>` : ''}<div style="margin-top:10px;"><strong>תשובתך:</strong> ${d.userAnsText}</div><div><strong>תשובה נכונה:</strong> ${d.correctText}</div>${d.q.explanation ? `<div class="result-explanation"><strong>הסבר:</strong> ${d.q.explanation}</div>` : ''}</div>`;
+    });
+    document.getElementById('result-details').innerHTML = detailsHtml;
+}
+
+function toggleDetails() { const el = document.getElementById('result-details'); el.style.display = (el.style.display === 'none') ? 'block' : 'none'; }
+
+function downloadSummary() {
+    if (!resultData) return;
+    const { totalScore, totalMax, details } = resultData;
+    const startMs = new Date(state.startTime).getTime();
+    const endMs = new Date(state.endTime).getTime();
+    const elapsedMs = endMs - startMs;
+    const elapsedMin = Math.round(elapsedMs / 60000);
+    const elapsedSec = Math.round(elapsedMs / 1000);
+    const exceeded = elapsedMs > TIME_LIMIT_MS + 60000;
+    const percent = (100 * totalScore / totalMax).toFixed(1);
+    const refreshes = state.refreshes || 0;
+    const attemptNumber = state.attemptNumber || 1;
+    const history = loadHistory();
+    let txt = `╔══════════════════════════════════════════════════════════════╗
+║  מבחן 4 — ניתוח קוד והבנת אלגוריתמים — 899371             ║
+║       קובץ סיכום אוטומטי                                       ║
+╚══════════════════════════════════════════════════════════════╝
+
+══════════════════════════════════════════════════════════════════
+פרטי תלמיד וזמנים:
+══════════════════════════════════════════════════════════════════
+שם תלמיד/ה:        ${state.name}
+תאריך מבחן:        ${new Date(state.startTime).toLocaleDateString('he-IL')}
+
+⏱  זמן התחלה אמיתי:  ${new Date(state.startTime).toLocaleString('he-IL')}
+⏱  זמן סיום אמיתי:   ${new Date(state.endTime).toLocaleString('he-IL')}
+⏱  משך מבחן בפועל:   ${elapsedMin} דקות (${elapsedSec} שניות)
+⏱  זמן מוקצב:        60 דקות
+${exceeded ? '⚠️  ⚠️  ⚠️  חריגה מזמן: כן  ⚠️  ⚠️  ⚠️ ' : '✓  בתוך הזמן המוקצב'}
+
+הגשה אוטומטית (נגמר הזמן):  ${state.autoSubmitted ? 'כן' : 'לא'}
+מספר רענונים בזמן המבחן:    ${refreshes}
+מספר ניסיון:                ${attemptNumber}${attemptNumber > 1 ? ' (ניסיון חוזר!)' : ''}
+${history.length > 0 ? `\n⚠️  ${history.length} ניסיון/ות קודם/ים תועדו בזיכרון הדפדפן\n` : ''}
+══════════════════════════════════════════════════════════════════
+ציון:
+══════════════════════════════════════════════════════════════════
+ציון סופי:        ${totalScore.toFixed(1)} / ${totalMax}
+אחוז:             ${percent}%
+
+פילוח לפי קטגוריה:
+`;
+    const byCat = {};
+    details.forEach(d => { const cat = d.q.category || d.q.topic; if (!byCat[cat]) byCat[cat] = { score:0, max:0 }; byCat[cat].score += d.score; byCat[cat].max += d.max; });
+    Object.entries(byCat).forEach(([cat, { score, max }]) => { const p = Math.round(100 * score / max); txt += `  • ${cat}\n    ניקוד: ${score.toFixed(1)} / ${max}  (${p}%)\n`; });
+    txt += `\n══════════════════════════════════════════════════════════════════\nתשובות מפורטות:\n══════════════════════════════════════════════════════════════════`;
+    details.forEach((d, i) => {
+        const icon = d.isCorrect ? '✓' : (d.score > 0 ? '◐' : '✗');
+        txt += `\n\n${icon} שאלה ${i+1} | ${d.q.section || ''} | ${d.score.toFixed(2)}/${d.max}\n   מזהה שאלה: ${d.q.id}\n   תשובת התלמיד:  ${d.userAnsText.replace(/<[^>]+>/g, '')}\n   תשובה נכונה:   ${d.correctText.replace(/<[^>]+>/g, '')}`;
+    });
+    // נתוני אימות מקודדים — מאפשרים אימות חיצוני של תוכן הקובץ
+    const verifyPayload = {
+        name: state.name,
+        startTime: state.startTime,
+        endTime: state.endTime,
+        score: totalScore.toFixed(2),
+        max: totalMax,
+        refreshes: refreshes,
+        attemptNumber: attemptNumber,
+        autoSubmitted: state.autoSubmitted || false
+    };
+    const verifyB64 = btoa(unescape(encodeURIComponent(JSON.stringify(verifyPayload))));
+    const checksum = simpleHash(verifyB64);
+    txt += `\n\n══════════════════════════════════════════════════════════════════\nחתימה דיגיטלית (לאימות אוטומטי):\n[VERIFY]${verifyB64}|${checksum}[/VERIFY]\n\nלאימות: הריצו את verify_metukonet.py על הקובץ הזה.\n══════════════════════════════════════════════════════════════════\n`;
+    const blob = new Blob([txt], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    const safeName = state.name.replace(/[^\u0590-\u05FFa-zA-Z0-9]/g, '_');
+    a.download = `מתכונת_899371_${safeName}_${new Date().toISOString().slice(0,10)}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+}
+
+function simpleHash(str) {
+    let h1 = 0xdeadbeef, h2 = 0x41c6ce57;
+    for (let i = 0; i < str.length; i++) {
+        const c = str.charCodeAt(i);
+        h1 = Math.imul(h1 ^ c, 2654435761);
+        h2 = Math.imul(h2 ^ c, 1597334677);
+    }
+    h1 = Math.imul(h1 ^ (h1>>>16), 2246822507);
+    h1 ^= Math.imul(h2 ^ (h2>>>13), 3266489909);
+    h2 = Math.imul(h2 ^ (h2>>>16), 2246822507);
+    h2 ^= Math.imul(h1 ^ (h1>>>13), 3266489909);
+    return (4294967296 * (2097151 & h2) + (h1>>>0)).toString(16).padStart(13,'0').toUpperCase();
+}
+
+window.addEventListener('beforeunload', (e) => {
+    if (state && !state.ended) {
+        e.preventDefault();
+        e.returnValue = 'התשובות נשמרות אבל הרענון נספר. להמשיך?';
+    }
+});
+</script>
+</body>
+</html>
