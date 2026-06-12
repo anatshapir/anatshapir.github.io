@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="he">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>מבחן 3 — עצמים ומחלקות — מדעי המחשב 899371</title>
+<style>
+:root { --blue:#1f4e79; --green:#0f7b0f; --red:#b40000; --orange:#d96a00; --gray:#888; --bg:#fafafa; --card:#ffffff; --border:#ddd; --code-bg:#f4f4f4; --code-border:#cccccc; --highlight:#fff8e1; }
+* { box-sizing: border-box; }
+body { font-family:'David','Arial Hebrew',Arial,sans-serif; background:var(--bg); margin:0; padding:0; color:#222; line-height:1.6; }
+.container { max-width:900px; margin:0 auto; padding:20px; }
+h1,h2,h3 { color:var(--blue); }
+h1 { font-size:28px; text-align:center; }
+h2 { font-size:22px; }
+h3 { font-size:18px; }
+code,pre { direction:ltr; unicode-bidi:isolate; font-family:'Consolas','Monaco',monospace; background:var(--code-bg); }
+code { padding:1px 5px; border-radius:3px; font-size:0.9em; }
+pre { padding:12px; border:1px solid var(--code-border); border-radius:4px; overflow-x:auto; text-align:left; margin:12px 0; white-space:pre; }
+.card { background:var(--card); border:1px solid var(--border); border-radius:8px; padding:24px; margin:20px 0; box-shadow:0 2px 4px rgba(0,0,0,0.04); }
+button { font-family:inherit; font-size:16px; padding:10px 24px; border:none; border-radius:6px; cursor:pointer; background:var(--blue); color:white; transition:background 0.2s; }
+button:hover { background:#163d5e; }
+button:disabled { background:#aaa; cursor:not-allowed; }
+button.secondary { background:var(--gray); }
+button.danger { background:var(--red); }
+button.warning { background:var(--orange); }
+input[type="text"],input[type="number"] { font-family:inherit; font-size:16px; padding:8px 12px; border:1px solid var(--border); border-radius:4px; direction:rtl; }
+input[type="number"] { direction:ltr; text-align:left; }
+.options { list-style:none; padding:0; }
+.option { padding:12px 16px; margin:6px 0; border:1px solid var(--border); border-radius:6px; cursor:pointer; transition:background 0.15s; display:flex; align-items:flex-start; gap:10px; }
+.option:hover { background:#f8f8f8; }
+.option input { margin-top:4px; flex-shrink:0; }
+.option-text { flex:1; }
+.option.selected { background:#e6f0f8; border-color:var(--blue); }
+pre select { font-family:'Consolas',monospace; font-size:0.95em; padding:1px 4px; margin:0 2px; border:1px solid var(--blue); border-radius:3px; background:#e6f0f8; direction:ltr; }
+.exam-header { position:sticky; top:0; background:var(--card); border-bottom:2px solid var(--blue); padding:12px 20px; display:flex; justify-content:space-between; align-items:center; z-index:100; box-shadow:0 2px 4px rgba(0,0,0,0.04); margin-bottom:20px; }
+.timer { font-family:monospace; font-size:20px; font-weight:bold; color:var(--blue); direction:ltr; unicode-bidi:isolate; }
+.timer.warning { color:var(--orange); }
+.timer.danger { color:var(--red); }
+.progress-info { color:var(--gray); font-size:14px; }
+.nav-buttons { display:flex; justify-content:space-between; gap:12px; margin-top:24px; flex-wrap:wrap; }
+.nav-mini { display:flex; flex-wrap:wrap; gap:4px; margin-top:12px; padding:12px; background:#f4f4f4; border-radius:6px; }
+.nav-btn { padding:6px 10px; font-size:13px; border:1px solid var(--border); background:white; color:#333; cursor:pointer; border-radius:4px; min-width:36px; }
+.nav-btn.answered { background:#d4edda; border-color:var(--green); }
+.nav-btn.current { background:var(--blue); color:white; border-color:var(--blue); }
+.score-big { font-size:64px; font-weight:bold; text-align:center; color:var(--blue); margin:20px 0; }
+.score-percent { font-size:24px; color:var(--gray); }
+.result-question { border-right:4px solid var(--gray); padding:16px 20px; margin:12px 0; background:#f8f8f8; border-radius:4px; }
+.result-question.correct { border-right-color:var(--green); background:#f0f9f0; }
+.result-question.wrong { border-right-color:var(--red); background:#faf0f0; }
+.result-explanation { background:var(--highlight); padding:12px 16px; border-radius:4px; margin-top:12px; font-size:0.95em; }
+.tag { display:inline-block; padding:2px 10px; background:var(--blue); color:white; border-radius:12px; font-size:12px; margin-left:8px; }
+.section-title { font-weight:bold; color:var(--blue); border-bottom:1px solid var(--border); padding-bottom:8px; margin-top:24px; }
+.warning-box { background:#fff3cd; border:1px solid #ffeaa7; border-radius:6px; padding:12px 16px; margin:16px 0; }
+.info-list { background:#e8f4f8; border:1px solid #b3d9e8; border-radius:6px; padding:16px 20px; margin:16px 0; }
+.info-list ul { margin:8px 0; padding-right:24px; }
+.info-list li { margin:6px 0; }
+.danger-box { background:#f8d7da; border:1px solid #f5c6cb; border-radius:6px; padding:16px 20px; margin:16px 0; color:#721c24; }
+.exceeded-warning { background:var(--red); color:white; padding:12px 16px; border-radius:6px; margin:12px 0; font-weight:bold; text-align:center; }
+@media (max-width:600px) { .container { padding:10px; } .card { padding:16px; } button { padding:12px 16px; font-size:14px; } }
+</style>
+</head>
+<body>
+<div class="container" id="app">
+    <div id="screen-start" class="card">
+        <h1>מבחן 3 — עצמים ומחלקות</h1>
+        <h3 style="text-align:center; color:var(--gray); margin-top:-10px;">מחלקות, בנאים, מערך אובייקטים, תכונה סטטית, העתקה עמוקה</h3>
+        <div id="resume-area" style="display:none;">
+            <div class="warning-box">
+                <strong>נמצא מבחן פתוח קודם</strong>
+                <p id="resume-info"></p>
+                <div style="margin-top:12px;">
+                    <button onclick="resumeExam()">המשך מבחן (יישמר זמן ההתחלה המקורי)</button>
+                    <button onclick="discardAndStart()" class="warning">ביטול והתחלה מחדש</button>
+                </div>
+            </div>
+        </div>
+        <div id="new-attempt-warning" style="display:none;">
+            <div class="danger-box"><strong>שים לב:</strong> כבר ניגשת למבחן הזה <span id="prev-attempts"></span> פעמים בעבר. כל ניסיון מתועד בקובץ הסיכום שיישלח למורה.</div>
+        </div>
+        <div class="info-list">
+            <strong>על המבחן:</strong>
+            <ul>
+                <li><strong>26 שאלות</strong> — מבחן ממוקד בנושא</li>
+                <li>נושא המבחן: מחלקות, בנאים, מערך אובייקטים, תכונה סטטית, העתקה עמוקה</li>
+                <li>משך זמן מוקצב: <strong>60 דקות</strong></li>
+                <li>אם תרענן את הדף — תוכל להמשיך מאותו מקום, אבל הזמן <strong>ממשיך לרוץ</strong> (לא מתחיל מ-0)</li>
+                <li>אם הזמן יסתיים — המבחן יוגש אוטומטית עם התשובות שמילאת</li>
+            </ul>
+        </div>
+        <div class="warning-box">
+            <strong>חשוב לדעת:</strong>
+            <ul style="margin:8px 0;">
+                <li>קובץ הסיכום שתורידי בסיום מתעד <strong>זמן התחלה אמיתי</strong>, <strong>זמן סיום אמיתי</strong>, ו<strong>מספר רענונים</strong></li>
+                <li>אם הזמן יחרוג מ-60 דקות — תופיע הערה ברורה בקובץ</li>
+                <li>חזרה למבחן אחרי שהוגש = ניסיון חדש (גם זה מתועד)</li>
+                <li>בסוף הקובץ יש <strong>חתימה דיגיטלית</strong> — שינוי ידני של הקובץ יקלקל אותה</li>
+            </ul>
+        </div>
+        <div style="margin:30px 0;">
+            <label style="display:block; margin-bottom:8px; font-weight:bold;">שם מלא (יופיע בקובץ הסיכום):</label>
+            <input type="text" id="student-name" style="width:100%; max-width:400px;" placeholder="שם פרטי ושם משפחה" autocomplete="off">
+        </div>
+        <div style="text-align:center;">
+            <button id="btn-start" onclick="startExam()" style="font-size:18px; padding:14px 36px;">התחלת המבחן ⏱</button>
+        </div>
+    </div>
+    <div id="screen-exam" style="display:none;">
+        <div class="exam-header">
+            <div><strong>שאלה <span id="current-num">1</span> מתוך <span id="total-num">30</span></strong> <span class="progress-info" id="section-name"></span></div>
+            <div class="timer" id="timer">110:00</div>
+        </div>
+        <div class="card">
+            <div id="question-container"></div>
+            <div class="nav-buttons">
+                <button onclick="prevQuestion()" id="btn-prev">הקודמת</button>
+                <button onclick="nextQuestion()" id="btn-next">הבאה ←</button>
+            </div>
+            <div class="nav-mini" id="nav-mini"></div>
+            <div style="text-align:center; margin-top:20px;">
+                <button onclick="confirmSubmit()" class="danger">סיום והגשת המבחן</button>
+            </div>
+        </div>
+    </div>
+    <div id="screen-result" style="display:none;">
+        <div class="card">
+            <h1>תוצאות המבחן</h1>
+            <div id="time-warning"></div>
+            <div id="result-summary"></div>
+            <div style="text-align:center; margin:30px 0;">
+                <button onclick="downloadSummary()">📥 הורדת קובץ סיכום (להעברה למורה)</button>
+                <button onclick="toggleDetails()" class="secondary">הצג/הסתר תשובות מפורטות</button>
+                <button onclick="startNewAttempt()" class="warning">התחלת ניסיון חדש (לתרגול בלבד)</button>
+            </div>
+            <div id="result-details" style="display:none;"></div>
+        </div>
+    </div>
+</div>
+<script>
+const QUESTIONS = [{"id": "q33_oop_compound_check", "topic": "מעקב על קוד", "difficulty": "medium", "stem": "נתונה מחלקת <code>Date</code> שמייצגת תאריך (שלוש תכונות: <code>day, month, year</code>). לפניכם פעולה במחלקה:", "code": "public boolean isAfter(Date other)\n{\n    if (this.year > other.year)\n        return true;\n    if (this.year < other.year)\n        return false;\n    if (this.month > other.month)\n        return true;\n    if (this.month < other.month)\n        return false;\n    return this.day > other.day;\n}", "question": "<code>d1</code> מייצג 15/3/2024 ו-<code>d2</code> מייצג 1/3/2024. מה תחזיר <code>d1.isAfter(d2)</code>?", "options": [{"text": "true תמיד, כי day גדול יותר", "correct": false, "feedback": "תשובה לא מדויקת — נכון שהיא תחזיר true, אבל לא ישירות בגלל day. הפעולה בודקת קודם שנה, אחר כך חודש."}, {"text": "true, אחרי השוואה של שנה→חודש→יום", "correct": true, "feedback": "נכון! שנה שווה (2024=2024), חודש שווה (3=3), יום גדול יותר (15>1) → true."}, {"text": "false, כי הפעולה השוואה לא נכונה", "correct": false, "feedback": "שגוי: הפעולה משווה נכון לפי קדימות שנה→חודש→יום."}, {"text": "השוואה לא חוקית — צריך מתודה compareTo", "correct": false, "feedback": "שגוי: זוהי דרך לגיטימית לכתוב השוואה. אין צורך ב-compareTo."}, {"text": "true רק אם year>year, אחרת false", "correct": false, "feedback": "שגוי: הפעולה ממשיכה לבדוק חודש ויום אם שנה שווה."}], "explanation": "הפעולה משווה בסדר עדיפות: שנה תחילה, ואם שווה — חודש, ואם שווה — יום. עבור d1=15/3/2024 ו-d2=1/3/2024: שנה=שנה, חודש=חודש, 15>1 → true.", "type": "multichoice", "part": "פרק 2", "section": "שאלה 4: עצמים — מחלקה בודדת", "category": "פרק 2/שאלה 4: עצמים — מחלקה בודדת"}, {"id": "m4_oop_method_properties", "type": "multianswer", "topic": "multi-answer", "difficulty": "medium", "stem": "במחלקת <code>BankAccount</code> מוגדרת פעולת המשיכה:", "code": "public boolean withdraw(double amount)\n{\n    if (amount > 0 && amount <= this.balance)\n    {\n        this.balance -= amount;\n        return true;\n    }\n    return false;\n}", "question": "סמנו את <strong>כל</strong> המשפטים הנכונים:", "options": [{"text": "הפעולה תחזיר <code>false</code> עבור משיכת סכום שלילי", "correct": true, "feedback": "נכון: התנאי amount>0 לא מתקיים, הפעולה נכנסת ל-return false."}, {"text": "הפעולה תחזיר <code>true</code> עבור משיכה של בדיוק כל היתרה", "correct": true, "feedback": "נכון: amount <= balance (=) מתקיים, יתרה נהפכת ל-0, מחזירה true."}, {"text": "הפעולה תאפשר משיכת 0 שקלים", "correct": false, "feedback": "שגוי: amount > 0 (חזק) לא מתקיים עבור 0, הפעולה תחזיר false."}, {"text": "אחרי קריאה שמחזירה <code>false</code>, היתרה אינה משתנה", "correct": true, "feedback": "נכון: ההפחתה balance -= amount נמצאת בתוך התנאי, אם התנאי נכשל ההפחתה לא מתבצעת."}, {"text": "ניתן לקרוא לפעולה רק ממופע (object), לא ממחלקה", "correct": true, "feedback": "נכון: הפעולה אינה static, ולכן דורשת מופע. גם השימוש ב-this מחייב מופע."}], "explanation": "ארבעה מתוך החמישה נכונים — הפעולה מטפלת נכון בקצוות, ההפחתה מוגנת על ידי התנאי, ופעולת מופע לא יכולה להיקרא ממחלקה. השגוי הוא (3): משיכה של 0 נכשלת בתנאי amount>0 החזק.", "part": "פרק 2", "section": "שאלה 4: עצמים — מחלקה בודדת", "category": "פרק 2/שאלה 4: עצמים — מחלקה בודדת"}, {"id": "m7_oop_array", "type": "multianswer", "topic": "multi-answer", "difficulty": "medium", "stem": "במחלקת <code>Class</code> מוגדר מערך אובייקטים <code>Student[] students</code> (יתכן שיש <code>null</code> במערך). למחלקת <code>Student</code> פעולת <code>getGrade()</code> שמחזירה <code>int</code>. לפניכם פעולה במחלקת Class:", "code": "public double averageGrade()\n{\n    double sum = 0;\n    int cnt = 0;\n    for (int i = 0; i < students.length; i++)\n    {\n        if (students[i] != null)\n        {\n            sum += students[i].getGrade();\n            cnt++;\n        }\n    }\n    return sum / cnt;\n}", "question": "סמנו את <strong>כל</strong> המשפטים הנכונים:", "options": [{"text": "אם <code>students</code> ריק לחלוטין (כל התאים null), הפעולה תחזיר <code>NaN</code> (Not a Number) או תוצאה לא תקינה", "correct": true, "feedback": "נכון: cnt=0, חלוקה של 0.0/0 על double מחזירה NaN ב-Java (לא חריגה, אבל ערך לא שמיש)."}, {"text": "הבדיקה <code>students[i] != null</code> חיונית כדי למנוע <code>NullPointerException</code>", "correct": true, "feedback": "נכון: בלי הבדיקה, קריאה ל-null.getGrade() תזרוק NullPointerException."}, {"text": "הפעולה מחזירה ממוצע ציונים של הסטודנטים הקיימים בלבד", "correct": true, "feedback": "נכון: רק תאים שאינם null נסכמים ונספרים."}, {"text": "אם נעביר את <code>cnt++</code> מחוץ ל-<code>if</code>, הפעולה תעבוד נכון גם עם תאי null", "correct": false, "feedback": "שגוי: אם cnt גדל גם עבור null, ה-ממוצע יהיה לא נכון (יחלקו ביותר מהמספר האמיתי של סטודנטים)."}, {"text": "הפעולה תעבוד נכון גם אם <code>students</code> אינו מלא — יש בו תאי null", "correct": true, "feedback": "נכון: הבדיקה i!=null מתעלמת מתאי null."}], "explanation": "ארבעה נכונים, אחד שגוי. (4) שגוי כי הסרת cnt++ מתוך ה-if תקלקל את הממוצע. הערה: (1) טכנית הביטוי 'יזרוק חריגה' לא מדויק ב-Java על חלוקת double — מקבלים NaN. אבל הכוונה ברורה (תוצאה בעייתית).", "part": "פרק 2", "section": "שאלה 5: עצמים — מערך אובייקטים", "category": "פרק 2/שאלה 5: עצמים — מערך אובייקטים"}, {"id": "m8_static_attribute", "type": "multianswer", "topic": "multi-answer", "difficulty": "hard", "stem": "במחלקת <code>Counter</code>:", "code": "public class Counter\n{\n    private static int totalCount = 0;\n    private int myCount;\n    \n    public Counter()\n    {\n        myCount = 0;\n        totalCount++;\n    }\n    \n    public void increment()\n    {\n        myCount++;\n        totalCount++;\n    }\n    \n    public int getMy() { return myCount; }\n    public static int getTotal() { return totalCount; }\n}", "question": "מבצעים: <code>Counter a = new Counter(); Counter b = new Counter(); a.increment(); a.increment(); b.increment();</code>. סמנו את <strong>כל</strong> המשפטים הנכונים:", "options": [{"text": "<code>a.getMy()</code> יחזיר 2", "correct": true, "feedback": "נכון: a.increment() נקרא פעמיים."}, {"text": "<code>b.getMy()</code> יחזיר 3", "correct": false, "feedback": "שגוי: b.increment() נקרא פעם אחת, b.myCount = 1."}, {"text": "<code>Counter.getTotal()</code> יחזיר 5", "correct": true, "feedback": "נכון: 2 בנאים (+2) + 3 קריאות ל-increment (+3) = 5."}, {"text": "<code>totalCount</code> משותף לכל מופעי <code>Counter</code>", "correct": true, "feedback": "נכון: תכונה סטטית שייכת למחלקה, לא למופע — משותפת לכולם."}, {"text": "אפשר לקרוא ל-<code>Counter.getMy()</code> ישירות מהמחלקה", "correct": false, "feedback": "שגוי: getMy() אינה סטטית, דורשת מופע. רק getTotal() (static) ניתנת לקריאה ישירות מהמחלקה."}], "explanation": "(1) ✓ a.myCount=2. (3) ✓ totalCount=5 (2 בנאים + 3 increments). (4) ✓ static = משותף לכל המופעים. (5) ✗ getMy אינה static. (2) ✗ b.myCount=1, לא 3.", "part": "פרק 2", "section": "שאלה 5: עצמים — מערך אובייקטים", "category": "פרק 2/שאלה 5: עצמים — מערך אובייקטים"}, {"id": "c4_oop_add_book", "type": "cloze", "topic": "Cloze", "difficulty": "medium", "stem": "במחלקת <code>Library</code> יש מערך <code>books</code> (אורכו <code>maxBooks</code>) ותכונה <code>numBooks</code> השומרת כמה ספרים יש בפועל. השלימו את הפעולה <code>addBook</code> שמוסיפה ספר למערך אם יש מקום פנוי. הפעולה מחזירה <code>true</code> אם ההוספה הצליחה ו-<code>false</code> אחרת:", "code_template": "public boolean addBook(Book b) {\n    if ([[GAP1]]) {\n        [[GAP2]]\n        [[GAP3]]\n        return true;\n    }\n    return false;\n}", "gaps": [{"label": "GAP1", "hint": "תנאי שיש מקום", "options": [{"text": "numBooks < maxBooks", "correct": true, "feedback": "נכון — יש מקום פנוי כל עוד מספר הספרים קטן מהגודל המקסימלי."}, {"text": "numBooks <= maxBooks", "correct": false, "feedback": "שגוי — בגבול numBooks==maxBooks אין מקום, אבל זה יאפשר חריגה מהמערך."}, {"text": "books.length > 0", "correct": false, "feedback": "שגוי — בודק רק שהמערך קיים, לא שיש בו מקום."}, {"text": "numBooks > 0", "correct": false, "feedback": "שגוי — בודק שיש כבר ספרים, לא שיש מקום."}]}, {"label": "GAP2", "hint": "הוספת הספר", "options": [{"text": "books[numBooks] = b;", "correct": true, "feedback": "נכון — מציב את הספר במיקום הפנוי הראשון (האינדקס שאחרי הספרים הקיימים)."}, {"text": "books[numBooks - 1] = b;", "correct": false, "feedback": "שגוי — דורס את הספר האחרון הקיים."}, {"text": "books[0] = b;", "correct": false, "feedback": "שגוי — דורס את הספר הראשון."}, {"text": "books[maxBooks] = b;", "correct": false, "feedback": "שגוי — חורג מהמערך (אינדקס maxBooks אינו חוקי)."}]}, {"label": "GAP3", "hint": "עדכון מונה", "options": [{"text": "numBooks++;", "correct": true, "feedback": "נכון — מגדיל את מונה הספרים ב-1."}, {"text": "numBooks--;", "correct": false, "feedback": "שגוי — מקטין במקום להגדיל."}, {"text": "maxBooks++;", "correct": false, "feedback": "שגוי — משנה את הקיבולת המקסימלית, לא את המונה."}, {"text": "numBooks = numBooks + b;", "correct": false, "feedback": "שגוי — חיבור int עם Book אינו תקין."}]}], "explanation": "תבנית סטנדרטית להוספה למערך-תיק עם מונה: בודקים מקום, מציבים במיקום הראשון הפנוי (אינדקס=numBooks), ומגדילים את המונה.", "part": "פרק 2", "section": "שאלה 5: עצמים — מערך אובייקטים", "category": "פרק 2/שאלה 5: עצמים — מערך אובייקטים"}, {"id": "c6_oop_cheapest_product", "type": "cloze", "topic": "Cloze", "difficulty": "hard", "stem": "במחלקת <code>Store</code> יש מערך <code>products</code> של אובייקטים מטיפוס <code>Product</code> (לכל מוצר פעולה <code>getPrice()</code>). השלימו את הפעולה <code>cheapest</code> שמחזירה את המוצר הזול ביותר. נניח שיש לפחות מוצר אחד:", "code_template": "public Product cheapest() {\n    Product cheap = [[GAP1]];\n    for (int i = 1; i < products.length; i++) {\n        if ([[GAP2]]) {\n            [[GAP3]]\n        }\n    }\n    return cheap;\n}", "gaps": [{"label": "GAP1", "hint": "אתחול", "options": [{"text": "products[0]", "correct": true, "feedback": "נכון — אתחול למוצר הראשון, נשווה לאחרים."}, {"text": "null", "correct": false, "feedback": "שגוי — תזרוק NullPointerException בגישה ל-cheap.getPrice() בלולאה."}, {"text": "new Product()", "correct": false, "feedback": "שגוי — יוצר אובייקט חדש שאינו במערך, ומחיר ברירת מחדל."}, {"text": "products[products.length - 1]", "correct": false, "feedback": "שגוי טכנית: יעבוד, אבל הלולאה מתחילה מ-1 ולא בודקת את המוצר האחרון. צריך לתאם בין השניים."}]}, {"label": "GAP2", "hint": "תנאי השוואה", "options": [{"text": "products[i].getPrice() < cheap.getPrice()", "correct": true, "feedback": "נכון — מוצר חדש זול יותר."}, {"text": "products[i].getPrice() > cheap.getPrice()", "correct": false, "feedback": "שגוי — יחפש יקר ביותר, לא זול."}, {"text": "products[i] < cheap", "correct": false, "feedback": "שגוי — אי אפשר להשוות אובייקטים עם <. צריך לגשת לתכונה."}, {"text": "products[i].getPrice() != cheap.getPrice()", "correct": false, "feedback": "שגוי — תנאי שונות, לא קטן יותר."}]}, {"label": "GAP3", "hint": "עדכון", "options": [{"text": "cheap = products[i];", "correct": true, "feedback": "נכון — שומר הפניה למוצר החדש הזול יותר."}, {"text": "cheap = products[i].getPrice();", "correct": false, "feedback": "שגוי — מציב מחיר (double) ב-cheap שהוא Product."}, {"text": "products[i] = cheap;", "correct": false, "feedback": "שגוי — דורס במערך במקום לעדכן את cheap."}, {"text": "cheap.setPrice(products[i].getPrice());", "correct": false, "feedback": "שגוי — משנה את מחיר המוצר הראשון, לא מוצא הכי זול."}]}], "explanation": "אלגוריתם חיפוש מינימום על מערך אובייקטים: אתחול לאיבר הראשון, מעבר על השאר, עדכון ההפניה כשנמצא ערך נמוך יותר.", "part": "פרק 2", "section": "שאלה 5: עצמים — מערך אובייקטים", "category": "פרק 2/שאלה 5: עצמים — מערך אובייקטים"}, {"id": "b3_null_bug", "type": "multichoice", "topic": "מצא את הבאג", "difficulty": "hard", "stem": "במחלקת <code>Library</code> יש מערך <code>books</code> שיכול להכיל <code>null</code>. לפניכם פעולה שאמורה לספור ספרים זמינים:", "code": "public int countAvailable() {\n    int cnt = 0;\n    for (int i = 0; i < books.length; i++) {\n        if (books[i].getAvailable() && books[i] != null)\n            cnt++;\n    }\n    return cnt;\n}", "question": "מה הבאג?", "options": [{"text": "סדר התנאים שגוי — צריך לבדוק <code>!= null</code> לפני <code>getAvailable()</code>", "correct": true, "feedback": "נכון! ב-Java, && מוערך משמאל לימין. אם books[i] הוא null, הקריאה books[i].getAvailable() תזרוק NullPointerException לפני שתגיע לבדיקת null. התיקון: <code>books[i] != null && books[i].getAvailable()</code>."}, {"text": "צריך להשתמש ב-<code>|</code> במקום <code>&&</code>", "correct": false, "feedback": "שגוי: || היה גורם לספירה גם של null או של ספרים לא זמינים."}, {"text": "המונה <code>cnt</code> צריך להיות מאותחל ל-1", "correct": false, "feedback": "שגוי: 0 הוא הערך הנכון להתחלה של ספירה."}, {"text": "<code>i</code> צריך להתחיל מ-1", "correct": false, "feedback": "שגוי: זה היה גורם לפספס את הספר הראשון במערך."}, {"text": "צריך להחליף <code>arr.length</code> ב-<code>arr.length - 1</code>", "correct": false, "feedback": "שגוי: היה גורם לפספס את הספר האחרון."}], "explanation": "ב-Java && הוא short-circuit ומוערך משמאל לימין. אם books[i]==null, getAvailable() יזרוק NullPointerException לפני בדיקת null. הסדר חייב להיות: בדיקת null ראשונה, ורק אחריה — שימוש בפעולת האובייקט.", "part": "פרק 2", "section": "שאלה 5: עצמים — מערך אובייקטים", "category": "פרק 2/שאלה 5: עצמים — מערך אובייקטים"}, {"id": "b5_oop_double_access", "type": "multichoice", "topic": "מצא את הבאג", "difficulty": "hard", "stem": "במחלקת <code>Class</code> יש פעולה שאמורה לבדוק אם יש סטודנט עם ציון מעל 90, ואם יש — להגדיל את הציון ב-5:", "code": "public boolean boostTopStudent() {\n    for (int i = 0; i < students.length; i++) {\n        if (students[i] != null && students[i].getGrade() > 90) {\n            students[i].setGrade(students[i].getGrade() + 5);\n            return true;\n        }\n    }\n    return false;\n}", "question": "איזה משפט מתאר את הבעיה?", "options": [{"text": "אין באג — הפעולה תקינה לחלוטין", "correct": false, "feedback": "שגוי: יש בעיה של יעילות וקריאות."}, {"text": "<code>setGrade</code> מקבלת int אבל <code>getGrade() + 5</code> הוא double", "correct": false, "feedback": "שגוי: int + int הוא int, אין בעיית טיפוס."}, {"text": "יש כפל הפניות מיותר ל-<code>students[i]</code> — צריך לאחסן ב-משתנה זמני", "correct": true, "feedback": "נכון! הפעולה ניגשת ל-<code>students[i]</code> 4 פעמים. עדיף: <code>Student s = students[i]; if (s != null && s.getGrade()>90) s.setGrade(s.getGrade()+5);</code>. גם יותר יעיל וגם יותר קריא."}, {"text": "צריך לעדכן את <code>students[i]</code> אחרי השינוי", "correct": false, "feedback": "שגוי: setGrade משנה את האובייקט במקום — students[i] הוא הפניה לאותו אובייקט, אין צורך לעדכן."}, {"text": "<code>return true</code> צריך להיות אחרי הלולאה", "correct": false, "feedback": "שגוי: הפעולה אמורה לטפל בסטודנט הראשון מעל 90 ולעצור — return true במקום נכון."}], "explanation": "הפעולה לוגית נכונה, אך יש בעיה של איכות קוד: 4 גישות ל-students[i] במקום אחת. בבגרות זה נחשב 'כפל הפניות' (כפל מיותר) ויכול להוריד נקודות. התיקון: אחסון <code>students[i]</code> במשתנה זמני <code>Student s</code>.", "part": "פרק 2", "section": "שאלה 5: עצמים — מערך אובייקטים", "category": "פרק 2/שאלה 5: עצמים — מערך אובייקטים"}, {"id": "d1_oop_design_school", "type": "multichoice", "topic": "תכנון OOP", "difficulty": "medium", "stem": "רוצים לייצג בית-ספר במערכת מחשב. לכל בית-ספר יש שם וכתובת, ועד 100 כיתות. לכל כיתה יש שם (למשל \"י1\") ועד 40 תלמידים. לכל תלמיד יש שם, ת.ז. וציון ממוצע.", "code": null, "question": "איזה תכנון מחלקות הוא הנכון ביותר?", "options": [{"text": "מחלקה אחת <code>School</code> עם 3 מערכים: <code>names</code>, <code>ids</code>, <code>grades</code> שכל אחד מכיל את כל התלמידים מכל הכיתות.", "correct": false, "feedback": "שגוי: איבוד מבנה היררכי, אי אפשר לדעת איזה תלמיד שייך לאיזו כיתה. גם קשה להוסיף תכונות לתלמיד."}, {"text": "שלוש מחלקות: <code>Student</code> (תכונות אישיות), <code>Class</code> (שם + מערך Student), <code>School</code> (שם, כתובת + מערך Class).", "correct": true, "feedback": "נכון! היררכיה נכונה: בית-ספר מורכב מכיתות, וכיתה מורכבת מתלמידים. כל מחלקה אחראית רק על המידע הרלוונטי לה."}, {"text": "מחלקה אחת <code>School</code> עם מערך תלמידים, וכל תלמיד מכיל שדה <code>className</code>.", "correct": false, "feedback": "שגוי: מאבד את מבנה הכיתה כיחידה (אי אפשר לחשב ממוצע ציונים לכיתה בקלות, לדוגמה). גם דורש סריקת כל התלמידים כדי לקבוצ לפי כיתות."}, {"text": "ירושה: <code>Class extends School</code> ו-<code>Student extends Class</code>.", "correct": false, "feedback": "שגוי: ירושה מבטאת קשר 'הוא מסוג' (Student הוא מסוג Person), לא 'מכיל'. כיתה אינה סוג של בית-ספר."}, {"text": "שתי מחלקות: <code>Person</code> (תלמידים ומורים) ו-<code>School</code> עם מערך Person.", "correct": false, "feedback": "שגוי: לא מבטא את מבנה הכיתות, ומערבב מורים ותלמידים."}], "explanation": "התכנון הנכון מבטא יחס הכלה (composition): School מכיל Class[], Class מכיל Student[]. כל מחלקה אחראית רק על המידע שלה. זוהי תבנית סטנדרטית של מחלקה מורכבת בתוכנית הלימודים של 371.", "part": "פרק 2", "section": "שאלה 5: עצמים — מערך אובייקטים", "category": "פרק 2/שאלה 5: עצמים — מערך אובייקטים"}, {"id": "d2_oop_static_vs_instance", "type": "multichoice", "topic": "תכנון OOP", "difficulty": "hard", "stem": "במחלקת <code>BankAccount</code> מתכננים את התכונות והפעולות הבאות. איזו מהן <strong>חייבת</strong> להיות <code>static</code>?", "code": null, "question": "איזו תכונה/פעולה חייבת להיות סטטית?", "options": [{"text": "<code>balance</code> — היתרה בחשבון", "correct": false, "feedback": "שגוי: היתרה ייחודית לכל חשבון, לא משותפת. חייבת להיות instance."}, {"text": "<code>owner</code> — שם בעל החשבון", "correct": false, "feedback": "שגוי: כל חשבון יש בעלים שונים. instance."}, {"text": "<code>interestRate</code> — אחוז הריבית בבנק (שווה לכל החשבונות)", "correct": true, "feedback": "נכון! אחוז ריבית בבנק שווה לכל החשבונות — תכונה של הבנק (=המחלקה), לא של חשבון בודד. static."}, {"text": "<code>withdraw(amount)</code> — פעולת משיכה", "correct": false, "feedback": "שגוי: משיכה משפיעה על חשבון ספציפי (משנה את balance שלו). חייבת להיות instance, לקבל this."}, {"text": "<code>getBalance()</code> — מחזיר את היתרה", "correct": false, "feedback": "שגוי: מחזיר את היתרה של חשבון ספציפי, דורש גישה ל-this.balance. instance."}], "explanation": "תכונות סטטיות הן 'תכונות של המחלקה', לא של מופע. אחוז ריבית בבנק (interestRate) הוא מאפיין של הבנק כולו, שווה לכל החשבונות, ולכן חייב להיות static. שינוי שלו משפיע על כל החשבונות באותו רגע.", "part": "פרק 2", "section": "שאלה 5: עצמים — מערך אובייקטים", "category": "פרק 2/שאלה 5: עצמים — מערך אובייקטים"}, {"id": "d3_oop_choose_representation", "type": "multichoice", "topic": "תכנון OOP", "difficulty": "medium", "stem": "במערכת ניהול ספרייה רוצים לשמור עבור כל ספר את מצב ההשאלה — האם זמין, ואם לא — מי השואל ומתי הוחזר. איזה ייצוג הוא <strong>המוצלח ביותר</strong>?", "code": null, "question": "איזה ייצוג הוא הנכון?", "options": [{"text": "בכל <code>Book</code>: <code>boolean available</code> + <code>String borrowerName</code> + <code>String returnDate</code>", "correct": true, "feedback": "נכון! פשוט וברור. אם available=true, שאר השדות לא רלוונטיים (אפשר להציב null או '')."}, {"text": "מחלקה נפרדת <code>Loan</code> עם שדות borrower ו-returnDate, ולכל Book שדה <code>Loan currentLoan</code> (יכול להיות null)", "correct": false, "feedback": "טכנית נכון, אבל מורכב מדי לבעיה הזו, ומחייב מחלקה נוספת. עבור מערכת פשוטה — overkill. (במערכת גדולה יותר זה היה הפתרון.)"}, {"text": "ב-Library: שלושה מערכים — <code>availableBooks</code>, <code>borrowedBooks</code>, <code>returnDates</code>", "correct": false, "feedback": "שגוי: מערכים מקבילים בעייתיים — קשה לסנכרן, ואי אפשר לזהות איזה ספר עומד מאחורי איזה רישום."}, {"text": "בכל <code>Book</code>: <code>String status</code> שמכיל מחרוזת מסוג 'available' או 'borrowed:John:2024-01-15'", "correct": false, "feedback": "שגוי: דחיסת מידע מבני למחרוזת מקשה על פירוק ועבודה. צריך פירוק (parsing) בכל גישה."}, {"text": "בכל <code>Book</code> רק <code>boolean available</code> — בלי שמירת השואל", "correct": false, "feedback": "שגוי: לא עונה על הדרישות. הדרישה היא לדעת מי השואל ומתי החזרה."}], "explanation": "הייצוג הראשון מספיק ומתאים לרמת מורכבות זו: תכונות פשוטות במחלקת Book, ושדות נוספים שהם רלוונטיים רק כשהספר מושאל. הפתרון הזה הוא בקווי תוכנית הלימודים של 371. הפתרון השני (Loan נפרד) מקצועי יותר אבל מעבר לרמה הנדרשת.", "part": "פרק 2", "section": "שאלה 5: עצמים — מערך אובייקטים", "category": "פרק 2/שאלה 5: עצמים — מערך אובייקטים"}, {"id": "d4_oop_when_array_objects", "type": "multichoice", "topic": "תכנון OOP", "difficulty": "medium", "stem": "באילו מהמקרים הבאים הייצוג המתאים הוא <strong>מערך של אובייקטים</strong> (כמו <code>Student[]</code>), ולא מערך פרימיטיבי (כמו <code>int[]</code>)?", "code": null, "question": "באיזה מקרה צריך מערך אובייקטים?", "options": [{"text": "שמירת ציונים של 30 תלמידים בכיתה", "correct": false, "feedback": "שגוי: int[] grades מתאים — רק ערכים מספריים."}, {"text": "שמירת רשימת תלמידים בכיתה, כאשר לכל תלמיד יש שם, ת.ז. וציון", "correct": true, "feedback": "נכון! כל תלמיד הוא ישות עם מספר תכונות (שם, ת.ז., ציון). הייצוג הנכון: מערך של אובייקטים מסוג Student."}, {"text": "שמירת 7 טמפרטורות יומיות בשבוע", "correct": false, "feedback": "שגוי: double[] temperatures מתאים — רק ערכים מספריים."}, {"text": "שמירת תוצאה מבחן (מספר נכונות) לכל תלמיד", "correct": false, "feedback": "שגוי: int[] correct מתאים — מספר אחד לתלמיד (אם הקשר תלמיד-מספר נשמר בנפרד)."}, {"text": "שמירת ה-30 חודשים האחרונים בלוח שנה", "correct": false, "feedback": "שגוי: int או String מתאים, לא צריך אובייקט מורכב."}], "explanation": "מערך אובייקטים נדרש כאשר כל איבר הוא ישות מורכבת — אובייקט עם מספר תכונות. תלמיד עם שם, ת.ז. וציון הוא ישות. מספר בודד (ציון, טמפרטורה) מתאים למערך פרימיטיבי.", "part": "פרק 2", "section": "שאלה 5: עצמים — מערך אובייקטים", "category": "פרק 2/שאלה 5: עצמים — מערך אובייקטים"}, {"id": "n2_numerical_oop", "type": "numerical", "topic": "Numerical", "difficulty": "hard", "stem": "חנות מנהלת לקוחות עם נקודות. לכל לקוח <code>points</code>. פעולת <code>shop(amount)</code> מוסיפה <code>amount/10</code> נקודות (חלוקה שלמה). פעולת <code>redeem(p)</code> מורידה p נקודות (אם יש מספיק).", "code": "public void shop(int amount) {\n    if (amount > 0)\n        points += amount / 10;\n}\n\npublic boolean redeem(int p) {\n    if (p > 0 && p <= points) {\n        points -= p;\n        return true;\n    }\n    return false;\n}", "question": "לקוח מתחיל עם 50 נקודות. מבצע: shop(127), shop(83), redeem(20), shop(45), redeem(100). מה הערך של <code>points</code> בסוף?", "correct_answer": 54, "tolerance": 0, "explanation": "מעקב: התחלה points=50. shop(127): 127/10=12 → 62. shop(83): 83/10=8 → 70. redeem(20): 20<=70 ✓ → 50. shop(45): 45/10=4 → 54. redeem(100): 100<=54 ✗ → ללא שינוי. סוף: 54.", "part": "פרק 2", "section": "שאלה 5: עצמים — מערך אובייקטים", "category": "פרק 2/שאלה 5: עצמים — מערך אובייקטים"}, {"id": "q28_oop_constructor", "topic": "OOP יחידה", "difficulty": "medium", "stem": "נתונה המחלקה <code>Book</code> שמייצגת ספר. למחלקה שלוש תכונות: <code>title</code> (שם), <code>author</code> (מחבר), ו-<code>pages</code> (מספר עמודים). לפניכם בנאי של המחלקה:", "code": "public Book(String title, String author, int pages)\n{\n    this.title = title;\n    this.author = author;\n    if (pages > 0)\n        this.pages = pages;\n    else\n        this.pages = 100;\n}", "question": "מה יקרה אחרי הקריאה <code>Book b = new Book(\"Java\", \"Smith\", -5);</code>?", "options": [{"text": "ייזרק חריג כי pages הוא מספר שלילי", "correct": false, "feedback": "שגוי: הבנאי לא זורק חריג. הוא בודק עם תנאי ומגיב בהתאם."}, {"text": "b.pages יהיה 100", "correct": true, "feedback": "נכון! pages=-5 לא גדול מ-0, אז הבנאי מציב את ערך ברירת המחדל 100."}, {"text": "b.pages יהיה -5", "correct": false, "feedback": "שגוי: הבנאי בודק את התנאי pages>0 ומציב 100 אם לא מתקיים."}, {"text": "b.pages יהיה 0", "correct": false, "feedback": "שגוי: אם pages לא חיובי, הבנאי מציב 100, לא 0."}, {"text": "b.pages יישאר ללא ערך", "correct": false, "feedback": "שגוי: ב-Java שדה int תמיד מקבל ערך (0 כברירת מחדל אם לא הוצב). אבל כאן הבנאי מציב 100."}], "explanation": "הבנאי בודק אם pages חיובי: אם כן — מציב את הערך, אחרת — מציב 100 כברירת מחדל. עבור pages=-5 התנאי לא מתקיים, אז b.pages=100.", "part": "פרק 2", "section": "שאלה 4: עצמים — מחלקה בודדת", "category": "פרק 2/שאלה 4: עצמים — מחלקה בודדת"}, {"id": "q29_oop_helper_method", "topic": "OOP יחידה", "difficulty": "medium", "stem": "נתונה מחלקת <code>Account</code> עם תכונה <code>balance</code> ושתי פעולות:", "code": "public boolean canWithdraw(double amount)\n{\n    return amount > 0 && amount <= this.balance;\n}\n\npublic boolean withdraw(double amount)\n{\n    if (canWithdraw(amount))\n    {\n        this.balance = this.balance - amount;\n        return true;\n    }\n    return false;\n}", "question": "חשבון נפתח עם <code>balance = 100</code>. מבצעים: <code>withdraw(30)</code>, <code>withdraw(80)</code>, <code>withdraw(50)</code>. מהו ה-<code>balance</code> בסוף?", "options": [{"text": "20", "correct": true, "feedback": "נכון! withdraw(30) → balance=70. withdraw(80) → 80>70, לא יורד. withdraw(50) → balance=20."}, {"text": "-60", "correct": false, "feedback": "שגוי: הפעולה withdraw בודקת canWithdraw לפני הפחתה. משיכה שגדולה מהיתרה נדחית."}, {"text": "0", "correct": false, "feedback": "שגוי: לא כל הפעולות מצליחות. השנייה (withdraw(80)) נכשלת כי balance=70 < 80."}, {"text": "70", "correct": false, "feedback": "כמעט: זה ה-balance אחרי הפעולה הראשונה בלבד. אבל הפעולה השלישית (withdraw(50)) מצליחה."}, {"text": "100", "correct": false, "feedback": "שגוי: לפחות חלק מהמשיכות מצליחות (הראשונה והשלישית), אז ה-balance יורד."}], "explanation": "מעקב: התחלה balance=100. (1) withdraw(30): 30>0 ו-30<=100 ✓ → balance=70. (2) withdraw(80): 80>0 ו-80<=70 ✗ → לא יורד, balance=70. (3) withdraw(50): 50>0 ו-50<=70 ✓ → balance=20.", "part": "פרק 2", "section": "שאלה 4: עצמים — מחלקה בודדת", "category": "פרק 2/שאלה 4: עצמים — מחלקה בודדת"}, {"id": "q30_oop_setter_validation", "topic": "OOP יחידה", "difficulty": "easy", "stem": "נתונה מחלקה <code>Student</code> עם תכונה פרטית <code>grade</code>. לפניכם פעולת ה-set:", "code": "public void setGrade(int grade)\n{\n    if (grade >= 0 && grade <= 100)\n        this.grade = grade;\n}", "question": "סטודנט עם <code>grade=80</code>. מבצעים: <code>setGrade(95)</code>, <code>setGrade(110)</code>, <code>setGrade(-5)</code>. מהו ערך <code>grade</code> בסוף?", "options": [{"text": "80", "correct": false, "feedback": "שגוי: הפעולה הראשונה (95) מצליחה ומשנה את הציון."}, {"text": "95", "correct": true, "feedback": "נכון! רק setGrade(95) עומד בטווח [0,100]. הפעולות 110 ו-(-5) נדחות, ולא מבצעות שום פעולה."}, {"text": "110", "correct": false, "feedback": "שגוי: 110 גדול מ-100, הפעולה נדחית והערך לא משתנה."}, {"text": "-5", "correct": false, "feedback": "שגוי: -5 שלילי, התנאי לא מתקיים, הערך לא משתנה."}, {"text": "0", "correct": false, "feedback": "שגוי: הפעולה לא מאתחלת את grade ל-0 כאשר התנאי לא מתקיים — היא פשוט לא עושה כלום."}], "explanation": "הסטטר בודק את החוקיות לפני שינוי. הפעולות שלא בטווח [0,100] לא משנות דבר. אחרי setGrade(95) ערך הציון הוא 95. שתי הפעולות הבאות נדחות, אז grade נשאר 95.", "part": "פרק 2", "section": "שאלה 4: עצמים — מחלקה בודדת", "category": "פרק 2/שאלה 4: עצמים — מחלקה בודדת"}, {"id": "q31_oop_two_constructors", "topic": "OOP יחידה", "difficulty": "medium", "stem": "נתונה מחלקת <code>Product</code> עם שני בנאים:", "code": "public Product(String name, double price)\n{\n    this.name = name;\n    this.price = price;\n    this.discount = 0;\n}\n\npublic Product(String name, double price, double discount)\n{\n    this.name = name;\n    this.price = price;\n    if (discount > 0 && discount < 1)\n        this.discount = discount;\n    else\n        this.discount = 0;\n}", "question": "איזה מהמשפטים נכון לגבי הבנאים?", "options": [{"text": "הבנאי הראשון יוצר מוצר עם discount=null", "correct": false, "feedback": "שגוי: discount הוא double פרימיטיבי, לא יכול להיות null. הבנאי מציב 0."}, {"text": "הבנאי השני יקבל discount=1.5 ויציב אותו כמו שהוא", "correct": false, "feedback": "שגוי: התנאי discount<1 נכשל ל-1.5. הבנאי מציב 0 במקום."}, {"text": "שני הבנאים מבטיחים שב-discount יהיה ערך תקין (0 או בין 0 ל-1)", "correct": true, "feedback": "נכון! הראשון תמיד מציב 0, השני מציב את הערך רק אם הוא בטווח, אחרת 0."}, {"text": "אי אפשר להגדיר שני בנאים עם אותו שם בJava", "correct": false, "feedback": "שגוי: Java תומכת ב-overloading של בנאים — שני בנאים שונים בסיגנטורה (פרמטרים שונים) מותרים."}, {"text": "הבנאי השני יזרוק חריג עבור discount=-0.5", "correct": false, "feedback": "שגוי: הבנאי לא זורק חריג — הוא רק לא מציב את הערך השלילי, ובמקומו מציב 0."}], "explanation": "שני הבנאים מבטיחים ערך תקין ל-discount: הראשון תמיד 0, השני מציב את הערך אם בטווח (0,1) או 0 אחרת. זוהי הגנה על תקינות האובייקט (encapsulation).", "part": "פרק 2", "section": "שאלה 4: עצמים — מחלקה בודדת", "category": "פרק 2/שאלה 4: עצמים — מחלקה בודדת"}, {"id": "q32_oop_state_after_calls", "topic": "OOP יחידה", "difficulty": "hard", "stem": "נתונה מחלקת <code>Rectangle</code> עם פעולות <code>area()</code>, <code>grow(factor)</code> (כופלת width ו-height ב-factor אם factor חיובי), ו-<code>isSquare()</code>.", "code": "public int area() { return width * height; }\n\npublic boolean isSquare() { return width == height; }\n\npublic void grow(int factor)\n{\n    if (factor > 0)\n    {\n        width = width * factor;\n        height = height * factor;\n    }\n}", "question": "מלבן נוצר עם width=3, height=4. מבצעים: <code>r.grow(2)</code>, <code>r.grow(-1)</code>, <code>r.grow(0)</code>. מהי <code>r.area()</code> בסוף?", "options": [{"text": "12", "correct": false, "feedback": "שגוי: זה השטח ההתחלתי (3*4). הפעולה הראשונה (grow(2)) מצליחה ומגדילה."}, {"text": "48", "correct": true, "feedback": "נכון! grow(2) → 6,8 (שטח 48). grow(-1) → לא משנה (factor לא חיובי). grow(0) → לא משנה. שטח סופי: 48."}, {"text": "0", "correct": false, "feedback": "שגוי: grow(0) לא מבוצע (התנאי factor>0 נכשל), כך שהמלבן לא 'נמחק'."}, {"text": "-48", "correct": false, "feedback": "שגוי: grow(-1) לא מבוצע. גם אילו היה — שטח לא יכול להיות שלילי כי width ו-height מוכפלים שניהם."}, {"text": "24", "correct": false, "feedback": "שגוי: כנראה חישבתם רק את grow(2) חלקית. שטח אחרי הכפלה ב-2: 6*8=48."}], "explanation": "מעקב: התחלה (3,4), area=12. grow(2): factor>0 ✓ → (6,8), area=48. grow(-1): factor>0 ✗ → ללא שינוי. grow(0): factor>0 ✗ → ללא שינוי. שטח סופי: 48.", "part": "פרק 2", "section": "שאלה 4: עצמים — מחלקה בודדת", "category": "פרק 2/שאלה 4: עצמים — מחלקה בודדת"}, {"id": "q34_oop_composite_count", "topic": "OOP מורכבת", "difficulty": "medium", "stem": "נתונה מחלקת <code>Library</code> המכילה מערך של אובייקטים מטיפוס <code>Book</code> (לכל ספר תכונה <code>available</code> בוליאנית). לפניכם פעולה במחלקת Library:", "code": "public int countAvailable()\n{\n    int cnt = 0;\n    for (int i = 0; i < books.length; i++)\n    {\n        if (books[i] != null && books[i].getAvailable())\n            cnt++;\n    }\n    return cnt;\n}", "question": "ספרייה מכילה מערך באורך 10 עם 6 ספרים בפועל (4 תאים <code>null</code>). מתוכם 4 זמינים. מה תחזיר <code>countAvailable()</code>?", "options": [{"text": "4", "correct": true, "feedback": "נכון! הפעולה בודקת קודם null (כדי למנוע NullPointerException) ואז את available. רק 4 ספרים זמינים נספרים."}, {"text": "6", "correct": false, "feedback": "שגוי: 6 הוא מספר הספרים בפועל, אבל הפעולה סופרת רק זמינים."}, {"text": "10", "correct": false, "feedback": "שגוי: 10 הוא אורך המערך, כולל תאים null שלא נספרים."}, {"text": "0", "correct": false, "feedback": "שגוי: לפי הנתונים יש 4 ספרים זמינים."}, {"text": "NullPointerException", "correct": false, "feedback": "שגוי: הבדיקה books[i]!=null מונעת את החריג."}], "explanation": "הפעולה סורקת את כל המערך, מדלגת על null (חשוב כדי למנוע NullPointerException בקריאה ל-getAvailable), וסופרת רק ספרים זמינים. 4 זמינים → 4.", "part": "פרק 2", "section": "שאלה 5: עצמים — מערך אובייקטים", "category": "פרק 2/שאלה 5: עצמים — מערך אובייקטים"}, {"id": "q35_oop_find_object", "topic": "OOP מורכבת", "difficulty": "medium", "stem": "נתונה מחלקת <code>Class</code> המכילה מערך מלא של <code>Student</code> (לכל סטודנט תכונות <code>name</code> ו-<code>grade</code>). לפניכם פעולה:", "code": "public Student topStudent()\n{\n    Student top = students[0];\n    for (int i = 1; i < students.length; i++)\n    {\n        if (students[i].getGrade() > top.getGrade())\n            top = students[i];\n    }\n    return top;\n}", "question": "איזה מהמשפטים נכון לגבי הפעולה?", "options": [{"text": "מחזירה תמיד את הסטודנט עם הציון הגבוה ביותר", "correct": true, "feedback": "נכון! אתחול ב-students[0] ומעבר על כל השאר. בתיקו (שני סטודנטים עם אותו ציון) — נשמר הראשון שנמצא."}, {"text": "תחזיר null אם המערך ריק", "correct": false, "feedback": "שגוי: גישה ל-students[0] על מערך ריק תזרוק ArrayIndexOutOfBoundsException, לא תחזיר null. אבל הנחת המחלקה היא שהמערך מלא."}, {"text": "מחזירה את הסטודנט הראשון במערך", "correct": false, "feedback": "שגוי: top מתעדכן בלולאה, ומגדיר את הסטודנט עם הציון הגבוה."}, {"text": "בתיקו בין שני סטודנטים — מחזירה את האחרון", "correct": false, "feedback": "שגוי: התנאי הוא > (חזק), לא >=. בתיקו לא יהיה עדכון, ויישמר הראשון שנמצא."}, {"text": "מחזירה את שם הסטודנט, לא את האובייקט", "correct": false, "feedback": "שגוי: סוג ההחזרה הוא Student, מחזירה את האובייקט עצמו."}], "explanation": "הפעולה מבצעת חיפוש מקסימום במערך לפי תכונת grade. אתחול ב-students[0], מעבר על השאר, עדכון top כאשר נמצא ציון גבוה יותר. בתיקו (=) — לא מתעדכן, אז נשמר הראשון.", "part": "פרק 2", "section": "שאלה 5: עצמים — מערך אובייקטים", "category": "פרק 2/שאלה 5: עצמים — מערך אובייקטים"}, {"id": "q36_oop_calculation", "topic": "OOP מורכבת", "difficulty": "hard", "stem": "נתונה מחלקת <code>Store</code> עם מערך <code>products</code> ותכונה סטטית <code>static int taxRate = 17</code> (אחוזים). למחלקת <code>Product</code> תכונה <code>price</code>. לפניכם פעולה:", "code": "public double totalWithTax()\n{\n    double sum = 0;\n    for (int i = 0; i < products.length; i++)\n    {\n        sum = sum + products[i].getPrice();\n    }\n    return sum * (100 + taxRate) / 100;\n}", "question": "חנות מכילה 4 מוצרים במחירים 50, 30, 20, 100. מה תחזיר <code>totalWithTax()</code> עם <code>taxRate=17</code>?", "options": [{"text": "200", "correct": false, "feedback": "שגוי: 200 הוא הסכום ללא מע\"מ. הפעולה מוסיפה 17%."}, {"text": "217", "correct": false, "feedback": "כמעט: 217 מוסיף 17 שקלים בלבד, לא 17%."}, {"text": "234", "correct": true, "feedback": "נכון! סכום: 50+30+20+100=200. הוספת מע\"מ: 200*117/100 = 234."}, {"text": "34", "correct": false, "feedback": "שגוי: 34 הוא רק תוספת המע\"מ (17% מ-200), לא הסכום הסופי."}, {"text": "2340", "correct": false, "feedback": "שגוי: כפלתם פי 10 בטעות."}], "explanation": "סכום מוצרים: 50+30+20+100 = 200. הוספת 17% מע\"מ: 200 * (100+17)/100 = 200 * 1.17 = 234.", "part": "פרק 2", "section": "שאלה 5: עצמים — מערך אובייקטים", "category": "פרק 2/שאלה 5: עצמים — מערך אובייקטים"}, {"id": "q37_oop_static_change", "topic": "OOP מורכבת", "difficulty": "hard", "stem": "נתונה מחלקת <code>Game</code> עם שתי תכונות:<br>• <code>int score</code> — ציון המשחק (תכונת מופע)<br>• <code>static int maxScore = 100</code> — סף הניצחון (תכונה סטטית, משותפת לכל המשחקים)<br>לפניכם שתי פעולות במחלקה:", "code": "public boolean wins()\n{\n    return this.score >= maxScore;\n}\n\npublic static void raiseLimit(int newMax)\n{\n    if (newMax > maxScore)\n        maxScore = newMax;\n}", "question": "שלושה משחקים נוצרו עם score=80, 95, 120. מבצעים: <code>Game.raiseLimit(110)</code>. כמה משחקים יחזירו <code>true</code> בקריאה ל-<code>wins()</code> לאחר השינוי?", "options": [{"text": "1", "correct": true, "feedback": "נכון! <code>wins()</code> משתמשת ב-<code>this.score</code> ולכן חייבת להיות פעולת מופע (אך יכולה לגשת לתכונה סטטית). אחרי <code>raiseLimit(110)</code>: <code>maxScore=110</code>. בדיקה: 80 קטן מ-110 (לא מנצח ✗), 95 קטן מ-110 (לא מנצח ✗), 120 גדול שווה ל-110 (מנצח ✓). רק משחק אחד מנצח."}, {"text": "2", "correct": false, "feedback": "שגוי: רק 120 גדול-שווה ל-110 החדש. 95 קטן ממנו."}, {"text": "3", "correct": false, "feedback": "שגוי: רק משחק עם score>=110 מנצח. רק 120."}, {"text": "0", "correct": false, "feedback": "שגוי: 120 גדול מהסף החדש 110, מנצח."}, {"text": "המספר תלוי במשחק", "correct": false, "feedback": "שגוי: התכונה סטטית — משותפת לכל המופעים. הסף משתנה לכולם בו-זמנית."}], "explanation": "תכונה סטטית משותפת לכל המופעים. הפעולה <code>raiseLimit</code> סטטית כי היא משתמשת רק ב-<code>maxScore</code> (סטטי) ולא צריכה <code>this</code>. הפעולה <code>wins()</code> אינה סטטית כי היא משתמשת ב-<code>this.score</code> (תכונת מופע). פעולת מופע יכולה לגשת לתכונה סטטית — אך פעולה סטטית לא יכולה לגשת לתכונת מופע. אחרי <code>raiseLimit(110)</code>: <code>maxScore=110</code>. בדיקת ניצחון לכל משחק: 80 קטן מ-110 ✗, 95 קטן מ-110 ✗, 120 גדול שווה ל-110 ✓. רק 1 מנצח.", "part": "פרק 2", "section": "שאלה 5: עצמים — מערך אובייקטים", "category": "פרק 2/שאלה 5: עצמים — מערך אובייקטים"}, {"id": "deepcopy_object_understand", "type": "multichoice", "topic": "העתקה עמוקה", "difficulty": "medium", "category": "פרק 2/שאלה 4: עצמים — מחלקה בודדת", "part": "פרק 2", "section": "שאלה 4: עצמים — מחלקה בודדת", "stem": "נתונה מחלקת <code>Point</code> עם שתי תכונות <code>int x</code> ו-<code>int y</code>, בנאי <code>Point(int x, int y)</code>, ופעולת <code>setX(int newX)</code>. לפניכם קטע קוד:", "code": "Point a = new Point(5, 10);\nPoint b = a;\nb.setX(99);\nSystem.out.println(a.getX());", "question": "מה יודפס, ומדוע?", "options": [{"text": "יודפס <code>99</code> — כי <code>a</code> ו-<code>b</code> מצביעים לאותו אובייקט", "correct": true, "feedback": "נכון! <code>Point b = a</code> מעתיק את ה<strong>הפניה</strong>, לא את האובייקט. שני המשתנים מצביעים לאותו אובייקט בזיכרון, ולכן שינוי דרך b משפיע גם על a."}, {"text": "יודפס <code>5</code> — כי <code>b</code> הוא עותק נפרד של <code>a</code>", "correct": false, "feedback": "שגוי. זה היה נכון אילו השתמשנו בבנאי מעתיק (<code>Point b = new Point(a.getX(), a.getY())</code>). אבל <code>b = a</code> רק מעתיק הפניה."}, {"text": "יודפס <code>0</code> — כי <code>setX</code> מאפס את הערכים", "correct": false, "feedback": "שגוי. <code>setX(99)</code> מציב 99, לא 0."}, {"text": "שגיאת קומפילציה — אי אפשר להשים אובייקט למשתנה אחר", "correct": false, "feedback": "שגוי. <code>Point b = a</code> חוקי לחלוטין ב-Java — זו השמה של הפניה."}, {"text": "יודפס <code>99</code> אבל רק כי <code>setX</code> היא פעולה סטטית", "correct": false, "feedback": "שגוי. הסיבה אינה קשורה ל-static — היא נובעת מכך ש-a ו-b מצביעים לאותו אובייקט."}], "explanation": "ב-Java, השמה של אובייקט (<code>b = a</code>) מעתיקה את ההפניה — שני המשתנים מצביעים לאותו אובייקט. כדי ליצור עותק <strong>נפרד</strong> (deep copy) של עצם, צריך בנאי מעתיק: <code>Point b = new Point(a.getX(), a.getY())</code>. אז שינוי ב-b לא ישפיע על a."}, {"id": "deepcopy_array_understand", "type": "multianswer", "topic": "העתקה עמוקה", "difficulty": "hard", "category": "פרק 2/שאלה 5: עצמים — מערך אובייקטים", "part": "פרק 2", "section": "שאלה 5: עצמים — מערך אובייקטים", "stem": "נתונה מחלקת <code>Point</code> (עם <code>x</code>, <code>y</code>, בנאי, ו-<code>setX</code>). לפניכם שתי פעולות שמקבלות מערך נקודות ומחזירות מערך חדש:", "code": "// פעולה A\npublic static Point[] copyA(Point[] arr)\n{\n    Point[] res = new Point[arr.length];\n    for (int i = 0; i < arr.length; i++)\n        res[i] = arr[i];\n    return res;\n}\n\n// פעולה B\npublic static Point[] copyB(Point[] arr)\n{\n    Point[] res = new Point[arr.length];\n    for (int i = 0; i < arr.length; i++)\n        res[i] = new Point(arr[i].getX(), arr[i].getY());\n    return res;\n}", "question": "סמנו את <strong>כל</strong> הטענות הנכונות:", "options": [{"text": "פעולה A מבצעת העתקה רדודה (shallow) — תאי המערך החדש מצביעים לאותם אובייקטים כמו המקורי", "correct": true, "feedback": "נכון. <code>res[i] = arr[i]</code> מעתיק את ההפניה. המערך חדש, אבל האובייקטים שבתוכו משותפים עם המקורי."}, {"text": "פעולה B מבצעת העתקה עמוקה (deep) — נוצרים אובייקטים חדשים ונפרדים", "correct": true, "feedback": "נכון. <code>new Point(...)</code> יוצר אובייקט חדש לכל איבר, כך שהמערך החדש בלתי תלוי במקורי."}, {"text": "אם נשנה <code>arr[0].setX(99)</code> אחרי הקריאה, התוצאה של פעולה A תושפע אך של B לא", "correct": true, "feedback": "נכון. ב-A, res[0] ו-arr[0] הם אותו אובייקט — שינוי באחד נראה בשני. ב-B הם אובייקטים נפרדים, אז B מבודד."}, {"text": "שתי הפעולות מבצעות בדיוק אותו דבר", "correct": false, "feedback": "שגוי. ההבדל מהותי: A משתפת אובייקטים (shallow), B יוצרת עותקים נפרדים (deep)."}, {"text": "פעולה A שגויה כי אי אפשר להשים <code>res[i] = arr[i]</code> בין שני מערכים", "correct": false, "feedback": "שגוי. <code>res[i] = arr[i]</code> חוקי לחלוטין — זו השמת הפניה לאובייקט. A פשוט עושה shallow copy (שזו לפעמים בדיוק מה שרוצים)."}], "explanation": "<strong>shallow copy</strong> (פעולה A): מעתיקים את ההפניות — המערך חדש, אך האובייקטים משותפים. שינוי באובייקט דרך מערך אחד נראה בשני. <strong>deep copy</strong> (פעולה B): יוצרים אובייקט חדש לכל איבר עם <code>new Point(...)</code> — המערכים בלתי תלויים לחלוטין. הבחירה תלויה בצורך: אם רוצים שהעותק יהיה עצמאי לגמרי — צריך deep copy."}, {"id": "deepcopy_object_cloze", "type": "cloze", "topic": "העתקה עמוקה", "difficulty": "medium", "category": "פרק 2/שאלה 4: עצמים — מחלקה בודדת", "part": "פרק 2", "section": "שאלה 4: עצמים — מחלקה בודדת", "stem": "במחלקת <code>Student</code> יש תכונות <code>String name</code> ו-<code>int grade</code>, ובנאי רגיל <code>Student(String name, int grade)</code>. השלימו <strong>בנאי מעתיק</strong> — בנאי שמקבל אובייקט <code>Student</code> קיים ויוצר ממנו עותק עמוק (אובייקט חדש עם אותם ערכים):", "code_template": "public Student(Student other)\n{\n    this.name = [[GAP1]];\n    this.grade = [[GAP2]];\n}", "gaps": [{"label": "GAP1", "hint": "העתקת השם מהאובייקט הקיים", "options": [{"text": "other.name", "correct": true, "feedback": "נכון — לוקחים את הערך מהאובייקט שהתקבל כפרמטר."}, {"text": "this.name", "correct": false, "feedback": "שגוי — this.name עוד לא אותחל, זה מה שאנחנו מנסים לקבוע."}, {"text": "name", "correct": false, "feedback": "שגוי — אין פרמטר בשם name בבנאי הזה; הפרמטר הוא other."}, {"text": "new String()", "correct": false, "feedback": "שגוי — יוצר מחרוזת ריקה במקום להעתיק את השם."}]}, {"label": "GAP2", "hint": "העתקת הציון מהאובייקט הקיים", "options": [{"text": "other.grade", "correct": true, "feedback": "נכון — מעתיקים את הציון מהאובייקט המקורי."}, {"text": "this.grade", "correct": false, "feedback": "שגוי — this.grade עדיין לא אותחל."}, {"text": "grade", "correct": false, "feedback": "שגוי — אין פרמטר grade; הפרמטר הוא other."}, {"text": "0", "correct": false, "feedback": "שגוי — מאפס את הציון במקום להעתיק אותו."}]}], "explanation": "בנאי מעתיק מקבל אובייקט קיים (<code>other</code>) ומאתחל את התכונות של האובייקט החדש (<code>this</code>) מערכי האובייקט הקיים. כך נוצר עותק עמוק: אובייקט חדש ונפרד עם אותם ערכים. הערה: עבור תכונות פרימיטיביות (int) ומחרוזות (immutable ב-Java), השמה ישירה מספיקה להעתקה עמוקה."}, {"id": "deepcopy_array_cloze", "type": "cloze", "topic": "העתקה עמוקה", "difficulty": "hard", "category": "פרק 2/שאלה 5: עצמים — מערך אובייקטים", "part": "פרק 2", "section": "שאלה 5: עצמים — מערך אובייקטים", "stem": "נתונה מחלקת <code>Student</code> עם בנאי מעתיק <code>Student(Student other)</code>. השלימו פעולה חיצונית שמקבלת מערך סטודנטים ומחזירה <strong>העתק עמוק</strong> שלו — מערך חדש שכל אובייקט בו הוא עותק נפרד:", "code_template": "public static Student[] deepCopy(Student[] arr)\n{\n    Student[] res = [[GAP1]];\n    for (int i = 0; i < arr.length; i++)\n        res[i] = [[GAP2]];\n    return res;\n}", "gaps": [{"label": "GAP1", "hint": "יצירת מערך חדש בגודל המתאים", "options": [{"text": "new Student[arr.length]", "correct": true, "feedback": "נכון — מערך חדש בגודל זהה למקורי."}, {"text": "arr", "correct": false, "feedback": "שגוי — זו הפניה לאותו מערך, לא מערך חדש."}, {"text": "new Student[0]", "correct": false, "feedback": "שגוי — מערך ריק, לא יוכל להכיל את האיברים."}, {"text": "new int[arr.length]", "correct": false, "feedback": "שגוי — טיפוס שגוי; צריך מערך של Student ולא int."}]}, {"label": "GAP2", "hint": "יצירת עותק נפרד של כל סטודנט", "options": [{"text": "new Student(arr[i])", "correct": true, "feedback": "נכון — הבנאי המעתיק יוצר אובייקט חדש ונפרד מכל איבר. זה מה שהופך את ההעתקה לעמוקה."}, {"text": "arr[i]", "correct": false, "feedback": "שגוי — זו העתקת הפניה (shallow). res[i] יצביע לאותו אובייקט כמו arr[i]."}, {"text": "new Student()", "correct": false, "feedback": "שגוי — יוצר סטודנט ריק בלי להעתיק את הערכים (וגם אין בנאי כזה)."}, {"text": "arr[i].clone()", "correct": false, "feedback": "שגוי בהקשר זה — clone לא הוגדר במחלקה, והדרך הנכונה כאן היא הבנאי המעתיק."}]}], "explanation": "deep copy של מערך אובייקטים דורש שני שלבים: (1) יצירת מערך חדש (<code>new Student[arr.length]</code>); (2) יצירת אובייקט חדש לכל איבר באמצעות הבנאי המעתיק (<code>new Student(arr[i])</code>). אילו היינו כותבים <code>res[i] = arr[i]</code> זו הייתה העתקה רדודה (shallow) — המערך חדש אבל האובייקטים משותפים."}];
+const STORAGE_KEY = 'metukonet_899371_oop_state';
+const HISTORY_KEY = 'metukonet_899371_oop_history';
+const TIME_LIMIT_MS = 60 * 60 * 1000;
+
+let state = null;
+let timerInterval = null;
+let resultData = null;
+
+function loadState() {
+    try { const raw = localStorage.getItem(STORAGE_KEY); return raw ? JSON.parse(raw) : null; }
+    catch (e) { return null; }
+}
+function saveState() {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+    catch (e) { console.warn('Failed to save:', e); }
+}
+function loadHistory() {
+    try { const raw = localStorage.getItem(HISTORY_KEY); return raw ? JSON.parse(raw) : []; }
+    catch (e) { return []; }
+}
+function appendHistory(entry) {
+    const history = loadHistory();
+    history.push(entry);
+    try { localStorage.setItem(HISTORY_KEY, JSON.stringify(history)); }
+    catch (e) { console.warn('Failed:', e); }
+}
+
+window.addEventListener('load', () => {
+    const existing = loadState();
+    if (existing && !existing.ended) {
+        const elapsed = Date.now() - new Date(existing.startTime).getTime();
+        if (elapsed >= TIME_LIMIT_MS) {
+            state = existing;
+            state.endTime = new Date(new Date(existing.startTime).getTime() + TIME_LIMIT_MS).toISOString();
+            state.ended = true;
+            state.autoSubmitted = true;
+            saveState();
+            showResults();
+        } else {
+            state = existing;
+            state.refreshes = (state.refreshes || 0) + 1;
+            saveState();
+            showResumeOption(elapsed);
+        }
+    } else if (existing && existing.ended) {
+        showNewAttemptWarning();
+    }
+});
+
+function showResumeOption(elapsed) {
+    const remainingMin = Math.floor((TIME_LIMIT_MS - elapsed) / 60000);
+    const elapsedMin = Math.floor(elapsed / 60000);
+    document.getElementById('resume-area').style.display = 'block';
+    document.getElementById('resume-info').innerHTML = `התחלת את המבחן לפני ${elapsedMin} דקות. נותרו <strong>${remainingMin} דקות</strong>. שם: <strong>${escapeHtml(state.name || 'לא צוין')}</strong>.`;
+    document.getElementById('btn-start').style.display = 'none';
+}
+
+function showNewAttemptWarning() {
+    const history = loadHistory();
+    if (history.length > 0) {
+        document.getElementById('new-attempt-warning').style.display = 'block';
+        document.getElementById('prev-attempts').textContent = history.length;
+    }
+}
+
+function startExam() {
+    const name = document.getElementById('student-name').value.trim();
+    if (!name) { alert('נא להזין שם מלא לפני התחלת המבחן'); return; }
+    const selected = selectQuestions();
+    state = {
+        name: name,
+        startTime: new Date().toISOString(),
+        endTime: null,
+        selectedIds: selected.map(q => q.id),
+        answers: {},
+        current: 0,
+        refreshes: 0,
+        ended: false,
+        autoSubmitted: false,
+        attemptNumber: loadHistory().length + 1
+    };
+    saveState();
+    document.getElementById('screen-start').style.display = 'none';
+    document.getElementById('screen-exam').style.display = 'block';
+    document.getElementById('total-num').textContent = selected.length;
+    renderQuestion();
+    startTimer();
+}
+
+function resumeExam() {
+    document.getElementById('screen-start').style.display = 'none';
+    document.getElementById('screen-exam').style.display = 'block';
+    document.getElementById('total-num').textContent = state.selectedIds.length;
+    renderQuestion();
+    startTimer();
+}
+
+function discardAndStart() {
+    if (!confirm('האם לבטל את המבחן הפתוח ולהתחיל מחדש? המעבר הזה יתועד בקובץ הסיכום.')) return;
+    if (state) {
+        appendHistory({ name: state.name, startTime: state.startTime, discardedAt: new Date().toISOString(), discarded: true });
+    }
+    localStorage.removeItem(STORAGE_KEY);
+    location.reload();
+}
+
+function startNewAttempt() {
+    if (!confirm('התחלת ניסיון חדש לתרגול. הציון הקודם נשמר בהיסטוריה. להמשיך?')) return;
+    if (state) {
+        appendHistory({ name: state.name, startTime: state.startTime, endTime: state.endTime, attemptNumber: state.attemptNumber, refreshes: state.refreshes, autoSubmitted: state.autoSubmitted, elapsed: new Date(state.endTime) - new Date(state.startTime) });
+    }
+    localStorage.removeItem(STORAGE_KEY);
+    location.reload();
+}
+
+function getSelectedQuestions() { return state.selectedIds.map(id => QUESTIONS.find(q => q.id === id)).filter(Boolean); }
+
+function selectQuestions() {
+    // כל 73 השאלות, ממוינות לפי פרק→שאלה. בתוך כל קטגוריה — סדר אקראי.
+    const order = [
+        'פרק 1/שאלה 1: מעקב על קוד',
+        'פרק 1/שאלה 2: מספרים וספרות',
+        'פרק 1/שאלה 3: מערכים ומחרוזות',
+        'פרק 2/שאלה 4: עצמים — מחלקה בודדת',
+        'פרק 2/שאלה 5: עצמים — מערך אובייקטים',
+        'פרק 2/שאלה 6: ניתוח קוד והבנת אלגוריתמים'
+    ];
+    const byCat = {};
+    QUESTIONS.forEach(q => { const cat = q.category || q.topic; if (!byCat[cat]) byCat[cat] = []; byCat[cat].push(q); });
+    const result = [];
+    order.forEach(cat => {
+        const pool = byCat[cat] || [];
+        const shuffled = [...pool].sort(() => Math.random() - 0.5);
+        result.push(...shuffled);
+    });
+    return result;
+}
+
+function startTimer() {
+    if (timerInterval) clearInterval(timerInterval);
+    timerInterval = setInterval(updateTimer, 1000);
+    updateTimer();
+}
+
+function updateTimer() {
+    const elapsed = Date.now() - new Date(state.startTime).getTime();
+    const remaining = TIME_LIMIT_MS - elapsed;
+    if (remaining <= 0) {
+        clearInterval(timerInterval);
+        state.endTime = new Date().toISOString();
+        state.ended = true;
+        state.autoSubmitted = true;
+        saveState();
+        alert('הזמן הסתיים. המבחן יוגש אוטומטית.');
+        showResults();
+        return;
+    }
+    const minutes = Math.floor(remaining / 60000);
+    const seconds = Math.floor((remaining % 60000) / 1000);
+    const timer = document.getElementById('timer');
+    timer.textContent = `${String(minutes).padStart(2,'0')}:${String(seconds).padStart(2,'0')}`;
+    if (remaining < 10*60*1000) timer.className = 'timer danger';
+    else if (remaining < 20*60*1000) timer.className = 'timer warning';
+    else timer.className = 'timer';
+}
+
+function renderQuestion() {
+    const selected = getSelectedQuestions();
+    const q = selected[state.current];
+    if (!q) return;
+    document.getElementById('current-num').textContent = state.current + 1;
+    document.getElementById('section-name').textContent = ' | ' + (q.section || q.category || '');
+    const container = document.getElementById('question-container');
+    let html = '';
+    if (q.stem) html += `<div class="stem">${q.stem}</div>`;
+    if (q.code) html += `<pre dir="ltr">${escapeHtml(q.code)}</pre>`;
+    if (q.question) html += `<div class="q" style="margin:16px 0;"><strong>השאלה:</strong> ${q.question}</div>`;
+    const type = q.type || 'multichoice';
+    const qid = `q${state.current}`;
+    if (type === 'multichoice') {
+        html += '<ul class="options">';
+        q.options.forEach((opt, i) => {
+            const checked = (state.answers[qid] === i) ? 'checked' : '';
+            const selectedCls = (state.answers[qid] === i) ? 'selected' : '';
+            html += `<li class="option ${selectedCls}" onclick="selectMC(${i})"><input type="radio" name="${qid}" value="${i}" ${checked} onclick="event.stopPropagation()"><div class="option-text">${opt.text}</div></li>`;
+        });
+        html += '</ul>';
+    } else if (type === 'multianswer') {
+        html += '<p style="color:var(--gray); font-size:0.9em;">סמנו את <strong>כל</strong> התשובות הנכונות.</p>';
+        html += '<ul class="options">';
+        const currentAns = state.answers[qid] || [];
+        q.options.forEach((opt, i) => {
+            const checked = currentAns.includes(i) ? 'checked' : '';
+            const selectedCls = currentAns.includes(i) ? 'selected' : '';
+            html += `<li class="option ${selectedCls}" onclick="selectMA(${i})"><input type="checkbox" name="${qid}" value="${i}" ${checked} onclick="event.stopPropagation()"><div class="option-text">${opt.text}</div></li>`;
+        });
+        html += '</ul>';
+    } else if (type === 'cloze') {
+        let code = q.code_template;
+        const currentAns = state.answers[qid] || {};
+        q.gaps.forEach((gap, gi) => {
+            let sel = `<select onchange="selectCloze(${gi}, this.value)"><option value="">-- בחר --</option>`;
+            gap.options.forEach((opt, oi) => {
+                const s = (currentAns[gi] === oi) ? 'selected' : '';
+                sel += `<option value="${oi}" ${s}>${escapeHtml(opt.text)}</option>`;
+            });
+            sel += '</select>';
+            code = code.replace(`[[${gap.label}]]`, sel);
+        });
+        let escapedCode = escapeHtml(code).replace(/&lt;select/g, '<select').replace(/&lt;\/select&gt;/g, '</select>').replace(/&lt;option/g, '<option').replace(/&lt;\/option&gt;/g, '</option>');
+        html += `<pre dir="ltr">${escapedCode}</pre>`;
+        q.gaps.forEach((gap, gi) => { html += `<p style="color:var(--gray); font-size:0.9em;"><strong>[[ ${gi+1} ]]</strong> ${gap.hint}</p>`; });
+    } else if (type === 'numerical') {
+        const val = state.answers[qid] !== undefined ? state.answers[qid] : '';
+        html += `<div style="margin:20px 0;"><label><strong>תשובה (מספר שלם):</strong></label><br><input type="number" id="${qid}-input" value="${val}" onchange="selectNum(this.value)" style="font-size:24px; width:200px; padding:10px;"></div>`;
+    }
+    container.innerHTML = html;
+    document.getElementById('btn-prev').disabled = (state.current === 0);
+    document.getElementById('btn-next').disabled = (state.current === state.selectedIds.length - 1);
+    renderNavMini();
+}
+
+function selectMC(i) { state.answers[`q${state.current}`] = i; saveState(); renderQuestion(); }
+function selectMA(i) {
+    const qid = `q${state.current}`;
+    if (!state.answers[qid]) state.answers[qid] = [];
+    const idx = state.answers[qid].indexOf(i);
+    if (idx >= 0) state.answers[qid].splice(idx, 1); else state.answers[qid].push(i);
+    saveState(); renderQuestion();
+}
+function selectCloze(gi, oi) {
+    const qid = `q${state.current}`;
+    if (!state.answers[qid]) state.answers[qid] = {};
+    state.answers[qid][gi] = oi === '' ? undefined : parseInt(oi);
+    saveState(); renderNavMini();
+}
+function selectNum(v) { state.answers[`q${state.current}`] = v === '' ? undefined : parseInt(v); saveState(); renderNavMini(); }
+
+function escapeHtml(t) { if (t === undefined || t === null) return ''; return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function nextQuestion() { if (state.current < state.selectedIds.length - 1) { state.current++; saveState(); renderQuestion(); window.scrollTo(0,0); } }
+function prevQuestion() { if (state.current > 0) { state.current--; saveState(); renderQuestion(); window.scrollTo(0,0); } }
+function goTo(idx) { state.current = idx; saveState(); renderQuestion(); window.scrollTo(0,0); }
+
+function renderNavMini() {
+    const selected = getSelectedQuestions();
+    const container = document.getElementById('nav-mini');
+    let html = '<strong style="margin-left:8px;">ניווט:</strong>';
+    selected.forEach((q, i) => {
+        const qid = `q${i}`;
+        const isAnswered = isQuestionAnswered(qid, q);
+        let cls = 'nav-btn';
+        if (i === state.current) cls += ' current';
+        else if (isAnswered) cls += ' answered';
+        html += `<button class="${cls}" onclick="goTo(${i})">${i+1}</button>`;
+    });
+    container.innerHTML = html;
+}
+
+function isQuestionAnswered(qid, q) {
+    const ans = state.answers[qid];
+    if (ans === undefined || ans === null) return false;
+    const type = q.type || 'multichoice';
+    if (type === 'multianswer') return ans.length > 0;
+    if (type === 'cloze') return Object.keys(ans).length === q.gaps.length;
+    return true;
+}
+
+function confirmSubmit() {
+    const selected = getSelectedQuestions();
+    const unanswered = selected.filter((q, i) => !isQuestionAnswered(`q${i}`, q)).length;
+    let msg = 'האם להגיש את המבחן?';
+    if (unanswered > 0) msg = `יש ${unanswered} שאלות שלא ענית עליהן. ${msg}`;
+    if (confirm(msg)) {
+        if (timerInterval) clearInterval(timerInterval);
+        state.endTime = new Date().toISOString();
+        state.ended = true;
+        saveState();
+        showResults();
+    }
+}
+
+function scoreExam() {
+    const selected = getSelectedQuestions();
+    let totalScore = 0, totalMax = 0;
+    const details = [];
+    selected.forEach((q, i) => {
+        const qid = `q${i}`;
+        const ans = state.answers[qid];
+        const type = q.type || 'multichoice';
+        let score = 0, max = 1, userAnsText = '', correctText = '', isCorrect = false;
+        if (type === 'multichoice') {
+            const correctIdx = q.options.findIndex(o => o.correct);
+            isCorrect = (ans === correctIdx);
+            score = isCorrect ? 1 : 0;
+            userAnsText = (ans !== undefined && ans !== null) ? q.options[ans].text : '(לא נענה)';
+            correctText = q.options[correctIdx].text;
+        } else if (type === 'multianswer') {
+            const correctIdxs = q.options.map((o, i) => o.correct ? i : -1).filter(i => i >= 0);
+            const userIdxs = ans || [];
+            const nCorrect = correctIdxs.length;
+            const nWrong = q.options.length - nCorrect;
+            const cf = 1 / nCorrect;
+            const wf = -1 / Math.max(nWrong, 1);
+            let s = 0;
+            userIdxs.forEach(i => { if (q.options[i].correct) s += cf; else s += wf; });
+            score = Math.max(0, Math.min(1, s));
+            isCorrect = (score === 1);
+            userAnsText = userIdxs.map(i => q.options[i].text.replace(/<[^>]+>/g, '')).join('; ') || '(לא נענה)';
+            correctText = correctIdxs.map(i => q.options[i].text.replace(/<[^>]+>/g, '')).join('; ');
+        } else if (type === 'cloze') {
+            const userAns = ans || {};
+            let cc = 0;
+            q.gaps.forEach((gap, gi) => {
+                const ci = gap.options.findIndex(o => o.correct);
+                if (userAns[gi] === ci) cc++;
+            });
+            score = cc / q.gaps.length;
+            isCorrect = (score === 1);
+            userAnsText = q.gaps.map((gap, gi) => { const u = userAns[gi]; return `[${gi+1}] ` + (u !== undefined ? gap.options[u].text : '(לא נענה)'); }).join(' | ');
+            correctText = q.gaps.map((gap, gi) => { const c = gap.options.findIndex(o => o.correct); return `[${gi+1}] ${gap.options[c].text}`; }).join(' | ');
+        } else if (type === 'numerical') {
+            isCorrect = (ans !== undefined && ans !== null && Math.abs(ans - q.correct_answer) <= (q.tolerance || 0));
+            score = isCorrect ? 1 : 0;
+            userAnsText = (ans !== undefined) ? String(ans) : '(לא נענה)';
+            correctText = String(q.correct_answer);
+        }
+        totalScore += score; totalMax += max;
+        details.push({ q, score, max, userAnsText, correctText, isCorrect });
+    });
+    return { totalScore, totalMax, details };
+}
+
+function showResults() {
+    document.getElementById('screen-start').style.display = 'none';
+    document.getElementById('screen-exam').style.display = 'none';
+    document.getElementById('screen-result').style.display = 'block';
+    resultData = scoreExam();
+    renderResults(resultData);
+    window.scrollTo(0,0);
+}
+
+function renderResults({ totalScore, totalMax, details }) {
+    const percent = Math.round(100 * totalScore / totalMax);
+    const startMs = new Date(state.startTime).getTime();
+    const endMs = new Date(state.endTime).getTime();
+    const elapsedMin = Math.round((endMs - startMs) / 60000);
+    const exceeded = (endMs - startMs) > TIME_LIMIT_MS + 60000;
+    const refreshes = state.refreshes || 0;
+    const attemptNumber = state.attemptNumber || 1;
+    let warning = '';
+    if (state.autoSubmitted) warning += `<div class="exceeded-warning">⏱ הזמן הסתיים — המבחן הוגש אוטומטית</div>`;
+    if (exceeded) warning += `<div class="exceeded-warning">⚠️ זמן המבחן בפועל: ${elapsedMin} דקות — חריגה מהזמן המוקצב (110)</div>`;
+    if (refreshes > 0) warning += `<div class="warning-box">📝 המבחן רוענן ${refreshes} פעמים במהלך הפתירה (תועד בקובץ הסיכום)</div>`;
+    if (attemptNumber > 1) warning += `<div class="warning-box">🔄 זהו ניסיון מספר ${attemptNumber} של המבחן (ניסיונות קודמים תועדו)</div>`;
+    document.getElementById('time-warning').innerHTML = warning;
+    let summary = `<div class="score-big">${totalScore.toFixed(1)} / ${totalMax}</div><div class="score-percent">ציון: ${percent}%</div><div style="text-align:center; margin:20px 0; color:var(--gray);"><strong>${escapeHtml(state.name)}</strong> | משך אמיתי: ${elapsedMin} דקות | תאריך: ${new Date().toLocaleDateString('he-IL')}</div><h3 class="section-title">פילוח לפי קטגוריה</h3>`;
+    const byCat = {};
+    details.forEach(d => { const cat = d.q.category || d.q.topic; if (!byCat[cat]) byCat[cat] = { score:0, max:0 }; byCat[cat].score += d.score; byCat[cat].max += d.max; });
+    summary += '<table style="width:100%; border-collapse:collapse;"><tr style="background:#e8f4f8;"><th style="padding:8px; text-align:right; border:1px solid var(--border);">קטגוריה</th><th style="padding:8px; border:1px solid var(--border);">ניקוד</th><th style="padding:8px; border:1px solid var(--border);">%</th></tr>';
+    Object.entries(byCat).forEach(([cat, { score, max }]) => { const p = Math.round(100 * score / max); summary += `<tr><td style="padding:8px; border:1px solid var(--border);">${cat}</td><td style="padding:8px; text-align:center; border:1px solid var(--border);">${score.toFixed(1)} / ${max}</td><td style="padding:8px; text-align:center; border:1px solid var(--border);">${p}%</td></tr>`; });
+    summary += '</table>';
+    document.getElementById('result-summary').innerHTML = summary;
+    let detailsHtml = '<h3 class="section-title">פירוט תשובות</h3>';
+    details.forEach((d, i) => {
+        const cls = d.isCorrect ? 'correct' : (d.score > 0 ? '' : 'wrong');
+        const icon = d.isCorrect ? '✓' : (d.score > 0 ? '◐' : '✗');
+        detailsHtml += `<div class="result-question ${cls}"><strong>${icon} שאלה ${i+1}</strong> <span class="tag">${d.q.section || d.q.category || ''}</span><span style="float:left; color:var(--gray);">${d.score.toFixed(2)} / ${d.max}</span><div style="margin-top:8px;">${d.q.stem || ''}</div>${d.q.code ? `<pre dir="ltr">${escapeHtml(d.q.code)}</pre>` : ''}${d.q.question ? `<div><strong>השאלה:</strong> ${d.q.question}</div>` : ''}<div style="margin-top:10px;"><strong>תשובתך:</strong> ${d.userAnsText}</div><div><strong>תשובה נכונה:</strong> ${d.correctText}</div>${d.q.explanation ? `<div class="result-explanation"><strong>הסבר:</strong> ${d.q.explanation}</div>` : ''}</div>`;
+    });
+    document.getElementById('result-details').innerHTML = detailsHtml;
+}
+
+function toggleDetails() { const el = document.getElementById('result-details'); el.style.display = (el.style.display === 'none') ? 'block' : 'none'; }
+
+function downloadSummary() {
+    if (!resultData) return;
+    const { totalScore, totalMax, details } = resultData;
+    const startMs = new Date(state.startTime).getTime();
+    const endMs = new Date(state.endTime).getTime();
+    const elapsedMs = endMs - startMs;
+    const elapsedMin = Math.round(elapsedMs / 60000);
+    const elapsedSec = Math.round(elapsedMs / 1000);
+    const exceeded = elapsedMs > TIME_LIMIT_MS + 60000;
+    const percent = (100 * totalScore / totalMax).toFixed(1);
+    const refreshes = state.refreshes || 0;
+    const attemptNumber = state.attemptNumber || 1;
+    const history = loadHistory();
+    let txt = `╔══════════════════════════════════════════════════════════════╗
+║  מבחן 3 — עצמים ומחלקות — 899371                          ║
+║       קובץ סיכום אוטומטי                                       ║
+╚══════════════════════════════════════════════════════════════╝
+
+══════════════════════════════════════════════════════════════════
+פרטי תלמיד וזמנים:
+══════════════════════════════════════════════════════════════════
+שם תלמיד/ה:        ${state.name}
+תאריך מבחן:        ${new Date(state.startTime).toLocaleDateString('he-IL')}
+
+⏱  זמן התחלה אמיתי:  ${new Date(state.startTime).toLocaleString('he-IL')}
+⏱  זמן סיום אמיתי:   ${new Date(state.endTime).toLocaleString('he-IL')}
+⏱  משך מבחן בפועל:   ${elapsedMin} דקות (${elapsedSec} שניות)
+⏱  זמן מוקצב:        60 דקות
+${exceeded ? '⚠️  ⚠️  ⚠️  חריגה מזמן: כן  ⚠️  ⚠️  ⚠️ ' : '✓  בתוך הזמן המוקצב'}
+
+הגשה אוטומטית (נגמר הזמן):  ${state.autoSubmitted ? 'כן' : 'לא'}
+מספר רענונים בזמן המבחן:    ${refreshes}
+מספר ניסיון:                ${attemptNumber}${attemptNumber > 1 ? ' (ניסיון חוזר!)' : ''}
+${history.length > 0 ? `\n⚠️  ${history.length} ניסיון/ות קודם/ים תועדו בזיכרון הדפדפן\n` : ''}
+══════════════════════════════════════════════════════════════════
+ציון:
+══════════════════════════════════════════════════════════════════
+ציון סופי:        ${totalScore.toFixed(1)} / ${totalMax}
+אחוז:             ${percent}%
+
+פילוח לפי קטגוריה:
+`;
+    const byCat = {};
+    details.forEach(d => { const cat = d.q.category || d.q.topic; if (!byCat[cat]) byCat[cat] = { score:0, max:0 }; byCat[cat].score += d.score; byCat[cat].max += d.max; });
+    Object.entries(byCat).forEach(([cat, { score, max }]) => { const p = Math.round(100 * score / max); txt += `  • ${cat}\n    ניקוד: ${score.toFixed(1)} / ${max}  (${p}%)\n`; });
+    txt += `\n══════════════════════════════════════════════════════════════════\nתשובות מפורטות:\n══════════════════════════════════════════════════════════════════`;
+    details.forEach((d, i) => {
+        const icon = d.isCorrect ? '✓' : (d.score > 0 ? '◐' : '✗');
+        txt += `\n\n${icon} שאלה ${i+1} | ${d.q.section || ''} | ${d.score.toFixed(2)}/${d.max}\n   מזהה שאלה: ${d.q.id}\n   תשובת התלמיד:  ${d.userAnsText.replace(/<[^>]+>/g, '')}\n   תשובה נכונה:   ${d.correctText.replace(/<[^>]+>/g, '')}`;
+    });
+    // נתוני אימות מקודדים — מאפשרים אימות חיצוני של תוכן הקובץ
+    const verifyPayload = {
+        name: state.name,
+        startTime: state.startTime,
+        endTime: state.endTime,
+        score: totalScore.toFixed(2),
+        max: totalMax,
+        refreshes: refreshes,
+        attemptNumber: attemptNumber,
+        autoSubmitted: state.autoSubmitted || false
+    };
+    const verifyB64 = btoa(unescape(encodeURIComponent(JSON.stringify(verifyPayload))));
+    const checksum = simpleHash(verifyB64);
+    txt += `\n\n══════════════════════════════════════════════════════════════════\nחתימה דיגיטלית (לאימות אוטומטי):\n[VERIFY]${verifyB64}|${checksum}[/VERIFY]\n\nלאימות: הריצו את verify_metukonet.py על הקובץ הזה.\n══════════════════════════════════════════════════════════════════\n`;
+    const blob = new Blob([txt], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    const safeName = state.name.replace(/[^\u0590-\u05FFa-zA-Z0-9]/g, '_');
+    a.download = `מתכונת_899371_${safeName}_${new Date().toISOString().slice(0,10)}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+}
+
+function simpleHash(str) {
+    let h1 = 0xdeadbeef, h2 = 0x41c6ce57;
+    for (let i = 0; i < str.length; i++) {
+        const c = str.charCodeAt(i);
+        h1 = Math.imul(h1 ^ c, 2654435761);
+        h2 = Math.imul(h2 ^ c, 1597334677);
+    }
+    h1 = Math.imul(h1 ^ (h1>>>16), 2246822507);
+    h1 ^= Math.imul(h2 ^ (h2>>>13), 3266489909);
+    h2 = Math.imul(h2 ^ (h2>>>16), 2246822507);
+    h2 ^= Math.imul(h1 ^ (h1>>>13), 3266489909);
+    return (4294967296 * (2097151 & h2) + (h1>>>0)).toString(16).padStart(13,'0').toUpperCase();
+}
+
+window.addEventListener('beforeunload', (e) => {
+    if (state && !state.ended) {
+        e.preventDefault();
+        e.returnValue = 'התשובות נשמרות אבל הרענון נספר. להמשיך?';
+    }
+});
+</script>
+</body>
+</html>
