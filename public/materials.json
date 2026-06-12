@@ -59,6 +59,10 @@
     "מבני נתונים": {
       "icon": "📚",
       "color": "from-amber-50 to-yellow-50 border-amber-200"
+    },
+    "יסודות": {
+      "icon": "🌳",
+      "color": "from-emerald-50 to-teal-50 border-emerald-200"
     }
   },
   "materials": [
@@ -451,6 +455,17 @@
       ],
       "linkUrl": "binary_trees_quiz.html/",
       "icon": "🌳"
+    },
+    {
+      "id": "מבחן-יסודות",
+      "title": "מבחן יסודות",
+      "description": "",
+      "category": "teaching",
+      "path": [
+        "יסודות"
+      ],
+      "linkUrl": "/מתכונת_899371_מבחן1_אלגוריתמיקה.html",
+      "icon": "📝"
     }
   ]
 }
