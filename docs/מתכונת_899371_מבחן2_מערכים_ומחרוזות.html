@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="he">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>מבחן 2 — מערכים ומחרוזות — מדעי המחשב 899371</title>
+<style>
+:root { --blue:#1f4e79; --green:#0f7b0f; --red:#b40000; --orange:#d96a00; --gray:#888; --bg:#fafafa; --card:#ffffff; --border:#ddd; --code-bg:#f4f4f4; --code-border:#cccccc; --highlight:#fff8e1; }
+* { box-sizing: border-box; }
+body { font-family:'David','Arial Hebrew',Arial,sans-serif; background:var(--bg); margin:0; padding:0; color:#222; line-height:1.6; }
+.container { max-width:900px; margin:0 auto; padding:20px; }
+h1,h2,h3 { color:var(--blue); }
+h1 { font-size:28px; text-align:center; }
+h2 { font-size:22px; }
+h3 { font-size:18px; }
+code,pre { direction:ltr; unicode-bidi:isolate; font-family:'Consolas','Monaco',monospace; background:var(--code-bg); }
+code { padding:1px 5px; border-radius:3px; font-size:0.9em; }
+pre { padding:12px; border:1px solid var(--code-border); border-radius:4px; overflow-x:auto; text-align:left; margin:12px 0; white-space:pre; }
+.card { background:var(--card); border:1px solid var(--border); border-radius:8px; padding:24px; margin:20px 0; box-shadow:0 2px 4px rgba(0,0,0,0.04); }
+button { font-family:inherit; font-size:16px; padding:10px 24px; border:none; border-radius:6px; cursor:pointer; background:var(--blue); color:white; transition:background 0.2s; }
+button:hover { background:#163d5e; }
+button:disabled { background:#aaa; cursor:not-allowed; }
+button.secondary { background:var(--gray); }
+button.danger { background:var(--red); }
+button.warning { background:var(--orange); }
+input[type="text"],input[type="number"] { font-family:inherit; font-size:16px; padding:8px 12px; border:1px solid var(--border); border-radius:4px; direction:rtl; }
+input[type="number"] { direction:ltr; text-align:left; }
+.options { list-style:none; padding:0; }
+.option { padding:12px 16px; margin:6px 0; border:1px solid var(--border); border-radius:6px; cursor:pointer; transition:background 0.15s; display:flex; align-items:flex-start; gap:10px; }
+.option:hover { background:#f8f8f8; }
+.option input { margin-top:4px; flex-shrink:0; }
+.option-text { flex:1; }
+.option.selected { background:#e6f0f8; border-color:var(--blue); }
+pre select { font-family:'Consolas',monospace; font-size:0.95em; padding:1px 4px; margin:0 2px; border:1px solid var(--blue); border-radius:3px; background:#e6f0f8; direction:ltr; }
+.exam-header { position:sticky; top:0; background:var(--card); border-bottom:2px solid var(--blue); padding:12px 20px; display:flex; justify-content:space-between; align-items:center; z-index:100; box-shadow:0 2px 4px rgba(0,0,0,0.04); margin-bottom:20px; }
+.timer { font-family:monospace; font-size:20px; font-weight:bold; color:var(--blue); direction:ltr; unicode-bidi:isolate; }
+.timer.warning { color:var(--orange); }
+.timer.danger { color:var(--red); }
+.progress-info { color:var(--gray); font-size:14px; }
+.nav-buttons { display:flex; justify-content:space-between; gap:12px; margin-top:24px; flex-wrap:wrap; }
+.nav-mini { display:flex; flex-wrap:wrap; gap:4px; margin-top:12px; padding:12px; background:#f4f4f4; border-radius:6px; }
+.nav-btn { padding:6px 10px; font-size:13px; border:1px solid var(--border); background:white; color:#333; cursor:pointer; border-radius:4px; min-width:36px; }
+.nav-btn.answered { background:#d4edda; border-color:var(--green); }
+.nav-btn.current { background:var(--blue); color:white; border-color:var(--blue); }
+.score-big { font-size:64px; font-weight:bold; text-align:center; color:var(--blue); margin:20px 0; }
+.score-percent { font-size:24px; color:var(--gray); }
+.result-question { border-right:4px solid var(--gray); padding:16px 20px; margin:12px 0; background:#f8f8f8; border-radius:4px; }
+.result-question.correct { border-right-color:var(--green); background:#f0f9f0; }
+.result-question.wrong { border-right-color:var(--red); background:#faf0f0; }
+.result-explanation { background:var(--highlight); padding:12px 16px; border-radius:4px; margin-top:12px; font-size:0.95em; }
+.tag { display:inline-block; padding:2px 10px; background:var(--blue); color:white; border-radius:12px; font-size:12px; margin-left:8px; }
+.section-title { font-weight:bold; color:var(--blue); border-bottom:1px solid var(--border); padding-bottom:8px; margin-top:24px; }
+.warning-box { background:#fff3cd; border:1px solid #ffeaa7; border-radius:6px; padding:12px 16px; margin:16px 0; }
+.info-list { background:#e8f4f8; border:1px solid #b3d9e8; border-radius:6px; padding:16px 20px; margin:16px 0; }
+.info-list ul { margin:8px 0; padding-right:24px; }
+.info-list li { margin:6px 0; }
+.danger-box { background:#f8d7da; border:1px solid #f5c6cb; border-radius:6px; padding:16px 20px; margin:16px 0; color:#721c24; }
+.exceeded-warning { background:var(--red); color:white; padding:12px 16px; border-radius:6px; margin:12px 0; font-weight:bold; text-align:center; }
+@media (max-width:600px) { .container { padding:10px; } .card { padding:16px; } button { padding:12px 16px; font-size:14px; } }
+</style>
+</head>
+<body>
+<div class="container" id="app">
+    <div id="screen-start" class="card">
+        <h1>מבחן 2 — מערכים ומחרוזות</h1>
+        <h3 style="text-align:center; color:var(--gray); margin-top:-10px;">מערכים חד-ממדיים ועיבוד מחרוזות</h3>
+        <div id="resume-area" style="display:none;">
+            <div class="warning-box">
+                <strong>נמצא מבחן פתוח קודם</strong>
+                <p id="resume-info"></p>
+                <div style="margin-top:12px;">
+                    <button onclick="resumeExam()">המשך מבחן (יישמר זמן ההתחלה המקורי)</button>
+                    <button onclick="discardAndStart()" class="warning">ביטול והתחלה מחדש</button>
+                </div>
+            </div>
+        </div>
+        <div id="new-attempt-warning" style="display:none;">
+            <div class="danger-box"><strong>שים לב:</strong> כבר ניגשת למבחן הזה <span id="prev-attempts"></span> פעמים בעבר. כל ניסיון מתועד בקובץ הסיכום שיישלח למורה.</div>
+        </div>
+        <div class="info-list">
+            <strong>על המבחן:</strong>
+            <ul>
+                <li><strong>13 שאלות</strong> — מבחן ממוקד בנושא</li>
+                <li>נושא המבחן: מערכים חד-ממדיים ועיבוד מחרוזות</li>
+                <li>משך זמן מוקצב: <strong>30 דקות</strong></li>
+                <li>אם תרענן את הדף — תוכל להמשיך מאותו מקום, אבל הזמן <strong>ממשיך לרוץ</strong> (לא מתחיל מ-0)</li>
+                <li>אם הזמן יסתיים — המבחן יוגש אוטומטית עם התשובות שמילאת</li>
+            </ul>
+        </div>
+        <div class="warning-box">
+            <strong>חשוב לדעת:</strong>
+            <ul style="margin:8px 0;">
+                <li>קובץ הסיכום שתורידי בסיום מתעד <strong>זמן התחלה אמיתי</strong>, <strong>זמן סיום אמיתי</strong>, ו<strong>מספר רענונים</strong></li>
+                <li>אם הזמן יחרוג מ-30 דקות — תופיע הערה ברורה בקובץ</li>
+                <li>חזרה למבחן אחרי שהוגש = ניסיון חדש (גם זה מתועד)</li>
+                <li>בסוף הקובץ יש <strong>חתימה דיגיטלית</strong> — שינוי ידני של הקובץ יקלקל אותה</li>
+            </ul>
+        </div>
+        <div style="margin:30px 0;">
+            <label style="display:block; margin-bottom:8px; font-weight:bold;">שם מלא (יופיע בקובץ הסיכום):</label>
+            <input type="text" id="student-name" style="width:100%; max-width:400px;" placeholder="שם פרטי ושם משפחה" autocomplete="off">
+        </div>
+        <div style="text-align:center;">
+            <button id="btn-start" onclick="startExam()" style="font-size:18px; padding:14px 36px;">התחלת המבחן ⏱</button>
+        </div>
+    </div>
+    <div id="screen-exam" style="display:none;">
+        <div class="exam-header">
+            <div><strong>שאלה <span id="current-num">1</span> מתוך <span id="total-num">30</span></strong> <span class="progress-info" id="section-name"></span></div>
+            <div class="timer" id="timer">110:00</div>
+        </div>
+        <div class="card">
+            <div id="question-container"></div>
+            <div class="nav-buttons">
+                <button onclick="prevQuestion()" id="btn-prev">הקודמת</button>
+                <button onclick="nextQuestion()" id="btn-next">הבאה ←</button>
+            </div>
+            <div class="nav-mini" id="nav-mini"></div>
+            <div style="text-align:center; margin-top:20px;">
+                <button onclick="confirmSubmit()" class="danger">סיום והגשת המבחן</button>
+            </div>
+        </div>
+    </div>
+    <div id="screen-result" style="display:none;">
+        <div class="card">
+            <h1>תוצאות המבחן</h1>
+            <div id="time-warning"></div>
+            <div id="result-summary"></div>
+            <div style="text-align:center; margin:30px 0;">
+                <button onclick="downloadSummary()">📥 הורדת קובץ סיכום (להעברה למורה)</button>
+                <button onclick="toggleDetails()" class="secondary">הצג/הסתר תשובות מפורטות</button>
+                <button onclick="startNewAttempt()" class="warning">התחלת ניסיון חדש (לתרגול בלבד)</button>
+            </div>
+            <div id="result-details" style="display:none;"></div>
+        </div>
+    </div>
+</div>
+<script>
+const QUESTIONS = [{"id": "q15_max_diff_consecutive", "topic": "מעקב על קוד", "difficulty": "medium", "stem": "לפניכם הפעולה <code>maxJump</code>:", "code": "public static int maxJump(int[] arr)\n{\n    int maxDiff = 0;\n    for (int i = 1; i < arr.length; i++)\n    {\n        int diff = Math.abs(arr[i] - arr[i-1]);\n        if (diff > maxDiff)\n            maxDiff = diff;\n    }\n    return maxDiff;\n}", "question": "מה תחזיר הקריאה <code>maxJump(arr)</code> עבור <code>arr = {3, 10, 1, 8, 5}</code>?", "options": [{"text": "7", "correct": false, "feedback": "טעות: 10-3=7 הוא הקפיצה הראשונה, אבל לא הגדולה. בדקו את כל הקפיצות."}, {"text": "9", "correct": true, "feedback": "נכון! הקפיצות: |10-3|=7, |1-10|=9, |8-1|=7, |5-8|=3. המקסימום: 9."}, {"text": "10", "correct": false, "feedback": "טעות: 10 הוא הערך המקסימלי במערך, לא ההפרש הגדול ביותר בין שכנים."}, {"text": "12", "correct": false, "feedback": "טעות: 12 לא מתקבל כהפרש בין שכנים במערך הזה."}, {"text": "5", "correct": false, "feedback": "טעות: 5 הוא הקפיצה הסופית? בדקו: |5-8|=3, לא 5."}], "explanation": "הפעולה מחזירה את ההפרש המוחלט הגדול ביותר בין שני איברים שכנים. הקפיצות: |10-3|=7, |1-10|=9, |8-1|=7, |5-8|=3. המקסימום: 9.", "type": "multichoice", "part": "פרק 1", "section": "שאלה 3: מערכים ומחרוזות", "category": "פרק 1/שאלה 3: מערכים ומחרוזות"}, {"id": "q17_count_peaks", "topic": "מעקב על קוד", "difficulty": "medium", "stem": "לפניכם הפעולה <code>peaks</code>:", "code": "public static int peaks(int[] arr)\n{\n    int cnt = 0;\n    for (int i = 0; i < arr.length; i++)\n    {\n        if (i > 0 && i < arr.length - 1)\n        {\n            if (arr[i] > arr[i-1] && arr[i] > arr[i+1])\n                cnt++;\n        }\n    }\n    return cnt;\n}", "question": "מה תחזיר הקריאה <code>peaks(arr)</code> עבור <code>arr = {1, 3, 2, 5, 1, 4, 2}</code>?", "options": [{"text": "2", "correct": false, "feedback": "טעות: יש 3 'פסגות'. בדקו את אינדקסים 1, 3, ו-5."}, {"text": "3", "correct": true, "feedback": "נכון! פסגות: arr[1]=3 (>1, >2 ✓), arr[3]=5 (>2, >1 ✓), arr[5]=4 (>1, >2 ✓). סה\"כ 3."}, {"text": "4", "correct": false, "feedback": "טעות: בדקו שוב — לא כל איבר גדול הוא 'פסגה' לפי ההגדרה (חייב להיות גדול משני השכנים)."}, {"text": "5", "correct": false, "feedback": "טעות: 5 הוא הערך המקסימלי, לא מספר הפסגות."}, {"text": "7", "correct": false, "feedback": "טעות: 7 הוא אורך המערך, לא מספר הפסגות."}], "explanation": "הפעולה סופרת 'פסגות' — איברים שגדולים משני שכניהם. אינדקסים בקצוות (0 ו-n-1) לא נחשבים. פסגות: i=1 (3>1,3>2 ✓), i=3 (5>2,5>1 ✓), i=5 (4>1,4>2 ✓). סה\"כ 3.", "type": "multichoice", "part": "פרק 1", "section": "שאלה 3: מערכים ומחרוזות", "category": "פרק 1/שאלה 3: מערכים ומחרוזות"}, {"id": "q19_sign_changes", "topic": "מעקב על קוד", "difficulty": "medium", "stem": "לפניכם הפעולה <code>changes</code>:", "code": "public static int changes(int[] arr)\n{\n    int cnt = 0;\n    for (int i = 1; i < arr.length; i++)\n    {\n        if (arr[i-1] >= 0 && arr[i] < 0)\n            cnt++;\n        else if (arr[i-1] < 0 && arr[i] >= 0)\n            cnt++;\n    }\n    return cnt;\n}", "question": "מה תחזיר הקריאה <code>changes(arr)</code> עבור <code>arr = {2, -3, -1, 4, 5, -2, 0}</code>?", "options": [{"text": "2", "correct": false, "feedback": "טעות: יש יותר משני מעברי סימן. בדקו כל זוג שכנים."}, {"text": "3", "correct": false, "feedback": "כמעט. בדקו שוב את הזוגות: (2,-3), (-3,-1), (-1,4), (4,5), (5,-2), (-2,0)."}, {"text": "4", "correct": true, "feedback": "נכון! מעברי סימן: 2→-3 (חיובי→שלילי), -1→4 (שלילי→חיובי), 5→-2 (חיובי→שלילי), -2→0 (שלילי→חיובי, כי 0 ≥ 0). סה\"כ 4."}, {"text": "5", "correct": false, "feedback": "טעות: בדקו אם (-3,-1) מהווה מעבר — שניהם שליליים, אז לא."}, {"text": "6", "correct": false, "feedback": "טעות: יש 6 זוגות שכנים, אבל לא כולם מעברי סימן."}], "explanation": "הפעולה סופרת מעברי סימן בין שכנים (כאשר 0 נחשב 'אי-שלילי'). הזוגות: (2,-3)✓, (-3,-1)✗, (-1,4)✓, (4,5)✗, (5,-2)✓, (-2,0)✓. סה\"כ 4.", "type": "multichoice", "part": "פרק 1", "section": "שאלה 3: מערכים ומחרוזות", "category": "פרק 1/שאלה 3: מערכים ומחרוזות"}, {"id": "q22_single_bubble_pass", "topic": "מעקב על קוד", "difficulty": "medium", "stem": "לפניכם הפעולה <code>onePass</code>:", "code": "public static void onePass(int[] arr)\n{\n    for (int i = 0; i < arr.length - 1; i++)\n    {\n        if (arr[i] > arr[i+1])\n        {\n            int temp = arr[i];\n            arr[i] = arr[i+1];\n            arr[i+1] = temp;\n        }\n    }\n}", "question": "מה יהיה המערך אחרי הקריאה <code>onePass(arr)</code> כאשר בתחילה <code>arr = {5, 2, 8, 1, 4}</code>?", "options": [{"text": "{1, 2, 4, 5, 8}", "correct": false, "feedback": "טעות: זוהי תוצאת מיון מלא, אבל הפעולה מבצעת רק סריקה אחת."}, {"text": "{2, 5, 1, 4, 8}", "correct": true, "feedback": "נכון! עוקבים: (5,2)→החלפה: {2,5,8,1,4}. (5,8)→ללא. (8,1)→החלפה: {2,5,1,8,4}. (8,4)→החלפה: {2,5,1,4,8}."}, {"text": "{2, 5, 8, 1, 4}", "correct": false, "feedback": "טעות: ביצעתם רק את ההחלפה הראשונה. הלולאה ממשיכה."}, {"text": "{5, 2, 8, 1, 4}", "correct": false, "feedback": "טעות: המערך לא נשאר ללא שינוי — היו החלפות."}, {"text": "{2, 5, 1, 8, 4}", "correct": false, "feedback": "כמעט! ביצעתם 3 החלפות אבל פספסתם את האחרונה (8,4)."}], "explanation": "זוהי סריקה אחת של מיון בועות. נעקוב צעד-צעד: i=0: (5,2)→החלפה→{2,5,8,1,4}. i=1: (5,8)→ללא. i=2: (8,1)→החלפה→{2,5,1,8,4}. i=3: (8,4)→החלפה→{2,5,1,4,8}.", "type": "multichoice", "part": "פרק 1", "section": "שאלה 3: מערכים ומחרוזות", "category": "פרק 1/שאלה 3: מערכים ומחרוזות"}, {"id": "q24_count_overlapping_substr", "topic": "מעקב על קוד", "difficulty": "medium", "stem": "לפניכם הפעולה <code>countSub</code>:", "code": "public static int countSub(String s, String sub)\n{\n    int cnt = 0;\n    for (int i = 0; i <= s.length() - sub.length(); i++)\n    {\n        boolean match = true;\n        for (int j = 0; j < sub.length(); j++)\n        {\n            if (s.charAt(i + j) != sub.charAt(j))\n            {\n                match = false;\n                break;\n            }\n        }\n        if (match)\n            cnt++;\n    }\n    return cnt;\n}", "question": "מה תחזיר הקריאה <code>countSub(\"aaaaa\", \"aa\")</code>?", "options": [{"text": "2", "correct": false, "feedback": "טעות: הפעולה סופרת גם הופעות חופפות. בדקו את כל המיקומים."}, {"text": "3", "correct": false, "feedback": "טעות: בדקו את כל המיקומים האפשריים i=0,1,2,3."}, {"text": "4", "correct": true, "feedback": "נכון! 'aa' מופיע ב-i=0,1,2,3 (4 פעמים), כי הפעולה לא מדלגת אחרי התאמה — היא מתקדמת ב-1 בלבד."}, {"text": "5", "correct": false, "feedback": "טעות: יש רק 4 מיקומים אפשריים (אורך 5 - אורך 2 + 1 = 4)."}, {"text": "1", "correct": false, "feedback": "טעות: הפעולה לא עוצרת אחרי ההתאמה הראשונה — היא ממשיכה לחפש."}], "explanation": "הפעולה סופרת הופעות חופפות. ב-'aaaaa' תת-המחרוזת 'aa' מופיעה במיקומים 0,1,2,3 — 4 הופעות. שימו לב: הלולאה מתקדמת ב-1 בכל איטרציה, לא ב-אורך-תת-המחרוזת.", "type": "multichoice", "part": "פרק 1", "section": "שאלה 3: מערכים ומחרוזות", "category": "פרק 1/שאלה 3: מערכים ומחרוזות"}, {"id": "q27_count_words", "topic": "מעקב על קוד", "difficulty": "hard", "stem": "לפניכם הפעולה <code>countWords</code>:", "code": "public static int countWords(String s)\n{\n    int cnt = 0;\n    boolean inWord = false;\n    for (int i = 0; i < s.length(); i++)\n    {\n        if (s.charAt(i) != ' ')\n        {\n            if (!inWord)\n            {\n                cnt++;\n                inWord = true;\n            }\n        }\n        else\n        {\n            inWord = false;\n        }\n    }\n    return cnt;\n}", "question": "מה תחזיר הקריאה <code>countWords(\"   Java is   fun  \")</code>?", "options": [{"text": "1", "correct": false, "feedback": "טעות: יש 3 מילים — אבל הפעולה מטפלת ברווחים מרובים נכון."}, {"text": "2", "correct": false, "feedback": "טעות: יש 3 מילים — Java, is, fun."}, {"text": "3", "correct": true, "feedback": "נכון! המשתנה inWord מבטיח שכל רצף תווים שאינם רווח נספר פעם אחת. המילים: Java, is, fun = 3."}, {"text": "4", "correct": false, "feedback": "טעות: ספרתם גם רווחים בודדים כמילה. הפעולה לא עושה זאת."}, {"text": "5", "correct": false, "feedback": "טעות: 5 לא תואם את מספר המילים בקלט."}], "explanation": "הפעולה משתמשת בדגל inWord כדי לזהות תחילה של מילה חדשה. רווחים מרובים מטופלים נכון — רק כשעוברים מרווח לתו אחר נספרת מילה חדשה. במחרוזת 'Java is fun' (גם אם עם רווחים מרובים) יש 3 מילים.", "type": "multichoice", "part": "פרק 1", "section": "שאלה 3: מערכים ומחרוזות", "category": "פרק 1/שאלה 3: מערכים ומחרוזות"}, {"id": "q16_alternating_sum", "topic": "מערכים", "difficulty": "easy", "stem": "לפניכם הפעולה <code>alt</code>:", "code": "public static int alt(int[] arr)\n{\n    int s = 0;\n    for (int i = 0; i < arr.length; i++)\n    {\n        if (i % 2 == 0)\n            s += arr[i];\n        else\n            s -= arr[i];\n    }\n    return s;\n}", "question": "מה תחזיר הקריאה <code>alt(arr)</code> עבור <code>arr = {5, 2, 8, 1, 4, 6}</code>?", "options": [{"text": "8", "correct": true, "feedback": "נכון! 5-2+8-1+4-6 = 8."}, {"text": "10", "correct": false, "feedback": "טעות בחישוב: 5-2+8-1+4-6 = 5+8+4-2-1-6 = 17-9 = 8."}, {"text": "26", "correct": false, "feedback": "טעות: 26 הוא סכום כל האיברים. הפעולה מבצעת חיבור וחיסור לסירוגין."}, {"text": "16", "correct": false, "feedback": "טעות: סכמתם רק את אינדקסים זוגיים (5+8+4=17), בלי לחסר את האי-זוגיים."}, {"text": "-9", "correct": false, "feedback": "טעות: -9 הוא רק תרומת האינדקסים האי-זוגיים."}], "explanation": "הפעולה מחברת איברים באינדקסים זוגיים ומחסרת איברים באינדקסים אי-זוגיים: 5(+) -2(-) +8(+) -1(-) +4(+) -6(-) = 8.", "part": "פרק 1", "section": "שאלה 3: מערכים ומחרוזות", "category": "פרק 1/שאלה 3: מערכים ומחרוזות"}, {"id": "q18_max_multiple_pos", "topic": "מערכים", "difficulty": "medium", "stem": "לפניכם הפעולה <code>locate</code>:", "code": "public static int locate(int[] arr)\n{\n    int pos = -1;\n    for (int i = 0; i < arr.length; i++)\n    {\n        if (arr[i] % 7 == 0)\n        {\n            if (pos == -1 || arr[i] > arr[pos])\n                pos = i;\n        }\n    }\n    return pos;\n}", "question": "מה תחזיר הקריאה <code>locate(arr)</code> עבור <code>arr = {21, 14, 35, 8, 49, 7}</code>?", "options": [{"text": "0", "correct": false, "feedback": "טעות: 21 הוא הכפולה הראשונה אבל לא הגדולה. הפעולה מחפשת את אינדקס הכפולה הגדולה."}, {"text": "2", "correct": false, "feedback": "טעות: 35 הוא גדול, אבל 49 (באינדקס 4) גדול ממנו."}, {"text": "4", "correct": true, "feedback": "נכון! כפולות 7 במערך: 21,14,35,49,7. הגדולה היא 49 באינדקס 4."}, {"text": "5", "correct": false, "feedback": "טעות: 7 (באינדקס 5) הוא כפולה אבל לא הגדולה."}, {"text": "49", "correct": false, "feedback": "טעות: 49 הוא הערך, לא האינדקס. הפעולה מחזירה אינדקס."}], "explanation": "הפעולה מחזירה את אינדקס הכפולה הגדולה ביותר של 7 במערך. הכפולות: 21,14,35,49,7. הגדולה: 49, אינדקס 4.", "part": "פרק 1", "section": "שאלה 3: מערכים ומחרוזות", "category": "פרק 1/שאלה 3: מערכים ומחרוזות"}, {"id": "q21_output_array_size", "topic": "מערכים", "difficulty": "easy", "stem": "לפניכם הפעולה <code>process</code> שמקבלת מערך ומחזירה מערך חדש:", "code": "public static int[] process(int[] arr)\n{\n    int cnt = 0;\n    for (int i = 0; i < arr.length; i++)\n        if (arr[i] > 0)\n            cnt++;\n    int[] result = new int[cnt];\n    int j = 0;\n    for (int i = 0; i < arr.length; i++)\n    {\n        if (arr[i] > 0)\n        {\n            result[j] = arr[i] * 2;\n            j++;\n        }\n    }\n    return result;\n}", "question": "עבור <code>arr = {3, -1, 4, 0, -2, 5, 0, 6}</code>, מה גודל המערך המוחזר?", "options": [{"text": "4", "correct": true, "feedback": "נכון! האיברים החיוביים (גדולים מ-0) הם 3, 4, 5, 6 — 4 איברים. שימו לב ש-0 לא נחשב חיובי לפי התנאי >0."}, {"text": "5", "correct": false, "feedback": "טעות: כללתם את 0 בספירה. התנאי הוא arr[i]>0, לא arr[i]>=0."}, {"text": "6", "correct": false, "feedback": "טעות: כללתם גם את שני האפסים. אבל הם לא חיוביים לפי התנאי."}, {"text": "8", "correct": false, "feedback": "טעות: 8 הוא אורך המערך המקורי. המערך המוחזר מכיל רק את החיוביים."}, {"text": "3", "correct": false, "feedback": "טעות בספירה: יש 4 חיוביים (3,4,5,6), לא 3."}], "explanation": "הפעולה סוקרת ראשית כדי לספור איברים חיוביים, יוצרת מערך בגודל המתאים, ואז ממלאת אותו. החיוביים (>0): 3,4,5,6. גודל המערך המוחזר: 4.", "part": "פרק 1", "section": "שאלה 3: מערכים ומחרוזות", "category": "פרק 1/שאלה 3: מערכים ומחרוזות"}, {"id": "q23_count_uppercase", "topic": "מחרוזות", "difficulty": "easy", "stem": "לפניכם הפעולה <code>countUpper</code>:", "code": "public static int countUpper(String s)\n{\n    int cnt = 0;\n    for (int i = 0; i < s.length(); i++)\n    {\n        char c = s.charAt(i);\n        if (c >= 'A' && c <= 'Z')\n            cnt++;\n    }\n    return cnt;\n}", "question": "מה תחזיר הקריאה <code>countUpper(\"Java Programming Language\")</code>?", "options": [{"text": "1", "correct": false, "feedback": "טעות בספירה: יש יותר מאות גדולה אחת. בדקו כל מילה."}, {"text": "3", "correct": true, "feedback": "נכון! J ב-Java, P ב-Programming, L ב-Language. סה\"כ 3 אותיות גדולות."}, {"text": "4", "correct": false, "feedback": "טעות: כנראה ספרתם גם רווח או תו שאינו אות גדולה."}, {"text": "23", "correct": false, "feedback": "טעות: 23 הוא בערך אורך המחרוזת כולה."}, {"text": "0", "correct": false, "feedback": "טעות: יש אותיות גדולות במחרוזת — J, P, L."}], "explanation": "הפעולה סופרת אותיות גדולות באנגלית (A עד Z). במחרוזת 'Java Programming Language' יש 3: J, P, L.", "part": "פרק 1", "section": "שאלה 3: מערכים ומחרוזות", "category": "פרק 1/שאלה 3: מערכים ומחרוזות"}, {"id": "q25_string_reverse_partial", "topic": "מחרוזות", "difficulty": "medium", "stem": "לפניכם הפעולה <code>transform</code>:", "code": "public static String transform(String s)\n{\n    String result = \"\";\n    for (int i = s.length() - 1; i >= 0; i--)\n    {\n        if (s.charAt(i) >= 'a' && s.charAt(i) <= 'z')\n            result = result + s.charAt(i);\n    }\n    return result;\n}", "question": "מה תחזיר הקריאה <code>transform(\"Hello World\")</code>?", "options": [{"text": "\"dlroWolleH\"", "correct": false, "feedback": "טעות: הפעולה משאירה רק אותיות קטנות, ומבטלת רווחים ואותיות גדולות."}, {"text": "\"dlroolleh\"", "correct": true, "feedback": "נכון! סורקים מהסוף, אוספים רק אותיות קטנות a-z: d,l,r,o,o,l,l,e,h. שימו לב — H ו-W (גדולות) ורווח לא נכללים."}, {"text": "\"dlrow olleh\"", "correct": false, "feedback": "טעות: הפעולה כוללת רק אותיות קטנות (a-z). רווחים ואותיות גדולות לא נכללים."}, {"text": "\"olleh\"", "correct": false, "feedback": "טעות: סרקתם רק מילה אחת. הפעולה סורקת את כל המחרוזת."}, {"text": "\"helloworld\"", "correct": false, "feedback": "טעות: לא הפכתם את הסדר. הלולאה רצה מהסוף להתחלה."}], "explanation": "הפעולה סורקת מהסוף להתחלה ומשרשרת רק אותיות קטנות a-z. ב-'Hello World': מהסוף — d,l,r,o (מ-World) ואז o,l,l,e,h (מ-Hello). התוצאה: 'dlroolleh'. שימו לב ש-H ו-W (גדולות) ורווח לא נכללים.", "part": "פרק 1", "section": "שאלה 3: מערכים ומחרוזות", "category": "פרק 1/שאלה 3: מערכים ומחרוזות"}, {"id": "q26_palindrome_check", "topic": "מחרוזות", "difficulty": "medium", "stem": "לפניכם הפעולה <code>check</code>:", "code": "public static boolean check(String s)\n{\n    int n = s.length();\n    for (int i = 0; i < n / 2; i++)\n    {\n        if (s.charAt(i) != s.charAt(n - 1 - i))\n            return false;\n    }\n    return true;\n}", "question": "עבור אילו מהקלטים הבאים <code>check</code> תחזיר <code>true</code>?", "options": [{"text": "\"hello\"", "correct": false, "feedback": "שגוי: h≠o, מחזירה false מיד."}, {"text": "\"radar\"", "correct": true, "feedback": "נכון! r=r, a=a, d באמצע (לא נבדק). 'radar' פלינדרום."}, {"text": "\"java\"", "correct": false, "feedback": "שגוי: j≠a, מחזירה false."}, {"text": "\"abcde\"", "correct": false, "feedback": "שגוי: a≠e, מחזירה false."}, {"text": "\"world\"", "correct": false, "feedback": "שגוי: w≠d, מחזירה false."}], "explanation": "הפעולה בודקת אם המחרוזת היא פלינדרום (נקראת אותו דבר מימין ומשמאל). 'radar' הוא פלינדרום: r=r, a=a, d באמצע.", "part": "פרק 1", "section": "שאלה 3: מערכים ומחרוזות", "category": "פרק 1/שאלה 3: מערכים ומחרוזות"}, {"id": "t1_doubled_next", "type": "multichoice", "topic": "מעקב על קוד", "difficulty": "medium", "stem": "לפניכם הפעולה <code>count</code>:", "code": "public static int count(int[] arr)\n{\n    int cnt = 0;\n    for (int i = 1; i < arr.length; i++)\n    {\n        if (arr[i] > arr[i-1] * 2)\n            cnt++;\n    }\n    return cnt;\n}", "question": "מה תחזיר הקריאה <code>count(arr)</code> עבור <code>arr = {3, 5, 12, 8, 20, 41}</code>?", "options": [{"text": "2", "correct": false, "feedback": "טעות בספירה. בדקו כל זוג: 5>6? 12>10? 8>24? 20>16? 41>40?"}, {"text": "3", "correct": true, "feedback": "נכון! 12>5*2=10 ✓, 20>8*2=16 ✓, 41>20*2=40 ✓. סה\"כ 3."}, {"text": "4", "correct": false, "feedback": "טעות: בדקו את 5>3*2=6 ✗ (5 לא גדול מ-6), אז זוג זה לא נספר."}, {"text": "5", "correct": false, "feedback": "טעות: יש רק 5 זוגות שכנים, ולא כולם מקיימים את התנאי."}, {"text": "1", "correct": false, "feedback": "טעות: יש יותר מזוג אחד שעומד בתנאי."}], "explanation": "הפעולה סופרת זוגות שכנים שבהם האיבר השני גדול מהראשון כפול 2. בדיקה: 5>6 ✗, 12>10 ✓, 8>24 ✗, 20>16 ✓, 41>40 ✓. סה\"כ 3.", "part": "פרק 1", "section": "שאלה 3: מערכים ומחרוזות", "category": "פרק 1/שאלה 3: מערכים ומחרוזות"}];
+const STORAGE_KEY = 'metukonet_899371_arrays_strings_state';
+const HISTORY_KEY = 'metukonet_899371_arrays_strings_history';
+const TIME_LIMIT_MS = 30 * 60 * 1000;
+
+let state = null;
+let timerInterval = null;
+let resultData = null;
+
+function loadState() {
+    try { const raw = localStorage.getItem(STORAGE_KEY); return raw ? JSON.parse(raw) : null; }
+    catch (e) { return null; }
+}
+function saveState() {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+    catch (e) { console.warn('Failed to save:', e); }
+}
+function loadHistory() {
+    try { const raw = localStorage.getItem(HISTORY_KEY); return raw ? JSON.parse(raw) : []; }
+    catch (e) { return []; }
+}
+function appendHistory(entry) {
+    const history = loadHistory();
+    history.push(entry);
+    try { localStorage.setItem(HISTORY_KEY, JSON.stringify(history)); }
+    catch (e) { console.warn('Failed:', e); }
+}
+
+window.addEventListener('load', () => {
+    const existing = loadState();
+    if (existing && !existing.ended) {
+        const elapsed = Date.now() - new Date(existing.startTime).getTime();
+        if (elapsed >= TIME_LIMIT_MS) {
+            state = existing;
+            state.endTime = new Date(new Date(existing.startTime).getTime() + TIME_LIMIT_MS).toISOString();
+            state.ended = true;
+            state.autoSubmitted = true;
+            saveState();
+            showResults();
+        } else {
+            state = existing;
+            state.refreshes = (state.refreshes || 0) + 1;
+            saveState();
+            showResumeOption(elapsed);
+        }
+    } else if (existing && existing.ended) {
+        showNewAttemptWarning();
+    }
+});
+
+function showResumeOption(elapsed) {
+    const remainingMin = Math.floor((TIME_LIMIT_MS - elapsed) / 60000);
+    const elapsedMin = Math.floor(elapsed / 60000);
+    document.getElementById('resume-area').style.display = 'block';
+    document.getElementById('resume-info').innerHTML = `התחלת את המבחן לפני ${elapsedMin} דקות. נותרו <strong>${remainingMin} דקות</strong>. שם: <strong>${escapeHtml(state.name || 'לא צוין')}</strong>.`;
+    document.getElementById('btn-start').style.display = 'none';
+}
+
+function showNewAttemptWarning() {
+    const history = loadHistory();
+    if (history.length > 0) {
+        document.getElementById('new-attempt-warning').style.display = 'block';
+        document.getElementById('prev-attempts').textContent = history.length;
+    }
+}
+
+function startExam() {
+    const name = document.getElementById('student-name').value.trim();
+    if (!name) { alert('נא להזין שם מלא לפני התחלת המבחן'); return; }
+    const selected = selectQuestions();
+    state = {
+        name: name,
+        startTime: new Date().toISOString(),
+        endTime: null,
+        selectedIds: selected.map(q => q.id),
+        answers: {},
+        current: 0,
+        refreshes: 0,
+        ended: false,
+        autoSubmitted: false,
+        attemptNumber: loadHistory().length + 1
+    };
+    saveState();
+    document.getElementById('screen-start').style.display = 'none';
+    document.getElementById('screen-exam').style.display = 'block';
+    document.getElementById('total-num').textContent = selected.length;
+    renderQuestion();
+    startTimer();
+}
+
+function resumeExam() {
+    document.getElementById('screen-start').style.display = 'none';
+    document.getElementById('screen-exam').style.display = 'block';
+    document.getElementById('total-num').textContent = state.selectedIds.length;
+    renderQuestion();
+    startTimer();
+}
+
+function discardAndStart() {
+    if (!confirm('האם לבטל את המבחן הפתוח ולהתחיל מחדש? המעבר הזה יתועד בקובץ הסיכום.')) return;
+    if (state) {
+        appendHistory({ name: state.name, startTime: state.startTime, discardedAt: new Date().toISOString(), discarded: true });
+    }
+    localStorage.removeItem(STORAGE_KEY);
+    location.reload();
+}
+
+function startNewAttempt() {
+    if (!confirm('התחלת ניסיון חדש לתרגול. הציון הקודם נשמר בהיסטוריה. להמשיך?')) return;
+    if (state) {
+        appendHistory({ name: state.name, startTime: state.startTime, endTime: state.endTime, attemptNumber: state.attemptNumber, refreshes: state.refreshes, autoSubmitted: state.autoSubmitted, elapsed: new Date(state.endTime) - new Date(state.startTime) });
+    }
+    localStorage.removeItem(STORAGE_KEY);
+    location.reload();
+}
+
+function getSelectedQuestions() { return state.selectedIds.map(id => QUESTIONS.find(q => q.id === id)).filter(Boolean); }
+
+function selectQuestions() {
+    // כל 73 השאלות, ממוינות לפי פרק→שאלה. בתוך כל קטגוריה — סדר אקראי.
+    const order = [
+        'פרק 1/שאלה 1: מעקב על קוד',
+        'פרק 1/שאלה 2: מספרים וספרות',
+        'פרק 1/שאלה 3: מערכים ומחרוזות',
+        'פרק 2/שאלה 4: עצמים — מחלקה בודדת',
+        'פרק 2/שאלה 5: עצמים — מערך אובייקטים',
+        'פרק 2/שאלה 6: ניתוח קוד והבנת אלגוריתמים'
+    ];
+    const byCat = {};
+    QUESTIONS.forEach(q => { const cat = q.category || q.topic; if (!byCat[cat]) byCat[cat] = []; byCat[cat].push(q); });
+    const result = [];
+    order.forEach(cat => {
+        const pool = byCat[cat] || [];
+        const shuffled = [...pool].sort(() => Math.random() - 0.5);
+        result.push(...shuffled);
+    });
+    return result;
+}
+
+function startTimer() {
+    if (timerInterval) clearInterval(timerInterval);
+    timerInterval = setInterval(updateTimer, 1000);
+    updateTimer();
+}
+
+function updateTimer() {
+    const elapsed = Date.now() - new Date(state.startTime).getTime();
+    const remaining = TIME_LIMIT_MS - elapsed;
+    if (remaining <= 0) {
+        clearInterval(timerInterval);
+        state.endTime = new Date().toISOString();
+        state.ended = true;
+        state.autoSubmitted = true;
+        saveState();
+        alert('הזמן הסתיים. המבחן יוגש אוטומטית.');
+        showResults();
+        return;
+    }
+    const minutes = Math.floor(remaining / 60000);
+    const seconds = Math.floor((remaining % 60000) / 1000);
+    const timer = document.getElementById('timer');
+    timer.textContent = `${String(minutes).padStart(2,'0')}:${String(seconds).padStart(2,'0')}`;
+    if (remaining < 10*60*1000) timer.className = 'timer danger';
+    else if (remaining < 20*60*1000) timer.className = 'timer warning';
+    else timer.className = 'timer';
+}
+
+function renderQuestion() {
+    const selected = getSelectedQuestions();
+    const q = selected[state.current];
+    if (!q) return;
+    document.getElementById('current-num').textContent = state.current + 1;
+    document.getElementById('section-name').textContent = ' | ' + (q.section || q.category || '');
+    const container = document.getElementById('question-container');
+    let html = '';
+    if (q.stem) html += `<div class="stem">${q.stem}</div>`;
+    if (q.code) html += `<pre dir="ltr">${escapeHtml(q.code)}</pre>`;
+    if (q.question) html += `<div class="q" style="margin:16px 0;"><strong>השאלה:</strong> ${q.question}</div>`;
+    const type = q.type || 'multichoice';
+    const qid = `q${state.current}`;
+    if (type === 'multichoice') {
+        html += '<ul class="options">';
+        q.options.forEach((opt, i) => {
+            const checked = (state.answers[qid] === i) ? 'checked' : '';
+            const selectedCls = (state.answers[qid] === i) ? 'selected' : '';
+            html += `<li class="option ${selectedCls}" onclick="selectMC(${i})"><input type="radio" name="${qid}" value="${i}" ${checked} onclick="event.stopPropagation()"><div class="option-text">${opt.text}</div></li>`;
+        });
+        html += '</ul>';
+    } else if (type === 'multianswer') {
+        html += '<p style="color:var(--gray); font-size:0.9em;">סמנו את <strong>כל</strong> התשובות הנכונות.</p>';
+        html += '<ul class="options">';
+        const currentAns = state.answers[qid] || [];
+        q.options.forEach((opt, i) => {
+            const checked = currentAns.includes(i) ? 'checked' : '';
+            const selectedCls = currentAns.includes(i) ? 'selected' : '';
+            html += `<li class="option ${selectedCls}" onclick="selectMA(${i})"><input type="checkbox" name="${qid}" value="${i}" ${checked} onclick="event.stopPropagation()"><div class="option-text">${opt.text}</div></li>`;
+        });
+        html += '</ul>';
+    } else if (type === 'cloze') {
+        let code = q.code_template;
+        const currentAns = state.answers[qid] || {};
+        q.gaps.forEach((gap, gi) => {
+            let sel = `<select onchange="selectCloze(${gi}, this.value)"><option value="">-- בחר --</option>`;
+            gap.options.forEach((opt, oi) => {
+                const s = (currentAns[gi] === oi) ? 'selected' : '';
+                sel += `<option value="${oi}" ${s}>${escapeHtml(opt.text)}</option>`;
+            });
+            sel += '</select>';
+            code = code.replace(`[[${gap.label}]]`, sel);
+        });
+        let escapedCode = escapeHtml(code).replace(/&lt;select/g, '<select').replace(/&lt;\/select&gt;/g, '</select>').replace(/&lt;option/g, '<option').replace(/&lt;\/option&gt;/g, '</option>');
+        html += `<pre dir="ltr">${escapedCode}</pre>`;
+        q.gaps.forEach((gap, gi) => { html += `<p style="color:var(--gray); font-size:0.9em;"><strong>[[ ${gi+1} ]]</strong> ${gap.hint}</p>`; });
+    } else if (type === 'numerical') {
+        const val = state.answers[qid] !== undefined ? state.answers[qid] : '';
+        html += `<div style="margin:20px 0;"><label><strong>תשובה (מספר שלם):</strong></label><br><input type="number" id="${qid}-input" value="${val}" onchange="selectNum(this.value)" style="font-size:24px; width:200px; padding:10px;"></div>`;
+    }
+    container.innerHTML = html;
+    document.getElementById('btn-prev').disabled = (state.current === 0);
+    document.getElementById('btn-next').disabled = (state.current === state.selectedIds.length - 1);
+    renderNavMini();
+}
+
+function selectMC(i) { state.answers[`q${state.current}`] = i; saveState(); renderQuestion(); }
+function selectMA(i) {
+    const qid = `q${state.current}`;
+    if (!state.answers[qid]) state.answers[qid] = [];
+    const idx = state.answers[qid].indexOf(i);
+    if (idx >= 0) state.answers[qid].splice(idx, 1); else state.answers[qid].push(i);
+    saveState(); renderQuestion();
+}
+function selectCloze(gi, oi) {
+    const qid = `q${state.current}`;
+    if (!state.answers[qid]) state.answers[qid] = {};
+    state.answers[qid][gi] = oi === '' ? undefined : parseInt(oi);
+    saveState(); renderNavMini();
+}
+function selectNum(v) { state.answers[`q${state.current}`] = v === '' ? undefined : parseInt(v); saveState(); renderNavMini(); }
+
+function escapeHtml(t) { if (t === undefined || t === null) return ''; return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function nextQuestion() { if (state.current < state.selectedIds.length - 1) { state.current++; saveState(); renderQuestion(); window.scrollTo(0,0); } }
+function prevQuestion() { if (state.current > 0) { state.current--; saveState(); renderQuestion(); window.scrollTo(0,0); } }
+function goTo(idx) { state.current = idx; saveState(); renderQuestion(); window.scrollTo(0,0); }
+
+function renderNavMini() {
+    const selected = getSelectedQuestions();
+    const container = document.getElementById('nav-mini');
+    let html = '<strong style="margin-left:8px;">ניווט:</strong>';
+    selected.forEach((q, i) => {
+        const qid = `q${i}`;
+        const isAnswered = isQuestionAnswered(qid, q);
+        let cls = 'nav-btn';
+        if (i === state.current) cls += ' current';
+        else if (isAnswered) cls += ' answered';
+        html += `<button class="${cls}" onclick="goTo(${i})">${i+1}</button>`;
+    });
+    container.innerHTML = html;
+}
+
+function isQuestionAnswered(qid, q) {
+    const ans = state.answers[qid];
+    if (ans === undefined || ans === null) return false;
+    const type = q.type || 'multichoice';
+    if (type === 'multianswer') return ans.length > 0;
+    if (type === 'cloze') return Object.keys(ans).length === q.gaps.length;
+    return true;
+}
+
+function confirmSubmit() {
+    const selected = getSelectedQuestions();
+    const unanswered = selected.filter((q, i) => !isQuestionAnswered(`q${i}`, q)).length;
+    let msg = 'האם להגיש את המבחן?';
+    if (unanswered > 0) msg = `יש ${unanswered} שאלות שלא ענית עליהן. ${msg}`;
+    if (confirm(msg)) {
+        if (timerInterval) clearInterval(timerInterval);
+        state.endTime = new Date().toISOString();
+        state.ended = true;
+        saveState();
+        showResults();
+    }
+}
+
+function scoreExam() {
+    const selected = getSelectedQuestions();
+    let totalScore = 0, totalMax = 0;
+    const details = [];
+    selected.forEach((q, i) => {
+        const qid = `q${i}`;
+        const ans = state.answers[qid];
+        const type = q.type || 'multichoice';
+        let score = 0, max = 1, userAnsText = '', correctText = '', isCorrect = false;
+        if (type === 'multichoice') {
+            const correctIdx = q.options.findIndex(o => o.correct);
+            isCorrect = (ans === correctIdx);
+            score = isCorrect ? 1 : 0;
+            userAnsText = (ans !== undefined && ans !== null) ? q.options[ans].text : '(לא נענה)';
+            correctText = q.options[correctIdx].text;
+        } else if (type === 'multianswer') {
+            const correctIdxs = q.options.map((o, i) => o.correct ? i : -1).filter(i => i >= 0);
+            const userIdxs = ans || [];
+            const nCorrect = correctIdxs.length;
+            const nWrong = q.options.length - nCorrect;
+            const cf = 1 / nCorrect;
+            const wf = -1 / Math.max(nWrong, 1);
+            let s = 0;
+            userIdxs.forEach(i => { if (q.options[i].correct) s += cf; else s += wf; });
+            score = Math.max(0, Math.min(1, s));
+            isCorrect = (score === 1);
+            userAnsText = userIdxs.map(i => q.options[i].text.replace(/<[^>]+>/g, '')).join('; ') || '(לא נענה)';
+            correctText = correctIdxs.map(i => q.options[i].text.replace(/<[^>]+>/g, '')).join('; ');
+        } else if (type === 'cloze') {
+            const userAns = ans || {};
+            let cc = 0;
+            q.gaps.forEach((gap, gi) => {
+                const ci = gap.options.findIndex(o => o.correct);
+                if (userAns[gi] === ci) cc++;
+            });
+            score = cc / q.gaps.length;
+            isCorrect = (score === 1);
+            userAnsText = q.gaps.map((gap, gi) => { const u = userAns[gi]; return `[${gi+1}] ` + (u !== undefined ? gap.options[u].text : '(לא נענה)'); }).join(' | ');
+            correctText = q.gaps.map((gap, gi) => { const c = gap.options.findIndex(o => o.correct); return `[${gi+1}] ${gap.options[c].text}`; }).join(' | ');
+        } else if (type === 'numerical') {
+            isCorrect = (ans !== undefined && ans !== null && Math.abs(ans - q.correct_answer) <= (q.tolerance || 0));
+            score = isCorrect ? 1 : 0;
+            userAnsText = (ans !== undefined) ? String(ans) : '(לא נענה)';
+            correctText = String(q.correct_answer);
+        }
+        totalScore += score; totalMax += max;
+        details.push({ q, score, max, userAnsText, correctText, isCorrect });
+    });
+    return { totalScore, totalMax, details };
+}
+
+function showResults() {
+    document.getElementById('screen-start').style.display = 'none';
+    document.getElementById('screen-exam').style.display = 'none';
+    document.getElementById('screen-result').style.display = 'block';
+    resultData = scoreExam();
+    renderResults(resultData);
+    window.scrollTo(0,0);
+}
+
+function renderResults({ totalScore, totalMax, details }) {
+    const percent = Math.round(100 * totalScore / totalMax);
+    const startMs = new Date(state.startTime).getTime();
+    const endMs = new Date(state.endTime).getTime();
+    const elapsedMin = Math.round((endMs - startMs) / 60000);
+    const exceeded = (endMs - startMs) > TIME_LIMIT_MS + 60000;
+    const refreshes = state.refreshes || 0;
+    const attemptNumber = state.attemptNumber || 1;
+    let warning = '';
+    if (state.autoSubmitted) warning += `<div class="exceeded-warning">⏱ הזמן הסתיים — המבחן הוגש אוטומטית</div>`;
+    if (exceeded) warning += `<div class="exceeded-warning">⚠️ זמן המבחן בפועל: ${elapsedMin} דקות — חריגה מהזמן המוקצב (110)</div>`;
+    if (refreshes > 0) warning += `<div class="warning-box">📝 המבחן רוענן ${refreshes} פעמים במהלך הפתירה (תועד בקובץ הסיכום)</div>`;
+    if (attemptNumber > 1) warning += `<div class="warning-box">🔄 זהו ניסיון מספר ${attemptNumber} של המבחן (ניסיונות קודמים תועדו)</div>`;
+    document.getElementById('time-warning').innerHTML = warning;
+    let summary = `<div class="score-big">${totalScore.toFixed(1)} / ${totalMax}</div><div class="score-percent">ציון: ${percent}%</div><div style="text-align:center; margin:20px 0; color:var(--gray);"><strong>${escapeHtml(state.name)}</strong> | משך אמיתי: ${elapsedMin} דקות | תאריך: ${new Date().toLocaleDateString('he-IL')}</div><h3 class="section-title">פילוח לפי קטגוריה</h3>`;
+    const byCat = {};
+    details.forEach(d => { const cat = d.q.category || d.q.topic; if (!byCat[cat]) byCat[cat] = { score:0, max:0 }; byCat[cat].score += d.score; byCat[cat].max += d.max; });
+    summary += '<table style="width:100%; border-collapse:collapse;"><tr style="background:#e8f4f8;"><th style="padding:8px; text-align:right; border:1px solid var(--border);">קטגוריה</th><th style="padding:8px; border:1px solid var(--border);">ניקוד</th><th style="padding:8px; border:1px solid var(--border);">%</th></tr>';
+    Object.entries(byCat).forEach(([cat, { score, max }]) => { const p = Math.round(100 * score / max); summary += `<tr><td style="padding:8px; border:1px solid var(--border);">${cat}</td><td style="padding:8px; text-align:center; border:1px solid var(--border);">${score.toFixed(1)} / ${max}</td><td style="padding:8px; text-align:center; border:1px solid var(--border);">${p}%</td></tr>`; });
+    summary += '</table>';
+    document.getElementById('result-summary').innerHTML = summary;
+    let detailsHtml = '<h3 class="section-title">פירוט תשובות</h3>';
+    details.forEach((d, i) => {
+        const cls = d.isCorrect ? 'correct' : (d.score > 0 ? '' : 'wrong');
+        const icon = d.isCorrect ? '✓' : (d.score > 0 ? '◐' : '✗');
+        detailsHtml += `<div class="result-question ${cls}"><strong>${icon} שאלה ${i+1}</strong> <span class="tag">${d.q.section || d.q.category || ''}</span><span style="float:left; color:var(--gray);">${d.score.toFixed(2)} / ${d.max}</span><div style="margin-top:8px;">${d.q.stem || ''}</div>${d.q.code ? `<pre dir="ltr">${escapeHtml(d.q.code)}</pre>` : ''}${d.q.question ? `<div><strong>השאלה:</strong> ${d.q.question}</div>` : ''}<div style="margin-top:10px;"><strong>תשובתך:</strong> ${d.userAnsText}</div><div><strong>תשובה נכונה:</strong> ${d.correctText}</div>${d.q.explanation ? `<div class="result-explanation"><strong>הסבר:</strong> ${d.q.explanation}</div>` : ''}</div>`;
+    });
+    document.getElementById('result-details').innerHTML = detailsHtml;
+}
+
+function toggleDetails() { const el = document.getElementById('result-details'); el.style.display = (el.style.display === 'none') ? 'block' : 'none'; }
+
+function downloadSummary() {
+    if (!resultData) return;
+    const { totalScore, totalMax, details } = resultData;
+    const startMs = new Date(state.startTime).getTime();
+    const endMs = new Date(state.endTime).getTime();
+    const elapsedMs = endMs - startMs;
+    const elapsedMin = Math.round(elapsedMs / 60000);
+    const elapsedSec = Math.round(elapsedMs / 1000);
+    const exceeded = elapsedMs > TIME_LIMIT_MS + 60000;
+    const percent = (100 * totalScore / totalMax).toFixed(1);
+    const refreshes = state.refreshes || 0;
+    const attemptNumber = state.attemptNumber || 1;
+    const history = loadHistory();
+    let txt = `╔══════════════════════════════════════════════════════════════╗
+║  מבחן 2 — מערכים ומחרוזות — 899371                        ║
+║       קובץ סיכום אוטומטי                                       ║
+╚══════════════════════════════════════════════════════════════╝
+
+══════════════════════════════════════════════════════════════════
+פרטי תלמיד וזמנים:
+══════════════════════════════════════════════════════════════════
+שם תלמיד/ה:        ${state.name}
+תאריך מבחן:        ${new Date(state.startTime).toLocaleDateString('he-IL')}
+
+⏱  זמן התחלה אמיתי:  ${new Date(state.startTime).toLocaleString('he-IL')}
+⏱  זמן סיום אמיתי:   ${new Date(state.endTime).toLocaleString('he-IL')}
+⏱  משך מבחן בפועל:   ${elapsedMin} דקות (${elapsedSec} שניות)
+⏱  זמן מוקצב:        30 דקות
+${exceeded ? '⚠️  ⚠️  ⚠️  חריגה מזמן: כן  ⚠️  ⚠️  ⚠️ ' : '✓  בתוך הזמן המוקצב'}
+
+הגשה אוטומטית (נגמר הזמן):  ${state.autoSubmitted ? 'כן' : 'לא'}
+מספר רענונים בזמן המבחן:    ${refreshes}
+מספר ניסיון:                ${attemptNumber}${attemptNumber > 1 ? ' (ניסיון חוזר!)' : ''}
+${history.length > 0 ? `\n⚠️  ${history.length} ניסיון/ות קודם/ים תועדו בזיכרון הדפדפן\n` : ''}
+══════════════════════════════════════════════════════════════════
+ציון:
+══════════════════════════════════════════════════════════════════
+ציון סופי:        ${totalScore.toFixed(1)} / ${totalMax}
+אחוז:             ${percent}%
+
+פילוח לפי קטגוריה:
+`;
+    const byCat = {};
+    details.forEach(d => { const cat = d.q.category || d.q.topic; if (!byCat[cat]) byCat[cat] = { score:0, max:0 }; byCat[cat].score += d.score; byCat[cat].max += d.max; });
+    Object.entries(byCat).forEach(([cat, { score, max }]) => { const p = Math.round(100 * score / max); txt += `  • ${cat}\n    ניקוד: ${score.toFixed(1)} / ${max}  (${p}%)\n`; });
+    txt += `\n══════════════════════════════════════════════════════════════════\nתשובות מפורטות:\n══════════════════════════════════════════════════════════════════`;
+    details.forEach((d, i) => {
+        const icon = d.isCorrect ? '✓' : (d.score > 0 ? '◐' : '✗');
+        txt += `\n\n${icon} שאלה ${i+1} | ${d.q.section || ''} | ${d.score.toFixed(2)}/${d.max}\n   מזהה שאלה: ${d.q.id}\n   תשובת התלמיד:  ${d.userAnsText.replace(/<[^>]+>/g, '')}\n   תשובה נכונה:   ${d.correctText.replace(/<[^>]+>/g, '')}`;
+    });
+    // נתוני אימות מקודדים — מאפשרים אימות חיצוני של תוכן הקובץ
+    const verifyPayload = {
+        name: state.name,
+        startTime: state.startTime,
+        endTime: state.endTime,
+        score: totalScore.toFixed(2),
+        max: totalMax,
+        refreshes: refreshes,
+        attemptNumber: attemptNumber,
+        autoSubmitted: state.autoSubmitted || false
+    };
+    const verifyB64 = btoa(unescape(encodeURIComponent(JSON.stringify(verifyPayload))));
+    const checksum = simpleHash(verifyB64);
+    txt += `\n\n══════════════════════════════════════════════════════════════════\nחתימה דיגיטלית (לאימות אוטומטי):\n[VERIFY]${verifyB64}|${checksum}[/VERIFY]\n\nלאימות: הריצו את verify_metukonet.py על הקובץ הזה.\n══════════════════════════════════════════════════════════════════\n`;
+    const blob = new Blob([txt], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    const safeName = state.name.replace(/[^\u0590-\u05FFa-zA-Z0-9]/g, '_');
+    a.download = `מתכונת_899371_${safeName}_${new Date().toISOString().slice(0,10)}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+}
+
+function simpleHash(str) {
+    let h1 = 0xdeadbeef, h2 = 0x41c6ce57;
+    for (let i = 0; i < str.length; i++) {
+        const c = str.charCodeAt(i);
+        h1 = Math.imul(h1 ^ c, 2654435761);
+        h2 = Math.imul(h2 ^ c, 1597334677);
+    }
+    h1 = Math.imul(h1 ^ (h1>>>16), 2246822507);
+    h1 ^= Math.imul(h2 ^ (h2>>>13), 3266489909);
+    h2 = Math.imul(h2 ^ (h2>>>16), 2246822507);
+    h2 ^= Math.imul(h1 ^ (h1>>>13), 3266489909);
+    return (4294967296 * (2097151 & h2) + (h1>>>0)).toString(16).padStart(13,'0').toUpperCase();
+}
+
+window.addEventListener('beforeunload', (e) => {
+    if (state && !state.ended) {
+        e.preventDefault();
+        e.returnValue = 'התשובות נשמרות אבל הרענון נספר. להמשיך?';
+    }
+});
+</script>
+</body>
+</html>
