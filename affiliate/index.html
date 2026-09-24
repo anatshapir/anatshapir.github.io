@@ -28,7 +28,7 @@ footer{margin-top:30px;color:#8a93a3;font-size:11px;text-align:center}@media(max
 <footer>ענת ממליצה · MVP פרטי · GitHub Pages + Backend מאובטח</footer>
 </div>
 <script>
-const API_BASE="";
+const API_BASE="https://anat-recommends-api.onrender.com";
 function connect(){if(!API_BASE){toast("האתר מוכן. אחרי הקמת השרת נחבר כאן את Yahoo OAuth.");return}window.location.href=API_BASE+"/auth/yahoo";}
 function toast(t){let x=document.getElementById("toast");if(!x){x=document.createElement("div");x.id="toast";x.style="position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#172033;color:#fff;padding:12px 18px;border-radius:12px;font-size:13px;box-shadow:0 10px 30px rgba(0,0,0,.2);z-index:9";document.body.appendChild(x)}x.textContent=t;x.style.opacity=1;clearTimeout(window.tt);window.tt=setTimeout(()=>x.style.opacity=0,2800)}
 </script>
