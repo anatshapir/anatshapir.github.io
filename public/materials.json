@@ -1,68 +1,19 @@
 {
   "meta": {
-    "רקורסיה": {
-      "icon": "🔄",
-      "color": "from-orange-50 to-amber-50 border-orange-200"
-    },
-    "מדעי המחשב": {
-      "icon": "💻",
-      "color": "from-blue-50 to-indigo-50 border-blue-200"
-    },
-    "מדעי הנתונים": {
-      "icon": "📊",
-      "color": "from-purple-50 to-fuchsia-50 border-purple-200"
-    },
-    "פיתוח ווב": {
-      "icon": "🌐",
-      "color": "from-emerald-50 to-teal-50 border-emerald-200"
-    },
-    "ספרים": {
-      "icon": "📚",
-      "color": "from-amber-50 to-yellow-50 border-amber-200"
-    },
-    "השראה": {
-      "icon": "✨",
-      "color": "from-rose-50 to-pink-50 border-rose-200"
-    },
-    "שירים": {
-      "icon": "🎵",
-      "color": "from-violet-50 to-purple-50 border-violet-200"
-    },
-    "המלצות": {
-      "icon": "⭐",
-      "color": "from-sky-50 to-cyan-50 border-sky-200"
-    },
-    "EDA": {
-      "icon": "📉",
-      "color": "from-purple-50 to-violet-50 border-purple-200"
-    },
-    "ספריות": {
-      "icon": "📁",
-      "color": "from-gray-50 to-slate-50 border-gray-200"
-    },
-    "מה זה בעצם מדעי המחשב": {
-      "icon": "🤔",
-      "color": "from-cyan-50 to-blue-50 border-cyan-200"
-    },
-    "KNN": {
-      "icon": "",
-      "color": "from-gray-50 to-slate-50 border-gray-200"
-    },
-    "מודלים": {
-      "icon": "📁",
-      "color": "from-gray-50 to-slate-50 border-gray-200"
-    },
-    "חישוביות/מודלים": {
-      "icon": "⚙️",
-      "color": "from-emerald-50 to-teal-50 border-emerald-200"
+    "יסודות מדעי המחשב": {
+      "icon": "💻"
     },
     "מבני נתונים": {
-      "icon": "📚",
-      "color": "from-amber-50 to-yellow-50 border-amber-200"
+      "icon": "🌳"
     },
-    "יסודות": {
-      "icon": "🌳",
-      "color": "from-emerald-50 to-teal-50 border-emerald-200"
+    "מדעי הנתונים": {
+      "icon": "📊"
+    },
+    "פיתוח ווב": {
+      "icon": "🌐"
+    },
+    "מודלים חישוביים": {
+      "icon": "⚙️"
     }
   },
   "materials": [
@@ -72,7 +23,8 @@
       "description": "מדריך מקיף לחשיבה רקורסיבית - מהבסיס ועד לפתרון בעיות מורכבות.",
       "category": "teaching",
       "path": [
-        "רקורסיה"
+        "מבני נתונים",
+        "חשיבה רקורסיבית"
       ],
       "linkUrl": "/recursiveThinking.html",
       "icon": "🧠"
@@ -83,7 +35,8 @@
       "description": "כלי אינטראקטיבי להמחשת זמן ריצה של פונקציות רקורסיביות.",
       "category": "teaching",
       "path": [
-        "רקורסיה"
+        "מבני נתונים",
+        "חשיבה רקורסיבית"
       ],
       "linkUrl": "/recursionVisualization.html",
       "icon": "📊"
@@ -94,7 +47,8 @@
       "description": "מדריך לרקורסיה על עצים בינאריים עם הדמיות והסברים מפורטים.",
       "category": "teaching",
       "path": [
-        "רקורסיה"
+        "מבני נתונים",
+        "עצים"
       ],
       "linkUrl": "/bintree_recursion.html",
       "icon": "🌳"
@@ -105,7 +59,8 @@
       "description": "תרגיל אינטראקטיבי בסגנון חדר בריחה לתרגול רקורסיה ברמה מתקדמת.",
       "category": "teaching",
       "path": [
-        "רקורסיה"
+        "מבני נתונים",
+        "חשיבה רקורסיבית"
       ],
       "linkUrl": "/recursionEscapeRoom.html",
       "icon": "🔑"
@@ -116,7 +71,8 @@
       "description": "משחק חדר בריחה ללימוד רקורסיה בצורה חווייתית ומהנה.",
       "category": "teaching",
       "path": [
-        "רקורסיה"
+        "מבני נתונים",
+        "חשיבה רקורסיבית"
       ],
       "linkUrl": "/recursive_labyrinth.html",
       "icon": "🏰"
@@ -127,7 +83,7 @@
       "description": "הדמיה אינטראקטיבית של אלגוריתמי חיפוש BFS ו-DFS בגרפים.",
       "category": "teaching",
       "path": [
-        "מדעי המחשב"
+        "מבני נתונים"
       ],
       "linkUrl": "/bfs_dfs.html",
       "icon": "🔍"
@@ -138,7 +94,8 @@
       "description": "מדריך מקיף לשפות רגולריות, אוטומטים וביטויים רגולריים.",
       "category": "teaching",
       "path": [
-        "מדעי המחשב"
+        "מודלים חישוביים",
+        "שפות רגולריות"
       ],
       "linkUrl": "/regularLanguages.html",
       "icon": "📜"
@@ -149,7 +106,8 @@
       "description": "כלי אינטראקטיבי לפתרון תרגילים בשפת Java.",
       "category": "teaching",
       "path": [
-        "מדעי המחשב"
+        "יסודות מדעי המחשב",
+        "כלים"
       ],
       "linkUrl": "/javaExercise.html",
       "icon": "☕"
@@ -160,7 +118,8 @@
       "description": "כלי לבניית טבלאות מעקב (Trace Table) לתרגילי תכנות.",
       "category": "teaching",
       "path": [
-        "מדעי המחשב"
+        "יסודות מדעי המחשב",
+        "כלים"
       ],
       "linkUrl": "/trackTable.html",
       "icon": "📋"
@@ -171,7 +130,8 @@
       "description": "מבוא למדעי הנתונים - מושגי יסוד, כלים וטכניקות בסיסיות.",
       "category": "teaching",
       "path": [
-        "מדעי הנתונים"
+        "מדעי הנתונים",
+        "מבוא למדעי הנתונים"
       ],
       "linkUrl": "/datascience-project.html",
       "icon": "📈"
@@ -183,7 +143,7 @@
       "category": "teaching",
       "path": [
         "מדעי הנתונים",
-        "EDA"
+        "חקירת נתונים (EDA)"
       ],
       "linkUrl": "/eda.html",
       "icon": "📉"
@@ -195,7 +155,7 @@
       "category": "teaching",
       "path": [
         "מדעי הנתונים",
-        "ספריות"
+        "כלים לעבודה עם נתונים"
       ],
       "linkUrl": "/pandas.html",
       "icon": "🐼"
@@ -262,7 +222,7 @@
       "category": "teaching",
       "path": [
         "מדעי הנתונים",
-        "ספריות"
+        "כלים לעבודה עם נתונים"
       ],
       "linkUrl": "/numpy.html",
       "icon": "🧮"
@@ -274,7 +234,7 @@
       "category": "teaching",
       "path": [
         "מדעי הנתונים",
-        "EDA"
+        "חקירת נתונים (EDA)"
       ],
       "linkUrl": "/numpy.html",
       "icon": "🎬"
@@ -286,7 +246,7 @@
       "category": "teaching",
       "path": [
         "מדעי הנתונים",
-        "EDA"
+        "חקירת נתונים (EDA)"
       ],
       "linkUrl": "/Practical_EDA.pdf",
       "icon": "📄"
@@ -297,8 +257,8 @@
       "description": "",
       "category": "teaching",
       "path": [
-        "מדעי המחשב",
-        "מה זה בעצם מדעי המחשב"
+        "יסודות מדעי המחשב",
+        "איך מחשבים ושפות תכנות עובדים"
       ],
       "linkUrl": "/The_Abstraction_Ladder.pdf",
       "icon": "💻"
@@ -309,8 +269,8 @@
       "description": "",
       "category": "teaching",
       "path": [
-        "מדעי המחשב",
-        "מה זה בעצם מדעי המחשב"
+        "יסודות מדעי המחשב",
+        "איך מחשבים ושפות תכנות עובדים"
       ],
       "linkUrl": "/שפת_סף__לדבר_עם_המכונה.mp4",
       "icon": "🎬"
@@ -322,7 +282,7 @@
       "category": "teaching",
       "path": [
         "מדעי הנתונים",
-        "EDA"
+        "חקירת נתונים (EDA)"
       ],
       "linkUrl": "https://colab.research.google.com/github/anatshapir/anatshapir.github.io/blob/main/docs/NB07_Evaluation_Metrics.ipynb",
       "icon": "📓"
@@ -334,7 +294,7 @@
       "category": "teaching",
       "path": [
         "מדעי הנתונים",
-        "ספריות"
+        "כלים לעבודה עם נתונים"
       ],
       "linkUrl": "https://colab.research.google.com/github/anatshapir/anatshapir.github.io/blob/main/docs/04 NumPy Notebook.ipynb",
       "icon": "📓"
@@ -346,7 +306,7 @@
       "category": "teaching",
       "path": [
         "מדעי הנתונים",
-        "ספריות"
+        "כלים לעבודה עם נתונים"
       ],
       "linkUrl": "https://colab.research.google.com/github/anatshapir/anatshapir.github.io/blob/main/docs/NB04_Pandas_DataFrames_IMPROVED.ipynb",
       "icon": "📓"
@@ -381,7 +341,8 @@
       "description": "הכנת המידע להפעלת המודלים",
       "category": "teaching",
       "path": [
-        "מדעי הנתונים"
+        "מדעי הנתונים",
+        "הכנת נתונים"
       ],
       "linkUrl": "https://colab.research.google.com/github/anatshapir/anatshapir.github.io/blob/main/docs/NB14_Data_Preparation_Advanced_IMPROVED.ipynb",
       "icon": "📋"
@@ -428,7 +389,8 @@
       "description": "",
       "category": "teaching",
       "path": [
-        "חישוביות/מודלים"
+        "מודלים חישוביים",
+        "מכונות טיורינג"
       ],
       "linkUrl": "turing-student.html",
       "icon": "/icons/1774120689984_turing.png"
@@ -462,7 +424,9 @@
       "description": "30 דקות, 14 שאלות",
       "category": "teaching",
       "path": [
-        "יסודות"
+        "יסודות מדעי המחשב",
+        "מבחנים",
+        "אלגוריתמיקה"
       ],
       "linkUrl": "/מתכונת_899371_מבחן1_אלגוריתמיקה.html",
       "icon": "📝"
@@ -473,7 +437,9 @@
       "description": "30 דקות, 13 שאלות",
       "category": "teaching",
       "path": [
-        "יסודות"
+        "יסודות מדעי המחשב",
+        "מבחנים",
+        "מערכים ומחרוזות"
       ],
       "linkUrl": "/מתכונת_899371_מבחן2_מערכים_ומחרוזות.html",
       "icon": "📝"
@@ -484,7 +450,9 @@
       "description": "60 דקות, 26 שאלות",
       "category": "teaching",
       "path": [
-        "יסודות"
+        "יסודות מדעי המחשב",
+        "מבחנים",
+        "עצמים"
       ],
       "linkUrl": "/מתכונת_899371_מבחן3_עצמים.html",
       "icon": "📄"
@@ -495,7 +463,9 @@
       "description": "60 דקות, 26 שאלות",
       "category": "teaching",
       "path": [
-        "יסודות"
+        "יסודות מדעי המחשב",
+        "מבחנים",
+        "ניתוח קוד"
       ],
       "linkUrl": "/מתכונת_899371_מבחן4_ניתוח_קוד.html",
       "icon": "📝"
