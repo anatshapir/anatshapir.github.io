@@ -91,13 +91,7 @@ export function TopicGrid({ category, title }: TopicGridProps) {
                   >
                     {number}
                   </span>
-                  {isFirst && (
-                    <div
-                      aria-hidden="true"
-                      className="h-8 w-8 bg-[#F9BF31] opacity-80"
-                      style={visualMask('/lalinka/visual/spark.svg')}
-                    />
-                  )}
+
                 </div>
 
                 <div className={`max-w-2xl ${isFirst ? 'mt-14' : 'mt-10'}`}>
@@ -122,7 +116,7 @@ export function TopicGrid({ category, title }: TopicGridProps) {
 
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute -bottom-10 -left-5 hidden h-24 w-24 rotate-[-18deg] lg:block bg-[#3ABD6C]/30"
+          className="pointer-events-none absolute -bottom-8 -right-4 hidden h-24 w-24 rotate-[-18deg] opacity-12 lg:block bg-[#3ABD6C]"
           style={visualMask('/lalinka/visual/leaf.svg')}
         />
       </div>
