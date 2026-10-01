@@ -37,54 +37,37 @@ export function Hero() {
         </div>
 
         <div className="pointer-events-none absolute inset-0" aria-hidden="true">
-          <div
-            className="absolute -right-10 top-20 h-64 w-64 opacity-70"
-            style={{
-              backgroundColor: "#00B0FF",
-              WebkitMaskImage: "url(/lalinka/visual/circle.svg)",
-              maskImage: "url(/lalinka/visual/circle.svg)",
-              WebkitMaskRepeat: "no-repeat",
-              maskRepeat: "no-repeat",
-              WebkitMaskSize: "contain",
-              maskSize: "contain",
-            }}
-          />
-          <div
-            className="absolute right-[14%] top-[18%] h-44 w-44 opacity-45"
-            style={{
-              backgroundColor: "#F9BF31",
-              WebkitMaskImage: "url(/lalinka/visual/arc.svg)",
-              maskImage: "url(/lalinka/visual/arc.svg)",
-              WebkitMaskRepeat: "no-repeat",
-              maskRepeat: "no-repeat",
-              WebkitMaskSize: "contain",
-              maskSize: "contain",
-            }}
-          />
-          <div
-            className="absolute -bottom-20 left-[-2%] h-72 w-72 opacity-55"
-            style={{
-              backgroundColor: "#EF882A",
-              WebkitMaskImage: "url(/lalinka/visual/semicircle.svg)",
-              maskImage: "url(/lalinka/visual/semicircle.svg)",
-              WebkitMaskRepeat: "no-repeat",
-              maskRepeat: "no-repeat",
-              WebkitMaskSize: "contain",
-              maskSize: "contain",
-            }}
-          />
-          <div
-            className="absolute bottom-8 left-[18%] h-32 w-32 opacity-30"
-            style={{
-              backgroundColor: "#6D338E",
-              WebkitMaskImage: "url(/lalinka/visual/diagonal-block.svg)",
-              maskImage: "url(/lalinka/visual/diagonal-block.svg)",
-              WebkitMaskRepeat: "no-repeat",
-              maskRepeat: "no-repeat",
-              WebkitMaskSize: "contain",
-              maskSize: "contain",
-            }}
-          />
+          <div className="absolute -right-32 -top-24 h-[520px] w-[520px] rounded-full bg-[#00B0FF]/14" />
+          <div className="absolute right-[18%] top-[7%] h-[300px] w-[300px] rounded-full bg-[#F9BF31]/16" />
+          <div className="absolute -left-28 bottom-[-170px] h-[560px] w-[560px] rounded-full bg-[#EF882A]/13" />
+          <div className="absolute left-[13%] bottom-[8%] h-[250px] w-[250px] rounded-full bg-[#6D338E]/08" />
+          <div className="absolute right-[7%] top-[31%] h-[260px] w-[260px] opacity-55" style={{
+            backgroundColor: "#00B0FF",
+            WebkitMaskImage: "url(/lalinka/visual/arc.svg)",
+            maskImage: "url(/lalinka/visual/arc.svg)",
+            WebkitMaskRepeat: "no-repeat",
+            maskRepeat: "no-repeat",
+            WebkitMaskSize: "contain",
+            maskSize: "contain",
+          }} />
+          <div className="absolute left-[7%] bottom-[12%] h-[210px] w-[210px] opacity-40" style={{
+            backgroundColor: "#EF882A",
+            WebkitMaskImage: "url(/lalinka/visual/semicircle.svg)",
+            maskImage: "url(/lalinka/visual/semicircle.svg)",
+            WebkitMaskRepeat: "no-repeat",
+            maskRepeat: "no-repeat",
+            WebkitMaskSize: "contain",
+            maskSize: "contain",
+          }} />
+          <div className="absolute right-[29%] bottom-[6%] h-[120px] w-[120px] opacity-22" style={{
+            backgroundColor: "#F9BF31",
+            WebkitMaskImage: "url(/lalinka/visual/diagonal-block.svg)",
+            maskImage: "url(/lalinka/visual/diagonal-block.svg)",
+            WebkitMaskRepeat: "no-repeat",
+            maskRepeat: "no-repeat",
+            WebkitMaskSize: "contain",
+            maskSize: "contain",
+          }} />
         </div>
       </div>
     </section>
