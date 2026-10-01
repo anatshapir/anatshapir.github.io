@@ -1,6 +1,5 @@
 import React from 'react';
 import { useMaterials } from '@/context/MaterialsContext';
-import { IconDisplay } from '@/components/IconDisplay';
 
 interface TopicGridProps {
   category?: 'teaching' | 'general';
@@ -23,93 +22,104 @@ const topicDescriptions: Record<string, string> = {
   'מודלים חישוביים': 'לגלות מה מחשבים יכולים לחשב, איך הם עושים זאת, ואיפה עובר הגבול.',
 };
 
-const topicAccents: Record<string, { line: string; soft: string; icon: string }> = {
-  'יסודות מדעי המחשב': { line: '#00B0FF', soft: '#EAF8FF', icon: '#00B0FF' },
-  'מבני נתונים': { line: '#3ABD6C', soft: '#EFFAF3', icon: '#3ABD6C' },
-  'מדעי הנתונים': { line: '#6D338E', soft: '#F6F0FA', icon: '#6D338E' },
-  'פיתוח ווב': { line: '#1C9AD3', soft: '#EEF8FC', icon: '#1C9AD3' },
-  'מודלים חישוביים': { line: '#EF882A', soft: '#FFF5EC', icon: '#EF882A' },
-};
-
-const topicIcons: Record<string, string> = {
-  'יסודות מדעי המחשב': '💻',
-  'מבני נתונים': '🌳',
-  'מדעי הנתונים': '📊',
-  'פיתוח ווב': '🌐',
-  'מודלים חישוביים': '🧠',
+const topicNumbers: Record<string, string> = {
+  'יסודות מדעי המחשב': '01',
+  'מבני נתונים': '02',
+  'מדעי הנתונים': '03',
+  'פיתוח ווב': '04',
+  'מודלים חישוביים': '05',
 };
 
 export function TopicGrid({ category, title }: TopicGridProps) {
   const { materials } = useMaterials();
 
   const filtered = category ? materials.filter(m => m.category === category) : materials;
-
   const availableTopics = new Set(filtered.map(m => m.path[0]));
   const topics = category === 'teaching'
     ? learningTopicOrder.filter(name => availableTopics.has(name))
     : Array.from(availableTopics);
 
   return (
-    <section id="topics" className="py-2 bg-transparent">
-      <div className="w-full">
-        {title && (
-          <div className="text-center mb-16 space-y-4">
-            <h2 className="text-4xl sm:text-5xl font-sans font-bold text-[#18324A]">{title}</h2>
-          </div>
-        )}
+    <section id="topics" className="relative" dir="rtl">
+      {title && (
+        <div className="mb-10">
+          <h2 className="text-3xl sm:text-4xl font-sans font-bold text-[#18324A]">{title}</h2>
+        </div>
+      )}
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+      <div className="relative">
+        <img
+          src="/lalinka/visual/offset-dots.svg"
+          alt=""
+          aria-hidden="true"
+          className="pointer-events-none absolute -left-8 -top-8 hidden h-28 w-28 text-[#F9BF31]/70 lg:block"
+        />
+        <img
+          src="/lalinka/visual/arc.svg"
+          alt=""
+          aria-hidden="true"
+          className="pointer-events-none absolute -right-12 top-[34%] hidden h-28 w-28 rotate-90 text-[#00B0FF]/20 lg:block"
+        />
+
+        <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
           {topics.map((name, index) => {
-            const accent = topicAccents[name] || { line: '#1C9AD3', soft: '#F4FAFD', icon: '#1C9AD3' };
-            const description = topicDescriptions[name];
             const isFirst = category === 'teaching' && index === 0;
+            const number = topicNumbers[name] ?? String(index + 1).padStart(2, '0');
 
             return (
               <a
                 key={name}
                 href={`#topic/${encodeURIComponent(name)}`}
-                className={`group relative overflow-hidden flex flex-col justify-between rounded-[18px] border border-[#18324A]/10 bg-white text-right transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_16px_40px_rgba(24,50,74,0.10)] ${isFirst ? 'md:col-span-2 min-h-[270px] p-9 sm:p-11' : 'min-h-[230px] p-7 sm:p-8'}`}
+                className={`group relative overflow-hidden rounded-[18px] bg-white px-7 py-7 sm:px-8 sm:py-8 text-right transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_45px_rgba(24,50,74,0.09)] ${isFirst ? 'md:col-span-2 min-h-[300px] sm:px-10 sm:py-10' : 'min-h-[215px]'}`}
               >
                 <div
-                  className="absolute top-0 right-0 left-0 h-1"
-                  style={{ backgroundColor: accent.line }}
+                  className={`absolute right-0 top-0 h-full w-1.5 ${isFirst ? 'bg-[#EF882A]' : 'bg-[#00B0FF]'}`}
                   aria-hidden="true"
                 />
 
-                <div className="flex items-start justify-between gap-6">
-                  <div
-                    className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full"
-                    style={{ backgroundColor: accent.soft }}
+                <div className="flex items-start justify-between gap-8">
+                  <span
+                    className={`font-sans text-sm font-semibold tracking-[0.18em] ${isFirst ? 'text-[#EF882A]' : 'text-[#00B0FF]'}`}
+                    dir="ltr"
                   >
-                    <IconDisplay icon={topicIcons[name] || '📁'} className="text-3xl" />
-                  </div>
-
+                    {number}
+                  </span>
                   {isFirst && (
-                    <span className="rounded-full bg-[#FFF5EC] px-3 py-1.5 text-sm font-medium text-[#EF882A]">
-                      נקודת ההתחלה
-                    </span>
+                    <img
+                      src="/lalinka/visual/spark.svg"
+                      alt=""
+                      aria-hidden="true"
+                      className="h-8 w-8 text-[#F9BF31] opacity-80"
+                    />
                   )}
                 </div>
 
-                <div className="mt-8">
-                  <h3 className={`font-sans font-bold text-[#18324A] ${isFirst ? 'text-3xl sm:text-4xl' : 'text-2xl'}`}>
+                <div className={`max-w-2xl ${isFirst ? 'mt-14' : 'mt-10'}`}>
+                  <h3 className={`font-sans font-bold tracking-tight text-[#18324A] ${isFirst ? 'text-3xl sm:text-4xl' : 'text-2xl sm:text-[28px]'}`}>
                     {name}
                   </h3>
-                  {description && (
-                    <p className={`mt-3 max-w-2xl leading-relaxed text-[#18324A]/65 ${isFirst ? 'text-lg sm:text-xl' : 'text-base sm:text-lg'}`}>
-                      {description}
+                  {topicDescriptions[name] && (
+                    <p className={`mt-3 leading-relaxed text-[#18324A]/68 ${isFirst ? 'text-lg sm:text-xl' : 'text-base sm:text-lg'}`}>
+                      {topicDescriptions[name]}
                     </p>
                   )}
                 </div>
 
-                <div className="mt-7 flex items-center gap-2 text-base font-semibold text-[#18324A]">
-                  <span className="transition-transform duration-200 group-hover:-translate-x-1">להיכנס לנושא</span>
+                <div className="absolute bottom-7 left-7 flex items-center gap-2 text-sm font-semibold text-[#18324A] opacity-70 transition-all duration-200 group-hover:-translate-x-1 group-hover:opacity-100 sm:bottom-8 sm:left-8">
+                  <span>להיכנס</span>
                   <span aria-hidden="true">←</span>
                 </div>
               </a>
             );
           })}
         </div>
+
+        <img
+          src="/lalinka/visual/leaf.svg"
+          alt=""
+          aria-hidden="true"
+          className="pointer-events-none absolute -bottom-10 -left-5 hidden h-24 w-24 rotate-[-18deg] text-[#3ABD6C]/30 lg:block"
+        />
       </div>
     </section>
   );
