@@ -30,6 +30,15 @@ const topicNumbers: Record<string, string> = {
   'מודלים חישוביים': '05',
 };
 
+const visualMask = (path: string) => ({
+  WebkitMaskImage: `url(${path})`,
+  maskImage: `url(${path})`,
+  WebkitMaskRepeat: 'no-repeat',
+  maskRepeat: 'no-repeat',
+  WebkitMaskSize: 'contain',
+  maskSize: 'contain',
+});
+
 export function TopicGrid({ category, title }: TopicGridProps) {
   const { materials } = useMaterials();
 
@@ -48,17 +57,15 @@ export function TopicGrid({ category, title }: TopicGridProps) {
       )}
 
       <div className="relative">
-        <img
-          src="/lalinka/visual/offset-dots.svg"
-          alt=""
+        <div
           aria-hidden="true"
-          className="pointer-events-none absolute -left-8 -top-8 hidden h-28 w-28 text-[#F9BF31]/70 lg:block"
+          className="pointer-events-none absolute -left-8 -top-8 hidden h-28 w-28 lg:block bg-[#F9BF31]/70"
+          style={visualMask('/lalinka/visual/offset-dots.svg')}
         />
-        <img
-          src="/lalinka/visual/arc.svg"
-          alt=""
+        <div
           aria-hidden="true"
-          className="pointer-events-none absolute -right-12 top-[34%] hidden h-28 w-28 rotate-90 text-[#00B0FF]/20 lg:block"
+          className="pointer-events-none absolute -right-12 top-[34%] hidden h-28 w-28 rotate-90 lg:block bg-[#00B0FF]/20"
+          style={visualMask('/lalinka/visual/arc.svg')}
         />
 
         <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
@@ -85,11 +92,10 @@ export function TopicGrid({ category, title }: TopicGridProps) {
                     {number}
                   </span>
                   {isFirst && (
-                    <img
-                      src="/lalinka/visual/spark.svg"
-                      alt=""
+                    <div
                       aria-hidden="true"
-                      className="h-8 w-8 text-[#F9BF31] opacity-80"
+                      className="h-8 w-8 bg-[#F9BF31] opacity-80"
+                      style={visualMask('/lalinka/visual/spark.svg')}
                     />
                   )}
                 </div>
@@ -114,11 +120,10 @@ export function TopicGrid({ category, title }: TopicGridProps) {
           })}
         </div>
 
-        <img
-          src="/lalinka/visual/leaf.svg"
-          alt=""
+        <div
           aria-hidden="true"
-          className="pointer-events-none absolute -bottom-10 -left-5 hidden h-24 w-24 rotate-[-18deg] text-[#3ABD6C]/30 lg:block"
+          className="pointer-events-none absolute -bottom-10 -left-5 hidden h-24 w-24 rotate-[-18deg] lg:block bg-[#3ABD6C]/30"
+          style={visualMask('/lalinka/visual/leaf.svg')}
         />
       </div>
     </section>
