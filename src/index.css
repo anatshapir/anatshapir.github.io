@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Assistant:wght@200..800&family=Varela+Round&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Assistant:wght@200..800&family=Heebo:wght@100..900&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -35,9 +35,9 @@
 
     --radius: 1rem;
 
-    /* Fonts */
-    --font-sans: 'Assistant', sans-serif;
-    --font-serif: 'Varela Round', sans-serif;
+    /* LALINKA typography */
+    --font-sans: 'Heebo', 'Assistant', sans-serif;
+    --font-serif: 'Heebo', 'Assistant', sans-serif;
     --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 
     /* Shadows */
