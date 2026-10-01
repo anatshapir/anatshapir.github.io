@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
 import { Hero } from '@/components/sections/Hero';
@@ -68,28 +68,68 @@ function HomePage() {
 }
 
 function CategoryPage({ category, title, subtitle }: { category: 'teaching' | 'general'; title: string; subtitle: string }) {
+  const isLearning = category === 'teaching';
+
   return (
-    <div className="pt-24">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <a href="#" className="inline-flex items-center gap-2 text-primary hover:text-primary/80 transition-colors text-lg mb-8">
-          <ArrowRight size={20} />
-          חזרה לדף הבית
-        </a>
-        <div className="text-center mb-4 space-y-4">
-          <h1 className="text-4xl sm:text-5xl font-serif font-bold text-foreground">{title}</h1>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">{subtitle}</p>
+    <div className="min-h-screen bg-[#FFFDF8] pt-20" dir="rtl">
+      <section className="relative overflow-hidden">
+        <div className="max-w-6xl mx-auto px-6 sm:px-8 pt-16 sm:pt-20 pb-12 sm:pb-16">
+          <a
+            href="#"
+            className="inline-flex items-center gap-2 text-sm font-medium text-[#18324A]/65 hover:text-[#18324A] transition-colors mb-12"
+          >
+            <ArrowRight size={18} />
+            חזרה לדף הבית
+          </a>
+
+          <div className="max-w-3xl">
+            <p className="text-sm font-bold tracking-wide text-[#1C9AD3] mb-4">
+              {isLearning ? 'העולם של ענת' : 'עוד דברים שאני אוהבת'}
+            </p>
+            <h1 className="text-5xl sm:text-6xl font-sans font-bold tracking-tight text-[#18324A] mb-5">
+              {title}
+            </h1>
+            <p className="text-xl sm:text-2xl leading-relaxed text-[#18324A]/70 max-w-2xl">
+              {subtitle}
+            </p>
+          </div>
         </div>
-      </div>
-      <TopicGrid category={category} title="" />
+
+        {isLearning && (
+          <div className="absolute left-[8%] top-28 hidden lg:block pointer-events-none" aria-hidden="true">
+            <div className="w-24 h-24 rounded-full border-8 border-[#F9BF31]/55" />
+            <div className="w-3 h-3 rounded-full bg-[#EF882A] absolute -right-5 top-20" />
+            <div className="w-2 h-2 rounded-full bg-[#1C9AD3] absolute right-14 -bottom-5" />
+          </div>
+        )}
+      </section>
+
+      {isLearning && (
+        <section className="max-w-6xl mx-auto px-6 sm:px-8 pb-20">
+          <div className="mb-10 flex items-end justify-between gap-6">
+            <div>
+              <h2 className="text-3xl sm:text-4xl font-sans font-bold text-[#18324A]">מה בא לך להבין?</h2>
+              <p className="mt-2 text-lg text-[#18324A]/60">בחרי עולם תוכן, ומשם ניכנס פנימה.</p>
+            </div>
+          </div>
+          <TopicGrid category={category} title="" />
+        </section>
+      )}
+
+      {!isLearning && (
+        <div className="pb-20">
+          <TopicGrid category={category} title="" />
+        </div>
+      )}
     </div>
   );
 }
 
 export default function App() {
-  const [page, setPage] = useState('home')
-  const [topicPath, setTopicPath] = useState<string[]>([])
+  const [page, setPage] = React.useState('home')
+  const [topicPath, setTopicPath] = React.useState<string[]>([])
 
-  useEffect(() => {
+  React.useEffect(() => {
     const handleHash = () => {
       const hash = window.location.hash.slice(1)
       if (hash.startsWith('topic/')) {
