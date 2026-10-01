@@ -7,7 +7,7 @@ export function Navbar() {
 
   const navItems = [
     { name: 'דף הבית', href: '#' },
-    { name: 'חומרי למידה', href: '#materials' },
+    { name: 'ללמוד', href: '#materials' },
     { name: 'דברים מעניינים', href: '#interesting' },
     { name: 'אודות', href: '#about' },
   ];
