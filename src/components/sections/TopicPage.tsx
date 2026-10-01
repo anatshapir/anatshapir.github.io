@@ -37,7 +37,7 @@ export function TopicPage({ pathSegments }: TopicPageProps) {
   // Determine which category page this topic belongs to
   const topCategory = descendants.length > 0 ? descendants[0].category : null;
   const categoryHref = topCategory === 'teaching' ? '#materials' : topCategory === 'general' ? '#interesting' : '#';
-  const categoryLabel = topCategory === 'teaching' ? 'חומרי למידה' : topCategory === 'general' ? 'דברים מעניינים' : 'דף הבית';
+  const categoryLabel = topCategory === 'teaching' ? 'ללמוד' : topCategory === 'general' ? 'דברים מעניינים' : 'דף הבית';
 
   // Back link
   const backHref = pathSegments.length > 1
@@ -94,9 +94,6 @@ export function TopicPage({ pathSegments }: TopicPageProps) {
           <div className="text-center space-y-4">
             <IconDisplay icon={meta.icon} className="text-6xl" />
             <h1 className={`text-4xl sm:text-5xl font-serif font-bold ${meta.headerImage ? 'text-white drop-shadow-lg' : 'text-foreground'}`}>{currentName}</h1>
-            <p className={`text-xl ${meta.headerImage ? 'text-white/80' : 'text-muted-foreground'}`}>
-              {descendants.length} {descendants.length === 1 ? 'פריט' : 'פריטים'}
-            </p>
           </div>
         </div>
       </section>
@@ -151,8 +148,7 @@ export function TopicPage({ pathSegments }: TopicPageProps) {
         {/* Empty state */}
         {descendants.length === 0 && (
           <div className="text-center py-20">
-            <p className="text-2xl text-muted-foreground">עוד לא הוספתי תוכן כאן</p>
-            <p className="text-lg text-muted-foreground mt-2">בקרוב!</p>
+            <p className="text-2xl text-muted-foreground">לא נמצא תוכן בנושא הזה.</p>
           </div>
         )}
       </div>
