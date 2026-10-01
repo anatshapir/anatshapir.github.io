@@ -7,7 +7,7 @@ export function Hero() {
       className="relative min-h-[78vh] overflow-hidden bg-[#FFFDF8] pt-24"
       dir="rtl"
     >
-      <div className="mx-auto grid min-h-[78vh] max-w-6xl items-center px-6 py-20 sm:px-8 lg:grid-cols-[1.15fr_0.85fr] lg:gap-16">
+      <div className="relative z-10 mx-auto grid min-h-[78vh] max-w-6xl items-center px-6 py-20 sm:px-8 lg:grid-cols-[1.15fr_0.85fr] lg:gap-16">
         <div className="max-w-3xl">
           <p className="mb-7 text-sm font-semibold tracking-[0.12em] text-[#EF882A]">
             העולם של ענת
@@ -36,15 +36,55 @@ export function Hero() {
           </div>
         </div>
 
-        <div className="relative hidden min-h-[360px] lg:block" aria-hidden="true">
-          <div className="absolute right-10 top-10 h-56 w-56 bg-[#00B0FF]/12" style={{
-            WebkitMaskImage: "url(/lalinka/visual/arc.svg)",
-            maskImage: "url(/lalinka/visual/arc.svg)",
-            WebkitMaskRepeat: "no-repeat",
-            maskRepeat: "no-repeat",
-            WebkitMaskSize: "contain",
-            maskSize: "contain",
-          }} />
+        <div className="pointer-events-none absolute inset-0" aria-hidden="true">
+          <div
+            className="absolute -right-10 top-20 h-64 w-64 opacity-70"
+            style={{
+              backgroundColor: "#00B0FF",
+              WebkitMaskImage: "url(/lalinka/visual/circle.svg)",
+              maskImage: "url(/lalinka/visual/circle.svg)",
+              WebkitMaskRepeat: "no-repeat",
+              maskRepeat: "no-repeat",
+              WebkitMaskSize: "contain",
+              maskSize: "contain",
+            }}
+          />
+          <div
+            className="absolute right-[14%] top-[18%] h-44 w-44 opacity-45"
+            style={{
+              backgroundColor: "#F9BF31",
+              WebkitMaskImage: "url(/lalinka/visual/arc.svg)",
+              maskImage: "url(/lalinka/visual/arc.svg)",
+              WebkitMaskRepeat: "no-repeat",
+              maskRepeat: "no-repeat",
+              WebkitMaskSize: "contain",
+              maskSize: "contain",
+            }}
+          />
+          <div
+            className="absolute -bottom-20 left-[-2%] h-72 w-72 opacity-55"
+            style={{
+              backgroundColor: "#EF882A",
+              WebkitMaskImage: "url(/lalinka/visual/semicircle.svg)",
+              maskImage: "url(/lalinka/visual/semicircle.svg)",
+              WebkitMaskRepeat: "no-repeat",
+              maskRepeat: "no-repeat",
+              WebkitMaskSize: "contain",
+              maskSize: "contain",
+            }}
+          />
+          <div
+            className="absolute bottom-8 left-[18%] h-32 w-32 opacity-30"
+            style={{
+              backgroundColor: "#6D338E",
+              WebkitMaskImage: "url(/lalinka/visual/diagonal-block.svg)",
+              maskImage: "url(/lalinka/visual/diagonal-block.svg)",
+              WebkitMaskRepeat: "no-repeat",
+              maskRepeat: "no-repeat",
+              WebkitMaskSize: "contain",
+              maskSize: "contain",
+            }}
+          />
         </div>
       </div>
     </section>
