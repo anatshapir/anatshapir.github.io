@@ -131,8 +131,8 @@ export default function App() {
           {page === 'materials' && (
             <CategoryPage
               category="teaching"
-              title="חומרי למידה"
-              subtitle="חומרי למידה יצירתיים ואינטראקטיביים במגוון נושאים"
+              title="ללמוד"
+              subtitle="רעיונות, כלים ושאלות שעוזרים להבין איך דברים עובדים — ולחשוב קצת אחרת."
             />
           )}
           {page === 'interesting' && (
