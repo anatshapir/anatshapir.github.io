@@ -13,7 +13,6 @@ function HomePage() {
     <>
       <Hero />
 
-      {/* About Section (Intro) */}
       <section id="about" className="py-24 bg-secondary/10 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-[120px] -z-10" />
         <div className="absolute bottom-0 left-0 w-80 h-80 bg-secondary/10 rounded-full blur-[120px] -z-10" />
@@ -46,7 +45,6 @@ function HomePage() {
         </div>
       </section>
 
-      {/* Contact/CTA */}
       <section className="py-24 bg-primary text-primary-foreground relative overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.1),transparent)]" />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
@@ -73,46 +71,57 @@ function CategoryPage({ category, title, subtitle }: { category: 'teaching' | 'g
   return (
     <div className="min-h-screen bg-[#FFFDF8] pt-20" dir="rtl">
       <section className="relative overflow-hidden">
-        <div className="max-w-6xl mx-auto px-6 sm:px-8 pt-16 sm:pt-20 pb-12 sm:pb-16">
+        <div className="max-w-6xl mx-auto px-6 sm:px-8 pt-16 sm:pt-20 pb-14 sm:pb-16">
           <a
             href="#"
-            className="inline-flex items-center gap-2 text-sm font-medium text-[#18324A]/65 hover:text-[#18324A] transition-colors mb-12"
+            className="inline-flex items-center gap-2 text-sm font-medium text-[#18324A]/60 hover:text-[#18324A] transition-colors mb-14"
           >
             <ArrowRight size={18} />
             חזרה לדף הבית
           </a>
 
-          <div className="max-w-3xl">
-            <p className="text-sm font-bold tracking-wide text-[#1C9AD3] mb-4">
+          <div className="relative max-w-4xl">
+            {isLearning && (
+              <div className="absolute -right-8 -top-5 hidden h-14 w-14 sm:block" aria-hidden="true">
+                <img src="/lalinka/visual/arc.svg" alt="" className="h-full w-full text-[#00B0FF]/70" />
+              </div>
+            )}
+
+            <p className="mb-4 text-sm font-semibold tracking-wide text-[#00B0FF]">
               {isLearning ? 'העולם של ענת' : 'עוד דברים שאני אוהבת'}
             </p>
-            <h1 className="text-5xl sm:text-6xl font-sans font-bold tracking-tight text-[#18324A] mb-5">
+
+            <h1 className="text-5xl sm:text-6xl font-sans font-bold tracking-tight text-[#18324A]">
               {title}
             </h1>
-            <p className="text-xl sm:text-2xl leading-relaxed text-[#18324A]/70 max-w-2xl">
+
+            <p className="mt-5 max-w-3xl text-xl sm:text-2xl leading-relaxed text-[#18324A]/68">
               {subtitle}
             </p>
           </div>
         </div>
-
-        {isLearning && (
-          <div className="absolute left-[8%] top-28 hidden lg:block pointer-events-none" aria-hidden="true">
-            <div className="w-24 h-24 rounded-full border-8 border-[#F9BF31]/55" />
-            <div className="w-3 h-3 rounded-full bg-[#EF882A] absolute -right-5 top-20" />
-            <div className="w-2 h-2 rounded-full bg-[#1C9AD3] absolute right-14 -bottom-5" />
-          </div>
-        )}
       </section>
 
       {isLearning && (
-        <section className="max-w-6xl mx-auto px-6 sm:px-8 pb-20">
-          <div className="mb-10 flex items-end justify-between gap-6">
-            <div>
-              <h2 className="text-3xl sm:text-4xl font-sans font-bold text-[#18324A]">מה בא לך להבין?</h2>
-              <p className="mt-2 text-lg text-[#18324A]/60">בחרי עולם תוכן, ומשם ניכנס פנימה.</p>
+        <section className="relative bg-white/55 border-y border-[#18324A]/[0.06]">
+          <div className="max-w-6xl mx-auto px-6 sm:px-8 py-16 sm:py-20">
+            <div className="relative mb-10 max-w-2xl">
+              <img
+                src="/lalinka/visual/leaf.svg"
+                alt=""
+                aria-hidden="true"
+                className="absolute -right-12 -top-5 hidden h-12 w-12 text-[#3ABD6C]/50 sm:block"
+              />
+              <h2 className="text-3xl sm:text-4xl font-sans font-bold text-[#18324A]">
+                מה בא לך להבין?
+              </h2>
+              <p className="mt-2 text-lg text-[#18324A]/60">
+                בחרי שביל, ומשם ניכנס פנימה.
+              </p>
             </div>
+
+            <TopicGrid category={category} title="" />
           </div>
-          <TopicGrid category={category} title="" />
         </section>
       )}
 
@@ -126,40 +135,40 @@ function CategoryPage({ category, title, subtitle }: { category: 'teaching' | 'g
 }
 
 export default function App() {
-  const [page, setPage] = React.useState('home')
-  const [topicPath, setTopicPath] = React.useState<string[]>([])
+  const [page, setPage] = React.useState('home');
+  const [topicPath, setTopicPath] = React.useState<string[]>([]);
 
   React.useEffect(() => {
     const handleHash = () => {
-      const hash = window.location.hash.slice(1)
+      const hash = window.location.hash.slice(1);
       if (hash.startsWith('topic/')) {
-        const segments = hash.slice(6).split('/').map(decodeURIComponent).filter(Boolean)
-        setTopicPath(segments)
-        setPage('topic')
+        const segments = hash.slice(6).split('/').map(decodeURIComponent).filter(Boolean);
+        setTopicPath(segments);
+        setPage('topic');
       } else if (hash === 'about') {
-        setPage('home')
+        setPage('home');
         setTimeout(() => {
-          document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' })
-        }, 100)
+          document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' });
+        }, 100);
       } else if (hash === 'admin') {
-        setPage('admin')
-        window.scrollTo(0, 0)
+        setPage('admin');
+        window.scrollTo(0, 0);
       } else if (hash === 'materials') {
-        setPage('materials')
-        window.scrollTo(0, 0)
+        setPage('materials');
+        window.scrollTo(0, 0);
       } else if (hash === 'interesting') {
-        setPage('interesting')
-        window.scrollTo(0, 0)
+        setPage('interesting');
+        window.scrollTo(0, 0);
       } else {
-        setPage('home')
-        window.scrollTo(0, 0)
+        setPage('home');
+        window.scrollTo(0, 0);
       }
-    }
+    };
 
-    handleHash()
-    window.addEventListener('hashchange', handleHash)
-    return () => window.removeEventListener('hashchange', handleHash)
-  }, [])
+    handleHash();
+    window.addEventListener('hashchange', handleHash);
+    return () => window.removeEventListener('hashchange', handleHash);
+  }, []);
 
   return (
     <MaterialsProvider>
