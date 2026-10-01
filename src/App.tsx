@@ -71,52 +71,61 @@ function CategoryPage({ category, title, subtitle }: { category: 'teaching' | 'g
   return (
     <div className="min-h-screen bg-[#FFFDF8] pt-20" dir="rtl">
       <section className="relative overflow-hidden">
-        <div className="max-w-6xl mx-auto px-6 sm:px-8 pt-16 sm:pt-20 pb-14 sm:pb-16">
+        <div className="mx-auto max-w-6xl px-6 pb-16 pt-16 sm:px-8 sm:pb-20 sm:pt-20">
           <a
             href="#"
-            className="inline-flex items-center gap-2 text-sm font-medium text-[#18324A]/60 hover:text-[#18324A] transition-colors mb-14"
+            className="mb-16 inline-flex items-center gap-2 text-sm font-medium text-[#18324A]/55 transition-colors hover:text-[#18324A]"
           >
-            <ArrowRight size={18} />
+            <ArrowRight size={17} />
             חזרה לדף הבית
           </a>
 
-          <div className="relative max-w-4xl">
-            {isLearning && (
-              <div className="absolute -right-8 -top-5 hidden h-14 w-14 sm:block" aria-hidden="true">
-                <img src="/lalinka/visual/arc.svg" alt="" className="h-full w-full text-[#00B0FF]/70" />
-              </div>
-            )}
+          <div className="grid items-end gap-10 lg:grid-cols-[1fr_0.22fr]">
+            <div className="max-w-3xl">
+              <p className="mb-5 text-sm font-semibold tracking-[0.12em] text-[#EF882A]">
+                {isLearning ? 'עולם 01' : 'מתוך העולם של ענת'}
+              </p>
 
-            <p className="mb-4 text-sm font-semibold tracking-wide text-[#00B0FF]">
-              {isLearning ? 'העולם של ענת' : 'עוד דברים שאני אוהבת'}
-            </p>
+              <h1 className="font-sans text-[52px] font-bold leading-[1.02] tracking-[-0.03em] text-[#18324A] sm:text-[72px]">
+                {title}
+              </h1>
 
-            <h1 className="text-5xl sm:text-6xl font-sans font-bold tracking-tight text-[#18324A]">
-              {title}
-            </h1>
+              <div className="mt-7 h-px w-20 bg-[#00B0FF]" />
 
-            <p className="mt-5 max-w-3xl text-xl sm:text-2xl leading-relaxed text-[#18324A]/68">
-              {subtitle}
-            </p>
+              <p className="mt-7 max-w-2xl text-xl leading-[1.65] text-[#18324A]/68 sm:text-[22px]">
+                {subtitle}
+              </p>
+            </div>
+
+            <div className="hidden justify-end pb-2 lg:flex" aria-hidden="true">
+              <div
+                className="h-32 w-32 rotate-[-12deg] bg-[#00B0FF]/20"
+                style={{
+                  WebkitMaskImage: "url(/lalinka/visual/arc.svg)",
+                  maskImage: "url(/lalinka/visual/arc.svg)",
+                  WebkitMaskRepeat: "no-repeat",
+                  maskRepeat: "no-repeat",
+                  WebkitMaskSize: "contain",
+                  maskSize: "contain",
+                }}
+              />
+            </div>
           </div>
         </div>
       </section>
 
       {isLearning && (
-        <section className="relative bg-white/55 border-y border-[#18324A]/[0.06]">
-          <div className="max-w-6xl mx-auto px-6 sm:px-8 py-16 sm:py-20">
-            <div className="relative mb-10 max-w-2xl">
-              <img
-                src="/lalinka/visual/leaf.svg"
-                alt=""
-                aria-hidden="true"
-                className="absolute -right-12 -top-5 hidden h-12 w-12 text-[#3ABD6C]/50 sm:block"
-              />
-              <h2 className="text-3xl sm:text-4xl font-sans font-bold text-[#18324A]">
+        <section className="border-y border-[#18324A]/[0.07] bg-white/45">
+          <div className="mx-auto max-w-6xl px-6 py-16 sm:px-8 sm:py-20">
+            <div className="mb-12 max-w-2xl">
+              <p className="text-sm font-semibold tracking-[0.1em] text-[#00B0FF]">
+                שבילים
+              </p>
+              <h2 className="mt-3 font-sans text-3xl font-bold tracking-tight text-[#18324A] sm:text-4xl">
                 מה בא לך להבין?
               </h2>
-              <p className="mt-2 text-lg text-[#18324A]/60">
-                בחרי שביל, ומשם ניכנס פנימה.
+              <p className="mt-3 text-lg leading-relaxed text-[#18324A]/58">
+                בחרי נושא, ומשם ניכנס פנימה.
               </p>
             </div>
 
