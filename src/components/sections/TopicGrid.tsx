@@ -7,6 +7,14 @@ interface TopicGridProps {
   title?: string;
 }
 
+const learningTopicOrder = [
+  'יסודות מדעי המחשב',
+  'מבני נתונים',
+  'מדעי הנתונים',
+  'פיתוח ווב',
+  'מודלים חישוביים',
+];
+
 const topicDescriptions: Record<string, string> = {
   'יסודות מדעי המחשב': 'להבין איך מחשבים, תוכניות ואלגוריתמים עובדים — מהרעיון ועד הקוד.',
   'מבני נתונים': 'לחשוב כמו מתכנתים: רקורסיה, עצים, חיפוש ועוד דרכים לארגן ולפתור בעיות.',
@@ -20,14 +28,10 @@ export function TopicGrid({ category, title }: TopicGridProps) {
 
   const filtered = category ? materials.filter(m => m.category === category) : materials;
 
-  const topics = Object.entries(
-    filtered.reduce((acc, m) => {
-      const topLevel = m.path[0];
-      if (!acc[topLevel]) acc[topLevel] = 0;
-      acc[topLevel]++;
-      return acc;
-    }, {} as Record<string, number>)
-  );
+  const availableTopics = new Set(filtered.map(m => m.path[0]));
+  const topics = category === 'teaching'
+    ? learningTopicOrder.filter(name => availableTopics.has(name))
+    : Array.from(availableTopics);
 
   return (
     <section id="topics" className="py-16 bg-background">
@@ -39,7 +43,7 @@ export function TopicGrid({ category, title }: TopicGridProps) {
         )}
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {topics.map(([name]) => {
+          {topics.map(name => {
             const meta = subcategoryMeta[name] || { icon: '📁', color: 'from-gray-50 to-slate-50 border-gray-200' };
             const description = topicDescriptions[name];
 
