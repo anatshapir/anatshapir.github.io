@@ -5,7 +5,6 @@
 // path מגדיר את ההיררכיה: ['נושא', 'תת-נושא', 'תת-תת-נושא', ...]
 // ============================================================
 
-// תמיכה בפורמט ישן (subcategory+subSubcategory) וחדש (path)
 export interface StaticMaterial {
   id: string
   title: string
@@ -16,7 +15,6 @@ export interface StaticMaterial {
   icon: string
 }
 
-// נרמול: אם חומר עם subcategory ובלי path, ממיר אוטומטית
 function normalizeMaterial(m: any): StaticMaterial {
   if (m.path && m.path.length > 0) return m as StaticMaterial
   const path: string[] = []
@@ -25,22 +23,27 @@ function normalizeMaterial(m: any): StaticMaterial {
   return { ...m, path }
 }
 
-// מטא-דאטה לכל נושא - אייקון וצבע לכרטיס
+// מטא-דאטה למסכים במצב fallback.
+// החומרים עצמם נטענים בדרך כלל מ-public/materials.json.
 export const subcategoryMeta: Record<string, { icon: string; color: string; headerImage?: string }> = {
-  'יסודות מדעי המחשב': {'icon':'💻','color':'from-blue-50 to-cyan-50 border-blue-200'},
-  'מבני נתונים': {'icon':'🌳','color':'from-emerald-50 to-teal-50 border-emerald-200'},
-  'מודלים חישוביים': {'icon':'🧠','color':'from-violet-50 to-purple-50 border-violet-200'},
-  'רקורסיה': {'icon':'🔄','color':'from-orange-50 to-amber-50 border-orange-200'},
-  
-  'מדעי הנתונים': {'icon':'📊','color':'from-purple-50 to-fuchsia-50 border-purple-200'},
-  'פיתוח ווב': {'icon':'🌐','color':'from-emerald-50 to-teal-50 border-emerald-200'},
-  'ספרים': {'icon':'📚','color':'from-amber-50 to-yellow-50 border-amber-200'},
-  'השראה': {'icon':'✨','color':'from-rose-50 to-pink-50 border-rose-200'},
-  'שירים': {'icon':'🎵','color':'from-violet-50 to-purple-50 border-violet-200'},
-  'המלצות': {'icon':'⭐','color':'from-sky-50 to-cyan-50 border-sky-200'},
-  'EDA': {'icon':'📉','color':'from-purple-50 to-violet-50 border-purple-200'},
-  'ספריות': {'icon':'📁','color':'from-gray-50 to-slate-50 border-gray-200'},
-  'מה זה בעצם מדעי המחשב': {'icon':'🤔','color':'from-cyan-50 to-blue-50 border-cyan-200'}
+  'יסודות מדעי המחשב': { icon: '💻', color: 'from-blue-50 to-cyan-50 border-blue-200' },
+  'מבני נתונים': { icon: '🌳', color: 'from-emerald-50 to-teal-50 border-emerald-200' },
+  'מדעי הנתונים': { icon: '📊', color: 'from-purple-50 to-fuchsia-50 border-purple-200' },
+  'פיתוח ווב': { icon: '🌐', color: 'from-emerald-50 to-teal-50 border-emerald-200' },
+  'מודלים חישוביים': { icon: '🧠', color: 'from-violet-50 to-purple-50 border-violet-200' },
+  'חשיבה רקורסיבית': { icon: '🔄', color: 'from-orange-50 to-amber-50 border-orange-200' },
+  'עצים': { icon: '🌳', color: 'from-emerald-50 to-teal-50 border-emerald-200' },
+  'כלים': { icon: '🧰', color: 'from-blue-50 to-cyan-50 border-blue-200' },
+  'מבחנים': { icon: '📝', color: 'from-amber-50 to-yellow-50 border-amber-200' },
+  'איך מחשבים ושפות תכנות עובדים': { icon: '💻', color: 'from-cyan-50 to-blue-50 border-cyan-200' },
+  'חקירת נתונים (EDA)': { icon: '📉', color: 'from-purple-50 to-violet-50 border-purple-200' },
+  'כלים לעבודה עם נתונים': { icon: '🧰', color: 'from-purple-50 to-fuchsia-50 border-purple-200' },
+  'הכנת נתונים': { icon: '📋', color: 'from-sky-50 to-cyan-50 border-sky-200' },
+  'מודלים': { icon: '⚗️', color: 'from-violet-50 to-purple-50 border-violet-200' },
+  'שפות רגולריות': { icon: '📜', color: 'from-violet-50 to-purple-50 border-violet-200' },
+  'מכונות טיורינג': { icon: '⚙️', color: 'from-violet-50 to-purple-50 border-violet-200' },
+  'ספרים': { icon: '📚', color: 'from-amber-50 to-yellow-50 border-amber-200' },
+  'השראה': { icon: '✨', color: 'from-rose-50 to-pink-50 border-rose-200' },
 }
 
 export const staticMaterials: StaticMaterial[] = ([
@@ -67,7 +70,7 @@ export const staticMaterials: StaticMaterial[] = ([
     title: 'רקורסיה על עצים בינאריים',
     description: 'מדריך לרקורסיה על עצים בינאריים עם הדמיות והסברים מפורטים.',
     category: 'teaching',
-    path: ['מבני נתונים', 'חשיבה רקורסיבית'],
+    path: ['מבני נתונים', 'עצים'],
     linkUrl: '/bintree_recursion.html',
     icon: '🌳',
   },
@@ -94,7 +97,7 @@ export const staticMaterials: StaticMaterial[] = ([
     title: 'BFS & DFS',
     description: 'הדמיה אינטראקטיבית של אלגוריתמי חיפוש BFS ו-DFS בגרפים.',
     category: 'teaching',
-    path: ['יסודות מדעי המחשב'],
+    path: ['מבני נתונים'],
     linkUrl: '/bfs_dfs.html',
     icon: '🔍',
   },
@@ -103,7 +106,7 @@ export const staticMaterials: StaticMaterial[] = ([
     title: 'שפות רגולריות',
     description: 'מדריך מקיף לשפות רגולריות, אוטומטים וביטויים רגולריים.',
     category: 'teaching',
-    path: ['יסודות מדעי המחשב'],
+    path: ['מודלים חישוביים', 'שפות רגולריות'],
     linkUrl: '/regularLanguages.html',
     icon: '📜',
   },
@@ -112,7 +115,7 @@ export const staticMaterials: StaticMaterial[] = ([
     title: 'פותר תרגילי Java',
     description: 'כלי אינטראקטיבי לפתרון תרגילים בשפת Java.',
     category: 'teaching',
-    path: ['יסודות מדעי המחשב'],
+    path: ['יסודות מדעי המחשב', 'כלים'],
     linkUrl: '/javaExercise.html',
     icon: '☕',
   },
@@ -121,7 +124,7 @@ export const staticMaterials: StaticMaterial[] = ([
     title: 'טבלת מעקב',
     description: 'כלי לבניית טבלאות מעקב (Trace Table) לתרגילי תכנות.',
     category: 'teaching',
-    path: ['יסודות מדעי המחשב'],
+    path: ['יסודות מדעי המחשב', 'כלים'],
     linkUrl: '/trackTable.html',
     icon: '📋',
   },
@@ -268,5 +271,5 @@ export const staticMaterials: StaticMaterial[] = ([
     path: ['מדעי הנתונים', 'חקירת נתונים (EDA)'],
     linkUrl: 'https://colab.research.google.com/github/anatshapir/anatshapir.github.io/blob/main/docs/NB07_Evaluation_Metrics.ipynb',
     icon: '📓',
-  }
-] as any[]).map(normalizeMaterial)
+  },
+] as StaticMaterial[]).map(normalizeMaterial)
