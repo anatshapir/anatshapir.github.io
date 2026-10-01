@@ -56,19 +56,19 @@ export function TopicGrid({ category, title }: TopicGridProps) {
         </div>
       )}
 
-      <div className="relative">
+      <div className="relative overflow-hidden py-3">
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute -left-8 -top-8 hidden h-28 w-28 lg:block bg-[#F9BF31]/70"
+          className="pointer-events-none absolute -left-8 -top-4 hidden h-40 w-40 opacity-35 lg:block bg-[#F9BF31]"
           style={visualMask('/lalinka/visual/offset-dots.svg')}
         />
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute -right-12 top-[34%] hidden h-28 w-28 rotate-90 lg:block bg-[#00B0FF]/20"
+          className="pointer-events-none absolute -right-16 top-24 hidden h-48 w-48 rotate-90 opacity-15 lg:block bg-[#00B0FF]"
           style={visualMask('/lalinka/visual/arc.svg')}
         />
 
-        <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+        <div className="relative z-10 grid grid-cols-1 gap-5 md:grid-cols-2">
           {topics.map((name, index) => {
             const isFirst = category === 'teaching' && index === 0;
             const number = topicNumbers[name] ?? String(index + 1).padStart(2, '0');
