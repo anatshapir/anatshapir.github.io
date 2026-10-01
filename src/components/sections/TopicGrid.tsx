@@ -7,12 +7,18 @@ interface TopicGridProps {
   title?: string;
 }
 
-export function TopicGrid({ category, title = 'מה תמצאו כאן?' }: TopicGridProps) {
+const topicDescriptions: Record<string, string> = {
+  'יסודות מדעי המחשב': 'להבין איך מחשבים, תוכניות ואלגוריתמים עובדים — מהרעיון ועד הקוד.',
+  'מבני נתונים': 'לחשוב כמו מתכנתים: רקורסיה, עצים, חיפוש ועוד דרכים לארגן ולפתור בעיות.',
+  'מדעי הנתונים': 'לגלות מה אפשר להבין מנתונים — ואיך מחשבים עוזרים לנו למצוא דפוסים ותשובות.',
+  'פיתוח ווב': 'לבנות את מה שקורה מאחורי המסך — מדפי HTML ועד אפליקציות ואתרים.',
+  'מודלים חישוביים': 'לגלות מה מחשבים יכולים לחשב, איך הם עושים זאת, ואיפה עובר הגבול.',
+};
+
+export function TopicGrid({ category, title }: TopicGridProps) {
   const { materials, meta: subcategoryMeta } = useMaterials();
 
-  const filtered = category
-    ? materials.filter(m => m.category === category)
-    : materials;
+  const filtered = category ? materials.filter(m => m.category === category) : materials;
 
   const topics = Object.entries(
     filtered.reduce((acc, m) => {
@@ -24,37 +30,31 @@ export function TopicGrid({ category, title = 'מה תמצאו כאן?' }: Topic
   );
 
   return (
-    <section id="topics" className="py-24 bg-background">
+    <section id="topics" className="py-16 bg-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {title && (
           <div className="text-center mb-16 space-y-4">
-            <h2 className="text-4xl sm:text-5xl font-serif font-bold text-foreground">
-              {title}
-            </h2>
-            <div className="w-24 h-1.5 bg-primary mx-auto rounded-full" />
+            <h2 className="text-4xl sm:text-5xl font-serif font-bold text-foreground">{title}</h2>
           </div>
         )}
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
-          {topics.map(([name, count]) => {
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          {topics.map(([name]) => {
             const meta = subcategoryMeta[name] || { icon: '📁', color: 'from-gray-50 to-slate-50 border-gray-200' };
+            const description = topicDescriptions[name];
 
             return (
               <a
                 key={name}
                 href={`#topic/${encodeURIComponent(name)}`}
-                className={`group relative flex flex-col items-center justify-center gap-4 p-8 rounded-2xl border-2 bg-gradient-to-br ${meta.color}
-                  shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer aspect-square`}
+                className={`group relative flex flex-col items-start gap-4 p-8 rounded-2xl border-2 bg-gradient-to-br ${meta.color} shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer text-right`}
               >
-                <span className="text-5xl sm:text-6xl group-hover:scale-110 transition-transform duration-300">
-                  <IconDisplay icon={meta.icon} className="text-5xl sm:text-6xl" />
-                </span>
-                <h3 className="text-xl sm:text-2xl font-serif font-bold text-foreground text-center">
-                  {name}
-                </h3>
-                <span className="text-sm text-muted-foreground">
-                  {count} {count === 1 ? 'פריט' : 'פריטים'}
-                </span>
+                <div className="flex items-center gap-4 w-full">
+                  <IconDisplay icon={meta.icon} className="text-5xl" />
+                  <h3 className="text-2xl sm:text-3xl font-serif font-bold text-foreground">{name}</h3>
+                </div>
+                {description && <p className="text-lg text-muted-foreground leading-relaxed">{description}</p>}
+                <span className="text-primary font-medium">להיכנס לנושא ←</span>
               </a>
             );
           })}
