@@ -1,8 +1,8 @@
 import React from 'react';
 import { ArrowRight, ArrowLeft } from 'lucide-react';
 import { useMaterials } from '@/context/MaterialsContext';
-import { IconDisplay } from '@/components/IconDisplay';
 import type { StaticMaterial } from '@/data/materials';
+import { IconDisplay } from '@/components/IconDisplay';
 
 interface TopicPageProps {
   pathSegments: string[];
@@ -14,32 +14,25 @@ export function TopicPage({ pathSegments }: TopicPageProps) {
   const currentName = pathSegments[pathSegments.length - 1];
   const meta = subcategoryMeta[currentName] || { icon: '📁', color: 'from-gray-50 to-slate-50 border-gray-200' };
 
-  // Find materials whose path starts with current segments
   const descendants = materials.filter(m =>
     pathSegments.every((seg, i) => m.path[i] === seg)
   );
 
-  // Materials at exactly this level (path matches exactly)
   const directItems = descendants.filter(m => m.path.length === pathSegments.length);
 
-  // Sub-folders: materials that go deeper, grouped by their next segment
-  const subFolders = Object.entries(
+  const subFolders = Object.keys(
     descendants.reduce((acc, m) => {
       if (m.path.length > pathSegments.length) {
-        const nextSeg = m.path[pathSegments.length];
-        if (!acc[nextSeg]) acc[nextSeg] = 0;
-        acc[nextSeg]++;
+        acc[m.path[pathSegments.length]] = true;
       }
       return acc;
-    }, {} as Record<string, number>)
+    }, {} as Record<string, boolean>)
   );
 
-  // Determine which category page this topic belongs to
   const topCategory = descendants.length > 0 ? descendants[0].category : null;
   const categoryHref = topCategory === 'teaching' ? '#materials' : topCategory === 'general' ? '#interesting' : '#';
   const categoryLabel = topCategory === 'teaching' ? 'ללמוד' : topCategory === 'general' ? 'דברים מעניינים' : 'דף הבית';
 
-  // Back link
   const backHref = pathSegments.length > 1
     ? `#topic/${pathSegments.slice(0, -1).map(encodeURIComponent).join('/')}`
     : categoryHref;
@@ -49,7 +42,6 @@ export function TopicPage({ pathSegments }: TopicPageProps) {
 
   return (
     <div className="pt-24 pb-16 min-h-screen">
-      {/* Header */}
       <section
         className={`py-16 border-b-2 relative overflow-hidden ${meta.headerImage ? '' : `bg-gradient-to-br ${meta.color}`}`}
         style={meta.headerImage ? {
@@ -70,7 +62,6 @@ export function TopicPage({ pathSegments }: TopicPageProps) {
             {backLabel}
           </a>
 
-          {/* Breadcrumb */}
           {pathSegments.length > 1 && (
             <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4 flex-wrap">
               {pathSegments.map((seg, i) => (
@@ -84,7 +75,9 @@ export function TopicPage({ pathSegments }: TopicPageProps) {
                       <IconDisplay icon={subcategoryMeta[seg]?.icon || '📁'} className="text-sm inline-block align-middle" /> {seg}
                     </a>
                   ) : (
-                    <span className="font-medium text-foreground"><IconDisplay icon={subcategoryMeta[seg]?.icon || '📁'} className="text-sm inline-block align-middle" /> {seg}</span>
+                    <span className="font-medium text-foreground">
+                      <IconDisplay icon={subcategoryMeta[seg]?.icon || '📁'} className="text-sm inline-block align-middle" /> {seg}
+                    </span>
                   )}
                 </React.Fragment>
               ))}
@@ -93,20 +86,21 @@ export function TopicPage({ pathSegments }: TopicPageProps) {
 
           <div className="text-center space-y-4">
             <IconDisplay icon={meta.icon} className="text-6xl" />
-            <h1 className={`text-4xl sm:text-5xl font-serif font-bold ${meta.headerImage ? 'text-white drop-shadow-lg' : 'text-foreground'}`}>{currentName}</h1>
+            <h1 className={`text-4xl sm:text-5xl font-serif font-bold ${meta.headerImage ? 'text-white drop-shadow-lg' : 'text-foreground'}`}>
+              {currentName}
+            </h1>
           </div>
         </div>
       </section>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-12">
-        {/* Sub-folder cards */}
         {subFolders.length > 0 && (
           <div>
             {directItems.length > 0 && (
               <h2 className="text-2xl font-serif font-bold text-foreground mb-6">תת-נושאים</h2>
             )}
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
-              {subFolders.map(([name, count]) => {
+              {subFolders.map(name => {
                 const subMeta = subcategoryMeta[name] || { icon: '📁', color: 'from-gray-50 to-slate-50 border-gray-200' };
                 return (
                   <a
@@ -115,15 +109,11 @@ export function TopicPage({ pathSegments }: TopicPageProps) {
                     className={`group relative flex flex-col items-center justify-center gap-4 p-8 rounded-2xl border-2 bg-gradient-to-br ${subMeta.color}
                       shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer aspect-square`}
                   >
-                    <span className="text-5xl sm:text-6xl group-hover:scale-110 transition-transform duration-300">
-                      <IconDisplay icon={subMeta.icon} className="text-5xl sm:text-6xl" />
-                    </span>
+                    <IconDisplay icon={subMeta.icon} className="text-5xl sm:text-6xl" />
                     <h3 className="text-xl sm:text-2xl font-serif font-bold text-foreground text-center">
                       {name}
                     </h3>
-                    <span className="text-sm text-muted-foreground">
-                      {count} {count === 1 ? 'פריט' : 'פריטים'}
-                    </span>
+                    <span className="text-sm text-muted-foreground">להיכנס לנושא ←</span>
                   </a>
                 );
               })}
@@ -131,7 +121,6 @@ export function TopicPage({ pathSegments }: TopicPageProps) {
           </div>
         )}
 
-        {/* Direct materials at this level */}
         {directItems.length > 0 && (
           <div>
             {subFolders.length > 0 && (
@@ -145,7 +134,6 @@ export function TopicPage({ pathSegments }: TopicPageProps) {
           </div>
         )}
 
-        {/* Empty state */}
         {descendants.length === 0 && (
           <div className="text-center py-20">
             <p className="text-2xl text-muted-foreground">לא נמצא תוכן בנושא הזה.</p>
