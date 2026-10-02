@@ -17,7 +17,7 @@ export function Navbar() {
       <div className="mx-auto max-w-7xl px-6 sm:px-8">
         <div className="flex h-[84px] items-center justify-between">
           <a href="#" aria-label="LALINKA" className="shrink-0">
-            <img src="/lalinka/logo/lalinka_logo_original_MASTER.svg" alt="LALINKA" className="h-[54px] w-auto" />
+            <img src="/lalinka/logo/lalinka-original.png" alt="LALINKA" className="h-[54px] w-auto" />
           </a>
 
           <div className="hidden items-center gap-8 md:flex">
