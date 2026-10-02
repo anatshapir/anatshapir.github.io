@@ -39,6 +39,9 @@ const categories = [
   },
 ];
 
+// Start with learning in RTL, preserving the other cards' left-to-right order.
+const rightToLeftCategories = [categories[0], ...categories.slice(1).reverse()];
+
 export default function Home() {
   return (
     <div className="home-page" dir="rtl">
@@ -63,8 +66,8 @@ export default function Home() {
           <h2 id="category-title">מה מחכה לך ב־<span>דברים שענת אוהבת במיוחד</span>?</h2>
           <p>רעיונות, מקומות ויצירות שמזמינים אותך ללמוד, לגלות, ליצור ולאהוב</p>
         </div>
-        <div className="category-grid" dir="ltr">
-          {categories.map((category) => (
+        <div className="category-grid" dir="rtl">
+          {rightToLeftCategories.map((category) => (
             <Link
               key={category.slug}
               href={`/category/${category.slug}`}
