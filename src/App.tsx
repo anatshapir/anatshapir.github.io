@@ -2,6 +2,7 @@ import React from "react";
 import { MaterialsProvider } from "@/context/MaterialsContext";
 import { AdminPanel } from "@/components/Admin";
 import { TopicPage } from "@/components/sections/TopicPage";
+import { useMaterials } from "@/context/MaterialsContext";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import Home from "@/approved/home";
@@ -10,10 +11,14 @@ import GeneralArea from "@/approved/general-area";
 import ContentDetail from "@/approved/content-detail";
 import ApprovedLayout from "@/approved/layout";
 import { useLocation } from "@/approved/router";
+import { LearningTopicPage } from "@/approved/learning-topics";
+import { useContentCatalog } from "@/approved/content-catalog";
 import "./approved/approved.css";
 
 function RoutedPage() {
   const [location] = useLocation();
+  const { materials: legacyMaterials } = useMaterials();
+  const catalog = useContentCatalog();
   const queryAt = location.indexOf("?");
   const pathname = queryAt < 0 ? location : location.slice(0, queryAt);
   const topicMatch = pathname.match(/^\/topic\/(.+)$/);
@@ -22,12 +27,16 @@ function RoutedPage() {
     try {
       topicMatch[1].split("/").forEach((segment) => {
         const decoded = decodeURIComponent(segment);
-        if (decoded) segments.push(decoded);
+        if (!decoded.trim()) throw new Error("Invalid topic segment");
+        segments.push(decoded);
       });
     } catch {
       return <NotFoundPage />;
     }
-    return <TopicPage pathSegments={segments} />;
+    const isGeneral = (catalog.data?.materials ?? legacyMaterials).some(
+      (item) => item.category === "general" && item.path[0] === segments[0],
+    );
+    return isGeneral ? <TopicPage pathSegments={segments} /> : <LearningTopicPage pathSegments={segments} />;
   }
   if (pathname === "/") return <Home />;
   if (pathname === "/admin") return <AdminPanel />;
@@ -53,23 +62,33 @@ function NotFoundPage() {
 }
 
 export default function App() {
+  return <MaterialsProvider><AppFrame /></MaterialsProvider>;
+}
+
+function AppFrame() {
   const [location] = useLocation();
   const pathname = location.split("?")[0];
+  const { materials } = useMaterials();
+  const catalog = useContentCatalog();
   React.useEffect(() => {
     if (window.location.hash !== "#categories") window.scrollTo(0, 0);
   }, [location]);
-  const preserveLegacyShell = pathname === "/admin" || pathname.startsWith("/topic/");
+  const topicPath = pathname.startsWith("/topic/") ? pathname.slice("/topic/".length).split("/").map((part) => {
+    try { return decodeURIComponent(part); } catch { return ""; }
+  }) : [];
+  const generalTopic = topicPath.length > 0 && (catalog.data?.materials ?? materials).some(
+    (item) => item.category === "general" && item.path[0] === topicPath[0],
+  );
+  const preserveLegacyShell = pathname === "/admin" || (pathname.startsWith("/topic/") && generalTopic);
   return (
-    <MaterialsProvider>
-      {preserveLegacyShell ? (
-        <div className="min-h-screen bg-background font-sans">
-          <Navbar />
-          <main className="relative z-10"><RoutedPage /></main>
-          <Footer />
-        </div>
-      ) : (
-        <ApprovedLayout><RoutedPage /></ApprovedLayout>
-      )}
-    </MaterialsProvider>
+    preserveLegacyShell ? (
+      <div className="min-h-screen bg-background font-sans">
+        <Navbar />
+        <main className="relative z-10"><RoutedPage /></main>
+        <Footer />
+      </div>
+    ) : (
+      <ApprovedLayout><RoutedPage /></ApprovedLayout>
+    )
   );
 }

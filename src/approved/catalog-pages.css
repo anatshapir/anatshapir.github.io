@@ -193,3 +193,5 @@
   .content-detail-page { padding: 25px 16px 35px; }
   .content-detail-card { border-radius: 20px; }
 }
+
+.approved-ui .learning-subjects .catalog-status { margin-bottom: 16px; }

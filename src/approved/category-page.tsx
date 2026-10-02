@@ -4,7 +4,7 @@ import TeachingMaterials from "@/approved/teaching-materials";
 import CatalogStatus from "@/approved/catalog-status";
 import { contentHref, getCategoryMaterials, getMaterialUrl, useContentCatalog } from "@/approved/content-catalog";
 import { LearningAtmosphere } from "@/components/sections/LearningAtmosphere";
-import { TopicGrid } from "@/components/sections/TopicGrid";
+import { LearningSubjectGrid } from "@/approved/learning-topics";
 import "./catalog-pages.css";
 
 const categories: Record<string, { title: string; kicker: string; description: string; illustration: string; icon: typeof Sparkles }> = {
@@ -38,7 +38,7 @@ export default function CategoryPage({ slug }: { slug: string }) {
           <h2 id="learning-topics-title">מה בא לך להבין?</h2>
           <p>בחרי נושא, ומשם ניכנס פנימה.</p>
         </div>
-        <TopicGrid category="teaching" title="" />
+        <LearningSubjectGrid />
       </section>
       <TeachingMaterials />
     </div>

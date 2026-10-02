@@ -25,7 +25,16 @@ function fallbackPath(item?: Material) {
 function safeReturnPath(value: string | null, item?: Material) {
   if (!value) return fallbackPath(item);
   try {
-    return allowedReturnPaths.has(value) ? value : fallbackPath(item);
+    if (allowedReturnPaths.has(value)) return value;
+    if (item?.category === "teaching" && value.startsWith("/topic/")) {
+      const segments = value.slice("/topic/".length).split("/").map((part) => decodeURIComponent(part));
+      const isOwnedLearningAncestor = segments.length > 0
+        && segments.every(Boolean)
+        && segments.length <= item.path.length
+        && segments.every((part, index) => item.path[index] === part);
+      if (isOwnedLearningAncestor) return `/topic/${segments.map(encodeURIComponent).join("/")}`;
+    }
+    return fallbackPath(item);
   } catch {
     return fallbackPath(item);
   }
