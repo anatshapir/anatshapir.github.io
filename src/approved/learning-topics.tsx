@@ -4,6 +4,7 @@ import CatalogStatus from "@/approved/catalog-status";
 import { contentHref, getCategoryMaterials, getMaterialUrl, useContentCatalog, type Material } from "@/approved/content-catalog";
 import "./catalog-pages.css";
 import "./learning-topics.css";
+import TopicSymbol from "./topic-symbol";
 
 const learningOrder = ["יסודות מדעי המחשב", "מבני נתונים", "מדעי הנתונים", "פיתוח ווב", "מודלים חישוביים"];
 const descriptions: Record<string, string> = {
@@ -13,7 +14,6 @@ const descriptions: Record<string, string> = {
   "פיתוח ווב": "לבנות את מה שקורה מאחורי המסך — מדפי HTML ועד אפליקציות ואתרים.",
   "מודלים חישוביים": "לגלות מה מחשבים יכולים לחשב, איך הם עושים זאת, ואיפה עובר הגבול.",
 };
-const accents = ["#00B0FF", "#F9BF31", "#EF882A", "#3ABD6C", "#6D338E"];
 export const topicHref = (path: string[]) => `#topic/${path.map(encodeURIComponent).join("/")}`;
 export const pathMatches = (path: string[], prefix: string[]) => prefix.length <= path.length && prefix.every((part, index) => path[index] === part);
 
@@ -36,7 +36,7 @@ export function LearningSubjectGrid() {
           {topics.map((name, index) => (
             <Link key={name} href={topicHref([name])} className="learning-subject-card">
               <span className="learning-subject-number" dir="ltr">{String(index + 1).padStart(2, "0")}</span>
-              <span className="learning-subject-mark" style={{ backgroundColor: accents[index % accents.length] }} aria-hidden="true" />
+              <span className="learning-subject-mark"><TopicSymbol name={name} /></span>
               <span className="learning-subject-copy">
                 <strong>{name}</strong>
                 {descriptions[name] && <span>{descriptions[name]}</span>}
@@ -93,7 +93,7 @@ export function LearningTopicPage({ pathSegments }: { pathSegments: string[] }) 
             const count = descendants.filter((item) => item.path.length > pathSegments.length && item.path[pathSegments.length] === name).length;
             return <Link key={name} href={topicHref([...pathSegments, name])} className="learning-subfolder-card">
               <span className="learning-subfolder-index" dir="ltr">{String(index + 1).padStart(2, "0")}</span>
-              <span className="learning-subfolder-dot" style={{ backgroundColor: accents[(index + pathSegments.length) % accents.length] }} />
+              <span className="learning-subfolder-symbol"><TopicSymbol name={name} /></span>
               <strong>{name}</strong><span>{count} פריטים <ArrowLeft size={15} /></span>
             </Link>;
           })}</div>
