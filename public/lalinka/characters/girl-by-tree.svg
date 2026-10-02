@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape" viewBox="345 235 335 570" role="img" aria-labelledby="title desc">
+  <title id="title">Lalinka by the tree — PROOF, NOT APPROVED</title>
+  <desc id="desc">Lalinka in her signature rounded black bob, black top and coral skirt reaches to touch a tall outlined tree. Layered editing proof; not approved.</desc>
+  <g id="illustration" stroke="#171715" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" inkscape:groupmode="layer" inkscape:label="Illustration">
+    <g id="tree-trunk-and-branches" fill="#fffdf9" inkscape:groupmode="layer" inkscape:label="Tree">
+      <path d="M519 793 C550 781 553 748 555 707 L557 369 C555 318 521 282 491 247 L508 247 L560 309 L560 247 L585 247 L586 304 L613 247 L626 247 C609 286 593 314 593 350 L593 697 C594 750 596 779 630 793 Z"/>
+      <g fill="none">
+        <path d="M514 263 C540 296 561 325 564 360"/>
+        <path d="M570 256 L573 304 C576 350 563 374 568 432"/>
+        <path d="M609 267 L583 323"/>
+        <path d="M581 376 C588 389 589 415 585 434"/>
+        <path d="M578 391 C574 419 578 444 580 464"/>
+        <path d="M564 451 L567 508"/>
+        <path d="M581 483 C581 528 586 571 581 618"/>
+        <path d="M574 515 C574 559 567 605 574 634"/>
+        <path d="M570 664 C565 711 573 760 543 791"/>
+        <path d="M582 656 C591 680 586 714 588 739"/>
+        <path d="M579 683 C575 737 577 774 599 791"/>
+      </g>
+    </g>
+    <g id="legs" fill="#fffdf9" inkscape:groupmode="layer" inkscape:label="Legs">
+      <path d="M447 694 C448 714 451 741 454 762 L455 778 L470 780 C473 748 475 721 475 696 Z"/>
+      <path d="M482 696 L485 756 L485 779 L500 780 C506 754 511 728 508 711 L510 695 Z"/>
+      <path d="M453 757 Q462 760 471 757" fill="none"/>
+      <path d="M485 758 Q495 760 504 757" fill="none"/>
+    </g>
+    <g id="shoes" fill="#080808" inkscape:groupmode="layer" inkscape:label="Shoes">
+      <path d="M455 775 Q462 769 470 776 L477 791 Q465 795 451 791 Z"/>
+      <path d="M485 776 Q492 770 500 776 L505 790 Q494 795 479 791 Z"/>
+      <path d="M457 780 Q462 776 468 780 M486 780 Q491 777 497 780" fill="none" stroke="#fff" stroke-width="3"/>
+    </g>
+    <g id="arms" fill="#fffdf9" inkscape:groupmode="layer" inkscape:label="Arms">
+      <path d="M426 551 C422 577 420 603 418 627 L425 637 L440 592 L442 558 Z"/>
+      <path d="M520 549 L528 571 L549 554 L553 545 Q560 537 561 542 L559 552 Q560 556 555 562 C546 579 535 591 529 591 Q521 590 519 578 L512 557 Z"/>
+      <path d="M529 563 L533 570" fill="none"/>
+    </g>
+    <g id="clothes" inkscape:groupmode="layer" inkscape:label="Clothes">
+      <g id="black-top" fill="#080808" inkscape:label="Black top">
+        <path d="M459 507 Q436 513 418 548 L434 560 L440 545 L438 584 Q477 600 519 586 L517 546 L522 561 L540 550 Q525 520 504 509 Z"/>
+      </g>
+      <g id="coral-skirt" fill="#F6674A" inkscape:label="Coral skirt">
+        <path d="M439 585 Q477 598 518 585 L522 600 C534 626 542 656 550 689 Q525 703 501 702 Q479 699 459 702 Q433 704 404 689 L426 623 Z"/>
+        <path d="M437 595 Q476 608 521 595" fill="none"/>
+        <g fill="none">
+          <path d="M443 602 L434 625 M456 601 L442 658"/>
+          <path d="M493 606 L494 615 M496 627 L500 685"/>
+          <path d="M514 605 L518 617"/>
+        </g>
+      </g>
+    </g>
+    <g id="hair" fill="#080808" inkscape:groupmode="layer" inkscape:label="Hair">
+      <path d="M470 366 C439 364 416 388 405 422 C393 454 393 479 408 494 Q425 506 456 502 L514 502 Q545 505 557 488 C562 458 552 412 533 389 Q508 362 480 367 Z"/>
+      <path d="M431 383 C414 405 406 433 402 457 Q398 479 408 490" fill="none" stroke="#fff" stroke-width="2"/>
+      <path d="M532 388 Q552 419 555 450" fill="none" stroke="#fff" stroke-width="2"/>
+    </g>
+    <g id="face" fill="#fffdf9" inkscape:groupmode="layer" inkscape:label="Face">
+      <path d="M438 429 L436 449 Q434 479 447 489 Q456 497 467 498 L466 505 L456 510 Q478 527 501 511 L491 505 L490 498 Q512 495 520 480 Q525 463 522 435 L519 444 L504 444 L501 421 L497 444 L466 444 L463 421 L459 444 L440 444 Z" stroke-width="1.8"/>
+      <path d="M441 446 L456 443 M465 442 L495 442 M506 443 L520 443" fill="none" stroke="#080808" stroke-width="3"/>
+      <path d="M447 450 Q454 446 460 450 M498 450 Q505 446 511 450" fill="none" stroke-width="2.6"/>
+      <ellipse cx="454" cy="461" rx="3.3" ry="4" fill="#080808" stroke="none"/>
+      <ellipse cx="505" cy="461" rx="3.3" ry="4" fill="#080808" stroke="none"/>
+      <circle cx="446" cy="477" r="7" fill="#f6b5aa" stroke="none"/>
+      <circle cx="514" cy="477" r="7" fill="#f6b5aa" stroke="none"/>
+      <path d="M477 472 Q480 469 483 472 M476 482 Q480 486 485 482" fill="none" stroke-width="1.7"/>
+    </g>
+    <path id="ground-line" d="M358 794 L666 794" fill="none"/>
+  </g>
+</svg>
