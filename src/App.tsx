@@ -4,6 +4,7 @@ import { Footer } from '@/components/layout/Footer';
 import { Hero } from '@/components/sections/Hero';
 import { TopicGrid } from '@/components/sections/TopicGrid';
 import { TopicPage } from '@/components/sections/TopicPage';
+import { LearningAtmosphere } from '@/components/sections/LearningAtmosphere';
 import { AdminPanel } from '@/components/Admin';
 import { MaterialsProvider } from '@/context/MaterialsContext';
 import { ArrowRight } from 'lucide-react';
@@ -61,14 +62,15 @@ function HomePage() {
 
 function CategoryPage({category,title,subtitle}:{category:'teaching'|'general';title:string;subtitle:string}) {
   const isLearning=category==='teaching';
-  return <div className="min-h-screen bg-[#FFFDF8] pt-20" dir="rtl">
-    <section><div className="mx-auto max-w-6xl px-6 pb-16 pt-16 sm:px-8 sm:pb-20 sm:pt-20">
+  return <div className={`min-h-screen bg-[#FFFDF8] pt-20${isLearning ? ' relative isolate' : ''}`} dir="rtl">
+    {isLearning && <LearningAtmosphere/>}
+    <section className={isLearning ? 'relative' : undefined}><div className="mx-auto max-w-6xl px-6 pb-16 pt-16 sm:px-8 sm:pb-20 sm:pt-20">
       <a href="#" className="mb-16 inline-flex items-center gap-2 text-sm font-medium text-[#18324A]/55"><ArrowRight size={17}/>חזרה לדף הבית</a>
       <div className="max-w-3xl"><p className="mb-5 text-sm font-semibold tracking-[0.12em] text-[#EF882A]">{isLearning?'עולם 01':'מתוך העולם של ענת'}</p>
       <h1 className="font-sans text-[52px] font-bold leading-[1.02] tracking-[-0.03em] text-[#18324A] sm:text-[72px]">{title}</h1>
       <div className="mt-7 h-px w-20 bg-[#00B0FF]"/><p className="mt-7 max-w-2xl text-xl leading-[1.65] text-[#18324A]/68 sm:text-[22px]">{subtitle}</p></div>
     </div></section>
-    {isLearning && <section className="border-y border-[#18324A]/[0.07] bg-white/45"><div className="mx-auto max-w-6xl px-6 py-16 sm:px-8 sm:py-20">
+    {isLearning && <section className="relative isolate overflow-hidden border-y border-[#18324A]/[0.07] bg-white/45"><div className="relative mx-auto max-w-6xl px-6 py-16 sm:px-8 sm:py-20">
       <div className="mb-12 max-w-2xl"><p className="text-sm font-semibold tracking-[0.1em] text-[#00B0FF]">שבילים</p><h2 className="mt-3 font-sans text-3xl font-bold text-[#18324A] sm:text-4xl">מה בא לך להבין?</h2><p className="mt-3 text-lg text-[#18324A]/58">בחרי נושא, ומשם ניכנס פנימה.</p></div><TopicGrid category={category} title=""/></div></section>}
     {!isLearning && <div className="pb-20"><TopicGrid category={category} title=""/></div>}
   </div>;
