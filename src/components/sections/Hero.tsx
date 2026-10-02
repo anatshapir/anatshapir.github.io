@@ -39,7 +39,7 @@ export function Hero() {
           aria-label="איור הילדה והעץ"
         >
           <img
-            src="/lalinka/character/girl_hero_scene.png"
+            src="/lalinka/characters/girl-by-tree.svg"
             alt="הילדה של LALINKA ליד העץ"
             className="relative z-10 max-h-[600px] w-full max-w-[620px] object-contain"
           />
