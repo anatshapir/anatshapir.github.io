@@ -102,8 +102,8 @@
     },
     {
       "id": "java-exercise",
-      "title": "פותר תרגילי Java",
-      "description": "כלי אינטראקטיבי לפתרון תרגילים בשפת Java.",
+      "title": "תרגול Java - מחשבון נקודות",
+      "description": "תרגיל אינטראקטיבי להשלמת קוד Java של מחשבון נקודות.",
       "category": "teaching",
       "path": [
         "יסודות מדעי המחשב",
@@ -126,12 +126,12 @@
     },
     {
       "id": "datascience-project",
-      "title": "מבוא למדעי הנתונים",
-      "description": "מבוא למדעי הנתונים - מושגי יסוד, כלים וטכניקות בסיסיות.",
+      "title": "מבוא ללמידת מכונה",
+      "description": "מדריך למושגי יסוד בלמידת מכונה, סוגי למידה, תהליך העבודה ו-Overfitting ו-Underfitting.",
       "category": "teaching",
       "path": [
         "מדעי הנתונים",
-        "מבוא למדעי הנתונים"
+        "מבוא ללמידת מכונה"
       ],
       "linkUrl": "/datascience-project.html",
       "icon": "📈"
@@ -162,8 +162,8 @@
     },
     {
       "id": "html-guide",
-      "title": "מדריך HTML & VS Code",
-      "description": "מדריך מקיף ל-HTML ולסביבת העבודה Visual Studio Code.",
+      "title": "מדריך HTML ו-ASP.NET ב-Visual Studio",
+      "description": "מדריך למתחילים לפיתוח אתר ב-ASP.NET: התקנת Visual Studio, יצירת פרויקט ודפי HTML.",
       "category": "teaching",
       "path": [
         "פיתוח ווב"
@@ -185,7 +185,7 @@
     {
       "id": "server-impl",
       "title": "מדריך Server Implementation",
-      "description": "מדריך מקיף למימוש שרת - ארכיטקטורה, API ותקשורת.",
+      "description": "מדריך מעשי ליישום צד השרת בפרויקט ASP.NET, כולל בסיס נתונים, מונה מבקרים, סקר ודף מנהל.",
       "category": "teaching",
       "path": [
         "פיתוח ווב"
@@ -236,7 +236,7 @@
         "מדעי הנתונים",
         "חקירת נתונים (EDA)"
       ],
-      "linkUrl": "/numpy.html",
+      "linkUrl": "/eda_video.mp4",
       "icon": "🎬"
     },
     {
@@ -277,12 +277,13 @@
     },
     {
       "id": "eda-מחברת",
-      "title": "EDA - מחברת",
-      "description": "מחברת הסבר ותרגול",
+      "title": "מדדי ביצוע - מחברת",
+      "description": "מחברת הסבר ותרגול להערכת מודלים: Accuracy, מטריצת בלבול, Precision, Recall ו-F1.",
       "category": "teaching",
       "path": [
         "מדעי הנתונים",
-        "חקירת נתונים (EDA)"
+        "מודלים",
+        "מדדי ביצוע"
       ],
       "linkUrl": "https://colab.research.google.com/github/anatshapir/anatshapir.github.io/blob/main/docs/NB07_Evaluation_Metrics.ipynb",
       "icon": "📓"
@@ -349,7 +350,7 @@
     },
     {
       "id": "svm-percepton",
-      "title": "SVM & Percepton",
+      "title": "SVM & Perceptron",
       "description": "",
       "category": "teaching",
       "path": [
@@ -361,8 +362,8 @@
     },
     {
       "id": "svm-מצגת-אינטרקטיבית",
-      "title": "SVM מצגת אינטרקטיבית",
-      "description": "",
+      "title": "SVM ו-Perceptron - מצגת PDF",
+      "description": "מצגת PDF על מסווגים ליניאריים, פרספטרון ו-SVM.",
       "category": "teaching",
       "path": [
         "מדעי הנתונים",
@@ -397,8 +398,8 @@
     },
     {
       "id": "הרצת-מודלים",
-      "title": "הרצת מודלים",
-      "description": "",
+      "title": "הכללת מודלים - מצגת PDF",
+      "description": "מצגת על בניית מודלים יציבים, חלוקת Train/Validation/Test ומניעת דליפת נתונים.",
       "category": "teaching",
       "path": [
         "מדעי הנתונים",
@@ -415,7 +416,7 @@
       "path": [
         "מבני נתונים"
       ],
-      "linkUrl": "binary_trees_quiz.html/",
+      "linkUrl": "/binary_trees_quiz.html",
       "icon": "🌳"
     },
     {
