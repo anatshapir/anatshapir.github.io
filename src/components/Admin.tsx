@@ -11,10 +11,11 @@ import {
 } from '@/components/ui/dialog'
 import {
   Plus, Trash2, Edit, X, Check, Upload, Settings, BookOpen,
-  Tag, Key, LogOut, Save, FolderOpen, ChevronRight,
+  Tag, Key, LogOut, Save, FolderOpen, ChevronRight, Sparkles,
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import * as github from '@/lib/github'
+import '@/approved/admin.css'
 
 // ─── Types ────────────────────────────────────────────
 interface CategoryMeta {
@@ -85,11 +86,13 @@ function EmojiPicker({ value, onChange }: { value: string; onChange: (v: string)
   }
 
   return (
-    <div className="relative">
+    <div className="relative admin-icon-picker">
       <button
         type="button"
         onClick={() => setOpen(!open)}
         className="flex items-center gap-2 px-3 py-2 border rounded-md hover:bg-muted transition-colors"
+        aria-label="בחירת אייקון"
+        aria-expanded={open}
       >
         {isImageIcon(value) ? (
           <img src={value} alt="" className="w-7 h-7 object-contain" />
@@ -99,7 +102,7 @@ function EmojiPicker({ value, onChange }: { value: string; onChange: (v: string)
         <span className="text-xs text-muted-foreground">בחרי אייקון</span>
       </button>
       {open && (
-        <div className="absolute z-50 top-full mt-1 bg-background border rounded-lg shadow-lg p-3 w-72">
+        <div className="absolute z-50 top-full mt-1 bg-background border rounded-lg shadow-lg p-3 w-72 admin-icon-menu">
           {EMOJI_OPTIONS.map(group => (
             <div key={group.group} className="mb-2">
               <p className="text-xs text-muted-foreground mb-1">{group.group}</p>
@@ -108,6 +111,7 @@ function EmojiPicker({ value, onChange }: { value: string; onChange: (v: string)
                   <button
                     key={emoji}
                     type="button"
+                    aria-label={`בחירת אייקון ${emoji}`}
                     onClick={() => { onChange(emoji); setOpen(false) }}
                     className={`text-xl p-1 rounded hover:bg-muted transition-colors ${
                       value === emoji ? 'bg-primary/10 ring-2 ring-primary' : ''
@@ -121,6 +125,7 @@ function EmojiPicker({ value, onChange }: { value: string; onChange: (v: string)
           ))}
           <div className="border-t pt-2 mt-2 space-y-2">
             <Input
+              aria-label="הקלדת אימוג׳י לאייקון"
               value={isImageIcon(value) ? '' : value}
               onChange={e => onChange(e.target.value)}
               placeholder="או הקלידי אימוג'י..."
@@ -187,7 +192,7 @@ function PathBuilder({
   }
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-3" aria-labelledby="admin-material-path-label">
       {/* Current path display */}
       {path.length > 0 && (
         <div className="flex items-center gap-1 flex-wrap">
@@ -210,7 +215,7 @@ function PathBuilder({
       )}
 
       {/* Options for next level */}
-      <div>
+      <div className="admin-field">
         <p className="text-xs text-muted-foreground mb-2">
           {path.length === 0 ? 'בחרי נושא ראשי *' : 'הוסיפי תת-נושא (אופציונלי)'}
         </p>
@@ -317,11 +322,12 @@ function MaterialForm({
   }
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-5 admin-form-stack">
       {/* Title */}
-      <div>
-        <label className="block text-sm font-medium mb-1">כותרת *</label>
+      <div className="admin-field">
+        <label htmlFor="admin-material-title" className="block text-sm font-medium mb-1">כותרת *</label>
         <Input
+          id="admin-material-title"
           value={form.title}
           onChange={e => setForm({ ...form, title: e.target.value })}
           placeholder="שם החומר"
@@ -329,9 +335,10 @@ function MaterialForm({
       </div>
 
       {/* Description */}
-      <div>
-        <label className="block text-sm font-medium mb-1">תיאור</label>
+      <div className="admin-field">
+        <label htmlFor="admin-material-description" className="block text-sm font-medium mb-1">תיאור</label>
         <Textarea
+          id="admin-material-description"
           value={form.description}
           onChange={e => setForm({ ...form, description: e.target.value })}
           placeholder="תיאור קצר"
@@ -340,31 +347,35 @@ function MaterialForm({
       </div>
 
       {/* Category */}
-      <div>
-        <label className="block text-sm font-medium mb-2">קטגוריה ראשית</label>
+      <div className="admin-field">
+        <span className="block text-sm font-medium mb-2" id="admin-category-kind-label">קטגוריה ראשית</span>
         <div className="flex gap-2">
           <Button
             type="button"
+            aria-pressed={form.category === 'teaching'}
+            aria-labelledby="admin-category-kind-label"
             variant={form.category === 'teaching' ? 'default' : 'outline'}
             size="sm"
             onClick={() => setForm({ ...form, category: 'teaching' })}
           >
-            📚 חומרי למידה
+            <BookOpen aria-hidden="true" /> חומרי למידה
           </Button>
           <Button
             type="button"
+            aria-pressed={form.category === 'general'}
+            aria-labelledby="admin-category-kind-label"
             variant={form.category === 'general' ? 'default' : 'outline'}
             size="sm"
             onClick={() => setForm({ ...form, category: 'general' })}
           >
-            ✨ דברים מעניינים
+            <Sparkles aria-hidden="true" /> דברים מעניינים
           </Button>
         </div>
       </div>
 
       {/* Path (dynamic hierarchy) */}
-      <div>
-        <label className="block text-sm font-medium mb-2">מיקום בהיררכיה *</label>
+      <div className="admin-field">
+        <span className="block text-sm font-medium mb-2" id="admin-material-path-label">מיקום בהיררכיה *</span>
         <PathBuilder
           path={form.path}
           onChange={path => setForm({ ...form, path })}
@@ -374,9 +385,10 @@ function MaterialForm({
       </div>
 
       {/* Link */}
-      <div>
-        <label className="block text-sm font-medium mb-1">קישור</label>
+      <div className="admin-field">
+        <label htmlFor="admin-material-link" className="block text-sm font-medium mb-1">קישור</label>
         <Input
+          id="admin-material-link"
           value={form.linkUrl}
           onChange={e => setForm({ ...form, linkUrl: e.target.value })}
           placeholder="/fileName.html או https://..."
@@ -387,13 +399,13 @@ function MaterialForm({
       </div>
 
       {/* Icon */}
-      <div>
+      <div className="admin-field">
         <label className="block text-sm font-medium mb-2">אייקון</label>
         <EmojiPicker value={form.icon} onChange={icon => setForm({ ...form, icon })} />
       </div>
 
       {/* Preview */}
-      <div className="border rounded-lg p-4 bg-muted/30">
+      <div className="border rounded-lg p-4 bg-muted/30 admin-preview">
         <p className="text-xs text-muted-foreground mb-2">תצוגה מקדימה:</p>
         <div className="flex items-center gap-3">
           <span className="text-3xl">{form.icon}</span>
@@ -457,10 +469,11 @@ function CategoryForm({
   ]
 
   return (
-    <div className="space-y-4">
-      <div className="grid grid-cols-[auto_1fr] gap-4 items-center">
-        <label className="text-sm font-medium">שם הקטגוריה *</label>
+    <div className="space-y-4 admin-form-stack">
+      <div className="grid grid-cols-[auto_1fr] gap-4 items-center admin-category-form-grid">
+        <label className="text-sm font-medium" htmlFor="admin-category-name">שם הקטגוריה *</label>
         <Input
+          id="admin-category-name"
           value={name}
           onChange={e => setName(e.target.value)}
           placeholder="למשל: אלגוריתמים"
@@ -471,10 +484,12 @@ function CategoryForm({
         <EmojiPicker value={icon} onChange={setIcon} />
 
         <label className="text-sm font-medium">צבע</label>
-        <div className="flex gap-2 flex-wrap">
+        <div className="flex gap-2 flex-wrap admin-color-presets">
           {colorPresets.map(cp => (
             <button
               key={cp.value}
+              type="button"
+              aria-pressed={color === cp.value}
               onClick={() => setColor(cp.value)}
               className={`px-3 py-1 rounded-lg border-2 text-xs bg-gradient-to-br ${cp.value} ${
                 color === cp.value ? 'ring-2 ring-primary ring-offset-2' : ''
@@ -719,17 +734,19 @@ export function AdminPanel() {
   // ─── Login Screen ─────────────
   if (!authenticated) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center px-4" dir="rtl">
-        <Card className="w-full max-w-md">
-          <CardHeader className="text-center">
-            <div className="text-5xl mb-4">🔐</div>
-            <CardTitle className="text-2xl font-serif">ניהול האתר</CardTitle>
-            <p className="text-muted-foreground mt-2">
+    <div className="approved-ui admin-page min-h-screen" dir="rtl">
+      <div className="admin-login-wrap">
+        <Card className="admin-login-card">
+          <CardHeader className="text-center admin-login-header">
+            <div className="admin-login-icon"><Key className="w-7 h-7" aria-hidden="true" /></div>
+            <CardTitle className="admin-title">ניהול האתר</CardTitle>
+            <p className="text-muted-foreground mt-2 admin-lede">
               הכניסי GitHub Personal Access Token כדי להתחבר
             </p>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-4 admin-login-content">
             <Input
+              aria-label="GitHub Personal Access Token"
               type="password"
               value={tokenInput}
               onChange={e => { setTokenInput(e.target.value); setAuthError('') }}
@@ -738,8 +755,8 @@ export function AdminPanel() {
             />
 
             {authError && (
-              <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-sm text-red-800 whitespace-pre-line">
-                ❌ {authError}
+              <div role="alert" className="admin-login-error text-sm whitespace-pre-line">
+                {authError}
               </div>
             )}
 
@@ -751,7 +768,7 @@ export function AdminPanel() {
               {validating ? 'בודק הרשאות...' : <><Key className="w-4 h-4 ml-2" /> התחברי</>}
             </Button>
 
-            <div className="text-xs text-muted-foreground space-y-2 bg-muted/50 rounded-lg p-3">
+            <div className="text-xs text-muted-foreground space-y-2 admin-login-help">
               <p className="font-bold">איך מייצרים Token?</p>
               <ol className="list-decimal list-inside space-y-1">
                 <li>GitHub → Settings → Developer settings → Personal access tokens</li>
@@ -760,41 +777,44 @@ export function AdminPanel() {
                 <li>ב-Permissions → Repository permissions:</li>
               </ol>
               <div className="mr-4 space-y-0.5">
-                <p>• <strong>Contents</strong>: Read and write ✅</p>
-                <p>• <strong>Metadata</strong>: Read-only ✅ (אוטומטי)</p>
+                <p>• <strong>Contents</strong>: Read and write</p>
+                <p>• <strong>Metadata</strong>: Read-only (אוטומטי)</p>
               </div>
-              <p className="mt-2 text-amber-700 font-medium">⚠️ Classic token? צריך scope של <code className="bg-background px-1 rounded">repo</code></p>
+              <p className="mt-2 text-amber-700 font-medium">Classic token? צריך scope של <code className="bg-background px-1 rounded">repo</code></p>
             </div>
           </CardContent>
         </Card>
       </div>
+    </div>
     )
   }
 
   // ─── Main Admin UI ────────────
   return (
-    <div className="min-h-screen bg-background py-24 px-4" dir="rtl">
-      <div className="max-w-6xl mx-auto">
+    <div className="approved-ui admin-page min-h-screen" dir="rtl">
+      <div className="admin-workspace">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-3xl font-serif font-bold text-foreground flex items-center gap-3">
-              <Settings className="w-8 h-8 text-primary" />
+        <div className="admin-heading-row">
+          <div className="admin-heading-copy">
+            <span className="admin-heading-mark"><Settings className="w-7 h-7" aria-hidden="true" /></span>
+            <div>
+            <h1 className="font-bold">
               ניהול האתר
             </h1>
             <p className="text-muted-foreground mt-1">הוסיפי, ערכי ומחקי תוכן</p>
+            </div>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="admin-heading-actions">
             {hasChanges && (
               <Button onClick={saveToGitHub} disabled={saving} className="animate-pulse">
                 <Save className="w-4 h-4 ml-2" />
                 {saving ? 'שומר...' : 'שמור ב-GitHub'}
               </Button>
             )}
-            <a href="#" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+            <a href="#/" className="admin-back-link">
               ← חזרה לאתר
             </a>
-            <Button variant="ghost" size="icon" onClick={handleLogout} title="התנתק">
+            <Button variant="ghost" size="icon" onClick={handleLogout} title="התנתק" aria-label="התנתקות">
               <LogOut className="w-4 h-4" />
             </Button>
           </div>
@@ -802,7 +822,7 @@ export function AdminPanel() {
 
         {/* Unsaved changes banner */}
         {hasChanges && (
-          <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-6 flex items-center justify-between">
+          <div role="status" className="admin-unsaved">
             <span className="text-amber-800 text-sm font-medium">
               יש שינויים שלא נשמרו! לחצי "שמור ב-GitHub" כדי לפרסם.
             </span>
@@ -813,7 +833,7 @@ export function AdminPanel() {
         )}
 
         {/* Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="admin-tabs" dir="rtl">
           <TabsList className="grid w-full max-w-lg mx-auto grid-cols-3 mb-8">
             <TabsTrigger value="materials" className="text-base">
               <BookOpen className="w-4 h-4 ml-1" /> חומרים ({materials.length})
@@ -830,8 +850,8 @@ export function AdminPanel() {
           <TabsContent value="materials">
             <div className="space-y-6">
               {/* Toolbar */}
-              <div className="flex items-center justify-between flex-wrap gap-4">
-                <div className="flex gap-2">
+              <div className="admin-toolbar">
+                <div className="flex gap-2 admin-filter-group" aria-label="סינון חומרים">
                   <Button
                     variant={filterCategory === 'all' ? 'default' : 'outline'}
                     size="sm"
@@ -862,11 +882,11 @@ export function AdminPanel() {
               {/* Materials List */}
               <div className="grid gap-3">
                 {filteredMaterials.map(m => (
-                  <Card key={m.id} className="hover:shadow-md transition-shadow">
-                    <CardContent className="p-4">
-                      <div className="flex items-center gap-4">
-                        <span className="text-3xl">{m.icon}</span>
-                        <div className="flex-1 min-w-0">
+                  <Card key={m.id} className="admin-panel-card admin-material-row">
+                    <CardContent className="admin-material-content">
+                      <div className="admin-material-layout">
+                        <span className="admin-material-icon" aria-hidden="true">{m.icon}</span>
+                        <div className="admin-material-copy">
                           <div className="flex items-center gap-2">
                             <h3 className="font-bold text-lg truncate">{m.title}</h3>
                             <span className={`text-xs px-2 py-0.5 rounded-full ${
@@ -878,7 +898,7 @@ export function AdminPanel() {
                             </span>
                           </div>
                           <p className="text-sm text-muted-foreground truncate">{m.description}</p>
-                          <div className="flex items-center gap-1 mt-1 text-xs text-muted-foreground">
+                          <div className="admin-material-meta">
                             {m.path.map((seg, i) => (
                               <React.Fragment key={i}>
                                 {i > 0 && <ChevronRight className="w-3 h-3" />}
@@ -888,15 +908,15 @@ export function AdminPanel() {
                               </React.Fragment>
                             ))}
                             {m.linkUrl && (
-                              <span className="text-primary mr-2">{m.linkUrl}</span>
+                              <span className="admin-resource-url">{m.linkUrl}</span>
                             )}
                           </div>
                         </div>
-                        <div className="flex gap-1">
-                          <Button variant="ghost" size="icon" onClick={() => setEditingMaterial(m)}>
+                        <div className="admin-row-actions">
+                          <Button variant="ghost" size="icon" aria-label={`עריכת ${m.title}`} onClick={() => setEditingMaterial(m)}>
                             <Edit className="w-4 h-4" />
                           </Button>
-                          <Button variant="ghost" size="icon" onClick={() => deleteMaterial(m.id)}>
+                          <Button variant="ghost" size="icon" aria-label={`מחיקת ${m.title}`} onClick={() => deleteMaterial(m.id)}>
                             <Trash2 className="w-4 h-4 text-destructive" />
                           </Button>
                         </div>
@@ -904,6 +924,9 @@ export function AdminPanel() {
                     </CardContent>
                   </Card>
                 ))}
+                {filteredMaterials.length === 0 && (
+                  <div className="admin-empty"><strong>אין חומרים להצגה</strong>הוסיפי חומר חדש או בחרי מסנן אחר.</div>
+                )}
               </div>
             </div>
           </TabsContent>
@@ -911,7 +934,7 @@ export function AdminPanel() {
           {/* ══════ Categories Tab ══════ */}
           <TabsContent value="categories">
             <div className="space-y-6">
-              <div className="flex justify-between items-center">
+              <div className="admin-section-heading">
                 <h2 className="text-xl font-bold">קטגוריות ונושאים</h2>
                 <Button onClick={() => setShowAddCategory(true)}>
                   <Plus className="w-4 h-4 ml-2" /> קטגוריה חדשה
@@ -922,7 +945,7 @@ export function AdminPanel() {
                 {Object.entries(categories).map(([name, meta]) => {
                   const count = materials.filter(m => m.path.includes(name)).length
                   return (
-                    <Card key={name} className={`bg-gradient-to-br ${meta.color} hover:shadow-md transition-shadow`}>
+                    <Card key={name} className="admin-category-card">
                       <CardContent className="p-4">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-3">
@@ -933,10 +956,10 @@ export function AdminPanel() {
                             </div>
                           </div>
                           <div className="flex gap-1">
-                            <Button variant="ghost" size="icon" onClick={() => setEditingCategory(name)}>
+                              <Button variant="ghost" size="icon" aria-label={`עריכת קטגוריה ${name}`} onClick={() => setEditingCategory(name)}>
                               <Edit className="w-4 h-4" />
                             </Button>
-                            <Button variant="ghost" size="icon" onClick={() => deleteCategory(name)}>
+                              <Button variant="ghost" size="icon" aria-label={`מחיקת קטגוריה ${name}`} onClick={() => deleteCategory(name)}>
                               <Trash2 className="w-4 h-4 text-destructive" />
                             </Button>
                           </div>
@@ -945,6 +968,7 @@ export function AdminPanel() {
                     </Card>
                   )
                 })}
+                {Object.keys(categories).length === 0 && <div className="admin-empty"><strong>עדיין אין קטגוריות</strong>צרי קטגוריה כדי לארגן את החומרים.</div>}
               </div>
             </div>
           </TabsContent>
@@ -952,7 +976,7 @@ export function AdminPanel() {
           {/* ══════ Upload Tab ══════ */}
           <TabsContent value="upload">
             <div className="max-w-2xl mx-auto space-y-6">
-              <Card>
+              <Card className="admin-panel-card admin-upload-card">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Upload className="w-5 h-5" /> העלאת קבצים
@@ -965,23 +989,21 @@ export function AdminPanel() {
                   </p>
 
                   {!uploadedFileLink ? (
-                    <div className={`border-2 border-dashed rounded-xl p-8 text-center transition-colors ${
-                      uploading ? 'border-primary bg-primary/5' : 'hover:border-primary'
-                    }`}>
+                    <div className={`admin-upload-drop ${uploading ? 'is-uploading' : ''}`}>
                       {uploading ? (
                         <>
-                          <div className="w-12 h-12 mx-auto mb-4 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+                          <div className="admin-upload-spinner" role="status" aria-label="העלאת הקובץ מתבצעת" />
                           <p className="text-lg font-medium">מעלה את הקובץ...</p>
                         </>
                       ) : (
                         <>
-                          <FolderOpen className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+                          <div className="admin-upload-mark" aria-hidden="true"><FolderOpen className="w-7 h-7" /></div>
                           <label className="cursor-pointer">
                             <span className="text-lg font-medium text-primary hover:underline">בחרי קובץ להעלאה</span>
                             <input
                               type="file"
                               accept=".html,.htm,.pdf,.mp4,.webm,.mov,.png,.jpg,.jpeg,.gif,.svg,.ipynb"
-                              className="hidden"
+                              className="sr-only"
                               onChange={handleFileUpload}
                             />
                           </label>
@@ -990,12 +1012,12 @@ export function AdminPanel() {
                       )}
                     </div>
                   ) : (
-                    <div className="border-2 border-green-300 bg-green-50 rounded-xl p-6 text-center space-y-4">
-                      <div className="text-4xl">✅</div>
+                    <div className="admin-upload-success space-y-4">
+                      <div className="admin-upload-mark" aria-hidden="true"><Check className="w-7 h-7" /></div>
                       <div>
                         <p className="font-bold text-lg text-green-800">הקובץ הועלה בהצלחה!</p>
                         <p className="text-green-700 mt-1">
-                          הקובץ זמין בכתובת: <code className="bg-white px-2 py-0.5 rounded font-mono">{uploadedFileLink}</code>
+                          הקובץ זמין בכתובת: <code className="admin-upload-url">{uploadedFileLink}</code>
                         </p>
                       </div>
                       <div className="flex gap-3 justify-center">
@@ -1009,7 +1031,7 @@ export function AdminPanel() {
                     </div>
                   )}
 
-                  <div className="bg-muted/50 rounded-lg p-4 space-y-2">
+                  <div className="admin-howto space-y-2">
                     <h4 className="font-medium text-sm">איך זה עובד:</h4>
                     <ol className="text-sm text-muted-foreground space-y-1 list-decimal list-inside">
                       <li>בחרי קובץ להעלאה (HTML, PDF, MP4, Jupyter Notebooks, תמונות)</li>
@@ -1035,7 +1057,7 @@ export function AdminPanel() {
         setShowAddMaterial(open)
         if (!open) setUploadedFileLink(null)
       }}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto" dir="rtl">
+        <DialogContent className="approved-ui admin-dialog max-w-2xl max-h-[90vh] overflow-y-auto" dir="rtl">
           <DialogHeader>
             <DialogTitle>הוספת חומר חדש</DialogTitle>
             <DialogDescription>
@@ -1056,7 +1078,7 @@ export function AdminPanel() {
 
       {/* Edit Material Dialog */}
       <Dialog open={!!editingMaterial} onOpenChange={() => setEditingMaterial(null)}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto" dir="rtl">
+        <DialogContent className="approved-ui admin-dialog max-w-2xl max-h-[90vh] overflow-y-auto" dir="rtl">
           <DialogHeader>
             <DialogTitle>עריכת חומר</DialogTitle>
             <DialogDescription>ערכי את הפרטים של "{editingMaterial?.title}"</DialogDescription>
@@ -1075,7 +1097,7 @@ export function AdminPanel() {
 
       {/* Add Category Dialog */}
       <Dialog open={showAddCategory} onOpenChange={setShowAddCategory}>
-        <DialogContent className="max-w-lg" dir="rtl">
+        <DialogContent className="approved-ui admin-dialog max-w-lg" dir="rtl">
           <DialogHeader>
             <DialogTitle>קטגוריה חדשה</DialogTitle>
             <DialogDescription>הוסיפי קטגוריה חדשה עם אייקון וצבע</DialogDescription>
@@ -1089,7 +1111,7 @@ export function AdminPanel() {
 
       {/* Edit Category Dialog */}
       <Dialog open={!!editingCategory} onOpenChange={() => setEditingCategory(null)}>
-        <DialogContent className="max-w-lg" dir="rtl">
+        <DialogContent className="approved-ui admin-dialog max-w-lg" dir="rtl">
           <DialogHeader>
             <DialogTitle>עריכת קטגוריה</DialogTitle>
             <DialogDescription>שני את האייקון או הצבע של "{editingCategory}"</DialogDescription>
