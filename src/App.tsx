@@ -79,7 +79,7 @@ function AppFrame() {
   const generalTopic = topicPath.length > 0 && (catalog.data?.materials ?? materials).some(
     (item) => item.category === "general" && item.path[0] === topicPath[0],
   );
-  const preserveLegacyShell = pathname === "/admin" || (pathname.startsWith("/topic/") && generalTopic);
+  const preserveLegacyShell = pathname.startsWith("/topic/") && generalTopic;
   return (
     preserveLegacyShell ? (
       <div className="min-h-screen bg-background font-sans">
